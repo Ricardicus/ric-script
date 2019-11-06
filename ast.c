@@ -67,10 +67,10 @@ expr_t* newExpr_ID(char *id)
 	expr_t *exp = ast_emalloc(sizeof(expr_t));
 
 	exp->type = EXPR_TYPE_ID;
-	exp->id.ID = (char*)ast_emalloc(textLen+1);
+	exp->id.id = (char*)ast_emalloc(textLen+1);
 
-	memcpy(exp->id.ID, id, textLen);
-	exp->id.ID[textLen] = 0;
+	memcpy(exp->id.id, id, textLen);
+	exp->id.id[textLen] = 0;
 
 	return exp;
 }
@@ -92,11 +92,11 @@ declaration_t* newDeclaration(const char *id, expr_t *exp)
 	declaration_t* decl = ast_emalloc(sizeof(declaration_t));
 
 	decl->val = exp;
-	decl->id.ID = ast_emalloc(idLen+1);
+	decl->id.id = ast_emalloc(idLen+1);
 
-	memcpy(decl->id.ID, id, idLen);
+	memcpy(decl->id.id, id, idLen);
 
-	decl->id.ID[idLen] = 0;
+	decl->id.id[idLen] = 0;
 
 	return decl;
 }
@@ -118,6 +118,7 @@ statement_t* newStatement(int type, void *content)
 		exit(EXIT_FAILURE);
 		break;
 	}
+	return stmt;
 }
 
 static void print_expr(expr_t *exp)
@@ -128,7 +129,7 @@ static void print_expr(expr_t *exp)
 	switch (exp->type) 
 	{
 		case EXPR_TYPE_ID:
-		printf("ID(%s)", exp->id.ID);
+		printf("ID(%s)", exp->id.id);
 		break;
 		case EXPR_TYPE_FVAL:
 		printf("%lf", exp->fval);
@@ -169,7 +170,7 @@ static void print_statements_(statement_t *stmt, int indent)
 	switch ( stmt->type ) 
 	{
 		case STMT_TYPE_DECL:
-		printf("Declaration, ID: %s, Expr: ", stmt->decl->id.ID);
+		printf("Declaration, ID: %s, Expr: ", stmt->decl->id.id);
 		print_expr(stmt->decl->val);
 		printf("\n");
 		break;

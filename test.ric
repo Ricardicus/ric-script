@@ -6,3 +6,8 @@ a = 1.337
 neg = -12
 
 t = "hejsan: " + <a> + "hejsan" + <a> + "tja"
+
+#foobar (a,b,c) {
+	# using built-in 'print' function
+#	print(<t>)
+#}

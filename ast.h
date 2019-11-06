@@ -17,8 +17,13 @@
 #define STMT_TYPE_DECL  1
 
 typedef struct ID_s {
-	char *ID;
+	char *id;
 } ID_t;
+
+typedef struct argsList {
+	ID_t id;
+	struct argsList *next;
+} argsList_t;
 
 typedef struct addOP {
 	void* left;

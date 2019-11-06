@@ -58,6 +58,7 @@ statement_t *root = NULL;
 %type<data> statements;
 %type<data> statement;
 %type<data> program;
+%type<data> arguments;
 
 %%
 
@@ -97,7 +98,22 @@ declaration:
     | ID '=' stringContents {
         $$ = newDeclaration($1,$3);
     }
+    | ID '(' arguments ')' body {
+
+    }
     /*| KEYWORD_STR WHITESPACE ID WHITESPACE '=' */
+    ;
+
+body:
+    '{' /* TODO */ '}';
+
+arguments:
+    ID arguments {
+
+    }
+    | {
+
+    }
     ;
 
 stringContents:
@@ -200,6 +216,14 @@ otherChar:
         $$[1] = 0;
     }
     | ':' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '(' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | ')' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

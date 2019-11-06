@@ -11,10 +11,6 @@ int yylinenor=1;
 
 DIGIT_VAL        [0-9]
 FLOAT_VAL        [0-9]+"."[0-9]*
-KEYWORD_INT      heltal
-KEYWORD_FLOAT    flyttal
-KEYWORD_STR      text
-KEYWORD_STRUCT   samling
 KEYWORD_PROCESS  process
 HASHTAG          [#]
 ID_TOKEN         [_[:alnum:]]
@@ -44,24 +40,6 @@ RETURN_AS_IS     [\"\'+<>:\-/]
 	return yytext[0];
 }
 
-{KEYWORD_INT} {
-	printf("KEY_INT\n");
-	return KEY_INT;
-}
-{KEYWORD_FLOAT} {
-	printf("KEY_FLOAT\n");
-	return KEY_FLOAT;
-}
-{KEYWORD_STR} {
-	printf("KEY_STR\n");
-	memset(yylval.id,0,sizeof(yylval.id));
-	memcpy(
-		yylval.id, yytext,
-		sizeof(yylval.id) > strlen(yytext) ?
-		strlen(yytext) : sizeof(yylval.id)
-	);
-	return KEY_STR;
-}
 {ID_TOKEN}+ {
 	printf("ID (%s)\n", yytext);
 	memset(yylval.id,0,sizeof(yylval.id));

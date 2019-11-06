@@ -28,6 +28,9 @@ void yyerror(const char *s)
 
 int yylex(void);
 
+/* Root statement */
+statement_t *root;
+
 %}
 
 %union { int val_int; double val_double; char id[256]; void *data; }
@@ -51,78 +54,114 @@ int yylex(void);
 %type<data> stringContent;
 %type<data> stringEditions;
 %type<data> stringEdition;
+%type<data> declaration;
+%type<data> statements;
+%type<data> statement;
+%type<data> program;
 
 %%
 
 program: statements {
-    printf("program\n");  
+    printf("program\n");
+    root = (statement_t*)$$;
 };
 
 statements: statement {
         printf("statement\n");
+        $$ = $1;
     }
     | statements statement {
+        statement_t *stmt = (statement_t*)$1;
+        stmt->next = (statement_t*)$2;
+
+        $$ = $1;
+
         printf("statements statement\n");
     } 
     ;
 
 statement:
     declaration {
+        $$ = newStatement(STMT_TYPE_DECL, $1);
         printf("declaration\n");
     }
     ;
 
 declaration: 
-    KEY_INT ID '=' DIGIT {
-
+    ID '=' DIGIT {
+        expr_t *d = newExpr_Ival($3);
+        $$ = newDeclaration($1,d);
     }
-    | KEY_FLOAT ID '=' DOUBLE {
-
+    | ID '=' DOUBLE {
+        expr_t *d = newExpr_Float($3);
+        $$ = newDeclaration($1,d);
     }
-    | KEY_STR ID '=' stringContents {
-
+    | ID '=' stringContents {
+        $$ = newDeclaration($1,$3);
     }
     /*| KEYWORD_STR WHITESPACE ID WHITESPACE '=' */
     ;
 
 stringContents:
     stringContents '+' stringContent {
+        expr_t *e1 = (expr_t*)$1;
+        expr_t *e2 = (expr_t*)$3;
 
-
-
+        $$ = newExpr_OPAdd(e1,e2);
     }
     | stringContents '+' '<' ID '>' {
+        expr_t *e1 = (expr_t*)$1;
+        expr_t *e2 = newExpr_ID($4);
 
+        $$ = newExpr_OPAdd(e1,e2);
     }
     | stringContent {
-
+        $$ = $1;
     }
-    | {
-
-    } /* Empty */
     ;
 
 stringContent:
     '\'' stringEditions '\'' {
-
+        $$ = $2;
     }
     | '"' stringEditions '"' {
-
+        $$ = $2;
     }
     ;
 
 stringEditions:
     stringEditions stringEdition {
+        char *textBuffer;
 
+        expr_t *e1 = (expr_t*)$1;
+        expr_t *e2 = (expr_t*)$2;
+
+        textBuffer = ast_emalloc(e1->textLen+e2->textLen+1);
+
+        snprintf(textBuffer, sizeof(textBuffer),
+            "%s%s",
+            e1->text,
+            e2->text
+        );
+
+        textBuffer[e1->textLen + e2->textLen] = 0;
+
+        free(e1->text);
+        free(e2->text);
+        free(e1);
+        free(e2);
+
+        $$ = newExpr_Text(textBuffer);
     }
     | stringEdition {
-
+        $$ = $1;
     }
+    | {}/* Empty */
     ;
 
 stringEdition:
     ID {
-        $$ = newExpr_ID(yyval.id);
+        $$ = newExpr_Text(yyval.id);
     }
     | DOUBLE {
         $$ = newExpr_Float(yyval.val_double);
@@ -158,7 +197,6 @@ otherChar:
     | ':' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
-        printf("A\n");
     }
     ;
 

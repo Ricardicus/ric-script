@@ -1,8 +1,8 @@
-flyttal x =    1.337        
+x =    1.337        
 # hejsan
-heltal sovtid = 100
+sovtid = 100
 # hejsan
-flyttal a = 1.337
-heltal neg = -12
+a = 1.337
+neg = -12
 
-text t = "hejsan: " + <a> + "hejsan" + <a> + "tja"
+t = "hejsan: " + <a> + "hejsan" + <a> + "tja"

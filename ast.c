@@ -1,12 +1,13 @@
 #include "ast.h"
 
-static void* ast_emalloc(size_t size)
+void* ast_emalloc(size_t size)
 {
 	char *p = (char*)malloc(size);
 	if ( p == NULL ) {
 		fprintf(
 			stderr,
-			"%s error: Failed to build AST, malloc failed (%zu bytes)\n",
+			"%s %s error: Failed to build AST, malloc failed (%zu bytes)\n",
+			__FILE__,
 			__func__,
 			size
 		);
@@ -22,6 +23,7 @@ expr_t* newExpr_Text(char *text)
 
 	exp->type = EXPR_TYPE_TEXT;
 	exp->text = (char*)ast_emalloc(textLen+1);
+	exp->textLen = textLen;
 
 	memcpy(exp->text, text, textLen);
 	exp->text[textLen] = 0;
@@ -82,4 +84,38 @@ expr_t* newExpr_OPAdd(expr_t *left, expr_t *right)
 	exp->add.right = right;
 
 	return exp;
+}
+
+declaration_t* newDeclaration(const char *id, expr_t *exp)
+{
+	size_t idLen = strlen(id);
+	declaration_t* decl = ast_emalloc(sizeof(declaration_t));
+
+	decl->val = exp;
+	decl->id.ID = ast_emalloc(idLen+1);
+
+	memcpy(decl->id.ID, id, idLen);
+
+	decl->id.ID[idLen] = 0;
+
+	return decl;
+}
+
+statement_t* newStatement(int type, void *content)
+{
+	statement_t* stmt = ast_emalloc(sizeof(statement_t));
+	stmt->type = type;
+	switch ( type ) {
+		case STMT_TYPE_DECL:
+		stmt->decl = (declaration_t*)content;
+		break;
+		default:
+		fprintf(stderr, "%s %s error: Failed to build AST, unknown type (%d)\n",
+			__FILE__,
+			__func__,
+			type
+		);
+		exit(EXIT_FAILURE);
+		break;
+	}
 }

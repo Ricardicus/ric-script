@@ -61,4 +61,6 @@ expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 declaration_t* newDeclaration(const char *id, expr_t *exp);
 statement_t*   newStatement(int type, void *content);
 
+void print_statements(statement_t *root);
+
 #endif

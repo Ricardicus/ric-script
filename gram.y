@@ -29,7 +29,7 @@ void yyerror(const char *s)
 int yylex(void);
 
 /* Root statement */
-statement_t *root;
+statement_t *root = NULL;
 
 %}
 
@@ -66,18 +66,16 @@ program: statements {
     root = (statement_t*)$$;
 };
 
-statements: statement {
-        printf("statement\n");
-        $$ = $1;
-    }
-    | statements statement {
+statements: 
+    statement statements {
         statement_t *stmt = (statement_t*)$1;
         stmt->next = (statement_t*)$2;
 
         $$ = $1;
 
         printf("statements statement\n");
-    } 
+    }
+    | { $$ = NULL; } /* EMPTY */
     ;
 
 statement:
@@ -127,6 +125,14 @@ stringContent:
     | '"' stringEditions '"' {
         $$ = $2;
     }
+    | '"' '"' {
+        /* Empty text */
+        $$ = newExpr_Text("");
+    }
+    | '\'' '\'' {
+        /* Empty text */
+        $$ = newExpr_Text("");
+    }
     ;
 
 stringEditions:
@@ -156,7 +162,6 @@ stringEditions:
     | stringEdition {
         $$ = $1;
     }
-    | {}/* Empty */
     ;
 
 stringEdition:
@@ -205,5 +210,10 @@ otherChar:
 
 int main() {
     yyparse();
+
+    if ( root != NULL ) {
+        print_statements(root);
+    }
+
 }
 

@@ -119,3 +119,69 @@ statement_t* newStatement(int type, void *content)
 		break;
 	}
 }
+
+static void print_expr(expr_t *exp)
+{
+	if ( exp == NULL )
+		return;
+
+	switch (exp->type) 
+	{
+		case EXPR_TYPE_ID:
+		printf("ID(%s)", exp->id.ID);
+		break;
+		case EXPR_TYPE_FVAL:
+		printf("%lf", exp->fval);
+		break;
+		case EXPR_TYPE_IVAL:
+		printf("%d", exp->ival);
+		break;
+		case EXPR_TYPE_UVAL:
+		printf("%u", exp->uval);
+		break;
+		case EXPR_TYPE_TEXT:
+		printf("%s", exp->text);
+		break;
+		case EXPR_TYPE_ADDOP:
+		print_expr((expr_t*)exp->add.left);
+		printf(" + ");
+		print_expr((expr_t*)exp->add.right);
+		break;
+		case EXPR_TYPE_EMPTY:
+		default:
+		break;
+	}
+
+}
+
+static void print_statements_(statement_t *stmt, int indent)
+{
+	int i = 0;
+
+	if ( stmt == NULL )
+		return;
+
+	while ( i < indent ){
+		printf(" ");
+		++i;
+	}
+
+	switch ( stmt->type ) 
+	{
+		case STMT_TYPE_DECL:
+		printf("Declaration, ID: %s, Expr: ", stmt->decl->id.ID);
+		print_expr(stmt->decl->val);
+		printf("\n");
+		break;
+		default:
+		break;
+	}
+
+	print_statements_(stmt->next, indent);
+
+}
+
+void print_statements(statement_t *stmt)
+{
+	print_statements_(stmt, 0);
+}

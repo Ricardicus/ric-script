@@ -1,0 +1,11 @@
+# Bison files
+y.tab.*
+y.output
+lex.y.*
+lex.yy.*
+
+# object files
+*.o
+
+# Executable
+main

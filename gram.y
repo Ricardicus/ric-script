@@ -59,11 +59,12 @@ statement_t *root = NULL;
 %type<data> statement;
 %type<data> program;
 %type<data> arguments;
+%type<data> body;
+%type<data> function;
 
 %%
 
 program: statements {
-    printf("program\n");
     root = (statement_t*)$$;
 };
 
@@ -73,16 +74,22 @@ statements:
         stmt->next = (statement_t*)$2;
 
         $$ = $1;
-
-        printf("statements statement\n");
     }
     | { $$ = NULL; } /* EMPTY */
     ;
 
 statement:
     declaration {
-        $$ = newStatement(STMT_TYPE_DECL, $1);
-        printf("declaration\n");
+        $$ = newStatement(LANG_ENTITY_DECL, $1);
+    } 
+    | function {
+        $$ = newStatement(LANG_ENTITY_FUNCDECL, $1);
+    }
+    ;
+
+function:
+    ID '(' arguments ')' body {
+        $$ = newFunc($1,$3,$5);
     }
     ;
 
@@ -98,21 +105,19 @@ declaration:
     | ID '=' stringContents {
         $$ = newDeclaration($1,$3);
     }
-    | ID '(' arguments ')' body {
-
-    }
-    /*| KEYWORD_STR WHITESPACE ID WHITESPACE '=' */
     ;
 
 body:
-    '{' /* TODO */ '}';
+    '{' statements '}' {
+        $$ = newBody($2);
+    };
 
 arguments:
     ID arguments {
-
+        $$ = newArgument($1,$2);
     }
-    | {
-
+    | ID {
+        $$ = newArgument($1,NULL);
     }
     ;
 

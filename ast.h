@@ -14,16 +14,16 @@
 #define EXPR_TYPE_ADDOP 6
 #define EXPR_TYPE_EMPTY 7
 
-#define STMT_TYPE_DECL  1
+#define LANG_ENTITY_DECL      1
+#define LANG_ENTITY_ARGS      2
+#define LANG_ENTITY_FUNCDECL  3
+#define LANG_ENTITY_STATEMENT 4
+#define LANG_ENTITY_BODY      5
+#define LANG_ENTITY_FUNCCALL  6
 
 typedef struct ID_s {
 	char *id;
 } ID_t;
-
-typedef struct argsList {
-	ID_t id;
-	struct argsList *next;
-} argsList_t;
 
 typedef struct addOP {
 	void* left;
@@ -42,17 +42,44 @@ typedef struct expr_s {
 } expr_t;
 
 typedef struct declaration_s {
+	int entity;
 	ID_t   id;
 	expr_t *val;
 } declaration_t;
 
+typedef struct argsList {
+	int entity;
+	ID_t id;
+	struct argsList *next;
+} argsList_t;
+
 typedef struct statement_s {
-	int type;
-	union {
-		declaration_t *decl;
-	};
+	int entity;
+	void *content;
 	struct statement_s *next;
 } statement_t;
+
+typedef struct body_s {
+	int entity;
+	struct statement_s *content;
+} body_t;
+
+typedef struct functionDef {
+	int entity;
+	ID_t id;
+	argsList_t *args;
+	statement_t *body;
+} functionDef_t;
+
+typedef struct functionCall {
+	int entity;
+	ID_t id;
+	argsList_t *args;
+} functionCall_t;
+
+typedef struct entity_eval {
+	int entity;
+} entity_eval_t;
 
 void* ast_emalloc(size_t size);
 
@@ -63,8 +90,12 @@ expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 
-declaration_t* newDeclaration(const char *id, expr_t *exp);
-statement_t*   newStatement(int type, void *content);
+declaration_t*  newDeclaration(const char *id, expr_t *exp);
+statement_t*    newStatement(int type, void *content);
+argsList_t*     newArgument(const char *id, void *next);
+functionDef_t*  newFunc(const char *id, void *args, void *body);
+functionCall_t* newFunCall(const char *id, void *args);
+body_t*         newBody(void *body);
 
 void print_statements(statement_t *root);
 

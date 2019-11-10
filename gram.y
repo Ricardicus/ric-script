@@ -61,6 +61,7 @@ statement_t *root = NULL;
 %type<data> arguments;
 %type<data> body;
 %type<data> function;
+%type<data> functionCall;
 
 %%
 
@@ -85,6 +86,9 @@ statement:
     | function {
         $$ = newStatement(LANG_ENTITY_FUNCDECL, $1);
     }
+    | functionCall {
+        $$ = newStatement(LANG_ENTITY_FUNCCALL, $1);
+    }
     ;
 
 function:
@@ -92,6 +96,11 @@ function:
         $$ = newFunc($1,$3,$5);
     }
     ;
+
+functionCall:
+    ID '(' arguments ')' {
+        $$ = newFunCall($1,$3);
+    };
 
 declaration: 
     ID '=' DIGIT {
@@ -128,9 +137,9 @@ stringContents:
 
         $$ = newExpr_OPAdd(e1,e2);
     }
-    | stringContents '+' '<' ID '>' {
+    | stringContents '+' ID  {
         expr_t *e1 = (expr_t*)$1;
-        expr_t *e2 = newExpr_ID($4);
+        expr_t *e2 = newExpr_ID($3);
 
         $$ = newExpr_OPAdd(e1,e2);
     }

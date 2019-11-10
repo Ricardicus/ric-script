@@ -5,11 +5,11 @@ sovtid = 100
 a = 1.337
 neg = -12
 
-t = "hejsan: " + <a> + "hejsan" + <a> + "tja"
+t = "hejsan: " + a + "hejsan" + a + "tja"
 
 foobar (a,b,c) {
 	# using built-in 'print' function
-	#print(<t>)
+	print(t)
 	dsadsa = 312321
 	dsa= 321
 	aaa = 1337

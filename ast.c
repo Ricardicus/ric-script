@@ -115,6 +115,9 @@ statement_t* newStatement(int type, void *content)
 		case LANG_ENTITY_FUNCDECL:
 		stmt->content = content;
 		break;
+		case LANG_ENTITY_FUNCCALL:
+		stmt->content = content;
+		break;
 		default:
 		fprintf(stderr, "%s %s error: Failed to build AST, unknown type (%d)\n",
 			__FILE__,
@@ -155,6 +158,21 @@ functionDef_t* newFunc(const char *id, void *args, void *body)
 
 	func->id.id = ast_emalloc(idLen+1);
 
+	memcpy(func->id.id, id, idLen);
+
+	return func;
+}
+
+functionCall_t* newFunCall(const char *id, void *args)
+{
+	size_t idLen = strlen(id);
+	functionCall_t* func = ast_emalloc(sizeof(functionCall_t));
+
+	func->entity = LANG_ENTITY_FUNCCALL;
+
+	func->args = args;
+
+	func->id.id = ast_emalloc(idLen+1);
 	memcpy(func->id.id, id, idLen);
 
 	return func;
@@ -216,6 +234,7 @@ static void print_statements_(void *stmt, int indent)
 	switch ( eval->entity ) {
 		case LANG_ENTITY_DECL:
 		case LANG_ENTITY_FUNCDECL:
+		case LANG_ENTITY_FUNCCALL:
 			while ( i < indent*4 ){
 				printf(" ");
 				++i;
@@ -234,15 +253,15 @@ static void print_statements_(void *stmt, int indent)
 		case LANG_ENTITY_DECL:
 		{
 			declaration_t* decl = ((statement_t*)stmt)->content;
-			printf("Declaration, ID: %s, Expr: ", decl->id.id);
+			printf("Declaration: ID(%s), Expr(", decl->id.id);
 			print_expr(decl->val);
-			printf("\n");
+			printf(")\n");
 		}
 		break;
 		case LANG_ENTITY_FUNCDECL:
 		{
 			functionDef_t *funcDef = ((statement_t*)stmt)->content;
-			printf("Function: ID(%s) args(", funcDef->id.id);
+			printf("Function Declaration: ID(%s) args(", funcDef->id.id);
 			argsList_t *args = funcDef->args;
 			int i = 0;
 			while ( args != NULL ) {
@@ -253,6 +272,22 @@ static void print_statements_(void *stmt, int indent)
 			printf(")\n");
 			print_statements_(funcDef->body,indent+1);
 		}
+		break;
+		case LANG_ENTITY_FUNCCALL:
+		{
+			functionCall_t *funcCall = ((statement_t*)stmt)->content;
+			printf("Function Call: ID(%s) args(", funcCall->id.id);
+			argsList_t *args = funcCall->args;
+			int i = 0;
+			while ( args != NULL ) {
+				printf("%sID(%s)", (i==0?"":","), args->id.id);
+				args=args->next;
+				i=1;
+			}
+			printf(")\n");
+		}
+		break;
+		default:
 		break;
 	}
 

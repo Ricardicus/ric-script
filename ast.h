@@ -13,6 +13,9 @@
 #define EXPR_TYPE_TEXT  5
 #define EXPR_TYPE_ADDOP 6
 #define EXPR_TYPE_EMPTY 7
+#define EXPR_TYPE_SUBOP 8
+#define EXPR_TYPE_DIVOP 9
+#define EXPR_TYPE_MODOP 10
 
 #define LANG_ENTITY_DECL      1
 #define LANG_ENTITY_ARGS      2

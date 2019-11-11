@@ -210,9 +210,11 @@ static void print_expr(expr_t *exp)
 		printf("%s", exp->text);
 		break;
 		case EXPR_TYPE_ADDOP:
+		printf("ADD(");
 		print_expr((expr_t*)exp->add.left);
-		printf(" + ");
+		printf(",");
 		print_expr((expr_t*)exp->add.right);
+		printf(")");
 		break;
 		case EXPR_TYPE_EMPTY:
 		default:

@@ -11,11 +11,12 @@
 #define EXPR_TYPE_IVAL  3
 #define EXPR_TYPE_UVAL  4
 #define EXPR_TYPE_TEXT  5
-#define EXPR_TYPE_ADDOP 6
-#define EXPR_TYPE_EMPTY 7
-#define EXPR_TYPE_SUBOP 8
-#define EXPR_TYPE_DIVOP 9
-#define EXPR_TYPE_MODOP 10
+#define EXPR_TYPE_EMPTY 6
+#define EXPR_TYPE_OPADD 7
+#define EXPR_TYPE_OPSUB 8
+#define EXPR_TYPE_OPDIV 9
+#define EXPR_TYPE_OPMOD 10
+#define EXPR_TYPE_OPMUL 11
 
 #define LANG_ENTITY_DECL      1
 #define LANG_ENTITY_ARGS      2
@@ -33,6 +34,26 @@ typedef struct addOP {
 	void* right;
 } addOP_t;
 
+typedef struct subOP {
+	void* left;
+	void* right;
+} subOP_t;
+
+typedef struct mulOP {
+	void* left;
+	void* right;
+} mulOP_t;
+
+typedef struct divOP {
+	void* left;
+	void* right;
+} divOP_t;
+
+typedef struct modOP {
+	void* left;
+	void* right;
+} modOP_t;
+
 typedef struct expr_s {
 	int      type;
 	ID_t     id;
@@ -41,7 +62,13 @@ typedef struct expr_s {
 	uint32_t uval;
 	char     *text;
 	size_t   textLen;
-	addOP_t  add;
+	union {
+		addOP_t add;
+		subOP_t sub;
+		mulOP_t mul;
+		divOP_t div;
+		modOP_t mod;
+	};
 } expr_t;
 
 typedef struct declaration_s {
@@ -92,6 +119,11 @@ expr_t* newExpr_Uval(unsigned val);
 expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
+expr_t* newExpr_OPSub(expr_t *left, expr_t *right);
+expr_t* newExpr_OPMul(expr_t *left, expr_t *right);
+expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
+expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
+
 
 declaration_t*  newDeclaration(const char *id, expr_t *exp);
 statement_t*    newStatement(int type, void *content);

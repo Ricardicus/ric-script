@@ -62,6 +62,12 @@ statement_t *root = NULL;
 %type<data> body;
 %type<data> function;
 %type<data> functionCall;
+%type<data> mathContents;
+%type<data> mathContent;
+
+%right'=' 
+%left '+' '-'
+%left '*' '/' '%'
 
 %%
 
@@ -103,15 +109,10 @@ functionCall:
     };
 
 declaration: 
-    ID '=' DIGIT {
-        expr_t *d = newExpr_Ival($3);
-        $$ = newDeclaration($1,d);
+    ID '=' stringContents {
+        $$ = newDeclaration($1,$3);
     }
-    | ID '=' DOUBLE {
-        expr_t *d = newExpr_Float($3);
-        $$ = newDeclaration($1,d);
-    }
-    | ID '=' stringContents {
+    | ID '=' mathContents {
         $$ = newDeclaration($1,$3);
     }
     ;
@@ -125,8 +126,44 @@ arguments:
     ID arguments {
         $$ = newArgument($1,$2);
     }
-    | ID {
-        $$ = newArgument($1,NULL);
+    | {
+        $$ = NULL;
+    }
+    ;
+
+mathContents:
+    mathContents '+' mathContents {
+        $$ = newExpr_OPAdd($1,$3);
+    }
+    | mathContents '-' mathContents {
+        $$ = newExpr_OPSub($1,$3);
+    }
+    | mathContents '*' mathContents {
+        $$ = newExpr_OPMul($1,$3);
+    }
+    | mathContents '%' mathContents {
+        $$ = newExpr_OPMod($1,$3);
+    }
+    | mathContents '/' mathContents {
+        $$ = newExpr_OPDiv($1,$3);
+    }
+    | mathContent {
+        $$ = $1;
+    }
+    ;
+
+mathContent:
+    ID {
+        $$ = newExpr_ID($1);
+    }
+    | DOUBLE {
+        $$ = newExpr_Float(yyval.val_double);
+    }
+    | DIGIT {
+        $$ = newExpr_Ival(yyval.val_int);
+    }
+    | '(' mathContents ')' {
+        $$ = $2;
     }
     ;
 

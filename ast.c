@@ -79,7 +79,51 @@ expr_t* newExpr_OPAdd(expr_t *left, expr_t *right)
 {
 	expr_t *exp = ast_emalloc(sizeof(expr_t));
 
-	exp->type = EXPR_TYPE_ADDOP;
+	exp->type = EXPR_TYPE_OPADD;
+	exp->add.left = left;
+	exp->add.right = right;
+
+	return exp;
+}
+
+expr_t* newExpr_OPSub(expr_t *left, expr_t *right)
+{
+	expr_t *exp = ast_emalloc(sizeof(expr_t));
+
+	exp->type = EXPR_TYPE_OPSUB;
+	exp->add.left = left;
+	exp->add.right = right;
+
+	return exp;
+}
+
+expr_t* newExpr_OPMul(expr_t *left, expr_t *right)
+{
+	expr_t *exp = ast_emalloc(sizeof(expr_t));
+
+	exp->type = EXPR_TYPE_OPMUL;
+	exp->add.left = left;
+	exp->add.right = right;
+
+	return exp;
+}
+
+expr_t* newExpr_OPMod(expr_t *left, expr_t *right)
+{
+	expr_t *exp = ast_emalloc(sizeof(expr_t));
+
+	exp->type = EXPR_TYPE_OPMOD;
+	exp->add.left = left;
+	exp->add.right = right;
+
+	return exp;
+}
+
+expr_t* newExpr_OPDiv(expr_t *left, expr_t *right)
+{
+	expr_t *exp = ast_emalloc(sizeof(expr_t));
+
+	exp->type = EXPR_TYPE_OPDIV;
 	exp->add.left = left;
 	exp->add.right = right;
 
@@ -209,8 +253,36 @@ static void print_expr(expr_t *exp)
 		case EXPR_TYPE_TEXT:
 		printf("%s", exp->text);
 		break;
-		case EXPR_TYPE_ADDOP:
+		case EXPR_TYPE_OPADD:
 		printf("ADD(");
+		print_expr((expr_t*)exp->add.left);
+		printf(",");
+		print_expr((expr_t*)exp->add.right);
+		printf(")");
+		break;
+		case EXPR_TYPE_OPSUB:
+		printf("SUB(");
+		print_expr((expr_t*)exp->add.left);
+		printf(",");
+		print_expr((expr_t*)exp->add.right);
+		printf(")");
+		break;
+		case EXPR_TYPE_OPMUL:
+		printf("MUL(");
+		print_expr((expr_t*)exp->add.left);
+		printf(",");
+		print_expr((expr_t*)exp->add.right);
+		printf(")");
+		break;
+		case EXPR_TYPE_OPMOD:
+		printf("MOD(");
+		print_expr((expr_t*)exp->add.left);
+		printf(",");
+		print_expr((expr_t*)exp->add.right);
+		printf(")");
+		break;
+		case EXPR_TYPE_OPDIV:
+		printf("DIV(");
 		print_expr((expr_t*)exp->add.left);
 		printf(",");
 		print_expr((expr_t*)exp->add.right);

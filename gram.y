@@ -211,7 +211,7 @@ stringEditions:
 
         textBuffer = ast_emalloc(e1->textLen+e2->textLen+1);
 
-        snprintf(textBuffer, sizeof(textBuffer),
+        snprintf(textBuffer, e1->textLen+e2->textLen+1,
             "%s%s",
             e1->text,
             e2->text
@@ -248,6 +248,11 @@ stringEdition:
 otherChar: 
     '+' {
         $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    |
+    ' ' {
+        $$[0] = ' ';
         $$[1] = 0;
     }
     | '<' {

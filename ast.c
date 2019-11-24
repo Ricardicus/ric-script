@@ -239,7 +239,7 @@ static void print_expr(expr_t *exp)
 	switch (exp->type) 
 	{
 		case EXPR_TYPE_ID:
-		printf("ID(%s)", exp->id.id);
+		printf("ID('%s')", exp->id.id);
 		break;
 		case EXPR_TYPE_FVAL:
 		printf("%lf", exp->fval);
@@ -251,7 +251,7 @@ static void print_expr(expr_t *exp)
 		printf("%u", exp->uval);
 		break;
 		case EXPR_TYPE_TEXT:
-		printf("%s", exp->text);
+		printf("'%s'", exp->text);
 		break;
 		case EXPR_TYPE_OPADD:
 		printf("ADD(");
@@ -327,7 +327,7 @@ static void print_statements_(void *stmt, int indent)
 		case LANG_ENTITY_DECL:
 		{
 			declaration_t* decl = ((statement_t*)stmt)->content;
-			printf("Declaration: ID(%s), Expr(", decl->id.id);
+			printf("Declaration: ID('%s'), Expr(", decl->id.id);
 			print_expr(decl->val);
 			printf(")\n");
 		}
@@ -335,11 +335,11 @@ static void print_statements_(void *stmt, int indent)
 		case LANG_ENTITY_FUNCDECL:
 		{
 			functionDef_t *funcDef = ((statement_t*)stmt)->content;
-			printf("Function Declaration: ID(%s) args(", funcDef->id.id);
+			printf("Function Declaration: ID('%s') args(", funcDef->id.id);
 			argsList_t *args = funcDef->args;
 			int i = 0;
 			while ( args != NULL ) {
-				printf("%sID(%s)", (i==0?"":","), args->id.id);
+				printf("%sID('%s')", (i==0?"":","), args->id.id);
 				args=args->next;
 				i=1;
 			}
@@ -350,11 +350,11 @@ static void print_statements_(void *stmt, int indent)
 		case LANG_ENTITY_FUNCCALL:
 		{
 			functionCall_t *funcCall = ((statement_t*)stmt)->content;
-			printf("Function Call: ID(%s) args(", funcCall->id.id);
+			printf("Function Call: ID('%s') args(", funcCall->id.id);
 			argsList_t *args = funcCall->args;
 			int i = 0;
 			while ( args != NULL ) {
-				printf("%sID(%s)", (i==0?"":","), args->id.id);
+				printf("%sID('%s')", (i==0?"":","), args->id.id);
 				args=args->next;
 				i=1;
 			}

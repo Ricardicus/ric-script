@@ -7,6 +7,10 @@
 
 int yylinenor=1;
 
+int return_spaces = 0;
+int double_citation = 0;
+int simple_citation = 0;
+
 %}
 
 DIGIT_VAL        [0-9]
@@ -34,6 +38,13 @@ RETURN_AS_IS     [\"\'+<>:\-/(){}\*%]
 {RETURN_AS_IS} {
 	yylval.id[0] = yytext[0];
 	yylval.id[1] = 0;
+
+	if ( yytext[0] == '\'' ){
+		simple_citation = (simple_citation+1) % 2;
+	} else if ( yytext[0] == '\"' ) {
+		double_citation = (double_citation+1) % 2;
+	}
+
 	return yytext[0];
 }
 
@@ -53,6 +64,13 @@ RETURN_AS_IS     [\"\'+<>:\-/(){}\*%]
 
 = {
 	return '=';
+}
+
+[ ] {
+	// return spaces only if within a citation
+	if ( double_citation|| simple_citation ) {
+		return ' ';
+	}
 }
 
 .               ;

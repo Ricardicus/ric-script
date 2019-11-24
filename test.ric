@@ -5,7 +5,7 @@ sovtid = 100
 a = 1.337
 neg = -12
 
-t = "hejsan: " + a + "hejsan" + a + "tja"
+t = "hejsan: " + a + "hej monica hej monica san" + a + "tja"
 
 foobar (a,b,c) {
 	# using built-in 'print' function

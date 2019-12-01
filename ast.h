@@ -18,12 +18,17 @@
 #define EXPR_TYPE_OPMOD 10
 #define EXPR_TYPE_OPMUL 11
 
-#define LANG_ENTITY_DECL      1
-#define LANG_ENTITY_ARGS      2
-#define LANG_ENTITY_FUNCDECL  3
-#define LANG_ENTITY_STATEMENT 4
-#define LANG_ENTITY_BODY      5
-#define LANG_ENTITY_FUNCCALL  6
+#define LANG_ENTITY_DECL         1
+#define LANG_ENTITY_ARGS         2
+#define LANG_ENTITY_FUNCDECL     3
+#define LANG_ENTITY_STATEMENT    4
+#define LANG_ENTITY_BODY         5
+#define LANG_ENTITY_FUNCCALL     6
+#define LANG_ENTITY_CONDITIONAL  7
+
+#define LANG_CONDITIONAL_IF      0
+#define LANG_CONDITIONAL_ELIF    1
+#define LANG_CONDITIONAL_ELSE    2
 
 typedef struct ID_s {
 	char *id;
@@ -107,6 +112,21 @@ typedef struct functionCall {
 	argsList_t *args;
 } functionCall_t;
 
+typedef struct ifCondition {
+	int entity;
+	expr_t *left;
+	expr_t *right;
+} ifCondition_t;
+
+typedef struct ifStmt {
+	int entity;
+	int ifType;
+	void *elif;
+	void *endif;
+	body_t *body;
+	ifCondition_t *cond;
+} ifStmt_t;
+
 typedef struct entity_eval {
 	int entity;
 } entity_eval_t;
@@ -124,10 +144,10 @@ expr_t* newExpr_OPMul(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 
-
 declaration_t*  newDeclaration(const char *id, expr_t *exp);
 statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(const char *id, void *next);
+ifStmt_t*       newIfStatement(int ifType, ifCondition_t *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 functionCall_t* newFunCall(const char *id, void *args);
 body_t*         newBody(void *body);

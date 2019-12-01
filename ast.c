@@ -149,17 +149,13 @@ declaration_t* newDeclaration(const char *id, expr_t *exp)
 statement_t* newStatement(int type, void *content)
 {
 	statement_t* stmt = ast_emalloc(sizeof(statement_t));
-
-	stmt->entity = type; 
+	stmt->entity = type;
 
 	switch ( type ) {
 		case LANG_ENTITY_DECL:
-		stmt->content = content;
-		break;
 		case LANG_ENTITY_FUNCDECL:
-		stmt->content = content;
-		break;
 		case LANG_ENTITY_FUNCCALL:
+		case LANG_ENTITY_CONDITIONAL:
 		stmt->content = content;
 		break;
 		default:
@@ -220,6 +216,18 @@ functionCall_t* newFunCall(const char *id, void *args)
 	memcpy(func->id.id, id, idLen);
 
 	return func;
+}
+
+ifStmt_t*  newIfStatement(int ifType, ifCondition_t *cond, void *body)
+{
+	ifStmt_t* ifstmt = ast_emalloc(sizeof(ifStmt_t));
+
+	ifstmt->cond  = cond;
+	ifstmt->body  = body;
+	ifstmt->elif  = NULL;
+	ifstmt->endif = NULL;
+
+	return ifstmt;
 }
 
 body_t* newBody(void *body)

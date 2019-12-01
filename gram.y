@@ -50,20 +50,25 @@ statement_t *root = NULL;
 %token CLOSE
 %token OTHER
 %type<id> otherChar
-%type<data> stringContents;
-%type<data> stringContent;
-%type<data> stringEditions;
-%type<data> stringEdition;
-%type<data> declaration;
-%type<data> statements;
-%type<data> statement;
-%type<data> program;
-%type<data> arguments;
-%type<data> body;
-%type<data> function;
-%type<data> functionCall;
-%type<data> mathContents;
-%type<data> mathContent;
+%type<data> stringContents
+%type<data> stringContent
+%type<data> stringEditions
+%type<data> stringEdition
+%type<data> declaration
+%type<data> statements
+%type<data> statement
+%type<data> program
+%type<data> arguments
+%type<data> body
+%type<data> function
+%type<data> functionCall
+%type<data> mathContents
+%type<data> mathContent
+%type<data> ifStatement
+%type<data> middleIfs
+%type<data> middleIf
+%type<data> endIf
+%type<data> condition
 
 %right'=' 
 %left '+' '-'
@@ -79,7 +84,6 @@ statements:
     statement statements {
         statement_t *stmt = (statement_t*)$1;
         stmt->next = (statement_t*)$2;
-
         $$ = $1;
     }
     | { $$ = NULL; } /* EMPTY */
@@ -95,13 +99,86 @@ statement:
     | functionCall {
         $$ = newStatement(LANG_ENTITY_FUNCCALL, $1);
     }
-    ;
+    | ifStatement {
+        $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
+    };
+
+ifStatement:
+    '[' condition ']' body {
+        $$ = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
+    }
+    | '[' condition ']' body middleIfs {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
+
+        ifs->elif = $5;
+        
+        $$ = ifs;
+    }
+    | '[' condition ']' body middleIfs endIf {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
+
+        ifs->elif = $5;
+        ifs->endif = $6;
+        
+        $$ = ifs;
+    }
+    | '[' condition ']' body endIf {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
+
+        ifs->endif = $5;
+        
+        $$ = ifs;
+    };
+
+middleIfs:
+    middleIfs middleIf {
+        ifStmt_t *ifs1 = (ifStmt_t *) $1;
+        ifStmt_t *ifs2 = (ifStmt_t *) $2;
+
+        ifs1->elif = ifs2;
+        $$ = ifs1;
+    }
+    | middleIf {
+        $$ = $1;
+    };
+
+middleIf:
+    '~' '[' condition ']' body {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELIF, $3, $5);
+       
+        $$ = ifs;
+    };
+
+endIf:
+    '~' body {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELSE, NULL, $2);
+        $$ = ifs;
+    };
+
+condition:
+    mathContent '=' '=' mathContent {
+        printf("Condition 1\n");
+    }
+    | mathContent '!' '=' mathContent {
+        printf("Condition 2\n");
+    }
+    | mathContent '<' '=' mathContent {
+        printf("Condition 3\n");
+    }
+    | mathContent '>' '=' mathContent {
+        printf("Condition 4\n");
+    }
+    | mathContent '<' mathContent {
+        printf("Condition 5\n");
+    }
+    | mathContent '>' mathContent {
+        printf("Condition 16\n");
+    };
 
 function:
     ID '(' arguments ')' body {
         $$ = newFunc($1,$3,$5);
-    }
-    ;
+    };
 
 functionCall:
     ID '(' arguments ')' {
@@ -114,8 +191,7 @@ declaration:
     }
     | ID '=' mathContents {
         $$ = newDeclaration($1,$3);
-    }
-    ;
+    };
 
 body:
     '{' statements '}' {
@@ -128,8 +204,7 @@ arguments:
     }
     | {
         $$ = NULL;
-    }
-    ;
+    };
 
 mathContents:
     mathContents '+' mathContents {
@@ -149,8 +224,7 @@ mathContents:
     }
     | mathContent {
         $$ = $1;
-    }
-    ;
+    };
 
 mathContent:
     ID {
@@ -164,8 +238,7 @@ mathContent:
     }
     | '(' mathContents ')' {
         $$ = $2;
-    }
-    ;
+    };
 
 stringContents:
     stringContents '+' stringContent {
@@ -182,8 +255,7 @@ stringContents:
     }
     | stringContent {
         $$ = $1;
-    }
-    ;
+    };
 
 stringContent:
     '\'' stringEditions '\'' {
@@ -199,8 +271,7 @@ stringContent:
     | '\'' '\'' {
         /* Empty text */
         $$ = newExpr_Text("");
-    }
-    ;
+    };
 
 stringEditions:
     stringEditions stringEdition {
@@ -228,8 +299,7 @@ stringEditions:
     }
     | stringEdition {
         $$ = $1;
-    }
-    ;
+    };
 
 stringEdition:
     ID {
@@ -282,8 +352,7 @@ otherChar:
     | ')' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
-    }
-    ;
+    };
 
 %%
 

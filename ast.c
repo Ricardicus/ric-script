@@ -222,6 +222,7 @@ ifStmt_t*  newIfStatement(int ifType, ifCondition_t *cond, void *body)
 {
 	ifStmt_t* ifstmt = ast_emalloc(sizeof(ifStmt_t));
 
+	ifstmt->ifType = ifType;
 	ifstmt->cond  = cond;
 	ifstmt->body  = body;
 	ifstmt->elif  = NULL;
@@ -303,12 +304,20 @@ static void print_expr(expr_t *exp)
 
 }
 
+static void print_indents(int indent) {
+	int i = 0;
+	while ( i < indent ){
+		printf("    ");
+		++i;
+	}
+}
+
 static void print_statements_(void *stmt, int indent)
 {
 	int i = 0;
 
 	entity_eval_t *eval = (entity_eval_t*)stmt;
-	void *next;
+	void *next = NULL;
 
 	if ( stmt == NULL )
 		return;
@@ -317,10 +326,8 @@ static void print_statements_(void *stmt, int indent)
 		case LANG_ENTITY_DECL:
 		case LANG_ENTITY_FUNCDECL:
 		case LANG_ENTITY_FUNCCALL:
-			while ( i < indent*4 ){
-				printf(" ");
-				++i;
-			}
+		case LANG_ENTITY_CONDITIONAL:
+			print_indents(indent);
 			next = ((statement_t*)stmt)->next;
 		break;
 		case LANG_ENTITY_BODY:
@@ -367,6 +374,46 @@ static void print_statements_(void *stmt, int indent)
 				i=1;
 			}
 			printf(")\n");
+		}
+		break;
+		case LANG_ENTITY_CONDITIONAL:
+		{
+			ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
+			ifStmt_t *ifstmtWalk;
+
+			switch ( ifstmt->ifType ) {
+			case LANG_CONDITIONAL_IF:
+				printf("if-statement - condition: ");
+				// Print condition
+				printf("TODO!!!!!!!\n");
+				break;
+			case LANG_CONDITIONAL_ELIF:
+			case LANG_CONDITIONAL_ELSE:
+				printf("UNEXPCTED CONDITIONAL (%d)\n", ifstmt->ifType);
+				break;
+			default:
+				break;
+			}
+			print_statements_(ifstmt->body, indent);
+
+			// Walk through the elifs.
+			ifstmtWalk = ifstmt->elif;
+
+			while ( ifstmtWalk != NULL ) {
+				print_indents(indent);
+				printf("else-if-statement - condition: TODO!!!!!!!\n");
+				print_statements_(ifstmtWalk->body, indent+1);
+				ifstmtWalk = ifstmtWalk->elif;
+			}
+
+			// Print the else if it is not NULL
+			if ( ifstmt->endif != NULL ){
+				ifstmtWalk = ifstmt->endif;
+				print_indents(indent);
+				printf("else-statment: condition: TODO!!!\n");
+				print_statements_(ifstmtWalk->body, indent);
+			}
+
 		}
 		break;
 		default:

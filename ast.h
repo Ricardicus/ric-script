@@ -119,7 +119,6 @@ typedef struct ifCondition {
 } ifCondition_t;
 
 typedef struct ifStmt {
-	int entity;
 	int ifType;
 	void *elif;
 	void *endif;

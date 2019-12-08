@@ -24,14 +24,43 @@ foobar (a,b,c) {
 		dsadsadsa = 1443
 	}
 
+	# if - else if
 	[ dsa == aaa ] {
 
-	} [ dsa == 23 ] {
+	} ~[ dsa == 23 ] {
 
-	} [ dsa <= 23 ] {
+	} 
+
+	# Single if
+	[ dsa < dsa ] {
+
+	}
+
+	# if - else if - else if 
+	[ dsa <= 23 ] {
+
+	} ~[dsa<=2] {
+		print(dsa)
+	} ~[dsadsa<=32]{
+
+	}
+
+	# if - else
+	[ id == 2] {
 
 	} ~ {
 		print(dsa)
+	}
+
+	# if - else if - else if - else 
+	[ dsa <= 23 ] {
+
+	} ~[dsa<=2] {
+		print(dsa)
+	} ~[dsadsa<=32] {
+		print(dsa)
+	} ~ {
+	 	print(sa)
 	}
 
 }

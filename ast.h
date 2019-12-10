@@ -25,10 +25,18 @@
 #define LANG_ENTITY_BODY         5
 #define LANG_ENTITY_FUNCCALL     6
 #define LANG_ENTITY_CONDITIONAL  7
+#define LANG_ENTITY_CONDITION    8
 
 #define LANG_CONDITIONAL_IF      0
 #define LANG_CONDITIONAL_ELIF    1
 #define LANG_CONDITIONAL_ELSE    2
+
+#define CONDITION_EQ             0
+#define CONDITION_NEQ            1
+#define CONDITION_LEQ            2
+#define CONDITION_GEQ            3
+#define CONDITION_GE             4
+#define CONDITION_LE             5
 
 typedef struct ID_s {
 	char *id;
@@ -113,7 +121,7 @@ typedef struct functionCall {
 } functionCall_t;
 
 typedef struct ifCondition {
-	int entity;
+	int type;
 	expr_t *left;
 	expr_t *right;
 } ifCondition_t;
@@ -143,6 +151,7 @@ expr_t* newExpr_OPMul(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 
+ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(const char *id, expr_t *exp);
 statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(const char *id, void *next);

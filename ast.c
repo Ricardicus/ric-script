@@ -130,6 +130,17 @@ expr_t* newExpr_OPDiv(expr_t *left, expr_t *right)
 	return exp;
 }
 
+ifCondition_t *newConditional(int type, expr_t *left, expr_t *right)
+{
+  ifCondition_t *cond = ast_emalloc(sizeof(ifCondition_t));
+
+  cond->type  = type;
+  cond->left  = left;
+  cond->right = right;
+
+  return cond;
+}
+
 declaration_t* newDeclaration(const char *id, expr_t *exp)
 {
 	size_t idLen = strlen(id);
@@ -312,6 +323,44 @@ static void print_indents(int indent) {
 	}
 }
 
+static void print_condition(ifCondition_t *cond)
+{
+  if ( cond == NULL )
+    return;
+
+  printf("[");
+  print_expr(cond->left);
+  printf("]");
+
+  switch ( cond->type ) {
+  case CONDITION_EQ:
+    printf(" == ");
+    break;
+  case CONDITION_NEQ:
+    printf(" != ");
+    break;
+  case CONDITION_LEQ:
+    printf(" <= ");
+    break;
+  case CONDITION_GEQ:
+    printf(" >= ");
+    break;
+  case CONDITION_GE:
+    printf(" > ");
+    break;
+  case CONDITION_LE:
+    printf(" < ");
+    break;
+
+  default:
+    break;
+  }
+
+  printf("[");
+  print_expr(cond->right);
+  printf("]");
+}
+
 static void print_statements_(void *stmt, int indent)
 {
 	int i = 0;
@@ -380,29 +429,22 @@ static void print_statements_(void *stmt, int indent)
 		{
 			ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
 			ifStmt_t *ifstmtWalk;
+      ifCondition_t *cond = ifstmt->cond;
 
-			switch ( ifstmt->ifType ) {
-			case LANG_CONDITIONAL_IF:
-				printf("if-statement - condition: ");
-				// Print condition
-				printf("TODO!!!!!!!\n");
-				break;
-			case LANG_CONDITIONAL_ELIF:
-			case LANG_CONDITIONAL_ELSE:
-				printf("UNEXPCTED CONDITIONAL (%d)\n", ifstmt->ifType);
-				break;
-			default:
-				break;
-			}
-			print_statements_(ifstmt->body, indent);
+      printf("if-statement - condition: ");
+			print_condition(cond);
+			printf("\n");
+      print_statements_(ifstmt->body, indent);
 
 			// Walk through the elifs.
 			ifstmtWalk = ifstmt->elif;
 
 			while ( ifstmtWalk != NULL ) {
 				print_indents(indent);
-				printf("else-if-statement - condition: TODO!!!!!!!\n");
-				print_statements_(ifstmtWalk->body, indent+1);
+				printf("else-if-statement - condition: ");
+				print_condition(ifstmtWalk->cond);
+        printf("\n");
+        print_statements_(ifstmtWalk->body, indent+1);
 				ifstmtWalk = ifstmtWalk->elif;
 			}
 
@@ -410,8 +452,8 @@ static void print_statements_(void *stmt, int indent)
 			if ( ifstmt->endif != NULL ){
 				ifstmtWalk = ifstmt->endif;
 				print_indents(indent);
-				printf("else-statment: condition: TODO!!!\n");
-				print_statements_(ifstmtWalk->body, indent);
+				printf("else-statment:");
+        print_statements_(ifstmtWalk->body, indent);
 			}
 
 		}

@@ -157,22 +157,22 @@ endIf:
 
 condition:
     mathContent '=' '=' mathContent {
-        printf("Condition 1\n");
+        $$ = newConditional(CONDITION_EQ, $1, $4);
     }
     | mathContent '!' '=' mathContent {
-        printf("Condition 2\n");
+        $$ = newConditional(CONDITION_NEQ, $1, $4);
     }
     | mathContent '<' '=' mathContent {
-        printf("Condition 3\n");
+        $$ = newConditional(CONDITION_LEQ, $1, $4);
     }
     | mathContent '>' '=' mathContent {
-        printf("Condition 4\n");
+        $$ = newConditional(CONDITION_GEQ, $1, $4);
     }
     | mathContent '<' mathContent {
-        printf("Condition 5\n");
+        $$ = newConditional(CONDITION_LE, $1, $3);
     }
     | mathContent '>' mathContent {
-        printf("Condition 16\n");
+        $$ = newConditional(CONDITION_GE, $1, $3);
     };
 
 function:

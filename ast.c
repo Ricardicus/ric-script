@@ -452,7 +452,7 @@ static void print_statements_(void *stmt, int indent)
 			if ( ifstmt->endif != NULL ){
 				ifstmtWalk = ifstmt->endif;
 				print_indents(indent);
-				printf("else-statment:");
+				printf("else-statment:\n");
         print_statements_(ifstmtWalk->body, indent);
 			}
 

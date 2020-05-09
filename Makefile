@@ -8,10 +8,7 @@ AST_SOURCE = ast.c
 .PHONY: lex yacc test
 
 main: lex yacc
-	$(CC) -c $(AST_SOURCE) -o $(subst .c,.o,$(AST_SOURCE))
-	$(CC) -c lex.yy.c
-	$(CC) -c y.tab.c ast.c
-	$(CC) -o main y.tab.o lex.yy.o $(subst .c,.o,$(AST_SOURCE))
+	$(CC) -o main main.c hooks.c y.tab.c lex.yy.c ast.c 
 
 test: main
 	cat test.ric | ./main
@@ -23,4 +20,4 @@ yacc: $(YACCSPEC)
 	yacc -dtv $(YACCSPEC)
 
 clean:
-	rm -f lex.yy.c y.output y.tab.c y.tab.h *.o
+	rm -f main lex.yy.c y.output y.tab.c y.tab.h *.o

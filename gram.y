@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "ast.h"
+#include "hooks.h"
 
 extern int yylinenor;
 
@@ -356,13 +357,9 @@ otherChar:
 
 %%
 
+#include "hooks.h"
 
-int main() {
-    yyparse();
-
-    if ( root != NULL ) {
-        print_statements(root);
-    }
-
+void initParser() {
+    setParser(yyparse);
+    setRoot(&root);
 }
-

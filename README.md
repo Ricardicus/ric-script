@@ -6,3 +6,7 @@ Not sure what target there will be yet.
 
 
 test.ric contains a program with OK syntax.
+
+# make test
+
+Will input test.ric into the program and let it output the AST.

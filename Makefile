@@ -11,7 +11,7 @@ main: lex yacc
 	$(CC) -o main main.c hooks.c y.tab.c lex.yy.c ast.c 
 
 test: main
-	cat test.ric | ./main
+	cat test.ric | ./main -p
 
 lex: $(FLEXSPEC)
 	flex $(FLEXSPEC)

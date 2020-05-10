@@ -472,3 +472,115 @@ void print_statements(statement_t *stmt)
 	print_statements_(stmt, 0);
 	printf("\n\n");
 }
+
+static void interpret_statements_(void *stmt,
+	PROVIDE_CONTEXT_ARGS()
+)
+{
+	entity_eval_t *eval = (entity_eval_t*)stmt;
+	void *next = NULL;
+
+	if ( stmt == NULL )
+		return;
+
+	switch ( eval->entity ) {
+		case LANG_ENTITY_DECL:
+		case LANG_ENTITY_FUNCDECL:
+		case LANG_ENTITY_FUNCCALL:
+		case LANG_ENTITY_CONDITIONAL:
+			next = ((statement_t*)stmt)->next;
+		break;
+		case LANG_ENTITY_BODY:
+			next = ((body_t*)stmt)->content;
+		break;
+		default:
+		break;
+	}
+
+	switch ( eval->entity ) {
+		case LANG_ENTITY_DECL:
+		{
+			declaration_t* decl = ((statement_t*)stmt)->content;
+			//printf("Declaration: ID('%s'), Expr(", decl->id.id);
+			//print_expr(decl->val);
+			//printf(")\n");
+		}
+		break;
+		case LANG_ENTITY_FUNCDECL:
+		{
+			functionDef_t *funcDef = ((statement_t*)stmt)->content;
+			printf("Function Declaration: ID('%s') args(", funcDef->id.id);
+			argsList_t *args = funcDef->args;
+			int i = 0;
+			while ( args != NULL ) {
+				printf("%sID('%s')", (i==0?"":","), args->id.id);
+				args=args->next;
+				i=1;
+			}
+			interpret_statements_(funcDef->body, PROVIDE_CONTEXT());
+		}
+		break;
+		case LANG_ENTITY_FUNCCALL:
+		{
+			functionCall_t *funcCall = ((statement_t*)stmt)->content;
+			printf("Function Call: ID('%s') args(", funcCall->id.id);
+			argsList_t *args = funcCall->args;
+			int i = 0;
+			while ( args != NULL ) {
+				printf("%sID('%s')", (i==0?"":","), args->id.id);
+				args=args->next;
+				i=1;
+			}
+			printf(")\n");
+		}
+		break;
+		case LANG_ENTITY_CONDITIONAL:
+		{
+			ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
+			ifStmt_t *ifstmtWalk;
+      ifCondition_t *cond = ifstmt->cond;
+
+      printf("if-statement - condition: ");
+			print_condition(cond);
+			printf("\n");
+      interpret_statements_(ifstmt->body, PROVIDE_CONTEXT());
+
+			// Walk through the elifs.
+			ifstmtWalk = ifstmt->elif;
+
+			while ( ifstmtWalk != NULL ) {
+				printf("else-if-statement - condition: ");
+				print_condition(ifstmtWalk->cond);
+        printf("\n");
+        interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT());
+				ifstmtWalk = ifstmtWalk->elif;
+			}
+
+			// Print the else if it is not NULL
+			if ( ifstmt->endif != NULL ){
+				ifstmtWalk = ifstmt->endif;
+				printf("else-statment:\n");
+        interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT());
+			}
+
+		}
+		break;
+		default:
+		break;
+	}
+
+	interpret_statements_(next, PROVIDE_CONTEXT());
+}
+
+void interpret_statements(statement_t *stmt)
+{
+	// "CPU" registers definitions
+	DEF_NEW_CONTEXT();
+
+	// Setup stack
+	SETUP_STACK(&sp, &sb);
+
+	interpret_statements_(stmt, PROVIDE_CONTEXT_INIT());
+
+	free(sb);
+}

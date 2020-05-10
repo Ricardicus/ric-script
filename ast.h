@@ -4,6 +4,8 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #define EXPR_TYPE_ID    1
@@ -161,5 +163,40 @@ functionCall_t* newFunCall(const char *id, void *args);
 body_t*         newBody(void *body);
 
 void print_statements(statement_t *root);
+void interpret_statements(statement_t *stmt);
+
+typedef enum stackvaltypes {
+	INT32TYPE,
+	DOUBLETYPE
+} stackvaltypes_t;
+
+typedef struct stackval {
+	int32_t type;
+	union {
+		double d;
+		int32_t i;
+	};
+} stackval_t;
+
+#define DEFAULT_STACKSIZE 1024 * sizeof(int32_t)
+
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb; double f1, f2, f3;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f1, &f2, &f3, &sp
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f1, f2, f3, sp
+#define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
+int32_t *ax, double *f1, double *f2, double *f3,  void *sp
+#define SETUP_STACK(sp, sb) do {\
+	intptr_t p;\
+	*sb = calloc(DEFAULT_STACKSIZE+1, sizeof(stackval_t));\
+	assert(*sb != NULL);\
+	p = ((intptr_t)*sb) % sizeof(stackval_t);\
+	if ( p != 0 ) {\
+		p = (sizeof(stackval_t) - ( p % sizeof(stackval_t) ));\
+	}\
+	*sp = *sb + p;\
+} while ( 0 )
+#define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
+#define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
+#define POP_VAL(a, sp) do { *sp -= sizeof(stackval); *a = *((stackval_t*) *sp);
 
 #endif

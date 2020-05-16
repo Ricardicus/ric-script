@@ -94,7 +94,7 @@ typedef struct declaration_s {
 
 typedef struct argsList {
 	int entity;
-	ID_t id;
+	expr_t *arg;
 	struct argsList *next;
 } argsList_t;
 
@@ -156,7 +156,7 @@ expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(const char *id, expr_t *exp);
 statement_t*    newStatement(int type, void *content);
-argsList_t*     newArgument(const char *id, void *next);
+argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, ifCondition_t *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 functionCall_t* newFunCall(const char *id, void *args);
@@ -167,7 +167,8 @@ void interpret_statements(statement_t *stmt);
 
 typedef enum stackvaltypes {
 	INT32TYPE,
-	DOUBLETYPE
+	DOUBLETYPE,
+	TEXT
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -175,6 +176,7 @@ typedef struct stackval {
 	union {
 		double d;
 		int32_t i;
+		char *t;
 	};
 } stackval_t;
 
@@ -197,6 +199,7 @@ int32_t *ax, double *f1, double *f2, double *f3,  void *sp
 } while ( 0 )
 #define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
 #define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
+#define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
 #define POP_VAL(a, sp) do { *sp -= sizeof(stackval); *a = *((stackval_t*) *sp);
 
 #endif

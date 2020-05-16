@@ -8,7 +8,7 @@ AST_SOURCE = ast.c
 .PHONY: lex yacc test
 
 main: lex yacc
-	$(CC) -o main main.c hooks.c y.tab.c lex.yy.c ast.c 
+	$(CC) -o main main.c hashtable.c hooks.c y.tab.c lex.yy.c ast.c 
 
 test: main
 	cat test.ric | ./main -p

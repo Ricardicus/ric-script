@@ -201,9 +201,9 @@ body:
 
 arguments:
     ID arguments {
-        $$ = newArgument($1,$2);
-    }
-    | {
+        expr_t *expr = newExpr_ID($1);
+        $$ = newArgument(expr,$2);
+    }| {
         $$ = NULL;
     };
 

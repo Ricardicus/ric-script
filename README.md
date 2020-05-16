@@ -17,6 +17,8 @@ cat test.ric | ./main -p
 
 PROGRAM:
 
+PROGRAM:
+
 Declaration: ID('x'), Expr(1.337000)
 Declaration: ID('sovtid'), Expr(100)
 Declaration: ID('a'), Expr(1.337000)
@@ -45,9 +47,10 @@ Function Declaration: ID('foobar') args(ID('a'),ID('b'),ID('c'))
         else-if-statement - condition: [ID('dsa')] <= [2]
                 Function Call: ID('print') args(ID('dsa'))
         else-if-statement - condition: [ID('dsadsa')] <= [32]
-                Function Call: ID('print') args(ID('dsa'))
+                Function Call: ID('print') args(ID('dsa'),1337,1337.000000)
         else-statment:
             Function Call: ID('print') args(ID('sa'))
 Declaration: ID('q'), Expr(ADD(ADD(SUB(SUB(ADD(123,ID('d')),MUL(32,4)),2),MOD(MUL(2,ADD(1,2)),2)),1))
+
 
 ```

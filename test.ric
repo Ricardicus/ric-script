@@ -58,7 +58,7 @@ foobar (a,b,c) {
 	} ~[dsa<=2] {
 		print(dsa)
 	} ~[dsadsa<=32] {
-		print(dsa)
+		print(dsa, 1337, 1337.0)
 	} ~ {
 	 	print(sa)
 	}

@@ -200,10 +200,6 @@ body:
     };
 
 arguments:
-    ID arguments {
-        expr_t *expr = newExpr_ID($1);
-        $$ = newArgument(expr,$2);
-    } |
     mathContents arguments {
         expr_t *expr = $1;
         $$ = newArgument(expr, $2);

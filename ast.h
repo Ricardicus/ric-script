@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define EXPR_TYPE_ID    1
 #define EXPR_TYPE_FVAL  2
@@ -173,7 +174,8 @@ void interpret_statements(statement_t *stmt);
 typedef enum stackvaltypes {
 	INT32TYPE = 1,
 	DOUBLETYPE,
-	TEXT
+	TEXT,
+	POINTERTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -185,16 +187,22 @@ typedef struct stackval {
 	};
 } stackval_t;
 
-#define DEFAULT_STACKSIZE 1024 * sizeof(int32_t)
+typedef struct heapval {
+	stackval_t sv;
+	bool occupied;
+} heapval_t;
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb; double f0, f1, f2;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp
+#define DEFAULT_STACKSIZE 256 * sizeof(int32_t)
+#define DEFAULT_HEAPSIZE  4096 * sizeof(int32_t)
+
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb, *hp, *hb; double f0, f1, f2;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, hp
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, hp
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
-int32_t *ax, double *f0, double *f1, double *f2, void *sp
-#define SETUP_STACK(sp, sb) do {\
+int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp
+#define SETUP_STACK(sp, sb, sz) do {\
 	intptr_t p;\
-	*sb = calloc(DEFAULT_STACKSIZE+1, sizeof(stackval_t));\
+	*sb = calloc(sz+1, sizeof(stackval_t));\
 	assert(*sb != NULL);\
 	p = ((intptr_t)*sb) % sizeof(stackval_t);\
 	if ( p != 0 ) {\
@@ -202,9 +210,40 @@ int32_t *ax, double *f0, double *f1, double *f2, void *sp
 	}\
 	*sp = *sb + p;\
 } while ( 0 )
+
+#define SETUP_HEAP(hp, hb, hz) do {\
+	intptr_t p;\
+	heapval_t hpbv;\
+	*hb = calloc(hz+1, sizeof(heapval_t));\
+	assert(*hb != NULL);\
+	p = ((intptr_t)*hb) % sizeof(heapval_t);\
+	if ( p != 0 ) {\
+		p = (sizeof(heapval_t) - ( p % sizeof(heapval_t) ));\
+	}\
+	hpbv.sv.type = INT32TYPE;\
+	hpbv.sv.i = (int32_t)hz;\
+	hpbv.occupied = true;\
+	*hp = *hb + p;\
+	**(heapval_t**) hp = hpbv;\
+} while ( 0 )
 #define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; **((stackval_t**)sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
 #define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
 #define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
 #define POP_VAL(a, sp) do { *((stackval_t**) sp) -= 1; *a = **((stackval_t**) sp); } while (0)
+
+#define ALLOC_HEAP(a, hp, hpv) do { \
+int32_t size = (*(heapval_t*)hp).sv.i;\
+int32_t i = 0;\
+heapval_t hv;\
+hv.sv = *a;\
+hv.occupied = true;\
+while( i < size ) {\
+	if ( !((heapval_t*) hp)[i].occupied ) {\
+		((heapval_t*) hp)[i] = hv;\
+		*hpv = &((heapval_t*) hp)[i];\
+		break;\
+	}\
+	++i;\
+} } while (0);
 
 #endif

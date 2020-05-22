@@ -500,8 +500,33 @@ static void evaluate_expression(
 	switch (expr->type) 
 	{
 		case EXPR_TYPE_ID:
-		printf("ID('%s')", expr->id.id);
-		break;
+		{
+			heapval_t *hv;
+
+			/* Check among the variables if we have it defined there */
+			hv = hashtable_get(varDecs, expr->id.id);
+
+			if ( hv != NULL ) {
+
+				switch ( hv->sv.type ) {
+				case DOUBLETYPE:
+					PUSH_DOUBLE(hv->sv.d, sp);
+					break;
+				case INT32TYPE:
+					PUSH_INT(hv->sv.i, sp);
+					break;
+				case TEXT:
+					PUSH_STRING(hv->sv.t, sp);
+					break;
+				break;
+				}
+
+			} else {
+				fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
+			}
+
+			break;
+		}
 		case EXPR_TYPE_FVAL:
 		PUSH_DOUBLE(expr->fval, sp);
 		break;
@@ -858,7 +883,8 @@ int evaluate_condition(ifCondition_t *cond)
 }
 
 
-static void interpret_statements_(void *stmt,
+static void interpret_statements_(
+	void *stmt,
 	PROVIDE_CONTEXT_ARGS(),
 	argsList_t *args
 )
@@ -894,7 +920,8 @@ static void interpret_statements_(void *stmt,
 			printf("%s\n", sv.t);
 			break;
 			default:
-			printf("unknown type of value on the stack (%d)\n", sv.type);
+			printf("%s.error: unknown type of value on the stack (%d)\n", 
+				__func__, sv.type);
 			break;
 			}
 
@@ -911,10 +938,19 @@ static void interpret_statements_(void *stmt,
 	switch ( eval->entity ) {
 		case LANG_ENTITY_DECL:
 		{
+			stackval_t sv;
+			heapval_t *hvp;
 			declaration_t* decl = ((statement_t*)stmt)->content;
 
+			/* Evaluating the expression among global variables */
+			evaluate_expression(decl->val, PROVIDE_CONTEXT(), args);
+			POP_VAL(&sv, sp);
+
+			/* Placing value on the heap */
+			ALLOC_HEAP(&sv, hp, &hvp); 
+
 			/* Placing variable declaration in global variable namespace */
-			hashtable_put(varDecs, decl->id.id, decl->val);
+			hashtable_put(varDecs, decl->id.id, hvp);
 		}
 		break;
 		case LANG_ENTITY_FUNCDECL:
@@ -1001,7 +1037,10 @@ void interpret_statements(statement_t *stmt)
 	DEF_NEW_CONTEXT();
 
 	// Setup stack
-	SETUP_STACK(&sp, &sb);
+	SETUP_STACK(&sp, &sb, DEFAULT_STACKSIZE);
+
+	// Setup heap
+	SETUP_HEAP(&hp, &hb, DEFAULT_HEAPSIZE);
 
 	// Setup namespaces
 	setup_namespaces();
@@ -1011,5 +1050,9 @@ void interpret_statements(statement_t *stmt)
 	// Close namespaces
 	close_namespaces();
 
+	// free heap
+	free(hb);
+
+	// Free stack
 	free(sb);
 }

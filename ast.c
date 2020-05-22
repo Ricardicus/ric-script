@@ -173,6 +173,8 @@ statement_t* newStatement(int type, void *content)
 		case LANG_ENTITY_FUNCDECL:
 		case LANG_ENTITY_FUNCCALL:
 		case LANG_ENTITY_CONDITIONAL:
+		case LANG_ENTITY_EMPTY_MATH:
+		case LANG_ENTITY_EMPTY_STR:
 		stmt->content = content;
 		break;
 		default:
@@ -498,14 +500,13 @@ static void evaluate_expression(
 	switch (expr->type) 
 	{
 		case EXPR_TYPE_ID:
-
 		printf("ID('%s')", expr->id.id);
 		break;
 		case EXPR_TYPE_FVAL:
-		printf("%lf", expr->fval);
+		PUSH_DOUBLE(expr->fval, sp);
 		break;
 		case EXPR_TYPE_IVAL:
-		printf("%d", expr->ival);
+		PUSH_INT(expr->ival, sp);
 		break;
 		case EXPR_TYPE_UVAL:
 		printf("%u", expr->uval);
@@ -514,39 +515,318 @@ static void evaluate_expression(
 		printf("'%s'", expr->text);
 		break;
 		case EXPR_TYPE_OPADD:
-		printf("ADD(");
-		print_expr((expr_t*)expr->add.left);
-		printf(",");
-		print_expr((expr_t*)expr->add.right);
-		printf(")");
+		{
+			stackval_t svLeft;
+			stackval_t svRight;
+
+			evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svLeft, sp);
+
+			evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svRight, sp);
+
+			switch (svLeft.type) {
+				case INT32TYPE: {
+					*r0 = svLeft.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f0 = svLeft.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+					exit(1);
+					break;
+			}
+
+			switch (svRight.type) {
+				case INT32TYPE: {
+					*r1 = svRight.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f1 = svRight.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+					exit(1);
+					break;
+			}
+
+			if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+				PUSH_INT(*r0+*r1,sp);
+			} else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*r0 + *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*f0 + *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+				PUSH_DOUBLE(*f0 + *r1,sp);
+			}
+
+			break;
+		}
 		break;
 		case EXPR_TYPE_OPSUB:
-		printf("SUB(");
-		print_expr((expr_t*)expr->add.left);
-		printf(",");
-		print_expr((expr_t*)expr->add.right);
-		printf(")");
-		break;
+		{
+			stackval_t svLeft;
+			stackval_t svRight;
+
+			evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svLeft, sp);
+
+			evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svRight, sp);
+
+			switch (svLeft.type) {
+				case INT32TYPE: {
+					*r0 = svLeft.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f0 = svLeft.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+					exit(1);
+					break;
+			}
+
+			switch (svRight.type) {
+				case INT32TYPE: {
+					*r1 = svRight.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f1 = svRight.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+					exit(1);
+					break;
+			}
+
+			if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+				PUSH_INT(*r0-*r1,sp);
+			} else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*r0 - *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*f0 - *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+				PUSH_DOUBLE(*f0 - *r1,sp);
+			}
+
+			break;
+		}
 		case EXPR_TYPE_OPMUL:
-		printf("MUL(");
-		print_expr((expr_t*)expr->add.left);
-		printf(",");
-		print_expr((expr_t*)expr->add.right);
-		printf(")");
-		break;
+		{
+			stackval_t svLeft;
+			stackval_t svRight;
+
+			evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svLeft, sp);
+
+			evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svRight, sp);
+
+			switch (svLeft.type) {
+				case INT32TYPE: {
+					*r0 = svLeft.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f0 = svLeft.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+					exit(1);
+					break;
+			}
+
+			switch (svRight.type) {
+				case INT32TYPE: {
+					*r1 = svRight.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f1 = svRight.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+					exit(1);
+					break;
+			}
+
+			if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+				PUSH_INT(*r0 * *r1,sp);
+			} else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*r0 * *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*f0 * *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+				PUSH_DOUBLE(*f0 * *r1,sp);
+			}
+
+			break;
+		}
 		case EXPR_TYPE_OPMOD:
-		printf("MOD(");
-		print_expr((expr_t*)expr->add.left);
-		printf(",");
-		print_expr((expr_t*)expr->add.right);
-		printf(")");
+		{
+			stackval_t svLeft;
+			stackval_t svRight;
+
+			evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svLeft, sp);
+
+			evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svRight, sp);
+
+			switch (svLeft.type) {
+				case INT32TYPE: {
+					*r0 = svLeft.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					fprintf(stderr, "error: Invalid expression, cannot calculate modulus on floating point.\n");
+					exit(1);
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+					exit(1);
+					break;
+			}
+
+			switch (svRight.type) {
+				case INT32TYPE: {
+					*r1 = svRight.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					fprintf(stderr, "error: Invalid expression, cannot calculate modulus on floating point.\n");
+					exit(1);
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+					exit(1);
+					break;
+			}
+
+			if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+				PUSH_INT(*r0 % *r1,sp);
+			}
+
+			break;
+		}
 		break;
 		case EXPR_TYPE_OPDIV:
-		printf("DIV(");
-		print_expr((expr_t*)expr->add.left);
-		printf(",");
-		print_expr((expr_t*)expr->add.right);
-		printf(")");
+		{
+			stackval_t svLeft;
+			stackval_t svRight;
+
+			evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svLeft, sp);
+
+			evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args);
+			POP_VAL(&svRight, sp);
+
+			switch (svLeft.type) {
+				case INT32TYPE: {
+					*r0 = svLeft.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f0 = svLeft.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+					exit(1);
+					break;
+			}
+
+			switch (svRight.type) {
+				case INT32TYPE: {
+					*r1 = svRight.i;
+					break;
+				}
+				case DOUBLETYPE: {
+					*f1 = svRight.i;
+					break;
+				}
+				case TEXT: {
+					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					exit(1);
+					break;
+				}
+				default:
+					fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+					exit(1);
+					break;
+			}
+
+			if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+				PUSH_INT(*r0 / *r1,sp);
+			} else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*r0 / *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+				PUSH_DOUBLE(*f0 / *f1,sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+				PUSH_DOUBLE(*f0 / *r1,sp);
+			}
+
+			break;
+		}
 		break;
 		case EXPR_TYPE_EMPTY:
 		default:
@@ -554,48 +834,29 @@ static void evaluate_expression(
 	}
 }
 
-#if 0
 int evaluate_condition(ifCondition_t *cond)
 {
-	switch (expr->type) 
+	switch (cond->type) 
 	{
-		case EXPR_TYPE_ID:
-		break;
-		case EXPR_TYPE_FVAL:
-		break;
-		case EXPR_TYPE_IVAL:
-		break;
-		case EXPR_TYPE_UVAL:
-		break;
-		case EXPR_TYPE_TEXT:
-		break;
-		case EXPR_TYPE_OPADD:
-		print_expr((expr_t*)expr->add.left);
-		print_expr((expr_t*)expr->add.right);
-		break;
-		case EXPR_TYPE_OPSUB:
-		print_expr((expr_t*)expr->add.left);
-		print_expr((expr_t*)expr->add.right);
-		break;
-		case EXPR_TYPE_OPMUL:
-		print_expr((expr_t*)expr->add.left);
-		print_expr((expr_t*)expr->add.right);
-		break;
-		case EXPR_TYPE_OPMOD:
-		print_expr((expr_t*)expr->add.left);
-		print_expr((expr_t*)expr->add.right);
-		break;
-		case EXPR_TYPE_OPDIV:
-		print_expr((expr_t*)expr->add.left);
-		print_expr((expr_t*)expr->add.right);
-		break;
-		case EXPR_TYPE_EMPTY:
-		default:
-		break;
+	case CONDITION_EQ:
+	break;
+	case CONDITION_NEQ:
+	break;
+	case CONDITION_LEQ:
+	break;
+	case CONDITION_GEQ:
+	break;
+	case CONDITION_GE:
+	break;
+	case CONDITION_LE:
+	break;
+	default:
+	break;
 	}
 
 	return 0;
 }
+
 
 static void interpret_statements_(void *stmt,
 	PROVIDE_CONTEXT_ARGS(),
@@ -615,6 +876,31 @@ static void interpret_statements_(void *stmt,
 		case LANG_ENTITY_CONDITIONAL:
 			next = ((statement_t*)stmt)->next;
 		break;
+		case LANG_ENTITY_EMPTY_MATH:
+		case LANG_ENTITY_EMPTY_STR:
+		{	
+			stackval_t sv;
+			expr_t *e = ((statement_t*)stmt)->content;
+			evaluate_expression(e, PROVIDE_CONTEXT(), args);
+			POP_VAL(&sv, sp);
+			switch ( sv.type) {
+			case INT32TYPE:
+			printf("%" PRIi32 "\n", sv.i);
+			break;
+			case DOUBLETYPE:
+			printf("%lf\n", sv.d);
+			break;
+			case TEXT:
+			printf("%s\n", sv.t);
+			break;
+			default:
+			printf("unknown type of value on the stack (%d)\n", sv.type);
+			break;
+			}
+
+			next = ((statement_t*)stmt)->next;
+			break;
+		}
 		case LANG_ENTITY_BODY:
 			next = ((body_t*)stmt)->content;
 		break;
@@ -628,7 +914,7 @@ static void interpret_statements_(void *stmt,
 			declaration_t* decl = ((statement_t*)stmt)->content;
 
 			/* Placing variable declaration in global variable namespace */
-			put(varDecs, decl->id.id, decl->val);
+			hashtable_put(varDecs, decl->id.id, decl->val);
 		}
 		break;
 		case LANG_ENTITY_FUNCDECL:
@@ -636,7 +922,7 @@ static void interpret_statements_(void *stmt,
 			functionDef_t *funcDef = ((statement_t*)stmt)->content;
 
 			/* Placing funciton declaration in global function namespace */
-			put(funcDecs, funcDef->id.id, funcDef->body);
+			hashtable_put(funcDecs, funcDef->id.id, funcDef->body);
 		}
 		break;
 		case LANG_ENTITY_FUNCCALL:
@@ -645,7 +931,7 @@ static void interpret_statements_(void *stmt,
 			functionCall_t *funcCall = ((statement_t*)stmt)->content;
 
 			/* Looking up the function and calling it if it exists */
-			body = get(funcDecs, funcCall->id.id)
+			body = hashtable_get(funcDecs, funcCall->id.id);
 
 			/* Check lookup status */
 			if ( body == NULL ) {
@@ -666,7 +952,7 @@ static void interpret_statements_(void *stmt,
 			printf("if-statement - condition: ");
 			print_condition(cond);
 			printf("\n");
-			interpret_statements_(ifstmt->body, PROVIDE_CONTEXT());
+			interpret_statements_(ifstmt->body, PROVIDE_CONTEXT(), args);
 
 			// Walk through the elifs.
 			ifstmtWalk = ifstmt->elif;
@@ -675,7 +961,7 @@ static void interpret_statements_(void *stmt,
 				printf("else-if-statement - condition: ");
 				print_condition(ifstmtWalk->cond);
 				printf("\n");
-				interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT());
+				interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args);
 				ifstmtWalk = ifstmtWalk->elif;
 			}
 
@@ -683,7 +969,7 @@ static void interpret_statements_(void *stmt,
 			if ( ifstmt->endif != NULL ){
 				ifstmtWalk = ifstmt->endif;
 				printf("else-statment:\n");
-				interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT());
+				interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args);
 			}
 
 		}
@@ -692,14 +978,8 @@ static void interpret_statements_(void *stmt,
 		break;
 	}
 
-	interpret_statements_(next, PROVIDE_CONTEXT());
+	interpret_statements_(next, PROVIDE_CONTEXT(), args);
 }
-#endif
-
-static void interpret_statements_(void *stmt,
-	PROVIDE_CONTEXT_ARGS(),
-	argsList_t *args
-){}
 
 void setup_namespaces() {
 	funcDecs = hashtable_new(100, 0.8);

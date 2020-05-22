@@ -64,8 +64,13 @@ int main(int argc, char *argv[]) {
 	switch ( mission ) {
 	break;
 	case runAsIntepreter:
-		fprintf(stderr, "INTERPRETER NOT IMPLEMENTED YET\r\n");
-		ret = 1;
+		if ( root != NULL ) {
+			/* Interpret the program */
+			interpret_statements(root);
+		} else {
+			fprintf(stderr, "Failed to parse program!\r\n");
+			ret = 1;
+		}
 		break;
 	case runAsASTPrinter:
 		if ( root != NULL ) {

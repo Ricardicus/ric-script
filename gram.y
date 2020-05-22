@@ -102,6 +102,12 @@ statement:
     }
     | ifStatement {
         $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
+    }
+    | mathContents {
+        $$ = newStatement(LANG_ENTITY_EMPTY_MATH, $1);
+    }
+    | stringContents {
+        $$ = newStatement(LANG_ENTITY_EMPTY_STR, $1);
     };
 
 ifStatement:

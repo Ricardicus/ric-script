@@ -28,6 +28,8 @@
 #define LANG_ENTITY_FUNCCALL     6
 #define LANG_ENTITY_CONDITIONAL  7
 #define LANG_ENTITY_CONDITION    8
+#define LANG_ENTITY_EMPTY_MATH   9
+#define LANG_ENTITY_EMPTY_STR    10
 
 #define LANG_CONDITIONAL_IF      0
 #define LANG_CONDITIONAL_ELIF    1
@@ -72,11 +74,14 @@ typedef struct modOP {
 typedef struct expr_s {
 	int      type;
 	ID_t     id;
-	double   fval;
-	int32_t  ival;
-	uint32_t uval;
+	union {
+		double   fval;
+		int32_t  ival;
+		uint32_t uval;
+	};	
 	char     *text;
 	size_t   textLen;
+
 	union {
 		addOP_t add;
 		subOP_t sub;
@@ -166,7 +171,7 @@ void print_statements(statement_t *root);
 void interpret_statements(statement_t *stmt);
 
 typedef enum stackvaltypes {
-	INT32TYPE,
+	INT32TYPE = 1,
 	DOUBLETYPE,
 	TEXT
 } stackvaltypes_t;
@@ -182,11 +187,11 @@ typedef struct stackval {
 
 #define DEFAULT_STACKSIZE 1024 * sizeof(int32_t)
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb; double f1, f2, f3;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f1, &f2, &f3, &sp
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f1, f2, f3, sp
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb; double f0, f1, f2;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
-int32_t *ax, double *f1, double *f2, double *f3,  void *sp
+int32_t *ax, double *f0, double *f1, double *f2, void *sp
 #define SETUP_STACK(sp, sb) do {\
 	intptr_t p;\
 	*sb = calloc(DEFAULT_STACKSIZE+1, sizeof(stackval_t));\
@@ -197,9 +202,9 @@ int32_t *ax, double *f1, double *f2, double *f3,  void *sp
 	}\
 	*sp = *sb + p;\
 } while ( 0 )
-#define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
-#define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
-#define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; *((stackval_t*) *sp) = stackval; *sp += sizeof(stackval); } while(0)
-#define POP_VAL(a, sp) do { *sp -= sizeof(stackval); *a = *((stackval_t*) *sp);
+#define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; **((stackval_t**)sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
+#define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
+#define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
+#define POP_VAL(a, sp) do { *((stackval_t**) sp) -= 1; *a = **((stackval_t**) sp); } while (0)
 
 #endif

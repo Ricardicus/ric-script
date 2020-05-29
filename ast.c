@@ -515,10 +515,26 @@ static void evaluate_expression(
 				case INT32TYPE:
 					PUSH_INT(hv->sv.i, sp);
 					break;
-				case TEXT:
-					PUSH_STRING(hv->sv.t, sp);
+				case TEXT: {
+					size_t len = strlen(hv->sv.t);
+					stackval_t sv;
+					heapval_t *hvp;
+					heapval_t hvs;
+					char *newText = ast_emalloc(len+1);
+					snprintf(newText, len+1, "%s", hv->sv.t);
+
+					sv.type = TEXT;
+					sv.t = newText;
+
+					ALLOC_HEAP(&sv, hp, &hvp);
+
+					hvs = *hvp;
+
+					PUSH_STRING(sv.t, sp);
 					break;
-				break;
+				}
+				default:
+					break;
 				}
 
 			} else {
@@ -534,10 +550,26 @@ static void evaluate_expression(
 		PUSH_INT(expr->ival, sp);
 		break;
 		case EXPR_TYPE_UVAL:
-		printf("%u", expr->uval);
+		PUSH_INT(expr->uval, sp);
 		break;
-		case EXPR_TYPE_TEXT:
-		printf("'%s'", expr->text);
+		case EXPR_TYPE_TEXT: {
+			size_t len = strlen(expr->text);
+			stackval_t sv;
+			heapval_t *hvp;
+			heapval_t hv;
+			char *newText = ast_emalloc(len+1);
+			snprintf(newText, len+1, "%s", expr->text);
+
+			sv.type = TEXT;
+			sv.t = newText;
+
+			ALLOC_HEAP(&sv, hp, &hvp);
+
+			hv = *hvp;
+
+			PUSH_STRING(hv.sv.t, sp);
+			break;
+		}
 		break;
 		case EXPR_TYPE_OPADD:
 		{
@@ -560,8 +592,6 @@ static void evaluate_expression(
 					break;
 				}
 				case TEXT: {
-					fprintf(stderr, "error: Not implemented string additions yet..\n");
-					exit(1);
 					break;
 				}
 				default:
@@ -580,8 +610,6 @@ static void evaluate_expression(
 					break;
 				}
 				case TEXT: {
-					fprintf(stderr, "error: Not implemented string additions yet..\n");
-					exit(1);
 					break;
 				}
 				default:
@@ -598,6 +626,21 @@ static void evaluate_expression(
 				PUSH_DOUBLE(*f0 + *f1,sp);
 			} else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
 				PUSH_DOUBLE(*f0 + *r1,sp);
+			} else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
+				size_t len = strlen(svLeft.t) + strlen(svRight.t);
+				stackval_t sv;
+				heapval_t *hvp;
+				heapval_t hv;
+				char *newText = ast_emalloc(len+1);
+				snprintf(newText, len+1, "%s%s", svLeft.t, svRight.t);
+
+				sv.type = TEXT;
+				sv.t = newText;
+
+				ALLOC_HEAP(&sv, hp, &hvp);
+
+				hv = *hvp;
+				PUSH_STRING(hv.sv.t, sp);
 			}
 
 			break;
@@ -624,7 +667,7 @@ static void evaluate_expression(
 					break;
 				}
 				case TEXT: {
-					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					fprintf(stderr, "error: Cannot substract strings..\n");
 					exit(1);
 					break;
 				}
@@ -644,7 +687,7 @@ static void evaluate_expression(
 					break;
 				}
 				case TEXT: {
-					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					fprintf(stderr, "error: Cannot substract strings..\n");
 					exit(1);
 					break;
 				}
@@ -687,7 +730,7 @@ static void evaluate_expression(
 					break;
 				}
 				case TEXT: {
-					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					fprintf(stderr, "error: Cannot multiply strings..\n");
 					exit(1);
 					break;
 				}
@@ -707,7 +750,7 @@ static void evaluate_expression(
 					break;
 				}
 				case TEXT: {
-					fprintf(stderr, "error: Not implemented string additions yet..\n");
+					fprintf(stderr, "error: Cannot multiply strings..\n");
 					exit(1);
 					break;
 				}
@@ -947,6 +990,14 @@ static void interpret_statements_(
 			POP_VAL(&sv, sp);
 
 			/* Placing value on the heap */
+			if ( sv.type == TEXT ) {
+				/* Special case */
+				char *c = sv.t;
+				size_t len = strlen(c)+1;
+				char *newText = ast_emalloc(len);
+				snprintf(newText,len,"%s",c);
+				sv.t = newText;
+			}
 			ALLOC_HEAP(&sv, hp, &hvp); 
 
 			/* Placing variable declaration in global variable namespace */
@@ -1002,7 +1053,7 @@ static void interpret_statements_(
 			}
 
 			// Print the else if it is not NULL
-			if ( ifstmt->endif != NULL ){
+			if ( ifstmt->endif != NULL ) {
 				ifstmtWalk = ifstmt->endif;
 				printf("else-statment:\n");
 				interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args);
@@ -1031,6 +1082,156 @@ void close_namespaces() {
 	hashtable_free(varDecs);
 }
 
+void free_expression(expr_t *expr) {
+	if ( expr == NULL )
+		return;
+
+	switch (expr->type) 
+	{
+		case EXPR_TYPE_ID:
+		{
+			free(expr->id.id);
+			break;
+		}
+		case EXPR_TYPE_FVAL:
+		case EXPR_TYPE_IVAL:
+		case EXPR_TYPE_UVAL:
+		break;
+		case EXPR_TYPE_TEXT: {
+			free(expr->text);
+			break;
+		}
+		break;
+		case EXPR_TYPE_OPADD:
+		{
+			free_expression((expr_t*)expr->add.left);
+			free_expression((expr_t*)expr->add.right);
+			break;
+		}
+		break;
+		case EXPR_TYPE_OPSUB:
+		{
+			free_expression((expr_t*)expr->add.left);
+			free_expression((expr_t*)expr->add.right);
+
+			break;
+		}
+		case EXPR_TYPE_OPMUL:
+		{
+			free_expression((expr_t*)expr->add.left);
+			free_expression((expr_t*)expr->add.right);
+			break;
+		}
+		case EXPR_TYPE_OPMOD:
+		{
+			free_expression((expr_t*)expr->add.left);
+			free_expression((expr_t*)expr->add.right);
+			break;
+		}
+		break;
+		case EXPR_TYPE_OPDIV:
+		{
+			free_expression((expr_t*)expr->add.left);
+			free_expression((expr_t*)expr->add.right);
+			break;
+		}
+		break;
+		case EXPR_TYPE_EMPTY:
+		default:
+		break;
+	}
+}
+
+static void free_cond(ifCondition_t *cond)
+{
+  free_expression(cond->left);
+  free_expression(cond->right);
+}
+
+void free_ast(statement_t *stmt)
+{
+	entity_eval_t *eval = (entity_eval_t*)stmt;
+	void *next = NULL;
+
+	if ( stmt == NULL )
+		return;
+
+	switch ( eval->entity ) {
+		case LANG_ENTITY_DECL:
+		case LANG_ENTITY_FUNCDECL: 
+		case LANG_ENTITY_FUNCCALL:
+		break;
+		case LANG_ENTITY_CONDITIONAL:
+			next = ((statement_t*)stmt)->next;
+		break;
+		case LANG_ENTITY_EMPTY_MATH:
+		case LANG_ENTITY_EMPTY_STR:
+		{
+			expr_t *e = ((statement_t*)stmt)->content;
+			free_expression(e);
+			next = ((statement_t*)stmt)->next;
+			break;
+		}
+		case LANG_ENTITY_BODY:
+			next = ((body_t*)stmt)->content;
+		break;
+		default:
+		break;
+	}
+
+	switch ( eval->entity ) {
+		case LANG_ENTITY_DECL:
+		{
+			declaration_t* decl = ((statement_t*)stmt)->content;
+			/* Evaluating the expression among global variables */
+			free_expression(decl->val);
+		}
+		break;
+		case LANG_ENTITY_FUNCDECL: 
+		{
+			functionDef_t *funcDef = ((statement_t*)stmt)->content;
+			free(funcDef->id.id);
+		}
+		break;
+		case LANG_ENTITY_FUNCCALL:
+		{
+			functionCall_t *funcCall = ((statement_t*)stmt)->content;
+			free(funcCall->id.id);
+		}
+		break;
+		case LANG_ENTITY_CONDITIONAL:
+		{
+			ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
+			ifStmt_t *ifstmtWalk;
+			ifCondition_t *cond = ifstmt->cond;
+
+			free_cond(cond);
+			free_ast(ifstmt->body->content);
+
+			// Walk through the elifs.
+			ifstmtWalk = ifstmt->elif;
+
+			while ( ifstmtWalk != NULL ) {
+				free_cond(ifstmtWalk->cond);
+				free_ast(ifstmtWalk->body->content);
+				ifstmtWalk = ifstmtWalk->elif;
+			}
+
+			// Print the else if it is not NULL
+			if ( ifstmt->endif != NULL ) {
+				ifstmtWalk = ifstmt->endif;
+				free_ast(ifstmtWalk->body->content);
+			}
+
+		}
+		break;
+		default:
+		break;
+	}
+
+	free_ast(next);
+}
+
 void interpret_statements(statement_t *stmt)
 {
 	// "CPU" registers definitions
@@ -1051,8 +1252,11 @@ void interpret_statements(statement_t *stmt)
 	close_namespaces();
 
 	// free heap
-	free(hb);
+	FREE_HEAP(hp, hb);
 
 	// Free stack
-	free(sb);
+	FREE_STACK(sp, sb);
+
+	// Free memory associated with the AST
+	free_ast(stmt);
 }

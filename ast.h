@@ -190,6 +190,7 @@ typedef struct stackval {
 typedef struct heapval {
 	stackval_t sv;
 	bool occupied;
+	bool toFree;
 } heapval_t;
 
 #define DEFAULT_STACKSIZE 256 * sizeof(int32_t)
@@ -223,9 +224,11 @@ int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp
 	hpbv.sv.type = INT32TYPE;\
 	hpbv.sv.i = (int32_t)hz;\
 	hpbv.occupied = true;\
+	hpbv.toFree = false;\
 	*hp = *hb + p;\
 	**(heapval_t**) hp = hpbv;\
 } while ( 0 )
+
 #define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; **((stackval_t**)sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
 #define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
 #define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
@@ -236,6 +239,9 @@ int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\
 heapval_t hv;\
 hv.sv = *a;\
+if (hv.sv.type == TEXT) {\
+	hv.toFree = true;\
+}\
 hv.occupied = true;\
 while( i < size ) {\
 	if ( !((heapval_t*) hp)[i].occupied ) {\
@@ -244,6 +250,26 @@ while( i < size ) {\
 		break;\
 	}\
 	++i;\
+}\
+if ( i == size ) {\
+	fprintf(stderr, "Error: Heap full\n");\
+	exit(1);\
 } } while (0);
+
+#define FREE_HEAP(hp, hpb) do { \
+int32_t size = (*(heapval_t*)hp).sv.i;\
+int32_t i = 0;\
+while( i < size ) {\
+	if ( ((heapval_t*) hp)[i].toFree ) {\
+		free(((heapval_t*) hp)[i].sv.t);\
+	}\
+	++i;\
+}\
+free(hpb);\
+} while (0);
+
+#define FREE_STACK(sp, spb) do { \
+free(spb);\
+} while (0);
 
 #endif

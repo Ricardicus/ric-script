@@ -313,10 +313,14 @@ stringEdition:
         $$ = newExpr_Text(yyval.id);
     }
     | DOUBLE {
-        $$ = newExpr_Float(yyval.val_double);
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), "%lf", yyval.val_double);
+        $$ = newExpr_Text(buffer);
     }
     | DIGIT {
-        $$ = newExpr_Ival(yyval.val_int);
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), "%d", yyval.val_int);
+        $$ = newExpr_Text(buffer);
     }
     | otherChar {
         $$ = newExpr_Text($1);
@@ -357,6 +361,10 @@ otherChar:
         $$[1] = 0;
     }
     | ')' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    };
+    | '!' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     };

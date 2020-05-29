@@ -1,0 +1,23 @@
+# Numbers
+1337        
+1.337
+(1335) + 1 + 1
+1337/(1+2)
+
+# Variable declaration
+a = 1337
+
+# printing a declare variable
+a
+
+# Some math, should print 1337
+a / 2 + 1337/ 2 +1337 % 2 
+
+# Declaration
+b = " hejsan!"
+
+# Using the declaration
+"hello" + " hello!" + b
+
+# Adding strings with numbers and digits and IDs
+"hello " + 1337.7 + " " + 14 + " " + a 

@@ -260,6 +260,22 @@ stringContents:
 
         $$ = newExpr_OPAdd(e1,e2);
     }
+    | stringContents '+' DOUBLE  {
+        expr_t *e1 = (expr_t*)$1;
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), "%.4f", $3);
+        expr_t *e2 = newExpr_Text(buffer);
+
+        $$ = newExpr_OPAdd(e1,e2);
+    }
+    | stringContents '+' DIGIT  {
+        expr_t *e1 = (expr_t*)$1;
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), "%d", $3);
+        expr_t *e2 = newExpr_Text(buffer);
+
+        $$ = newExpr_OPAdd(e1,e2);
+    }
     | stringContent {
         $$ = $1;
     };

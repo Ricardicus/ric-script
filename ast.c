@@ -588,7 +588,7 @@ static void evaluate_expression(
 					break;
 				}
 				case DOUBLETYPE: {
-					*f0 = svLeft.i;
+					*f0 = svLeft.d;
 					break;
 				}
 				case TEXT: {
@@ -606,7 +606,7 @@ static void evaluate_expression(
 					break;
 				}
 				case DOUBLETYPE: {
-					*f1 = svRight.i;
+					*f1 = svRight.d;
 					break;
 				}
 				case TEXT: {
@@ -633,6 +633,66 @@ static void evaluate_expression(
 				heapval_t hv;
 				char *newText = ast_emalloc(len+1);
 				snprintf(newText, len+1, "%s%s", svLeft.t, svRight.t);
+
+				sv.type = TEXT;
+				sv.t = newText;
+
+				ALLOC_HEAP(&sv, hp, &hvp);
+
+				hv = *hvp;
+				PUSH_STRING(hv.sv.t, sp);
+			} else if ( svLeft.type == DOUBLETYPE && svRight.type == TEXT ) {
+				size_t len = 50 + strlen(svRight.t);
+				stackval_t sv;
+				heapval_t *hvp;
+				heapval_t hv;
+				char *newText = ast_emalloc(len+1);
+				snprintf(newText, len+1, "%.4f%s", svLeft.d, svRight.t);
+
+				sv.type = TEXT;
+				sv.t = newText;
+
+				ALLOC_HEAP(&sv, hp, &hvp);
+
+				hv = *hvp;
+				PUSH_STRING(hv.sv.t, sp);
+			} else if ( svLeft.type == TEXT && svRight.type == DOUBLETYPE ) {
+				size_t len = 50 + strlen(svLeft.t);
+				stackval_t sv;
+				heapval_t *hvp;
+				heapval_t hv;
+				char *newText = ast_emalloc(len+1);
+				snprintf(newText, len+1, "%s%.4f", svLeft.t, svRight.d);
+
+				sv.type = TEXT;
+				sv.t = newText;
+
+				ALLOC_HEAP(&sv, hp, &hvp);
+
+				hv = *hvp;
+				PUSH_STRING(hv.sv.t, sp);
+			} else if ( svLeft.type == TEXT && svRight.type == INT32TYPE ) {
+				size_t len = 50 + strlen(svLeft.t);
+				stackval_t sv;
+				heapval_t *hvp;
+				heapval_t hv;
+				char *newText = ast_emalloc(len+1);
+				snprintf(newText, len+1, "%s%d", svLeft.t, svRight.i);
+
+				sv.type = TEXT;
+				sv.t = newText;
+
+				ALLOC_HEAP(&sv, hp, &hvp);
+
+				hv = *hvp;
+				PUSH_STRING(hv.sv.t, sp);
+			} else if ( svLeft.type == INT32TYPE && svRight.type == TEXT ) {
+				size_t len = 50 + strlen(svRight.t);
+				stackval_t sv;
+				heapval_t *hvp;
+				heapval_t hv;
+				char *newText = ast_emalloc(len+1);
+				snprintf(newText, len+1, "%d%s", svLeft.i, svRight.t);
 
 				sv.type = TEXT;
 				sv.t = newText;

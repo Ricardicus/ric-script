@@ -17,8 +17,6 @@ cat test.ric | ./main -p
 
 PROGRAM:
 
-PROGRAM:
-
 Declaration: ID('x'), Expr(1.337000)
 Declaration: ID('sovtid'), Expr(100)
 Declaration: ID('a'), Expr(1.337000)
@@ -52,5 +50,23 @@ Function Declaration: ID('foobar') args(ID('a'),ID('b'),ID('c'))
             Function Call: ID('print') args(ID('sa'))
 Declaration: ID('q'), Expr(ADD(ADD(SUB(SUB(ADD(123,ID('d')),MUL(32,4)),2),MOD(MUL(2,ADD(1,2)),2)),1))
 
+
+```
+
+# Code interpreter
+
+I am now working on an interpreter for this baby script language
+
+```
+cat testInterpret.ric |./main -i 
+
+1337
+1.337000
+1337
+445
+1337
+1337
+hello hello! hejsan!
+hello 1337.7000 14 1337
 
 ```

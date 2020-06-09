@@ -1,8 +1,5 @@
-# Bison files
-y.tab.*
+# Bison debug outpu
 y.output
-lex.y.*
-lex.yy.*
 
 # object files
 *.o

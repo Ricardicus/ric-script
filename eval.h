@@ -12,6 +12,9 @@ void evaluate_expression(
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args);
 
+void print_statements(statement_t *stmt);
+void print_statements_(void *stmt, int indent);
+
 void interpret_statements_(
   void *stmt,
   PROVIDE_CONTEXT_ARGS(),

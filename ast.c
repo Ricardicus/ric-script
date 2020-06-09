@@ -262,10 +262,8 @@ body_t* newBody(void *body)
 	return bdy;
 }
 
-static void print_statements_(void *stmt, int indent)
+void print_statements_(void *stmt, int indent)
 {
-	int i = 0;
-
 	entity_eval_t *eval = (entity_eval_t*)stmt;
 	void *next = NULL;
 

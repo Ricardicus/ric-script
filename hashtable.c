@@ -15,7 +15,6 @@ hashtable_t * hashtable_new(int size, float load)
 	hashtable->load = load;
 	hashtable->table = (entry_t**) calloc(size,sizeof(entry_t*));
 	hashtable->put = hashtable_put;
-	hashtable->print_table_callbacks = print_table_callbacks;
 	return hashtable;
 }
 
@@ -166,27 +165,6 @@ void * hashtable_get(hashtable_t * hashtable, const char * key)
 		p = p->next;
 	}
 	return NULL;
-}
-
-void print_table_callbacks(hashtable_t * hashtable)
-{
-	int i = 0;
-	int size = hashtable->size;
-	struct key_val_pair * ptr;
-
-	while(i<size)
-	{
-		if(hashtable->table[i] != NULL)
-		{
-			ptr = hashtable->table[i];
-			while(ptr!=NULL)
-			{
-				printf("key: %s - > data: %s\n",ptr->key,(char*)(((callback_func_t) ptr->data))(0,NULL,"NAME"));
-				ptr=ptr->next;
-			}
-		}
-		i++;
-	}
 }
 
 void print_table_as_chars(hashtable_t * hashtable)

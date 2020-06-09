@@ -297,7 +297,7 @@ void evaluate_expression(
           size_t len = strlen(hv->sv.t);
           stackval_t sv;
           heapval_t *hvp;
-          heapval_t hvs;
+
           char *newText = ast_emalloc(len+1);
           snprintf(newText, len+1, "%s", hv->sv.t);
 
@@ -305,8 +305,6 @@ void evaluate_expression(
           sv.t = newText;
 
           ALLOC_HEAP(&sv, hp, &hvp);
-
-          hvs = *hvp;
 
           PUSH_STRING(sv.t, sp);
           break;

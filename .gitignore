@@ -6,3 +6,6 @@ y.output
 
 # Executable
 main
+
+# The name I typically give my meson build folders
+builddir

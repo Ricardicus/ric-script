@@ -213,7 +213,7 @@ int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp
 	if ( p != 0 ) {\
 		p = (sizeof(stackval_t) - ( p % sizeof(stackval_t) ));\
 	}\
-	*sp = *sb + p;\
+	*(intptr_t*)sp = *(intptr_t*)sb + p;\
 } while ( 0 )
 
 #define SETUP_HEAP(hp, hb, hz) do {\
@@ -229,7 +229,7 @@ int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp
 	hpbv.sv.i = (int32_t)hz;\
 	hpbv.occupied = true;\
 	hpbv.toFree = false;\
-	*hp = *hb + p;\
+	*(intptr_t*)hp = *(intptr_t*)hb + p;\
 	**(heapval_t**) hp = hpbv;\
 } while ( 0 )
 

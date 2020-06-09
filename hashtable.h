@@ -25,7 +25,6 @@ typedef struct hash{
 	float load;
 	entry_t ** table;
 	void (*put)(struct hash*,char*,void *);
-	void (*print_table_callbacks)(struct hash*);
 } hashtable_t;
 
 // Make sure it outputs its name on recieving the "NAME" command
@@ -41,7 +40,6 @@ void hashtable_free(hashtable_t*);
 void* hashtable_get(hashtable_t*,const char*);
 int hashtable_hash(hashtable_t*,const char*);
 void hashtable_put(hashtable_t*,char*,void*);
-void print_table_callbacks(hashtable_t*);
 void print_table_as_chars(hashtable_t*);
 void for_each_pair(hashtable_t * hash, void (*callback)(void*,void*) );
 

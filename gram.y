@@ -135,7 +135,44 @@ ifStatement:
         ifs->endif = $5;
         
         $$ = ifs;
-    };
+    } 
+    | '[' mathContents ']' body {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
+
+        $$ = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
+    }
+    | '[' mathContents ']' body middleIfs {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
+
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
+
+        ifs->elif = $5;
+        
+        $$ = ifs;
+    }
+    | '[' mathContents ']' body middleIfs endIf {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
+
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
+
+        ifs->elif = $5;
+        ifs->endif = $6;
+        
+        $$ = ifs;
+    }
+    | '[' mathContents ']' body endIf {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
+
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
+
+        ifs->endif = $5;
+        
+        $$ = ifs;
+    } 
 
 middleIfs:
     middleIfs middleIf {
@@ -163,25 +200,25 @@ endIf:
     };
 
 condition:
-    mathContent '=' '=' mathContent {
+    mathContents '=' '=' mathContents {
         $$ = newConditional(CONDITION_EQ, $1, $4);
     }
     | stringContents '=' '=' stringContents {
         $$ = newConditional(CONDITION_EQ, $1, $4);
     }
-    | mathContent '!' '=' mathContent {
+    | mathContents '!' '=' mathContents {
         $$ = newConditional(CONDITION_NEQ, $1, $4);
     }
-    | mathContent '<' '=' mathContent {
+    | mathContents '<' '=' mathContents {
         $$ = newConditional(CONDITION_LEQ, $1, $4);
     }
-    | mathContent '>' '=' mathContent {
+    | mathContents '>' '=' mathContents {
         $$ = newConditional(CONDITION_GEQ, $1, $4);
     }
-    | mathContent '<' mathContent {
+    | mathContents '<' mathContents {
         $$ = newConditional(CONDITION_LE, $1, $3);
     }
-    | mathContent '>' mathContent {
+    | mathContents '>' mathContents {
         $$ = newConditional(CONDITION_GE, $1, $3);
     };
 

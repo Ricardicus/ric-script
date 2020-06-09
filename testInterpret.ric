@@ -56,3 +56,18 @@ b
 b = 10.1 <= 10.0
 b
 
+[ 1 ] {
+  
+  # should print 1337
+  a = 1337
+  a
+
+}
+
+[ b ] {
+  
+  # should not print 1337
+  a = 1337
+  a
+
+}

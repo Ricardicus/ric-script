@@ -853,29 +853,36 @@ void interpret_statements_(
     {
       ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
       ifStmt_t *ifstmtWalk;
-      ifCondition_t *cond = ifstmt->cond;
 
-      printf("if-statement - condition: ");
-      print_condition(cond);
-      printf("\n");
-      interpret_statements_(ifstmt->body, PROVIDE_CONTEXT(), args);
+      /* Read ax for conditional */
+      evaluate_condition(ifstmt->cond, PROVIDE_CONTEXT(), args);
+      if ( *ax ) {
+        interpret_statements_(ifstmt->body,
+          PROVIDE_CONTEXT(), args);
+      } else {
+        // Walk through the elifs.
+        int stop = 0;
+        ifstmtWalk = ifstmt->elif;
 
-      // Walk through the elifs.
-      ifstmtWalk = ifstmt->elif;
+        while ( ifstmtWalk != NULL ) {
+          evaluate_condition(ifstmtWalk->cond, PROVIDE_CONTEXT(), args);
+          if ( *ax ) {
+            interpret_statements_(ifstmtWalk->body,
+              PROVIDE_CONTEXT(), args);
+            stop = 1;
+            break;
+          }
+          ifstmtWalk = ifstmtWalk->elif;
+        }
 
-      while ( ifstmtWalk != NULL ) {
-        printf("else-if-statement - condition: ");
-        print_condition(ifstmtWalk->cond);
-        printf("\n");
-        interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args);
-        ifstmtWalk = ifstmtWalk->elif;
-      }
+        if ( ! stop ) {
+          // Print the else if it is not NULL
+          if ( ifstmt->endif != NULL ) {
+            ifstmtWalk = ifstmt->endif;
+            interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args);
+          }
+        }
 
-      // Print the else if it is not NULL
-      if ( ifstmt->endif != NULL ) {
-        ifstmtWalk = ifstmt->endif;
-        printf("else-statment:\n");
-        interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args);
       }
 
     }
@@ -885,35 +892,6 @@ void interpret_statements_(
   }
 
   interpret_statements_(next, PROVIDE_CONTEXT(), args);
-}
-
-void interpret_statements(statement_t *stmt)
-{
-  // "CPU" registers definitions
-  DEF_NEW_CONTEXT();
-
-  // Setup stack
-  SETUP_STACK(&sp, &sb, DEFAULT_STACKSIZE);
-
-  // Setup heap
-  SETUP_HEAP(&hp, &hb, DEFAULT_HEAPSIZE);
-
-  // Setup namespaces
-  setup_namespaces();
-
-  interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL);
-
-  // Close namespaces
-  close_namespaces();
-
-  // free heap
-  FREE_HEAP(hp, hb);
-
-  // Free stack
-  FREE_STACK(sp, sb);
-
-  // Free memory associated with the AST
-  free_ast(stmt);
 }
 
 void setup_namespaces() {
@@ -929,7 +907,6 @@ void close_namespaces() {
   hashtable_free(funcDecs);
   hashtable_free(varDecs);
 }
-
 
 void print_expr(expr_t *expr)
 {
@@ -1162,3 +1139,34 @@ void print_statements(statement_t *stmt)
   print_statements_(stmt, 0);
   printf("\n\n");
 }
+
+void interpret_statements(statement_t *stmt)
+{
+  // "CPU" registers definitions
+  DEF_NEW_CONTEXT();
+
+  // Setup stack
+  SETUP_STACK(&sp, &sb, DEFAULT_STACKSIZE);
+
+  // Setup heap
+  SETUP_HEAP(&hp, &hb, DEFAULT_HEAPSIZE);
+
+  // Setup namespaces
+  setup_namespaces();
+
+  interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL);
+
+  // Close namespaces
+  close_namespaces();
+
+  // free heap
+  FREE_HEAP(hp, hb);
+
+  // Free stack
+  FREE_STACK(sp, sb);
+
+  // Free memory associated with the AST
+  free_ast(stmt);
+}
+
+

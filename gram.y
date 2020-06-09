@@ -166,6 +166,9 @@ condition:
     mathContent '=' '=' mathContent {
         $$ = newConditional(CONDITION_EQ, $1, $4);
     }
+    | stringContents '=' '=' stringContents {
+        $$ = newConditional(CONDITION_EQ, $1, $4);
+    }
     | mathContent '!' '=' mathContent {
         $$ = newConditional(CONDITION_NEQ, $1, $4);
     }
@@ -198,6 +201,10 @@ declaration:
     }
     | ID '=' mathContents {
         $$ = newDeclaration($1,$3);
+    }
+    | ID '=' condition {
+        expr_t *expr = newExpr_Cond($3);
+        $$ = newDeclaration($1,expr);
     };
 
 body:
@@ -245,6 +252,9 @@ mathContent:
     }
     | '(' mathContents ')' {
         $$ = $2;
+    }
+    | '(' condition ')' {
+        $$ = newExpr_Cond($2);
     };
 
 stringContents:

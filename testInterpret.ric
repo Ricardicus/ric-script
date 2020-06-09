@@ -21,3 +21,13 @@ b = " hejsan!"
 
 # Adding strings with numbers and digits and IDs
 "hello " + 1337.7 + " " + 14 + " " + a 
+
+# Assigning either 1 or 0 to variables 
+# based on conditionals
+b = "hello" == "hello"
+# Should print 1
+b
+
+b = ( "hello" == "hi" )
+# Should print 0
+b

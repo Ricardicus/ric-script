@@ -22,6 +22,16 @@ void* ast_emalloc(size_t size)
 	return (void*)p;
 }
 
+expr_t* newExpr_Cond(ifCondition_t *cond)
+{
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+
+  expr->type = EXPR_TYPE_COND;
+  expr->cond = cond;
+
+  return expr;
+}
+
 expr_t* newExpr_Text(char *text)
 {
 	size_t textLen = strlen(text);
@@ -956,17 +966,75 @@ static void evaluate_expression(
 			break;
 		}
 		break;
+    case EXPR_TYPE_COND:
+    {
+      evaluate_condition(expr->cond, PROVIDE_CONTEXT(), args);
+      /* Push ax to stack */
+      PUSH_INT(*ax,sp);
+      break;
+    }
 		case EXPR_TYPE_EMPTY:
 		default:
 		break;
 	}
 }
 
-int evaluate_condition(ifCondition_t *cond)
+int evaluate_condition(ifCondition_t *cond,
+  PROVIDE_CONTEXT_ARGS(),
+  argsList_t* args)
 {
+  /* Will set ax either 1 or 0 (or interrupt the program on error) */
 	switch (cond->type) 
 	{
 	case CONDITION_EQ:
+  {
+    stackval_t svLeft;
+    stackval_t svRight;
+
+    evaluate_expression(cond->left, PROVIDE_CONTEXT(), args);
+    POP_VAL(&svLeft, sp);
+
+    evaluate_expression(cond->right, PROVIDE_CONTEXT(), args);
+    POP_VAL(&svRight, sp);
+
+    if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+
+      if ( svLeft.i == svRight.i ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = (double) svLeft.i;
+
+      if ( fabs(*f0 - svRight.d) < 0.00001 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = svRight.d;
+      *f1 = svLeft.d;
+
+      if ( fabs(*f0 - *f1) < 0.00001 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+      *f0 = (double) svRight.i;
+
+      if ( fabs(*f0 - svLeft.d) < 0.00001 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
+      *ax = strcmp(svLeft.t, svRight.t) == 0;
+    }
+  }
 	break;
 	case CONDITION_NEQ:
 	break;

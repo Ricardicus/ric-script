@@ -68,5 +68,7 @@ cat testInterpret.ric |./main -i
 1337
 hello hello! hejsan!
 hello 1337.7000 14 1337
+1
+0
 
 ```

@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 #include <stdbool.h>
 
 #define EXPR_TYPE_ID    1
@@ -20,6 +21,7 @@
 #define EXPR_TYPE_OPDIV 9
 #define EXPR_TYPE_OPMOD 10
 #define EXPR_TYPE_OPMUL 11
+#define EXPR_TYPE_COND  12
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -72,6 +74,12 @@ typedef struct modOP {
 	void* right;
 } modOP_t;
 
+typedef struct ifCondition {
+  int type;
+  void *left;
+  void *right;
+} ifCondition_t;
+
 typedef struct expr_s {
 	int      type;
 	ID_t     id;
@@ -89,6 +97,7 @@ typedef struct expr_s {
 		mulOP_t mul;
 		divOP_t div;
 		modOP_t mod;
+    ifCondition_t *cond;
 	};
 } expr_t;
 
@@ -128,12 +137,6 @@ typedef struct functionCall {
 	argsList_t *args;
 } functionCall_t;
 
-typedef struct ifCondition {
-	int type;
-	expr_t *left;
-	expr_t *right;
-} ifCondition_t;
-
 typedef struct ifStmt {
 	int ifType;
 	void *elif;
@@ -158,6 +161,7 @@ expr_t* newExpr_OPSub(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMul(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
+expr_t* newExpr_Cond(ifCondition_t *cond);
 
 ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(const char *id, expr_t *exp);
@@ -275,4 +279,9 @@ free(hpb);\
 free(spb);\
 } while (0);
 
+int evaluate_condition(ifCondition_t *cond,
+  PROVIDE_CONTEXT_ARGS(),
+  argsList_t* args);
+
 #endif
+

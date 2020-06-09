@@ -984,19 +984,22 @@ int evaluate_condition(ifCondition_t *cond,
   argsList_t* args)
 {
   /* Will set ax either 1 or 0 (or interrupt the program on error) */
+  stackval_t svLeft;
+  stackval_t svRight;
+
+  /* Arbitrary double resoultion, not sure what to set this to */
+  double epsilon = 0.00001;
+
+  evaluate_expression(cond->left, PROVIDE_CONTEXT(), args);
+  POP_VAL(&svLeft, sp);
+
+  evaluate_expression(cond->right, PROVIDE_CONTEXT(), args);
+  POP_VAL(&svRight, sp);
+
 	switch (cond->type) 
 	{
 	case CONDITION_EQ:
   {
-    stackval_t svLeft;
-    stackval_t svRight;
-
-    evaluate_expression(cond->left, PROVIDE_CONTEXT(), args);
-    POP_VAL(&svLeft, sp);
-
-    evaluate_expression(cond->right, PROVIDE_CONTEXT(), args);
-    POP_VAL(&svRight, sp);
-
     if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
 
       if ( svLeft.i == svRight.i ) {
@@ -1008,7 +1011,7 @@ int evaluate_condition(ifCondition_t *cond,
     } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
       *f0 = (double) svLeft.i;
 
-      if ( fabs(*f0 - svRight.d) < 0.00001 ) {
+      if ( fabs(*f0 - svRight.d) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -1018,7 +1021,7 @@ int evaluate_condition(ifCondition_t *cond,
       *f0 = svRight.d;
       *f1 = svLeft.d;
 
-      if ( fabs(*f0 - *f1) < 0.00001 ) {
+      if ( fabs(*f0 - *f1) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -1026,7 +1029,7 @@ int evaluate_condition(ifCondition_t *cond,
     } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
       *f0 = (double) svRight.i;
 
-      if ( fabs(*f0 - svLeft.d) < 0.00001 ) {
+      if ( fabs(*f0 - svLeft.d) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -1034,18 +1037,203 @@ int evaluate_condition(ifCondition_t *cond,
     } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
       *ax = strcmp(svLeft.t, svRight.t) == 0;
     }
+    break;
   }
-	break;
 	case CONDITION_NEQ:
-	break;
+  {
+    if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+
+      if ( svLeft.i != svRight.i ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = (double) svLeft.i;
+
+      if ( fabs(*f0 - svRight.d) > epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = svRight.d;
+      *f1 = svLeft.d;
+
+      if ( fabs(*f0 - *f1) > epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+      *f0 = (double) svRight.i;
+
+      if ( fabs(*f0 - svLeft.d) > epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    }
+    break;
+  }
 	case CONDITION_LEQ:
-	break;
+  {
+    if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+
+      if ( svLeft.i <= svRight.i ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = (double) svLeft.i;
+
+      if ( *f0 - svRight.d < -epsilon || fabs(*f0 - svRight.d) < epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = svLeft.d;
+      *f1 = svRight.d;
+
+      if ( *f0 - *f1 < -epsilon || fabs(*f0 - *f1) < epsilon) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+      *f1 = (double) svRight.i;
+
+      if ( svLeft.d - *f1 < -epsilon || fabs(svLeft.d - *f1) < epsilon) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    }
+    break;
+  }
 	case CONDITION_GEQ:
-	break;
+  {
+    if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+
+      if ( svLeft.i >= svRight.i ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = (double) svLeft.i;
+
+      if ( *f0 - svRight.d > epsilon || fabs(*f0 - svRight.d) < epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = svLeft.d;
+      *f1 = svRight.d;
+
+      if ( *f0 - *f1 > epsilon || fabs(*f0 - *f1) < epsilon) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+      *f1 = (double) svRight.i;
+
+      if ( svLeft.d - *f1 > epsilon || fabs(svLeft.d - *f1) < epsilon) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    }
+    break;
+  }
 	case CONDITION_GE:
-	break;
+  {
+    if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+
+      if ( svLeft.i > svRight.i ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = (double) svLeft.i;
+
+      if ( *f0 - svRight.d > epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = svLeft.d;
+      *f1 = svRight.d;
+
+      if ( *f0 - *f1 > epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+      *f1 = (double) svRight.i;
+
+      if ( svLeft.d - *f1 > epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    }
+    break;
+  }
 	case CONDITION_LE:
-	break;
+  {
+    if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
+
+      if ( svLeft.i < svRight.i ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = (double) svLeft.i;
+
+      if ( *f0 - svRight.d < -epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
+      *f0 = svLeft.d;
+      *f1 = svRight.d;
+
+      if ( *f0 - *f1 < -epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
+      *f1 = (double) svRight.i;
+
+      if ( svLeft.d - *f1 < -epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    }
+    break;
+  }
 	default:
 	break;
 	}

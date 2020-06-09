@@ -11,7 +11,18 @@ main: lex yacc
 	$(CC) -o main main.c hashtable.c hooks.c y.tab.c lex.yy.c ast.c 
 
 test: main
-	cat test.ric | ./main -p
+	@echo ""
+	@echo "======================"
+	@echo "AST of file 'test.ric'"
+	@echo "======================"
+	@echo ""
+	@cat test.ric |./main -p
+	@echo ""
+	@echo "=========================================="
+	@echo "Interpreration of file 'testInterpret.ric'"
+	@echo "=========================================="
+	@echo ""
+	@cat testInterpret.ric|./main -i
 
 lex: $(FLEXSPEC)
 	flex $(FLEXSPEC)

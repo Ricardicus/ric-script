@@ -13,7 +13,14 @@ Will input test.ric into the program and let it output the AST.
 Like this:
 
 ```
-cat test.ric | ./main -p
+make test
+
+
+======================
+AST of file 'test.ric'
+======================
+
+
 
 PROGRAM:
 
@@ -49,6 +56,36 @@ Function Declaration: ID('foobar') args(ID('a'),ID('b'),ID('c'))
         else-statment:
             Function Call: ID('print') args(ID('sa'))
 Declaration: ID('q'), Expr(ADD(ADD(SUB(SUB(ADD(123,ID('d')),MUL(32,4)),2),MOD(MUL(2,ADD(1,2)),2)),1))
+
+
+
+==========================================
+Interpreration of file 'testInterpret.ric'
+==========================================
+
+1337
+1.337000
+1337
+445
+1337
+1337
+hello hello! hejsan!
+hello 1337.7000 14 1337
+1
+0
+10.100000 > 10.000000: 
+1
+10.100000 < 10.000000:
+0
+10.100000 <= 10.100000:
+1
+10.100000 >= 10.100000:
+1
+5
+10.100000 >= 10.000000: 
+1
+10.100000 <= 10.000000:
+0
 
 
 ```

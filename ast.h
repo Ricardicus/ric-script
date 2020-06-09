@@ -241,6 +241,8 @@ heapval_t hv;\
 hv.sv = *a;\
 if (hv.sv.type == TEXT) {\
 	hv.toFree = true;\
+} else {\
+  hv.toFree = false;\
 }\
 hv.occupied = true;\
 while( i < size ) {\
@@ -260,7 +262,8 @@ if ( i == size ) {\
 int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\
 while( i < size ) {\
-	if ( ((heapval_t*) hp)[i].toFree ) {\
+	if ( ((heapval_t*) hp)[i].occupied &&\
+   ((heapval_t*) hp)[i].toFree ) {\
 		free(((heapval_t*) hp)[i].sv.t);\
 	}\
 	++i;\

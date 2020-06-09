@@ -3,12 +3,14 @@ CC = gcc
 FLEXSPEC = lex.l
 YACCSPEC = gram.y
 
-AST_SOURCE = ast.c
+YACCSOURCES = y.tab.c
+FLEXSOURCES = lex.yy.c 
+RIC_SOURCES = main.c hashtable.c hooks.c ast.c eval.c
 
 .PHONY: lex yacc test
 
 main: lex yacc
-	$(CC) -o main main.c hashtable.c hooks.c y.tab.c lex.yy.c ast.c 
+	$(CC) -o main $(YACCSOURCES) $(FLEXSOURCES) $(RIC_SOURCES) 
 
 test: main
 	@echo ""

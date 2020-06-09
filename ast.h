@@ -279,9 +279,7 @@ free(hpb);\
 free(spb);\
 } while (0);
 
-int evaluate_condition(ifCondition_t *cond,
-  PROVIDE_CONTEXT_ARGS(),
-  argsList_t* args);
+void free_ast(statement_t *stmt);
 
 #endif
 

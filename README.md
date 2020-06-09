@@ -94,18 +94,11 @@ hello 1337.7000 14 1337
 
 I am now working on an interpreter for this baby script language
 
-```
-cat testInterpret.ric |./main -i 
+# Code generation
 
-1337
-1.337000
-1337
-445
-1337
-1337
-hello hello! hejsan!
-hello 1337.7000 14 1337
-1
-0
+I am thinking of inventing a bytecode language for this, 
+for which I will compile my programs. After that I will
+build a virtual machine for this type of bytecodes.
+But I will start by implementing an interpreter for the
+"real code" in text format. 
 
-```

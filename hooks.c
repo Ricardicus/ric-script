@@ -19,3 +19,4 @@ MainParserFunc getParser() {
 statement_t *getRoot() {
 	return *root;
 }
+

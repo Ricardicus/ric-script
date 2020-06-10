@@ -14,3 +14,4 @@ statement_t *getRoot();
 /* Implemented in gram.y */
 void initParser();
 #endif
+

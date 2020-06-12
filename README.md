@@ -21,7 +21,6 @@ AST of file 'test.ric'
 ======================
 
 
-
 PROGRAM:
 
 Declaration: ID('x'), Expr(1.337000)
@@ -29,6 +28,7 @@ Declaration: ID('sovtid'), Expr(100)
 Declaration: ID('a'), Expr(1.337000)
 Declaration: ID('neg'), Expr(-12)
 Declaration: ID('t'), Expr(ADD(ADD(ADD(ADD('hejsan: ',ID('a')),'hej monica hej monica process san'),ID('a')),'tja'))
+Function Declaration: ID('foobar') args()
 Function Declaration: ID('foobar') args(ID('a'),ID('b'),ID('c'))
         Function Call: ID('print') args(ID('t'))
         Declaration: ID('dsadsa'), Expr(312321)
@@ -40,6 +40,10 @@ Function Declaration: ID('foobar') args(ID('a'),ID('b'),ID('c'))
                 Declaration: ID('dsadsadsa'), Expr(1443)
         if-statement - condition: [ID('dsa')] == [ID('aaa')]
         else-if-statement - condition: [ID('dsa')] == [23]
+        Declaration: ID('i'), Expr(0)
+        if-statement - condition: [ID('i')] < [10]
+            Declaration: ID('i'), Expr(ADD(ID('i'),1))
+            === CONTINUE ===
         if-statement - condition: [ID('dsa')] < [ID('dsa')]
         if-statement - condition: [ID('dsa')] <= [23]
         else-if-statement - condition: [ID('dsa')] <= [2]
@@ -88,6 +92,11 @@ hello 1337.7000 14 1337
 0
 1337
 hello from foobar
+1
+2
+3
+4
+5
 
 
 ```

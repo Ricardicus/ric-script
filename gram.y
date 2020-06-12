@@ -68,6 +68,8 @@ statement_t *root = NULL;
 %type<data> mathContents
 %type<data> mathContent
 %type<data> ifStatement
+%type<data> continueStatement
+%type<data> breakStatement
 %type<data> middleIfs
 %type<data> middleIf
 %type<data> endIf
@@ -110,7 +112,21 @@ statement:
     }
     | stringContents {
         $$ = newStatement(LANG_ENTITY_EMPTY_STR, $1);
+    } 
+    | continueStatement {
+        $$ = newStatement(LANG_ENTITY_CONTINUE, $1);
+    }
+    | breakStatement {
+        $$ = newStatement(LANG_ENTITY_BREAK, $1);
     };
+
+continueStatement: '@' {
+    $$ = NULL;
+};
+
+breakStatement: '!' '@' {
+    $$ = NULL;
+};
 
 ifStatement:
     '[' condition ']' body {

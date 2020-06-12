@@ -790,8 +790,9 @@ void interpret_statements_(
       next = ((statement_t*)stmt)->next;
       break;
     }
-    case LANG_ENTITY_BODY:
+    case LANG_ENTITY_BODY: {
       next = ((body_t*)stmt)->content;
+    }
     break;
     default:
     break;
@@ -831,6 +832,18 @@ void interpret_statements_(
       hashtable_put(funcDecs, funcDef->id.id, funcDef->body);
     }
     break;
+    case LANG_ENTITY_CONTINUE:
+    {
+      /* Set PC to continue 'st' */
+      interpret_statements_(*st, PROVIDE_CONTEXT(), args);
+    }
+    break;
+    case LANG_ENTITY_BREAK:
+    {
+      /* Set PC to break 'end' */
+      interpret_statements_(*ed, PROVIDE_CONTEXT(), args);
+    }
+    break;
     case LANG_ENTITY_FUNCCALL:
     {
       statement_t *body;
@@ -853,6 +866,20 @@ void interpret_statements_(
     {
       ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
       ifStmt_t *ifstmtWalk;
+
+      intptr_t st_prev = *(intptr_t*) st;
+      intptr_t ed_prev = *(intptr_t*) ed;
+      void *walk_a,*ed_new;
+
+      walk_a = stmt;
+
+      while ( walk_a ) {
+        ed_new = walk_a;
+        walk_a = ((statement_t*)walk_a)->next;
+      }
+
+      (*(intptr_t*)st) = (intptr_t) stmt;
+      (*(intptr_t*)ed) = (intptr_t) next;
 
       /* Read ax for conditional */
       evaluate_condition(ifstmt->cond, PROVIDE_CONTEXT(), args);
@@ -885,6 +912,8 @@ void interpret_statements_(
 
       }
 
+      (*(intptr_t*)st) = st_prev;
+      (*(intptr_t*)ed) = ed_prev;
     }
     break;
     default:
@@ -1051,6 +1080,8 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_FUNCDECL:
     case LANG_ENTITY_FUNCCALL:
     case LANG_ENTITY_CONDITIONAL:
+    case LANG_ENTITY_CONTINUE:
+    case LANG_ENTITY_BREAK:
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
     break;
@@ -1069,6 +1100,16 @@ void print_statements_(void *stmt, int indent)
       printf("Declaration: ID('%s'), Expr(", decl->id.id);
       print_expr(decl->val);
       printf(")\n");
+    }
+    break;
+    case LANG_ENTITY_CONTINUE:
+    {
+      printf("=== CONTINUE ===\n");
+    }
+    break;
+    case LANG_ENTITY_BREAK:
+    {
+      printf("=== BREAK ===\n");
     }
     break;
     case LANG_ENTITY_FUNCDECL:
@@ -1151,6 +1192,10 @@ void interpret_statements(statement_t *stmt)
 
   // Setup namespaces
   setup_namespaces();
+
+  /* Set starting point and end point */
+  st = stmt;
+  ed = NULL;
 
   interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL);
 

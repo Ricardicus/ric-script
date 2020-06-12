@@ -33,6 +33,8 @@
 #define LANG_ENTITY_CONDITION    8
 #define LANG_ENTITY_EMPTY_MATH   9
 #define LANG_ENTITY_EMPTY_STR    10
+#define LANG_ENTITY_BREAK        11
+#define LANG_ENTITY_CONTINUE     12
 
 #define LANG_CONDITIONAL_IF      0
 #define LANG_CONDITIONAL_ELIF    1
@@ -200,11 +202,11 @@ typedef struct heapval {
 #define DEFAULT_STACKSIZE 256 * sizeof(int32_t)
 #define DEFAULT_HEAPSIZE  4096 * sizeof(int32_t)
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb, *hp, *hb; double f0, f1, f2;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, hp
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, hp
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb, *hp, *hb; double f0, f1, f2; void *st, *ed;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, hp, &st, &ed
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, hp, st, ed
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
-int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp
+int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp, void **st, void **ed
 #define SETUP_STACK(sp, sb, sz) do {\
 	intptr_t p;\
 	*sb = calloc(sz+1, sizeof(stackval_t));\

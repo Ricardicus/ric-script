@@ -35,6 +35,13 @@ t = "hejsan: " + a + "hej monica hej monica process san" + a + "tja"
 
 	} 
 
+	# While loop
+	i = 0
+	[ i < 10 ] {
+		i = i + 1
+		@
+	}
+
 	# Single if
 	[ dsa < dsa ] {
 

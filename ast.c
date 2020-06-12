@@ -181,6 +181,8 @@ statement_t* newStatement(int type, void *content)
 		case LANG_ENTITY_CONDITIONAL:
 		case LANG_ENTITY_EMPTY_MATH:
 		case LANG_ENTITY_EMPTY_STR:
+    case LANG_ENTITY_CONTINUE:
+    case LANG_ENTITY_BREAK:
 		stmt->content = content;
 		break;
 		default:

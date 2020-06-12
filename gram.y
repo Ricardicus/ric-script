@@ -36,6 +36,7 @@ statement_t *root = NULL;
 
 %union { int val_int; double val_double; char id[256]; void *data; }
 
+
 %token<val_int> DIGIT
 %token<val_double> DOUBLE
 %token<id> ID
@@ -59,7 +60,8 @@ statement_t *root = NULL;
 %type<data> statements
 %type<data> statement
 %type<data> program
-%type<data> arguments
+%type<data> arguments_list
+%type<data> parameters_list
 %type<data> body
 %type<data> function
 %type<data> functionCall
@@ -223,13 +225,19 @@ condition:
     };
 
 function:
-    ID '(' arguments ')' body {
-        $$ = newFunc($1,$3,$5);
+    '@' ID '(' parameters_list ')' body {
+        $$ = newFunc($2,$4,$6);
+    } |
+    '@' ID '(' ')' body {
+        $$ = newFunc($2,NULL,$5);
     };
 
 functionCall:
-    ID '(' arguments ')' {
+    ID '(' arguments_list ')' {
         $$ = newFunCall($1,$3);
+    } | 
+    ID '(' ')' {
+        $$ = newFunCall($1,NULL);
     };
 
 declaration: 
@@ -249,12 +257,24 @@ body:
         $$ = newBody($2);
     };
 
-arguments:
-    mathContents arguments {
-        expr_t *expr = $1;
-        $$ = newArgument(expr, $2);
-    } | {
-        $$ = NULL;
+arguments_list:
+    arguments_list ',' mathContents {
+        expr_t *expr = $3;
+        $$ = newArgument(expr, $1);
+    }
+    | mathContents {
+        $$ = newArgument($1, NULL);
+    };
+
+parameters_list:
+    parameters_list ',' ID {
+        /* A parameter list is an argument struct list with only ID expressions */
+        expr_t *expr = newExpr_ID($3);
+        $$ = newArgument(expr, $1);
+    }
+    | ID {
+        expr_t *expr = newExpr_ID($1);
+        $$ = newArgument(expr, NULL);
     };
 
 mathContents:

@@ -1027,6 +1027,16 @@ void flush_parameters()
   }
 }
 
+int print_args(argsList_t *args)
+{
+  if ( args == NULL )
+    return 0;
+
+  if ( print_args(args->next) ) {
+    printf(",");
+  }
+  print_expr(args->arg);
+}
 
 void print_statements_(void *stmt, int indent)
 {
@@ -1066,13 +1076,7 @@ void print_statements_(void *stmt, int indent)
       functionDef_t *funcDef = ((statement_t*)stmt)->content;
       printf("Function Declaration: ID('%s') args(", funcDef->id.id);
       argsList_t *args = funcDef->args;
-      int i = 0;
-      while ( args != NULL ) {
-        printf("%s", (i==0?"":","));
-        print_expr(args->arg);
-        args=args->next;
-        i=1;
-      }
+      print_args(args);
       printf(")\n");
       print_statements_(funcDef->body,indent+1);
     }
@@ -1082,13 +1086,7 @@ void print_statements_(void *stmt, int indent)
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
       printf("Function Call: ID('%s') args(", funcCall->id.id);
       argsList_t *args = funcCall->args;
-      int i = 0;
-      while ( args != NULL ) {
-        printf("%s", (i==0?"":","));
-        print_expr(args->arg);
-        args=args->next;
-        i=1;
-      }
+      print_args(args);
       printf(")\n");
     }
     break;

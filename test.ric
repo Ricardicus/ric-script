@@ -7,7 +7,11 @@ neg = -12
 
 t = "hejsan: " + a + "hej monica hej monica process san" + a + "tja"
 
-foobar (a,b,c) {
+@ foobar () {
+
+}
+
+@ foobar (a,b,c) {
 	# using built-in 'print' function
 	print(t)
 	dsadsa = 312321
@@ -15,11 +19,11 @@ foobar (a,b,c) {
 	aaa = 1337
 
 
-	foofoo(q,r,e) {
+	@ foofoo(q,r,e) {
 		dsa = 32
 	}
 
-	fo() 
+	@ fo() 
 	{
 		dsadsadsa = 1443
 	}

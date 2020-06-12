@@ -1,6 +1,8 @@
 #ifndef EVAL_H
 #define EVAL_H
 
+#include <setjmp.h>
+
 #include "ast.h"
 #include "hashtable.h"
 

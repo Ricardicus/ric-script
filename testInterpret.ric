@@ -1,4 +1,5 @@
 # Numbers
+a = 2;
 1337        
 1.337
 (1335) + 1 + 1
@@ -90,3 +91,18 @@ i = 0
   i
   @
 }
+
+# A funny feature with this language
+a = 1338
+
+[ a == 1337 ] {
+  "Now the variable is: " + a
+  "yey!"
+} ~ {
+  "A variable was not 1337, it was: " + a
+  a = 1337
+  "Re-evaluating"
+  @
+}
+
+"Nu e de slut"

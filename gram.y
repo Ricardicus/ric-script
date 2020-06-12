@@ -83,6 +83,18 @@ statement_t *root = NULL;
 
 program: statements {
     root = (statement_t*)$$;
+
+    if ( root != NULL ) {
+      statement_t *walk1,*walk2;
+
+      walk1 = root;
+      while ( walk1 != NULL ) {
+        walk2 = walk1;
+        walk1 = walk1->next;
+      }
+
+      walk2->next = newStatement(LANG_ENTITY_FIN, NULL);
+    }
 };
 
 statements: 
@@ -464,6 +476,10 @@ otherChar:
         $$[1] = 0;
     }
     | '!' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | ',' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

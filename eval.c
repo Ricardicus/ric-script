@@ -5,6 +5,8 @@ hashtable_t *funcDecs = NULL;
 hashtable_t *varDecs = NULL;
 hashtable_t *parameters = NULL;
 
+jmp_buf jmpbuf;
+
 int evaluate_condition(ifCondition_t *cond,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args)
@@ -794,6 +796,11 @@ void interpret_statements_(
       next = ((body_t*)stmt)->content;
     }
     break;
+    case LANG_ENTITY_FIN: {
+      /* Jump to VM shutdown */
+      longjmp(jmpbuf, 1);
+    }
+    break;
     default:
     break;
   }
@@ -835,7 +842,7 @@ void interpret_statements_(
     case LANG_ENTITY_CONTINUE:
     {
       /* Set PC to continue 'st' */
-      interpret_statements_(*st, PROVIDE_CONTEXT(), args);
+      next = *st;
     }
     break;
     case LANG_ENTITY_BREAK:
@@ -866,17 +873,6 @@ void interpret_statements_(
     {
       ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
       ifStmt_t *ifstmtWalk;
-
-      intptr_t st_prev = *(intptr_t*) st;
-      intptr_t ed_prev = *(intptr_t*) ed;
-      void *walk_a,*ed_new;
-
-      walk_a = stmt;
-
-      while ( walk_a ) {
-        ed_new = walk_a;
-        walk_a = ((statement_t*)walk_a)->next;
-      }
 
       (*(intptr_t*)st) = (intptr_t) stmt;
       (*(intptr_t*)ed) = (intptr_t) next;
@@ -912,8 +908,6 @@ void interpret_statements_(
 
       }
 
-      (*(intptr_t*)st) = st_prev;
-      (*(intptr_t*)ed) = ed_prev;
     }
     break;
     default:
@@ -994,6 +988,11 @@ void print_expr(expr_t *expr)
     print_expr((expr_t*)expr->add.right);
     printf(")");
     break;
+    case EXPR_TYPE_COND:
+    printf("Conditional(");
+    print_condition((ifCondition_t*)expr->cond);
+    printf(")");
+    break;
     case EXPR_TYPE_EMPTY:
     default:
     break;
@@ -1065,6 +1064,7 @@ int print_args(argsList_t *args)
     printf(",");
   }
   print_expr(args->arg);
+  return 1;
 }
 
 void print_statements_(void *stmt, int indent)
@@ -1082,6 +1082,9 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_CONDITIONAL:
     case LANG_ENTITY_CONTINUE:
     case LANG_ENTITY_BREAK:
+    case LANG_ENTITY_EMPTY_MATH:
+    case LANG_ENTITY_EMPTY_STR:
+      printf("[%p] ", stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
     break;
@@ -1094,6 +1097,14 @@ void print_statements_(void *stmt, int indent)
   }
 
   switch ( eval->entity ) {
+    case LANG_ENTITY_EMPTY_MATH:
+    case LANG_ENTITY_EMPTY_STR:
+    {
+      printf("Expr(");
+      print_expr(((statement_t*)stmt)->content);
+      printf(");\n");
+    }
+    break;
     case LANG_ENTITY_DECL:
     {
       declaration_t* decl = ((statement_t*)stmt)->content;
@@ -1197,19 +1208,22 @@ void interpret_statements(statement_t *stmt)
   st = stmt;
   ed = NULL;
 
-  interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL);
+  if ( setjmp(jmpbuf) == 0) {
+    /* Start descending and evaluating the AST */
+    interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL);
+  } else {
+    // Close namespaces
+    close_namespaces();
 
-  // Close namespaces
-  close_namespaces();
+    // free heap
+    FREE_HEAP(hp, hb);
 
-  // free heap
-  FREE_HEAP(hp, hb);
+    // Free stack
+    FREE_STACK(sp, sb);
 
-  // Free stack
-  FREE_STACK(sp, sb);
-
-  // Free memory associated with the AST
-  free_ast(stmt);
+    // Free memory associated with the AST
+    free_ast(stmt);
+  }
 }
 
 

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern FILE *yyin;
+
 void usage(char *argv0, int ret)
 {
 	fprintf((ret == 0 ? stdout : stderr),
@@ -44,7 +46,15 @@ int main(int argc, char *argv[]) {
 				usage(argv[0], 0);
 			} else if ( strcmp("--help", argv[i]) == 0){
 				usage(argv[0], 0);
-			}
+			} else {
+        /* Attempt to open the file */
+        FILE *fp = fopen(argv[i], "r");
+        if ( fp == NULL ) {
+          fprintf(stderr, "Error: failed to open file: '%s'\n", argv[i]);
+          exit(1);
+        }
+        yyin = fp;
+      }
 			++i;
 		}
 	} 

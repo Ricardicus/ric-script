@@ -9,23 +9,23 @@ RIC_SOURCES = main.c hashtable.c hooks.c ast.c eval.c
 
 .PHONY: lex yacc test
 
-main: lex yacc
-	$(CC) -o main $(YACCSOURCES) $(FLEXSOURCES) $(RIC_SOURCES) 
+ric: lex yacc
+	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_SOURCES) 
 
-test: main
+test: ric
 	@echo ""
 	@echo "======================"
 	@echo "AST of file 'test.ric'"
 	@echo "======================"
 	@echo ""
-	@cat test.ric |./main -p
+	@./ric -p test.ric
 	@echo ""
 	@echo "=========================================="
 	@echo "Interpreration of file 'testInterpret.ric'"
 	@echo "=========================================="
 	@echo ""
-	cat testInterpret.ric|./main -p
-	cat testInterpret.ric|./main -i
+	@./main -p testInterpret.ric
+	@./main -i testInterpret.ric
 
 lex: $(FLEXSPEC)
 	flex $(FLEXSPEC)

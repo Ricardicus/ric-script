@@ -24,8 +24,8 @@ test: ric
 	@echo "Interpreration of file 'testInterpret.ric'"
 	@echo "=========================================="
 	@echo ""
-	@./main -p testInterpret.ric
-	@./main -i testInterpret.ric
+	@./ric -p testInterpret.ric
+	@./ric -i testInterpret.ric
 
 lex: $(FLEXSPEC)
 	flex $(FLEXSPEC)

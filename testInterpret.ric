@@ -71,3 +71,12 @@ b
   a
 
 }
+
+@ foobar() {
+  
+  b = "hello from foobar"
+  b
+
+}
+
+foobar()

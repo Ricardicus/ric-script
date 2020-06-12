@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
 	statement_t *root = NULL;
 	MainParserFunc parse;
 	int ret = 0;
+  FILE *fp = NULL;
 
 	/* Check inputs */
 	if ( argc > 1 ) {
@@ -48,7 +49,7 @@ int main(int argc, char *argv[]) {
 				usage(argv[0], 0);
 			} else {
         /* Attempt to open the file */
-        FILE *fp = fopen(argv[i], "r");
+        fp = fopen(argv[i], "r");
         if ( fp == NULL ) {
           fprintf(stderr, "Error: failed to open file: '%s'\n", argv[i]);
           exit(1);
@@ -94,6 +95,10 @@ int main(int argc, char *argv[]) {
 	default:
 	break;
 	}
+
+  if ( fp != NULL ) {
+    fclose(fp);
+  }
 
 	return ret;
 }

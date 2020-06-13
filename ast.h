@@ -191,6 +191,7 @@ typedef struct stackval {
 		double d;
 		int32_t i;
 		char *t;
+		uintptr_t p;
 	};
 } stackval_t;
 
@@ -239,6 +240,8 @@ int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp, void **st, 
 #define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; **((stackval_t**)sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
 #define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
 #define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
+#define PUSH_POINTER(a, sp) do { stackval_t stackval; stackval.type = POINTERTYPE;  stackval.p = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
+
 #define POP_VAL(a, sp) do { *((stackval_t**) sp) -= 1; *a = **((stackval_t**) sp); } while (0)
 
 #define ALLOC_HEAP(a, hp, hpv) do { \

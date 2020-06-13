@@ -873,9 +873,17 @@ void interpret_statements_(
     {
       ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
       ifStmt_t *ifstmtWalk;
+      stackval_t sv;
 
-      (*(intptr_t*)st) = (intptr_t) stmt;
-      (*(intptr_t*)ed) = (intptr_t) next;
+      if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
+        PUSH_POINTER((*(uintptr_t*)st), sp);
+      }
+      if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
+        PUSH_POINTER((*(uintptr_t*)ed), sp);
+      }
+
+      (*(uintptr_t*)st) = (uintptr_t) stmt;
+      (*(uintptr_t*)ed) = (uintptr_t) next;
 
       /* Read ax for conditional */
       evaluate_condition(ifstmt->cond, PROVIDE_CONTEXT(), args);
@@ -907,6 +915,11 @@ void interpret_statements_(
         }
 
       }
+
+      POP_VAL(&sv, sp);
+      (*(uintptr_t*)ed) = sv.p;
+      POP_VAL(&sv, sp);
+      (*(uintptr_t*)st) = sv.p;
 
     }
     break;

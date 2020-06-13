@@ -105,4 +105,18 @@ a = 1338
   @
 }
 
+# Nested loops
+q = 0
+[ q < 4 ] {
+	i = 0
+	[ i < 4 ] {
+		"q: " + q + ", i: " + i
+		i = i + 1
+		@
+	}
+	q = q + 1
+	q
+	@
+}
+
 "Nu e de slut"

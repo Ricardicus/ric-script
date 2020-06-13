@@ -18,7 +18,7 @@ else
 	deps = [mathlib]
 endif
 
-network = executable('main',
+network = executable('ric',
   sources: [sources],
   dependencies: deps,
   include_directories: [includes]

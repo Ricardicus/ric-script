@@ -7,6 +7,23 @@ Not sure what target there will be yet.
 
 test.ric contains a program with OK syntax.
 
+# Build
+
+On linux or mac use meson or GNU make
+For windows only meson works:
+
+```
+# on windows
+python -m venv venv
+venv\Source\activate
+pip install meson
+meson builddir
+cd builddir
+ninja
+# Now you have built the program!
+# Ignore the warnings.....
+```
+
 # make test
 
 Will input test.ric into the program and let it output the AST.

@@ -174,28 +174,19 @@ A variable was not 1337, it was: 1338
 Re-evaluating
 Now the variable is: 1337
 yey!
-q: 0, i: 0
-q: 0, i: 1
-q: 0, i: 2
-q: 0, i: 3
-1
-q: 1, i: 0
-q: 1, i: 1
-q: 1, i: 2
-q: 1, i: 3
-2
-q: 2, i: 0
-q: 2, i: 1
-q: 2, i: 2
-q: 2, i: 3
-3
-q: 3, i: 0
-q: 3, i: 1
-q: 3, i: 2
-q: 3, i: 3
-4
+================
+ Nested looping
+================
+a: 0, b: 0, c: 0
+a: 0, b: 0, c: 1
+a: 0, b: 1, c: 0
+a: 0, b: 1, c: 1
+a: 1, b: 0, c: 0
+a: 1, b: 0, c: 1
+a: 1, b: 1, c: 0
+a: 1, b: 1, c: 1
+================
 Nu e de slut
-
 
 ```
 

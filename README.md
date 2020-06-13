@@ -201,6 +201,7 @@ Nu e de slut
 
 I am now working on an interpreter for this baby script language
 The following code is ric-script that is currently supported
+and is found in *testInterpret.ric*. 
 
 ```
 # Numbers

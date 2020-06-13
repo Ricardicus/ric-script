@@ -200,6 +200,142 @@ Nu e de slut
 # Code interpreter
 
 I am now working on an interpreter for this baby script language
+The following code is ric-script that is currently supported
+
+```
+# Numbers
+a = 2;
+1337        
+1.337
+(1335) + 1 + 1
+1337/(1+2)
+
+# Variable declaration
+a = 1337
+
+# printing a declare variable
+a
+
+# Some math, should print 1337
+a / 2 + 1337/ 2 +1337 % 2 
+
+# Declaration
+b = " hejsan!"
+
+# Using the declaration
+"hello" + " hello!" + b
+
+# Adding strings with numbers and digits and IDs
+"hello " + 1337.7 + " " + 14 + " " + a 
+
+# Assigning either 1 or 0 to variables 
+# based on conditionals
+b = "hello" == "hello"
+# Should print 1
+b
+
+b = ( "hello" == "hi" )
+# Should print 0
+b
+
+"10.1 > 10.0: "
+b = 10.1 > 10.0
+b
+
+"10.1 < 10.0:"
+b = 10.1 < 10.0
+b
+
+"10.1 <= 10.1:"
+b = 10.1 <= 10.1
+b
+
+"10.1 >= 10.1:"
+b = 10.1 >= 10.1
+b
+
+5 "10.1 >= 10.0: "
+b = 10.1 >= 10.0
+b
+
+"10.1 <= 10.0:"
+b = 10.1 <= 10.0
+b
+
+[ 1 ] {
+  
+  # should print 1337
+  a = 1337
+  a
+
+}
+
+[ b ] {
+  
+  # should not print 1337
+  a = 1337
+  a
+
+}
+
+@ foobar() {
+  
+  b = "hello from foobar"
+  b
+
+}
+
+foobar()
+
+# A while loop
+
+i = 0
+
+[ i < 5 ] {
+  i = i + 1
+  i
+  @
+}
+
+# A funny feature with this language
+a = 1338
+
+[ a == 1337 ] {
+  "Now the variable is: " + a
+  "yey!"
+} ~ {
+  "A variable was not 1337, it was: " + a
+  a = 1337
+  "Re-evaluating"
+  @
+}
+
+"================"
+" Nested looping"
+"================"
+
+# Nested loops
+a = 0
+[ a < 2 ] {
+	b = 0
+	[ b < 2 ] {
+		c = 0
+		[ c < 2 ] {
+			"a: " + a + ", b: " + b + ", c: " + c
+			c = c + 1
+			@
+		}
+		b = b + 1
+		@
+	}
+	a = a + 1
+	@
+}
+
+"================"
+
+"Nu e de slut"
+```
 
 # Code generation
 

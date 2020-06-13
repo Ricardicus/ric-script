@@ -69,75 +69,82 @@ Interpreration of file 'testInterpret.ric'
 
 PROGRAM:
 
-[0x7fdcf6405940] Declaration: ID('a'), Expr(2)
-[0x7fdcf64059a0] Expr(1337);
-[0x7fdcf6405a00] Expr(1.337000);
-[0x7fdcf6405b60] Expr(ADD(ADD(1335,1),1));
-[0x7fdcf6405cc0] Expr(DIV(1337,ADD(1,2)));
-[0x7fdcf6405d50] Declaration: ID('a'), Expr(1337)
-[0x7fdcf6405dc0] Expr(ID('a'));
-[0x7fdcf64060b0] Expr(ADD(ADD(DIV(ID('a'),2),DIV(1337,2)),MOD(1337,2)));
-[0x7fdcf6406150] Declaration: ID('b'), Expr(' hejsan!')
-[0x7fdcf6406320] Expr(ADD(ADD('hello',' hello!'),ID('b')));
-[0x7fdcf6406710] Expr(ADD(ADD(ADD(ADD(ADD('hello ','1337.7000'),' '),'14'),' '),ID('a')));
-[0x7fdcf6406860] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hello']))
-[0x7fdcf64068d0] Expr(ID('b'));
-[0x7fdcf6406a20] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hi']))
-[0x7fdcf6406a90] Expr(ID('b'));
-[0x7fdcf6406b10] Expr('10.100000 > 10.000000: ');
-[0x7fdcf6406cd0] Declaration: ID('b'), Expr(Conditional([10.100000] > [10.000000]))
-[0x7fdcf6406d40] Expr(ID('b'));
-[0x7fdcf6406d80] Expr('10.100000 < 10.000000:');
-[0x7fdcf6406f60] Declaration: ID('b'), Expr(Conditional([10.100000] < [10.000000]))
-[0x7fdcf6406fd0] Expr(ID('b'));
-[0x7fdcf6407030] Expr('10.100000 <= 10.100000:');
-[0x7fdcf6407200] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.100000]))
-[0x7fdcf6407270] Expr(ID('b'));
-[0x7fdcf64072d0] Expr('10.100000 >= 10.100000:');
-[0x7fdcf64074a0] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.100000]))
-[0x7fdcf6407510] Expr(ID('b'));
-[0x7fdcf6407570] Expr(5);
-[0x7fdcf6407590] Expr('10.100000 >= 10.000000: ');
-[0x7fdcf64077c0] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.000000]))
-[0x7fdcf6407830] Expr(ID('b'));
-[0x7fdcf6407890] Expr('10.100000 <= 10.000000:');
-[0x7fdcf6407a60] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.000000]))
-[0x7fdcf6407ad0] Expr(ID('b'));
-[0x7fdcf6407cd0] if-statement - condition: [1] > [0]
-[0x7fdcf6407ba0]     Declaration: ID('a'), Expr(1337)
-[0x7fdcf6407c10]     Expr(ID('a'));
-[0x7fdcf6407ee0] if-statement - condition: [ID('b')] > [0]
-[0x7fdcf6407db0]     Declaration: ID('a'), Expr(1337)
-[0x7fdcf6407e20]     Expr(ID('a'));
-[0x7fdcf64080b0] Function Declaration: ID('foobar') args()
-[0x7fdcf6407ff0]         Declaration: ID('b'), Expr('hello from foobar')
-[0x7fdcf6408050]         Expr(ID('b'));
-[0x7fdcf6408100] Function Call: ID('foobar') args()
-[0x7fdcf6408190] Declaration: ID('i'), Expr(0)
-[0x7fdcf6408450] if-statement - condition: [ID('i')] < [5]
-[0x7fdcf6408360]     Declaration: ID('i'), Expr(ADD(ID('i'),1))
-[0x7fdcf64083d0]     Expr(ID('i'));
-[0x7fdcf64083f0]     === CONTINUE ===
-[0x7fdcf64084e0] Declaration: ID('a'), Expr(1338)
-[0x7fdcf6408ca0] if-statement - condition: [ID('a')] == [1337]
-[0x7fdcf6408770]     Expr(ADD('Now the variable is: ',ID('a')));
-[0x7fdcf6408790]     Expr('yey!');
+[0x7fdf12e040b0] Declaration: ID('a'), Expr(2)
+[0x7fdf12e04110] Expr(1337);
+[0x7fdf12e04170] Expr(1.337000);
+[0x7fdf12e042d0] Expr(ADD(ADD(1335,1),1));
+[0x7fdf12e04430] Expr(DIV(1337,ADD(1,2)));
+[0x7fdf12e044c0] Declaration: ID('a'), Expr(1337)
+[0x7fdf12e04530] Expr(ID('a'));
+[0x7fdf12e04820] Expr(ADD(ADD(DIV(ID('a'),2),DIV(1337,2)),MOD(1337,2)));
+[0x7fdf12e048c0] Declaration: ID('b'), Expr(' hejsan!')
+[0x7fdf12c05960] Expr(ADD(ADD('hello',' hello!'),ID('b')));
+[0x7fdf12c05d50] Expr(ADD(ADD(ADD(ADD(ADD('hello ','1337.7000'),' '),'14'),' '),ID('a')));
+[0x7fdf12c05ea0] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hello']))
+[0x7fdf12c05f10] Expr(ID('b'));
+[0x7fdf12c06060] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hi']))
+[0x7fdf12c060d0] Expr(ID('b'));
+[0x7fdf12c06150] Expr('10.100000 > 10.000000: ');
+[0x7fdf12c06310] Declaration: ID('b'), Expr(Conditional([10.100000] > [10.000000]))
+[0x7fdf12c06380] Expr(ID('b'));
+[0x7fdf12c063c0] Expr('10.100000 < 10.000000:');
+[0x7fdf12c065a0] Declaration: ID('b'), Expr(Conditional([10.100000] < [10.000000]))
+[0x7fdf12c06610] Expr(ID('b'));
+[0x7fdf12d04100] Expr('10.100000 <= 10.100000:');
+[0x7fdf12d04290] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.100000]))
+[0x7fdf12d04300] Expr(ID('b'));
+[0x7fdf12d04360] Expr('10.100000 >= 10.100000:');
+[0x7fdf12d04530] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.100000]))
+[0x7fdf12d045a0] Expr(ID('b'));
+[0x7fdf12d04600] Expr(5);
+[0x7fdf12d04620] Expr('10.100000 >= 10.000000: ');
+[0x7fdf12c06740] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.000000]))
+[0x7fdf12c067b0] Expr(ID('b'));
+[0x7fdf12c06810] Expr('10.100000 <= 10.000000:');
+[0x7fdf12c069e0] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.000000]))
+[0x7fdf12c06a50] Expr(ID('b'));
+[0x7fdf12c06c50] if-statement - condition: [1] > [0]
+[0x7fdf12c06b20]     Declaration: ID('a'), Expr(1337)
+[0x7fdf12c06b90]     Expr(ID('a'));
+[0x7fdf12c06e60] if-statement - condition: [ID('b')] > [0]
+[0x7fdf12c06d30]     Declaration: ID('a'), Expr(1337)
+[0x7fdf12c06da0]     Expr(ID('a'));
+[0x7fdf12c07030] Function Declaration: ID('foobar') args()
+[0x7fdf12c06f70]         Declaration: ID('b'), Expr('hello from foobar')
+[0x7fdf12c06fd0]         Expr(ID('b'));
+[0x7fdf12c07080] Function Call: ID('foobar') args()
+[0x7fdf12c07110] Declaration: ID('i'), Expr(0)
+[0x7fdf12c073d0] if-statement - condition: [ID('i')] < [5]
+[0x7fdf12c072e0]     Declaration: ID('i'), Expr(ADD(ID('i'),1))
+[0x7fdf12c07350]     Expr(ID('i'));
+[0x7fdf12c07370]     === CONTINUE ===
+[0x7fdf12c07460] Declaration: ID('a'), Expr(1338)
+[0x7fdf12c07c20] if-statement - condition: [ID('a')] == [1337]
+[0x7fdf12c076f0]     Expr(ADD('Now the variable is: ',ID('a')));
+[0x7fdf12c07710]     Expr('yey!');
 else-statment:
-[0x7fdcf64087c0]     Expr(ADD('A variable was not 1337, it was: ',ID('a')));
-[0x7fdcf6408b60]     Declaration: ID('a'), Expr(1337)
-[0x7fdcf6408bd0]     Expr('Re-evaluating');
-[0x7fdcf6408bf0]     === CONTINUE ===
-[0x7fdcf6408d30] Declaration: ID('q'), Expr(0)
-[0x7fdcf6409550] if-statement - condition: [ID('q')] < [4]
-[0x7fdcf6408e70]     Declaration: ID('i'), Expr(0)
-[0x7fdcf6409340]     if-statement - condition: [ID('i')] < [4]
-[0x7fdcf64091a0]         Expr(ADD(ADD(ADD('q: ',ID('q')),', i: '),ID('i')));
-[0x7fdcf64092c0]         Declaration: ID('i'), Expr(ADD(ID('i'),1))
-[0x7fdcf64092e0]         === CONTINUE ===
-[0x7fdcf6409460]     Declaration: ID('q'), Expr(ADD(ID('q'),1))
-[0x7fdcf64094d0]     Expr(ID('q'));
-[0x7fdcf64094f0]     === CONTINUE ===
-[0x7fdcf64095c0] Expr('Nu e de slut');
+[0x7fdf12c07740]     Expr(ADD('A variable was not 1337, it was: ',ID('a')));
+[0x7fdf12c07ae0]     Declaration: ID('a'), Expr(1337)
+[0x7fdf12c07b50]     Expr('Re-evaluating');
+[0x7fdf12c07b70]     === CONTINUE ===
+[0x7fdf12c07c60] Expr('================');
+[0x7fdf12c07de0] Expr(' Nested looping');
+[0x7fdf12c07eb0] Expr('================');
+[0x7fdf12c08060] Declaration: ID('a'), Expr(0)
+[0x7fdf12c08c40] if-statement - condition: [ID('a')] < [2]
+[0x7fdf12c08190]     Declaration: ID('b'), Expr(0)
+[0x7fdf12c08aa0]     if-statement - condition: [ID('b')] < [2]
+[0x7fdf12c082d0]         Declaration: ID('c'), Expr(0)
+[0x7fdf12c08900]         if-statement - condition: [ID('c')] < [2]
+[0x7fdf12c08760]             Expr(ADD(ADD(ADD(ADD(ADD('a: ',ID('a')),', b: '),ID('b')),', c: '),ID('c')));
+[0x7fdf12c08880]             Declaration: ID('c'), Expr(ADD(ID('c'),1))
+[0x7fdf12c088a0]             === CONTINUE ===
+[0x7fdf12c08a20]         Declaration: ID('b'), Expr(ADD(ID('b'),1))
+[0x7fdf12c08a40]         === CONTINUE ===
+[0x7fdf12c08bc0]     Declaration: ID('a'), Expr(ADD(ID('a'),1))
+[0x7fdf12c08be0]     === CONTINUE ===
+[0x7fdf12f04100] Expr('================');
+[0x7fdf12f04200] Expr('Nu e de slut');
 
 
 1337

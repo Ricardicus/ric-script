@@ -184,6 +184,7 @@ statement_t* newStatement(int type, void *content)
     case LANG_ENTITY_CONTINUE:
     case LANG_ENTITY_BREAK:
     case LANG_ENTITY_FIN:
+    case LANG_ENTITY_SYSTEM:
       stmt->content = content;
       break;
     default:

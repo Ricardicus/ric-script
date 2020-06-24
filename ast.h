@@ -36,6 +36,7 @@
 #define LANG_ENTITY_BREAK        11
 #define LANG_ENTITY_CONTINUE     12
 #define LANG_ENTITY_FIN          13
+#define LANG_ENTITY_SYSTEM       14
 
 #define LANG_CONDITIONAL_IF      0
 #define LANG_CONDITIONAL_ELIF    1

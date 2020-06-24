@@ -138,6 +138,8 @@ a = 0
 
 testFunc(14,12, 15)
 
-
+$ "echo 'hello, the variable a has the value: " + a + "'"
 
 "Nu e de slut"
+
+

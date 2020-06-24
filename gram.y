@@ -70,6 +70,7 @@ statement_t *root = NULL;
 %type<data> ifStatement
 %type<data> continueStatement
 %type<data> breakStatement
+%type<data> systemStatement
 %type<data> middleIfs
 %type<data> middleIf
 %type<data> endIf
@@ -130,7 +131,14 @@ statement:
     }
     | breakStatement {
         $$ = newStatement(LANG_ENTITY_BREAK, $1);
+    }
+    | systemStatement {
+        $$ = newStatement(LANG_ENTITY_SYSTEM, $1);
     };
+
+systemStatement: '$' stringContents {
+    $$ = newStatement(LANG_ENTITY_EMPTY_STR, $2);
+}
 
 continueStatement: '@' {
     $$ = NULL;
@@ -463,6 +471,10 @@ otherChar:
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }
+    | '\\' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
     | ':' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
@@ -480,6 +492,14 @@ otherChar:
         $$[1] = 0;
     }
     | ',' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '\'' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '\"' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

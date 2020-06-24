@@ -795,6 +795,7 @@ void interpret_statements_(
     case LANG_ENTITY_FUNCDECL:
     case LANG_ENTITY_FUNCCALL:
     case LANG_ENTITY_CONDITIONAL:
+    case LANG_ENTITY_SYSTEM:
       next = ((statement_t*)stmt)->next;
     break;
     case LANG_ENTITY_EMPTY_MATH:
@@ -860,6 +861,26 @@ void interpret_statements_(
 
       /* Placing variable declaration in global variable namespace */
       hashtable_put(varDecs, decl->id.id, hvp);
+    }
+    break;
+    case LANG_ENTITY_SYSTEM:
+    {
+      statement_t *sys_stmt = ((statement_t*)stmt)->content;
+
+      stackval_t sv;
+      expr_t *e = sys_stmt->content;
+      evaluate_expression(e, PROVIDE_CONTEXT(), args);
+      POP_VAL(&sv, sp);
+      switch ( sv.type ) {
+      case TEXT:
+        /* Making the system call */
+        system(sv.t);
+        break;
+      default:
+        printf("%s.error: unknown type of system call on the stack (%d)\n", 
+          __func__, sv.type);
+        break;
+      }
     }
     break;
     case LANG_ENTITY_FUNCDECL:
@@ -1204,6 +1225,7 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_BREAK:
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
+    case LANG_ENTITY_SYSTEM:
       printf("[%p] ", stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
@@ -1231,6 +1253,16 @@ void print_statements_(void *stmt, int indent)
       printf("Declaration: ID('%s'), Expr(", decl->id.id);
       print_expr(decl->val);
       printf(")\n");
+    }
+    break;
+    case LANG_ENTITY_SYSTEM:
+    {
+      statement_t *sys_stmt = ((statement_t*)stmt)->content;
+
+      printf("System(");
+      print_expr(((statement_t*)sys_stmt)->content);
+      printf(");\n");
+
     }
     break;
     case LANG_ENTITY_CONTINUE:

@@ -18,7 +18,7 @@ FLOAT_VAL        [0-9]+"."[0-9]*
 KEYWORD_PROCESS  process
 HASHTAG          [#]
 ID_TOKEN         [_[:alnum:]]
-RETURN_AS_IS     [\"\'+<>:\-/(){}\*%\[\]~!=,@]
+RETURN_AS_IS     [\"\'+<>:\-/(){}\*%\[\]~!=,@$\\]
 
 %%
 
@@ -39,9 +39,9 @@ RETURN_AS_IS     [\"\'+<>:\-/(){}\*%\[\]~!=,@]
 	yylval.id[0] = yytext[0];
 	yylval.id[1] = 0;
 
-	if ( yytext[0] == '\'' ){
+	if ( yytext[0] == '\'' && !double_citation ){
 		simple_citation = (simple_citation+1) % 2;
-	} else if ( yytext[0] == '\"' ) {
+	} else if ( yytext[0] == '\"' && !simple_citation ) {
 		double_citation = (double_citation+1) % 2;
 	}
 

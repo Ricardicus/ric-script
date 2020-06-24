@@ -9,7 +9,7 @@ extern FILE *yyin;
 void usage(char *argv0, int ret)
 {
   fprintf((ret == 0 ? stdout : stderr),
-    "usage: %s [-p] [-i] [-h|--help]\r\n",
+    "usage: %s [file] [-[p|i]] [-h|--help]\r\n",
     argv0);
   fprintf((ret == 0 ? stdout : stderr),
     "  -p: print AST\r\n");
@@ -34,6 +34,10 @@ int main(int argc, char *argv[]) {
   MainParserFunc parse;
   int ret = 0;
   FILE *fp = NULL;
+
+  if ( argc == 1 ) {
+    usage(argv[0], 0);
+  }
 
   /* Check inputs */
   if ( argc > 1 ) {

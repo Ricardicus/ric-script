@@ -14,18 +14,12 @@ ric: lex yacc
 
 test: ric
 	@echo ""
-	@echo "======================"
-	@echo "AST of file 'test.ric'"
-	@echo "======================"
+	@echo "============================================"
+	@echo "Interpretation of file 'samples/example.ric'"
+	@echo "============================================"
 	@echo ""
-	@./ric -p test.ric
-	@echo ""
-	@echo "=========================================="
-	@echo "Interpreration of file 'testInterpret.ric'"
-	@echo "=========================================="
-	@echo ""
-	@./ric -p testInterpret.ric
-	@./ric -i testInterpret.ric
+	@./ric -p samples/example.ric
+	@./ric -i samples/example.ric
 
 lex: $(FLEXSPEC)
 	flex $(FLEXSPEC)

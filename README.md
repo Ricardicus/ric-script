@@ -356,6 +356,16 @@ build a virtual machine for this type of bytecodes.
 But I will start by implementing an interpreter for the
 "real code" in text format. 
 
+# Comments on the syntax
+
+For starters I only have **global** name scope.
+Now I kind of like it. BASH only has global scope
+as stored in the environment. Maybe it will be OK? 
+
+The while/do while/for/foreach loops have been mixed
+with the if/else if/else concepts by introducing the
+**@** langage construct. I think that I very cool!
+
 Have a good day!
 
 

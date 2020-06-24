@@ -129,4 +129,15 @@ a = 0
 
 "================"
 
+
+@ testFunc(a,b,c) {
+  
+  "arg1: " + a + ", arg2: " + b + ", arg3: " + c
+
+}
+
+testFunc(14,12, 15)
+
+
+
 "Nu e de slut"

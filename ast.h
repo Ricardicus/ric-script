@@ -112,6 +112,7 @@ typedef struct declaration_s {
 
 typedef struct argsList {
 	int entity;
+  unsigned int length;
 	expr_t *arg;
 	struct argsList *next;
 } argsList_t;
@@ -130,7 +131,7 @@ typedef struct body_s {
 typedef struct functionDef {
 	int entity;
 	ID_t id;
-	argsList_t *args;
+	argsList_t *params;
 	statement_t *body;
 } functionDef_t;
 

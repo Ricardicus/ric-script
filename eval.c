@@ -3,7 +3,7 @@
 /* Namespace (all global) */
 hashtable_t *funcDecs = NULL;
 hashtable_t *varDecs = NULL;
-hashtable_t *parameters = NULL;
+hashtable_t *arguments = NULL;
 
 jmp_buf jmpbuf;
 
@@ -283,40 +283,71 @@ void evaluate_expression(
     {
       heapval_t *hv;
 
-      /* Check among the variables if we have it defined there */
-      hv = hashtable_get(varDecs, expr->id.id);
+      /* Check if this ID is among the arguments */
+      argsList_t *walk = args;
 
-      if ( hv != NULL ) {
+      while ( walk != NULL ) {
+        expr_t *exp = walk->arg;
+        if ( exp->type == EXPR_TYPE_ID ) {
+          expr_t *expArg;
 
-        switch ( hv->sv.type ) {
-        case DOUBLETYPE:
-          PUSH_DOUBLE(hv->sv.d, sp);
-          break;
-        case INT32TYPE:
-          PUSH_INT(hv->sv.i, sp);
-          break;
-        case TEXT: {
-          size_t len = strlen(hv->sv.t);
-          stackval_t sv;
-          heapval_t *hvp;
+          /* Check among the variables if we have it defined there */
+          expArg = hashtable_get(arguments, expr->id.id);
 
-          char *newText = ast_emalloc(len+1);
-          snprintf(newText, len+1, "%s", hv->sv.t);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp);
-
-          PUSH_STRING(sv.t, sp);
-          break;
-        }
-        default:
-          break;
+          if ( expArg != NULL ) {
+            /* This was an argument! */
+            if ( expArg->type == EXPR_TYPE_ID ) {
+              // This is not supposed to happen!
+            } else {
+              /* Evaluate this expression */
+              evaluate_expression(expArg, PROVIDE_CONTEXT(), args);
+            }
+            break;
+          }
+        } else {
+          printf("walk->arg not exp type ID (%d)\n", exp->type);
         }
 
-      } else {
-        fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
+        walk = walk->next;
+      }
+
+      if ( walk == NULL ) {
+        /* Check among the variables if we have it defined there */
+        hv = hashtable_get(varDecs, expr->id.id);
+
+        if ( hv != NULL ) {
+
+          switch ( hv->sv.type ) {
+          case DOUBLETYPE:
+            PUSH_DOUBLE(hv->sv.d, sp);
+            break;
+          case INT32TYPE:
+            PUSH_INT(hv->sv.i, sp);
+            break;
+          case TEXT: {
+            size_t len = strlen(hv->sv.t);
+            stackval_t sv;
+            heapval_t *hvp;
+
+            char *newText = ast_emalloc(len+1);
+            snprintf(newText, len+1, "%s", hv->sv.t);
+
+            sv.type = TEXT;
+            sv.t = newText;
+
+            ALLOC_HEAP(&sv, hp, &hvp);
+
+            PUSH_STRING(sv.t, sp);
+            break;
+          }
+          default:
+            break;
+          }
+
+        } else {
+          fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
+          exit(1);
+        }
       }
 
       break;
@@ -836,7 +867,7 @@ void interpret_statements_(
       functionDef_t *funcDef = ((statement_t*)stmt)->content;
 
       /* Placing funciton declaration in global function namespace */
-      hashtable_put(funcDecs, funcDef->id.id, funcDef->body);
+      hashtable_put(funcDecs, funcDef->id.id, funcDef);
     }
     break;
     case LANG_ENTITY_CONTINUE:
@@ -853,20 +884,94 @@ void interpret_statements_(
     break;
     case LANG_ENTITY_FUNCCALL:
     {
-      statement_t *body;
+      functionDef_t *funcDef;
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
+      argsList_t *argsWalk = funcCall->args;
+      argsList_t *params;
 
       /* Looking up the function and calling it if it exists */
-      body = hashtable_get(funcDecs, funcCall->id.id);
+      funcDef = hashtable_get(funcDecs, funcCall->id.id);
 
       /* Check lookup status */
-      if ( body == NULL ) {
+      if ( funcDef == NULL ) {
         fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
         exit(1);
       }
 
+      /* Check that # parameters == # arguments */
+      params = funcDef->params;
+
+      if ( params == NULL && argsWalk != NULL ) {
+        fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+          funcCall->id.id, argsWalk->length );
+        exit(1);
+      }
+
+      if ( params != NULL && argsWalk == NULL ) {
+        fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+          funcCall->id.id, params->length );
+        exit(1);
+      }
+
+      if ( params != NULL && argsWalk != NULL )  {
+        /* Verifying function definition parameters and function call arguments */
+        if ( params->length != argsWalk->length ) {
+          /* print error message */
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+            funcCall->id.id, params->length, argsWalk->length );
+          exit(1);
+        }
+
+        /* flush arguments */
+        flush_arguments();
+
+        /* Populate arguments */
+        while ( argsWalk != NULL && params != NULL ) {
+          stackval_t sv;
+          expr_t *newArg = NULL;
+
+          if ( params->arg->type != EXPR_TYPE_ID ) {
+            /* This is not supposed to happen */
+            printf("Error: parameter in function definition '%s' was invalid\n",
+              funcCall->id.id);
+          }
+
+          /* Evaluate expression */
+          evaluate_expression(argsWalk->arg, PROVIDE_CONTEXT(), args);
+          
+          /* Fetch the evaluated expression to the arguments table */
+          POP_VAL(&sv, sp);
+
+          switch (sv.type) {
+            case INT32TYPE: {
+              newArg = newExpr_Ival(sv.i);
+              break;
+            }
+            case DOUBLETYPE: {
+              newArg = newExpr_Float(sv.d);
+              break;
+            }
+            case TEXT: {
+              newArg = newExpr_Text(sv.t);
+              break;
+            }
+            default:
+              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+              exit(1);
+              break;
+          }
+
+          /* Adding expression to argument table */
+          hashtable_put(arguments, params->arg->id.id, newArg);
+
+          params = params->next;
+          argsWalk = argsWalk->next;
+        }
+
+      }
+
       /* Call the function */
-      interpret_statements_(body, PROVIDE_CONTEXT(), funcCall->args);
+      interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params);
     }
     break;
     case LANG_ENTITY_CONDITIONAL:
@@ -935,8 +1040,9 @@ void setup_namespaces() {
   assert(funcDecs != NULL);
   varDecs = hashtable_new(200, 0.8);
   assert(varDecs != NULL);
-  parameters = hashtable_new(20, 0.8);
-  assert(parameters != NULL);
+  arguments = hashtable_new(20, 0.8);
+  assert(arguments != NULL);
+  arguments->data_also = 1;
 }
 
 void close_namespaces() {
@@ -1059,12 +1165,13 @@ void print_indents(int indent) {
   }
 }
 
-void flush_parameters()
+void flush_arguments()
 {
-  if ( parameters != NULL ) {
-    hashtable_free(parameters);
-    parameters = hashtable_new(20, 0.8);
-    assert(parameters != NULL);
+  if ( arguments != NULL ) {
+    hashtable_free(arguments);
+    arguments = hashtable_new(20, 0.8);
+    assert(arguments != NULL);
+    arguments->data_also = 1;
   }
 }
 
@@ -1140,8 +1247,8 @@ void print_statements_(void *stmt, int indent)
     {
       functionDef_t *funcDef = ((statement_t*)stmt)->content;
       printf("Function Declaration: ID('%s') args(", funcDef->id.id);
-      argsList_t *args = funcDef->args;
-      print_args(args);
+      argsList_t *params = funcDef->params;
+      print_args(params);
       printf(")\n");
       print_statements_(funcDef->body,indent+1);
     }

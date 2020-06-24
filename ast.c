@@ -200,47 +200,51 @@ statement_t* newStatement(int type, void *content)
 
 argsList_t* newArgument(expr_t *expr, void *next)
 {
-	argsList_t* argl = ast_emalloc(sizeof(argsList_t));
+  argsList_t* argl = ast_emalloc(sizeof(argsList_t));
 
-	argl->entity = LANG_ENTITY_ARGS;
+  argl->entity = LANG_ENTITY_ARGS;
+  argl->next = next;
+  argl->arg = expr;
+  argl->length = 0;
 
-	argl->next = next;
-	argl->arg = expr;
+  if ( argl->next != NULL ) {
+    argl->length = argl->next->length + 1;
+  }
 
-	return argl;
+  return argl;
 }
 
-functionDef_t* newFunc(const char *id, void *args, void *body)
+functionDef_t* newFunc(const char *id, void *params, void *body)
 {
-	size_t idLen = strlen(id);
-	functionDef_t* func = ast_emalloc(sizeof(functionDef_t));
+  size_t idLen = strlen(id);
+  functionDef_t* func = ast_emalloc(sizeof(functionDef_t));
 
-	func->entity = LANG_ENTITY_FUNCDECL;
+  func->entity = LANG_ENTITY_FUNCDECL;
 
-	func->args = args;
-	func->body = body;
-	func->body->entity = LANG_ENTITY_BODY;
+  func->params = params;
+  func->body = body;
+  func->body->entity = LANG_ENTITY_BODY;
 
-	func->id.id = ast_emalloc(idLen+1);
+  func->id.id = ast_emalloc(idLen+1);
 
-	memcpy(func->id.id, id, idLen);
+  memcpy(func->id.id, id, idLen);
 
-	return func;
+  return func;
 }
 
 functionCall_t* newFunCall(const char *id, void *args)
 {
-	size_t idLen = strlen(id);
-	functionCall_t* func = ast_emalloc(sizeof(functionCall_t));
+  size_t idLen = strlen(id);
+  functionCall_t* func = ast_emalloc(sizeof(functionCall_t));
 
-	func->entity = LANG_ENTITY_FUNCCALL;
+  func->entity = LANG_ENTITY_FUNCCALL;
 
-	func->args = args;
+  func->args = args;
 
-	func->id.id = ast_emalloc(idLen+1);
-	memcpy(func->id.id, id, idLen);
+  func->id.id = ast_emalloc(idLen+1);
+  memcpy(func->id.id, id, idLen);
 
-	return func;
+  return func;
 }
 
 ifStmt_t*  newIfStatement(int ifType, ifCondition_t *cond, void *body)

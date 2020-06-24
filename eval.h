@@ -30,7 +30,7 @@ void print_indents(int indent);
 
 void setup_namespaces();
 void close_namespaces();
-void flush_parameters();
+void flush_arguments();
 
 #endif
 

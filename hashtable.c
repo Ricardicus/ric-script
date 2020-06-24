@@ -33,7 +33,6 @@ static void free_hashtable_table(hashtable_t * hash)
 			ptr1 = ptr1->next;
 			if ( hash->data_also ){
 				free(ptr2->data);
-				free(ptr2->key);
 			}
 			free(ptr2);
 		}

@@ -73,6 +73,18 @@ b
 
 }
 
+# Some if-else if- else logic
+p = 1337
+[ p < 1337 ] {
+  "Something went wrong.. Not supposed to be in this 'if' section."
+} ~[p == 1338] {
+ "There is something wrong.. I am in an 'else-if' section.." 
+} ~[p == 1337] {
+  "Yey, I am in an else-if!"
+} ~ {
+  "Nope, something isn't right. I am in an 'else' section.."
+}
+
 @ foobar() {
   
   b = "hello from foobar"
@@ -138,6 +150,7 @@ a = 0
 
 testFunc(14,12, 15)
 
+# System call
 $ "echo 'hello, the variable a has the value: " + a + "'"
 
 "Nu e de slut"

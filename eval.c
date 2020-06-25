@@ -1036,12 +1036,11 @@ void interpret_statements_(
       void *new_st = st;
       void *new_ed = ed;
 
-      if ( ed != next ) {
-        new_ed = next;
+      if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
+        new_st = stmt;
       }
-
-      if ( st != stmt ) {
-        new_st = st;
+      if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
+        new_ed = next;
       }
       
       /* Read ax for conditional */

@@ -149,13 +149,7 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 
 void * hashtable_get(hashtable_t * hashtable, const char * key)
 {
-	int index;
-
-  if ( hashtable == NULL ) {
-    return NULL;
-  }
-
-  index = hashtable_hash(hashtable,key);
+	int index = hashtable_hash(hashtable,key);
 	if(hashtable->table[index] == NULL)
 	{
 		return NULL;

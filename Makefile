@@ -10,7 +10,7 @@ RIC_SOURCES = main.c hashtable.c hooks.c ast.c eval.c
 .PHONY: lex yacc test
 
 ric: lex yacc
-	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_SOURCES) 
+	$(CC) -g -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_SOURCES) 
 
 test: ric
 	@echo ""

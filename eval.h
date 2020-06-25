@@ -8,11 +8,13 @@
 
 int evaluate_condition(ifCondition_t *cond,
   PROVIDE_CONTEXT_ARGS(),
-  argsList_t* args);
+  argsList_t* args,
+  hashtable_t *argVals);
 void evaluate_expression(
   expr_t *expr,
   PROVIDE_CONTEXT_ARGS(),
-  argsList_t* args);
+  argsList_t* args,
+  hashtable_t *argVals);
 
 void print_statements(statement_t *stmt);
 void print_statements_(void *stmt, int indent);
@@ -20,7 +22,10 @@ void print_statements_(void *stmt, int indent);
 void interpret_statements_(
   void *stmt,
   PROVIDE_CONTEXT_ARGS(),
-  argsList_t *args);
+  argsList_t *args,
+  hashtable_t *argVals,
+  void **st,
+  void **ed);
 
 void interpret_statements(statement_t *stmt);
 
@@ -30,7 +35,9 @@ void print_indents(int indent);
 
 void setup_namespaces();
 void close_namespaces();
-void flush_arguments();
+void flush_arguments(hashtable_t *argVals);
+
+hashtable_t *new_argstable();
 
 #endif
 

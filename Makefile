@@ -17,9 +17,7 @@ test: ric
 	@echo "============================================"
 	@echo "Interpretation of file 'samples/example.ric'"
 	@echo "============================================"
-	@echo ""
-	@./ric -p samples/example.ric
-	@./ric -i samples/example.ric
+	@./ric -pi samples/example.ric
 
 lex: $(FLEXSPEC)
 	flex $(FLEXSPEC)

@@ -1383,9 +1383,7 @@ void print_statements_(void *stmt, int indent)
 
 void print_statements(statement_t *stmt)
 {
-  printf("\n\nPROGRAM:\n\n");
   print_statements_(stmt, 0);
-  printf("\n\n");
 }
 
 void interpret_statements(statement_t *stmt)

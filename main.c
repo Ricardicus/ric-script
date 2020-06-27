@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
   case runAsASTPrinter:
     if ( root != NULL ) {
       /* Printt the program */
+      printf("AST:\n\n");
       print_statements(root);
     } else {
       fprintf(stderr, "Failed to parse program!\r\n");
@@ -104,8 +105,10 @@ int main(int argc, char *argv[]) {
   case runAsASTPrinterAndInterpreter:
     if ( root != NULL ) {
       /* Print the program */
+      printf("AST:\n\n");
       print_statements(root);
       /* Interpret the program */
+      printf("\n\nOUTPUT:\n\n");
       interpret_statements(root);
     } else {
       fprintf(stderr, "Failed to parse program!\r\n");

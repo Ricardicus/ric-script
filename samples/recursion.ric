@@ -9,7 +9,6 @@
   }
 }
 
-recursive(10)
+recursive(100)
 
-"Hello! 1"
-"hello! 2"
+"Yey! The interpreter is doing recursion all fine!"

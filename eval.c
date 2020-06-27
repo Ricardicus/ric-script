@@ -1273,7 +1273,7 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
     case LANG_ENTITY_SYSTEM:
-      printf("[%lu] ", (uintptr_t)stmt);
+      printf("[0x%lx] ", (uintptr_t)stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
     break;

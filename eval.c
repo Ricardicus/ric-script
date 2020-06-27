@@ -941,6 +941,7 @@ void interpret_statements_(
       argsList_t *argsWalk = funcCall->args;
       argsList_t *params;
       hashtable_t *newArgumentTable = new_argstable();
+      stackval_t sv;
 
       /* Looking up the function and calling it if it exists */
       funcDef = hashtable_get(funcDecs, funcCall->id.id);
@@ -1020,9 +1021,20 @@ void interpret_statements_(
 
       }
 
+      PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+      PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
+
+      (*(uintptr_t*)st) = (uintptr_t) stmt;
+      (*(uintptr_t*)ed) = (uintptr_t) next;
+
       /* Call the function */
       interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
-      
+
+      POP_VAL(&sv, sp, sc);
+      (*(uintptr_t*)ed) = sv.p;
+      POP_VAL(&sv, sp, sc);
+      (*(uintptr_t*)st) = sv.p;
+
       /* Free the argument value table */
       flush_arguments(newArgumentTable);
     }

@@ -15,6 +15,10 @@ ric: lex yacc
 test: ric
 	@echo ""
 	@echo "============================================"
+	@echo "Content of file 'samples/example.ric'"
+	@echo "============================================"
+	@cat samples/example.ric
+	@echo "============================================"
 	@echo "Interpretation of file 'samples/example.ric'"
 	@echo "============================================"
 	@./ric -pi samples/example.ric

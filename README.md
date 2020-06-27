@@ -16,7 +16,7 @@ For windows only meson works:
 # on windows
 python -m venv venv
 venv\Source\activate
-pip install meson
+pip install -r requirements.txt
 meson builddir
 cd builddir
 ninja

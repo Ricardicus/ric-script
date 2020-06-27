@@ -1022,9 +1022,8 @@ void interpret_statements_(
       }
 
       PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-      PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-
       (*(uintptr_t*)st) = (uintptr_t) stmt;
+      PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
       (*(uintptr_t*)ed) = (uintptr_t) next;
 
       /* Call the function */
@@ -1034,6 +1033,9 @@ void interpret_statements_(
       (*(uintptr_t*)ed) = sv.p;
       POP_VAL(&sv, sp, sc);
       (*(uintptr_t*)st) = sv.p;
+
+      /* Push some value on the stack: When implementing return, this should be fixed */
+      PUSH_POINTER((*(uintptr_t*)st), sp, sc);
 
       /* Free the argument value table */
       flush_arguments(newArgumentTable);
@@ -1047,13 +1049,12 @@ void interpret_statements_(
 
       if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
         PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+        (*(uintptr_t*)st) = (uintptr_t) stmt;
       }
       if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
         PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
+        (*(uintptr_t*)ed) = (uintptr_t) next;
       }
-
-      (*(uintptr_t*)st) = (uintptr_t) stmt;
-      (*(uintptr_t*)ed) = (uintptr_t) next;
 
       /* Read ax for conditional */
       evaluate_condition(ifstmt->cond, PROVIDE_CONTEXT(), args, argVals);
@@ -1272,7 +1273,7 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
     case LANG_ENTITY_SYSTEM:
-      printf("[%p] ", stmt);
+      printf("[%lu] ", (uintptr_t)stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
     break;
@@ -1308,7 +1309,6 @@ void print_statements_(void *stmt, int indent)
       printf("System(");
       print_expr(((statement_t*)sys_stmt)->content);
       printf(");\n");
-
     }
     break;
     case LANG_ENTITY_CONTINUE:

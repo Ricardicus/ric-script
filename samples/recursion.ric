@@ -3,9 +3,9 @@
   [ a == 0 ] {
     "I am done with the recursion now!"
   } ~ {
-    "a: " + a
+    "-- a: " + a
     recursive( a - 1 )
-    "Coming back (" + a + ")"  
+    "++ a: " + a
   }
 }
 

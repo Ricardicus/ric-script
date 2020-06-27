@@ -16,6 +16,8 @@ void usage(char *argv0, int ret)
   fprintf((ret == 0 ? stdout : stderr),
     "  -i: launch intepreter\r\n");
   fprintf((ret == 0 ? stdout : stderr),
+    "  -pi: print AST then launch intepreter\r\n");
+  fprintf((ret == 0 ? stdout : stderr),
     "  -h|--help: print this help\r\n");
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
   fprintf((ret == 0 ? stdout : stderr), 
@@ -25,7 +27,8 @@ void usage(char *argv0, int ret)
 
 typedef enum mission {
   runAsIntepreter,
-  runAsASTPrinter
+  runAsASTPrinter,
+  runAsASTPrinterAndInterpreter
 } mission_t;
 
 int main(int argc, char *argv[]) {
@@ -47,6 +50,8 @@ int main(int argc, char *argv[]) {
         mission = runAsASTPrinter;
       } else if ( strcmp("-i", argv[i]) == 0){
         mission = runAsIntepreter;
+      } else if ( strcmp("-pi", argv[i]) == 0){
+        mission = runAsASTPrinterAndInterpreter;
       } else if ( strcmp("-h", argv[i]) == 0){
         usage(argv[0], 0);
       } else if ( strcmp("--help", argv[i]) == 0){
@@ -91,6 +96,17 @@ int main(int argc, char *argv[]) {
     if ( root != NULL ) {
       /* Printt the program */
       print_statements(root);
+    } else {
+      fprintf(stderr, "Failed to parse program!\r\n");
+      ret = 1;
+    }
+    break;
+  case runAsASTPrinterAndInterpreter:
+    if ( root != NULL ) {
+      /* Print the program */
+      print_statements(root);
+      /* Interpret the program */
+      interpret_statements(root);
     } else {
       fprintf(stderr, "Failed to parse program!\r\n");
       ret = 1;

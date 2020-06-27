@@ -1,0 +1,21 @@
+# A script showing how the GCD of two numbers can be determined
+
+gcd = 0
+
+@ calcGCD(a, b) {
+    "a " + a 
+    "b " + b
+    [ b == 0 ] { 
+      gcd = a
+    } ~ { 
+      calcGCD(b , (a % b) )
+    }
+}
+
+# Numbers to calculate GCD of
+x = 60
+y = 48
+
+calcGCD(x, y)
+
+"GCD of " + x + " and " + y + ", is: " + gcd

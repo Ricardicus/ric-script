@@ -1,0 +1,15 @@
+# A function that will be recursive
+@ recursive(a) {
+  [ a == 0 ] {
+    "I am done with the recursion now!"
+  } ~ {
+    "a: " + a
+    recursive( a - 1 )
+    "Coming back (" + a + ")"  
+  }
+}
+
+recursive(10)
+
+"Hello! 1"
+"hello! 2"

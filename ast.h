@@ -49,6 +49,8 @@
 #define CONDITION_GE             4
 #define CONDITION_LE             5
 
+#define GENERAL_ERROR_ISSUE_URL  "https://github.com/Ricardicus/ric-script"
+
 typedef struct ID_s {
 	char *id;
 } ID_t;
@@ -203,14 +205,17 @@ typedef struct heapval {
 	bool toFree;
 } heapval_t;
 
-#define DEFAULT_STACKSIZE 256 * sizeof(int32_t)
-#define DEFAULT_HEAPSIZE  4096 * sizeof(int32_t)
+// Number of elements on the stack of this interpreter (arbitrary number?)
+#define RIC_STACKSIZE 1024
+// Number of elements on the heap of this interpreter (arbitrary number?)
+#define RIC_HEAPSIZE  4096
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb, *hp, *hb; double f0, f1, f2; void *st, *ed;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, hp, &st, &ed
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, hp, st, ed
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb, *hp, *hb; double f0, f1, f2; void *st, *ed; size_t sc = 0;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, hp, &st, &ed, &sc
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, hp, st, ed, sc
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
-int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp, void **st, void **ed
+int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp, void **st, void **ed,\
+size_t *sc
 #define SETUP_STACK(sp, sb, sz) do {\
 	intptr_t p;\
 	*sb = calloc(sz+1, sizeof(stackval_t));\
@@ -239,12 +244,79 @@ int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp, void **st, 
 	**(heapval_t**) hp = hpbv;\
 } while ( 0 )
 
-#define PUSH_DOUBLE(a, sp) do { stackval_t stackval; stackval.type = DOUBLETYPE; stackval.d = a; **((stackval_t**)sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
-#define PUSH_INT(a, sp) do { stackval_t stackval; stackval.type = INT32TYPE;  stackval.i = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1; } while(0)
-#define PUSH_STRING(a, sp) do { stackval_t stackval; stackval.type = TEXT;  stackval.t = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
-#define PUSH_POINTER(a, sp) do { stackval_t stackval; stackval.type = POINTERTYPE;  stackval.p = a; **((stackval_t**) sp) = stackval; *((stackval_t**) sp) += 1;} while(0)
+#define PUSH_DOUBLE(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+	fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix it!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+	exit(1);\
+}\
+stackval.type = DOUBLETYPE;\
+stackval.d = a;\
+**((stackval_t**)sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
+#define PUSH_INT(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+	fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+	exit(1);\
+}\
+stackval.type = INT32TYPE;\
+stackval.i = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
+#define PUSH_STRING(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+	fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+	exit(1);\
+}\
+stackval.type = TEXT;\
+stackval.t = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
+#define PUSH_POINTER(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+	fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+	exit(1);\
+}\
+stackval.type = POINTERTYPE;\
+stackval.p = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
 
-#define POP_VAL(a, sp) do { *((stackval_t**) sp) -= 1; *a = **((stackval_t**) sp); } while (0)
+#define POP_VAL(a, sp, sc) do {\
+if ( *sc == 0 ) {\
+	fprintf(stderr, "Error: Intepreter stack corruption\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+	exit(1);\
+}\
+*((stackval_t**) sp) -= 1;\
+*a = **((stackval_t**) sp);\
+*sc = *sc - 1;\
+} while (0)
 
 #define ALLOC_HEAP(a, hp, hpv) do { \
 int32_t size = (*(heapval_t*)hp).sv.i;\

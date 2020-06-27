@@ -19,10 +19,10 @@ int evaluate_condition(ifCondition_t *cond,
   double epsilon = 0.00001;
 
   evaluate_expression(cond->left, PROVIDE_CONTEXT(), args, argVals);
-  POP_VAL(&svLeft, sp);
+  POP_VAL(&svLeft, sp, sc);
 
   evaluate_expression(cond->right, PROVIDE_CONTEXT(), args, argVals);
-  POP_VAL(&svRight, sp);
+  POP_VAL(&svRight, sp, sc);
 
   switch (cond->type) 
   {
@@ -300,10 +300,10 @@ void evaluate_expression(
             /* This was an argument! */
             switch ( expArg->type ) {
             case EXPR_TYPE_IVAL:
-              PUSH_INT(expArg->ival, sp);
+              PUSH_INT(expArg->ival, sp, sc);
               break;
             case EXPR_TYPE_FVAL:
-              PUSH_DOUBLE(expArg->fval, sp);
+              PUSH_DOUBLE(expArg->fval, sp, sc);
               break;
             case EXPR_TYPE_TEXT:
             {
@@ -318,7 +318,7 @@ void evaluate_expression(
 
               ALLOC_HEAP(&sv, hp, &hvp);
 
-              PUSH_STRING(sv.t, sp);
+              PUSH_STRING(sv.t, sp, sc);
               break;
             }
             default:
@@ -349,10 +349,10 @@ void evaluate_expression(
 
           switch ( hv->sv.type ) {
           case DOUBLETYPE:
-            PUSH_DOUBLE(hv->sv.d, sp);
+            PUSH_DOUBLE(hv->sv.d, sp, sc);
             break;
           case INT32TYPE:
-            PUSH_INT(hv->sv.i, sp);
+            PUSH_INT(hv->sv.i, sp, sc);
             break;
           case TEXT: {
             size_t len = strlen(hv->sv.t);
@@ -367,7 +367,7 @@ void evaluate_expression(
 
             ALLOC_HEAP(&sv, hp, &hvp);
 
-            PUSH_STRING(sv.t, sp);
+            PUSH_STRING(sv.t, sp, sc);
             break;
           }
           default:
@@ -383,13 +383,13 @@ void evaluate_expression(
       break;
     }
     case EXPR_TYPE_FVAL:
-    PUSH_DOUBLE(expr->fval, sp);
+    PUSH_DOUBLE(expr->fval, sp, sc);
     break;
     case EXPR_TYPE_IVAL:
-    PUSH_INT(expr->ival, sp);
+    PUSH_INT(expr->ival, sp, sc);
     break;
     case EXPR_TYPE_UVAL:
-    PUSH_INT(expr->uval, sp);
+    PUSH_INT(expr->uval, sp, sc);
     break;
     case EXPR_TYPE_TEXT: {
       size_t len = strlen(expr->text);
@@ -406,7 +406,7 @@ void evaluate_expression(
 
       hv = *hvp;
 
-      PUSH_STRING(hv.sv.t, sp);
+      PUSH_STRING(hv.sv.t, sp, sc);
       break;
     }
     break;
@@ -416,10 +416,10 @@ void evaluate_expression(
       stackval_t svRight;
 
       evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svLeft, sp);
+      POP_VAL(&svLeft, sp, sc);
 
       evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svRight, sp);
+      POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
         case INT32TYPE: {
@@ -458,13 +458,13 @@ void evaluate_expression(
       }
 
       if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
-        PUSH_INT(*r0+*r1,sp);
+        PUSH_INT(*r0+*r1, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*r0 + *f1,sp);
+        PUSH_DOUBLE(*r0 + *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*f0 + *f1,sp);
+        PUSH_DOUBLE(*f0 + *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
-        PUSH_DOUBLE(*f0 + *r1,sp);
+        PUSH_DOUBLE(*f0 + *r1, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
         size_t len = strlen(svLeft.t) + strlen(svRight.t);
         stackval_t sv;
@@ -479,7 +479,7 @@ void evaluate_expression(
         ALLOC_HEAP(&sv, hp, &hvp);
 
         hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp);
+        PUSH_STRING(hv.sv.t, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == TEXT ) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
@@ -494,7 +494,7 @@ void evaluate_expression(
         ALLOC_HEAP(&sv, hp, &hvp);
 
         hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp);
+        PUSH_STRING(hv.sv.t, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == DOUBLETYPE ) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
@@ -509,7 +509,7 @@ void evaluate_expression(
         ALLOC_HEAP(&sv, hp, &hvp);
 
         hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp);
+        PUSH_STRING(hv.sv.t, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == INT32TYPE ) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
@@ -524,7 +524,7 @@ void evaluate_expression(
         ALLOC_HEAP(&sv, hp, &hvp);
 
         hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp);
+        PUSH_STRING(hv.sv.t, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == TEXT ) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
@@ -539,7 +539,7 @@ void evaluate_expression(
         ALLOC_HEAP(&sv, hp, &hvp);
 
         hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp);
+        PUSH_STRING(hv.sv.t, sp, sc);
       }
 
       break;
@@ -551,10 +551,10 @@ void evaluate_expression(
       stackval_t svRight;
 
       evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svLeft, sp);
+      POP_VAL(&svLeft, sp, sc);
 
       evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svRight, sp);
+      POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
         case INT32TYPE: {
@@ -597,13 +597,13 @@ void evaluate_expression(
       }
 
       if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
-        PUSH_INT(*r0-*r1,sp);
+        PUSH_INT(*r0-*r1, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*r0 - *f1,sp);
+        PUSH_DOUBLE(*r0 - *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*f0 - *f1,sp);
+        PUSH_DOUBLE(*f0 - *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
-        PUSH_DOUBLE(*f0 - *r1,sp);
+        PUSH_DOUBLE(*f0 - *r1, sp, sc);
       }
 
       break;
@@ -614,10 +614,10 @@ void evaluate_expression(
       stackval_t svRight;
 
       evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svLeft, sp);
+      POP_VAL(&svLeft, sp, sc);
 
       evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svRight, sp);
+      POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
         case INT32TYPE: {
@@ -660,13 +660,13 @@ void evaluate_expression(
       }
 
       if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
-        PUSH_INT(*r0 * *r1,sp);
+        PUSH_INT(*r0 * *r1, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*r0 * *f1,sp);
+        PUSH_DOUBLE(*r0 * *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*f0 * *f1,sp);
+        PUSH_DOUBLE(*f0 * *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
-        PUSH_DOUBLE(*f0 * *r1,sp);
+        PUSH_DOUBLE(*f0 * *r1, sp, sc);
       }
 
       break;
@@ -677,10 +677,10 @@ void evaluate_expression(
       stackval_t svRight;
 
       evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svLeft, sp);
+      POP_VAL(&svLeft, sp, sc);
 
       evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svRight, sp);
+      POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
         case INT32TYPE: {
@@ -725,7 +725,7 @@ void evaluate_expression(
       }
 
       if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
-        PUSH_INT(*r0 % *r1,sp);
+        PUSH_INT(*r0 % *r1, sp, sc);
       }
 
       break;
@@ -737,10 +737,10 @@ void evaluate_expression(
       stackval_t svRight;
 
       evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svLeft, sp);
+      POP_VAL(&svLeft, sp, sc);
 
       evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&svRight, sp);
+      POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
         case INT32TYPE: {
@@ -783,13 +783,13 @@ void evaluate_expression(
       }
 
       if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
-        PUSH_INT(*r0 / *r1,sp);
+        PUSH_INT(*r0 / *r1, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*r0 / *f1,sp);
+        PUSH_DOUBLE(*r0 / *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE ) {
-        PUSH_DOUBLE(*f0 / *f1,sp);
+        PUSH_DOUBLE(*f0 / *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
-        PUSH_DOUBLE(*f0 / *r1,sp);
+        PUSH_DOUBLE(*f0 / *r1, sp, sc);
       }
 
       break;
@@ -799,7 +799,7 @@ void evaluate_expression(
     {
       evaluate_condition(expr->cond, PROVIDE_CONTEXT(), args, argVals);
       /* Push ax to stack */
-      PUSH_INT(*ax,sp);
+      PUSH_INT(*ax, sp, sc);
       break;
     }
     case EXPR_TYPE_EMPTY:
@@ -835,7 +835,7 @@ void interpret_statements_(
       stackval_t sv;
       expr_t *e = ((statement_t*)stmt)->content;
       evaluate_expression(e, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&sv, sp);
+      POP_VAL(&sv, sp, sc);
       switch ( sv.type) {
       case INT32TYPE:
       printf("%" PRIi32 "\n", sv.i);
@@ -877,7 +877,7 @@ void interpret_statements_(
 
       /* Evaluating the expression among global variables */
       evaluate_expression(decl->val, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&sv, sp);
+      POP_VAL(&sv, sp, sc);
 
       /* Placing value on the heap */
       if ( sv.type == TEXT ) {
@@ -901,7 +901,7 @@ void interpret_statements_(
       stackval_t sv;
       expr_t *e = sys_stmt->content;
       evaluate_expression(e, PROVIDE_CONTEXT(), args, argVals);
-      POP_VAL(&sv, sp);
+      POP_VAL(&sv, sp, sc);
       switch ( sv.type ) {
       case TEXT:
         /* Making the system call */
@@ -990,7 +990,7 @@ void interpret_statements_(
           evaluate_expression(argsWalk->arg, PROVIDE_CONTEXT(), args, argVals);
           
           /* Fetch the evaluated expression to the arguments table */
-          POP_VAL(&sv, sp);
+          POP_VAL(&sv, sp, sc);
 
           switch (sv.type) {
             case INT32TYPE: {
@@ -1034,10 +1034,10 @@ void interpret_statements_(
       stackval_t sv;
 
       if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
-        PUSH_POINTER((*(uintptr_t*)st), sp);
+        PUSH_POINTER((*(uintptr_t*)st), sp, sc);
       }
       if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
-        PUSH_POINTER((*(uintptr_t*)ed), sp);
+        PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
       }
 
       (*(uintptr_t*)st) = (uintptr_t) stmt;
@@ -1074,9 +1074,9 @@ void interpret_statements_(
 
       }
 
-      POP_VAL(&sv, sp);
+      POP_VAL(&sv, sp, sc);
       (*(uintptr_t*)ed) = sv.p;
-      POP_VAL(&sv, sp);
+      POP_VAL(&sv, sp, sc);
       (*(uintptr_t*)st) = sv.p;
 
     }
@@ -1382,10 +1382,10 @@ void interpret_statements(statement_t *stmt)
   DEF_NEW_CONTEXT();
 
   // Setup stack
-  SETUP_STACK(&sp, &sb, DEFAULT_STACKSIZE);
+  SETUP_STACK(&sp, &sb, RIC_STACKSIZE);
 
   // Setup heap
-  SETUP_HEAP(&hp, &hb, DEFAULT_HEAPSIZE);
+  SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
 
   // Setup namespaces
   setup_namespaces();

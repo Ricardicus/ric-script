@@ -186,9 +186,9 @@ hello, the variable a has the value: 2
 Nu e de slut
 ```
 
-# Code generation
+# Intermediate code generation
 
-I am thinking of inventing a bytecode language for this, 
+I am thinking of inventing an intermediate bytecode language for this, 
 for which I will compile my programs. After that I will
 build a virtual machine for this type of bytecodes.
 But I will start by implementing an interpreter for the

@@ -410,7 +410,6 @@ void evaluate_expression(
       size_t len = strlen(expr->text);
       stackval_t sv;
       heapval_t *hvp;
-      heapval_t hv;
       int heapUpdated;
       char *newText = ast_emalloc(len+1);
       snprintf(newText, len+1, "%s", expr->text);
@@ -488,7 +487,6 @@ void evaluate_expression(
         size_t len = strlen(svLeft.t) + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        heapval_t hv;
         int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s%s", svLeft.t, svRight.t);
@@ -508,7 +506,6 @@ void evaluate_expression(
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        heapval_t hv;
         int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%.4f%s", svLeft.d, svRight.t);
@@ -528,7 +525,6 @@ void evaluate_expression(
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        heapval_t hv;
         int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s%.4f", svLeft.t, svRight.d);
@@ -548,7 +544,6 @@ void evaluate_expression(
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        heapval_t hv;
         int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s%d", svLeft.t, svRight.i);
@@ -568,7 +563,6 @@ void evaluate_expression(
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        heapval_t hv;
         int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%d%s", svLeft.i, svRight.t);
@@ -939,7 +933,6 @@ void interpret_statements_(
     {
       stackval_t sv;
       heapval_t *hvp = ast_emalloc(sizeof(heapval_t));
-      int heapUpdated;
       declaration_t* decl = ((statement_t*)stmt)->content;
 
       /* Evaluating the expression among global variables */

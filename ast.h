@@ -318,10 +318,13 @@ GENERAL_ERROR_ISSUE_URL);\
 *sc = *sc - 1;\
 } while (0)
 
-#define ALLOC_HEAP(a, hp, hpv) do { \
+#define ALLOC_HEAP(a, hp, hpv, upd) do { \
 int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\
 heapval_t hv;\
+if ( upd != NULL ) {\
+  *(int*)upd = 1;\
+}\
 hv.sv = *a;\
 if (hv.sv.type == TEXT) {\
 	hv.toFree = true;\
@@ -334,7 +337,13 @@ while( i < size ) {\
 		((heapval_t*) hp)[i] = hv;\
 		*hpv = &((heapval_t*) hp)[i];\
 		break;\
-	}\
+	} else if ( upd != NULL && ((heapval_t*) hp)[i].sv.type == TEXT ) {\
+    if ( strcmp(hv.sv.t, ((heapval_t*) hp)[i].sv.t) == 0 ) {\
+      *hpv = &((heapval_t*) hp)[i];\
+      *(int*)upd = 0;\
+      break;\
+    }\
+  }\
 	++i;\
 }\
 if ( i == size ) {\

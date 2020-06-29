@@ -310,13 +310,19 @@ void evaluate_expression(
               size_t len = strlen(expArg->text);
               stackval_t sv;
               heapval_t *hvp;
+              int heapUpdated;
               char *newText = ast_emalloc(len+1);
               snprintf(newText, len+1, "%s", expArg->text);
 
               sv.type = TEXT;
               sv.t = newText;
 
-              ALLOC_HEAP(&sv, hp, &hvp);
+              ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+              if ( !heapUpdated ) {
+                free(newText);
+                sv = hvp->sv;
+              }
 
               PUSH_STRING(sv.t, sp, sc);
               break;
@@ -358,6 +364,7 @@ void evaluate_expression(
             size_t len = strlen(hv->sv.t);
             stackval_t sv;
             heapval_t *hvp;
+            int heapUpdated;
 
             char *newText = ast_emalloc(len+1);
             snprintf(newText, len+1, "%s", hv->sv.t);
@@ -365,7 +372,12 @@ void evaluate_expression(
             sv.type = TEXT;
             sv.t = newText;
 
-            ALLOC_HEAP(&sv, hp, &hvp);
+            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+            if ( !heapUpdated ) {
+              free(newText);
+              sv = hvp->sv;
+            }
 
             PUSH_STRING(sv.t, sp, sc);
             break;
@@ -396,17 +408,21 @@ void evaluate_expression(
       stackval_t sv;
       heapval_t *hvp;
       heapval_t hv;
+      int heapUpdated;
       char *newText = ast_emalloc(len+1);
       snprintf(newText, len+1, "%s", expr->text);
 
       sv.type = TEXT;
       sv.t = newText;
+  
+      ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-      ALLOC_HEAP(&sv, hp, &hvp);
+      if ( !heapUpdated ) {
+        free(newText);
+        sv = hvp->sv;
+      }
 
-      hv = *hvp;
-
-      PUSH_STRING(hv.sv.t, sp, sc);
+      PUSH_STRING(sv.t, sp, sc);
       break;
     }
     break;
@@ -470,76 +486,101 @@ void evaluate_expression(
         stackval_t sv;
         heapval_t *hvp;
         heapval_t hv;
+        int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s%s", svLeft.t, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp);
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp, sc);
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == TEXT ) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
         heapval_t hv;
+        int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%.4f%s", svLeft.d, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        ALLOC_HEAP(&sv, hp, &hvp);
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
 
-        hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp, sc);
+        PUSH_STRING(sv.t, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == DOUBLETYPE ) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
         heapval_t hv;
+        int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s%.4f", svLeft.t, svRight.d);
 
         sv.type = TEXT;
         sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        ALLOC_HEAP(&sv, hp, &hvp);
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
 
-        hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp, sc);
+        PUSH_STRING(sv.t, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == INT32TYPE ) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
         heapval_t hv;
+        int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s%d", svLeft.t, svRight.i);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp);
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp, sc);
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == TEXT ) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
         heapval_t hv;
+        int heapUpdated;
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%d%s", svLeft.i, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        ALLOC_HEAP(&sv, hp, &hvp);
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
 
-        hv = *hvp;
-        PUSH_STRING(hv.sv.t, sp, sc);
+        PUSH_STRING(sv.t, sp, sc);
       }
 
       break;
@@ -852,6 +893,8 @@ void interpret_statements_(
       break;
       }
 
+
+
       next = ((statement_t*)stmt)->next;
       break;
     }
@@ -872,7 +915,8 @@ void interpret_statements_(
     case LANG_ENTITY_DECL:
     {
       stackval_t sv;
-      heapval_t *hvp;
+      heapval_t *hvp = ast_emalloc(sizeof(heapval_t));
+      int heapUpdated;
       declaration_t* decl = ((statement_t*)stmt)->content;
 
       /* Evaluating the expression among global variables */
@@ -888,7 +932,8 @@ void interpret_statements_(
         snprintf(newText,len,"%s",c);
         sv.t = newText;
       }
-      ALLOC_HEAP(&sv, hp, &hvp); 
+
+      hvp->sv = sv;
 
       /* Placing variable declaration in global variable namespace */
       hashtable_put(varDecs, decl->id.id, hvp);

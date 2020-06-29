@@ -1,0 +1,17 @@
+# A forever true loop
+# Just to stress-test the interpreter
+
+a = 1
+
+@ neverEnd(message) {
+  [ 1 ] {
+    "Never Ending: " + a
+    a = a + 1
+    @
+  }
+}
+
+# Calling a never ending function
+whatToWrite = "Ric Script!"
+neverEnd( whatToWrite )
+

@@ -210,13 +210,14 @@ typedef struct heapval {
 // Number of elements on the heap of this interpreter (arbitrary number?)
 #define RIC_HEAPSIZE  4096
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; void *sp, *sb, *hp, *hb; double f0, f1, f2; void *st, *ed; size_t sc = 0;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, hp, &st, &ed, &sc
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, hp, st, ed, sc
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc
+#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc }
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
-int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *hp, void **st, void **ed,\
-size_t *sc
-#define SETUP_STACK(sp, sb, sz) do {\
+int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
+void *hp, void *hb, void **st, void **ed, size_t *sc
+#define SETUP_STACK(sp, sb, sz, sc) do {\
 	intptr_t p;\
 	*sb = calloc(sz+1, sizeof(stackval_t));\
 	assert(*sb != NULL);\
@@ -225,6 +226,7 @@ size_t *sc
 		p = (sizeof(stackval_t) - ( p % sizeof(stackval_t) ));\
 	}\
 	*(intptr_t*)sp = *(intptr_t*)sb + p;\
+  *(size_t*)sc = 0;\
 } while ( 0 )
 
 #define SETUP_HEAP(hp, hb, hz) do {\
@@ -369,6 +371,11 @@ free(spb);\
 } while (0);
 
 void free_ast(statement_t *stmt);
+
+
+typedef struct context_full_t {
+DEF_NEW_CONTEXT()
+} context_full_t;
 
 #endif
 

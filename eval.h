@@ -6,6 +6,9 @@
 #include "ast.h"
 #include "hashtable.h"
 
+#define JMP_CODE_INITIAL     0
+#define JMP_CODE_CONTINUE    1
+
 int evaluate_condition(ifCondition_t *cond,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
@@ -36,6 +39,12 @@ void close_namespaces();
 void flush_arguments(hashtable_t *args);
 
 hashtable_t *new_argstable();
+
+typedef struct ctx_table_t {
+  void *stmt;
+  argsList_t *args;
+  hashtable_t *argVals;
+} ctx_table_t;
 
 #endif
 

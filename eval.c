@@ -4,7 +4,10 @@
 hashtable_t *funcDecs = NULL;
 hashtable_t *varDecs = NULL;
 
-jmp_buf jmpbuf;
+jmp_buf endingJmpBuf;
+jmp_buf continueJmpBuf;
+
+ctx_table_t continueCtx;
 
 int evaluate_condition(ifCondition_t *cond,
   PROVIDE_CONTEXT_ARGS(),
@@ -856,11 +859,31 @@ void interpret_statements_(
   hashtable_t *argVals
 )
 {
-  entity_eval_t *eval = (entity_eval_t*)stmt;
+  static int premier = 1;
+  entity_eval_t *eval;
   void *next = NULL;
+
+  if ( premier ) {
+    switch ( setjmp(continueJmpBuf) ) {
+      case JMP_CODE_CONTINUE: {
+        stmt = continueCtx.stmt;
+        args = continueCtx.args;
+        argVals = continueCtx.argVals;
+      }
+      break;
+      case JMP_CODE_INITIAL:
+      /* Fall through */
+      default:
+      /* It is OK, just continue */
+      break;
+    }
+    premier = 0;
+  }
 
   if ( stmt == NULL )
     return;
+
+  eval = (entity_eval_t*)stmt;
 
   switch ( eval->entity ) {
     case LANG_ENTITY_DECL:
@@ -904,7 +927,7 @@ void interpret_statements_(
     break;
     case LANG_ENTITY_FIN: {
       /* Jump to VM shutdown */
-      longjmp(jmpbuf, 1);
+      longjmp(endingJmpBuf, 1);
     }
     break;
     default:
@@ -970,7 +993,10 @@ void interpret_statements_(
     case LANG_ENTITY_CONTINUE:
     {
       /* Set PC to continue 'st' */
-      next = *st;
+      continueCtx.stmt = *st;
+      continueCtx.args = args;
+      continueCtx.argVals = argVals;
+      longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
     }
     break;
     case LANG_ENTITY_BREAK:
@@ -1437,7 +1463,7 @@ void interpret_statements(statement_t *stmt)
   DEF_NEW_CONTEXT();
 
   // Setup stack
-  SETUP_STACK(&sp, &sb, RIC_STACKSIZE);
+  SETUP_STACK(&sp, &sb, RIC_STACKSIZE, &sc);
 
   // Setup heap
   SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
@@ -1449,7 +1475,7 @@ void interpret_statements(statement_t *stmt)
   st = stmt;
   ed = NULL;
 
-  if ( setjmp(jmpbuf) == 0) {
+  if ( setjmp(endingJmpBuf) == JMP_CODE_INITIAL) {
     /* Start descending and evaluating the AST */
     interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
   } else {

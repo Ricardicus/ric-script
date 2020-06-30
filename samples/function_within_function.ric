@@ -4,12 +4,19 @@
 @ foo () {
 
 	# Defining a function within a function
-	# will make it globally available
+	# will actually make it globally available
 	@ bar () {
 		"bar"
 	}
 
 	"foo"
+
+	[ 0 ] {
+		# But only if the code is executed
+		@ bar () {
+			"Not bar!"
+		}
+	}
 }
 
 foo()

@@ -1,0 +1,17 @@
+# In this language, everything is global
+# namespace. Even function declarations.
+
+@ foo () {
+
+	# Defining a function within a function
+	# will make it globally available
+	@ bar () {
+		"bar"
+	}
+
+	"foo"
+}
+
+foo()
+bar()
+

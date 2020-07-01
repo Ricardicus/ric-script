@@ -1,24 +1,36 @@
 # In this language, everything is global
 # namespace. Even function declarations.
 
-@ foo () {
+@ foo (a) {
 
 	# Defining a function within a function
 	# will actually make it globally available
-	@ bar () {
-		"bar"
-	}
 
 	"foo"
 
-	[ 0 ] {
+	[ a ] {
 		# But only if the code is executed
 		@ bar () {
-			"Not bar!"
+			"bar"
 		}
+	} ~ {
+		# If a function is defined again, it is
+		# overwritten
+                @ bar () {
+                        "not bar"
+                }
 	}
 }
 
-foo()
+# Will print:
+# foo
+# not bar
+foo(0)
+bar()
+
+# Will print:
+# foo
+# bar
+foo(1)
 bar()
 

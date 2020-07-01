@@ -49,4 +49,5 @@ bar()
 # Will print:
 # hejsan
 # tjenare
+
 hejsan()

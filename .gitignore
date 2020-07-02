@@ -5,7 +5,7 @@ y.output
 *.o
 
 # Executable
-main
+ric
 
 # The name I typically give my meson build folders
 builddir

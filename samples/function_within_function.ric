@@ -1,0 +1,53 @@
+# In this language, everything is in a global
+# namespace. Even function declarations.
+# Functions can be defined multiple times
+
+@ foo (a) {
+
+	# Defining a function within a function
+	# will actually make it globally available
+
+	"foo"
+
+	[ a ] {
+		# But only if the code is executed
+		@ bar () {
+			"bar"
+		}
+	} ~ {
+		# If a function is defined again, it is
+		# overwritten
+                @ bar () {
+                        "not bar"
+                }
+	}
+}
+
+# Will print:
+# foo
+# not bar
+foo(0)
+bar()
+
+# Will print:
+# foo
+# bar
+foo(1)
+bar()
+
+# Overwriting a function (extreme example)
+@ hejsan () {
+
+	"hejsan"
+	@ hejsan () {
+		"tjenare"
+	}
+
+	hejsan()
+}
+
+# Will print:
+# hejsan
+# tjenare
+
+hejsan()

@@ -28,7 +28,7 @@ void interpret_statements_(
   argsList_t *args,
   hashtable_t *argVals);
 
-void interpret_statements(statement_t *stmt);
+void interpret_statements(int argc, char* argv[], statement_t *stmt);
 
 void print_condition(ifCondition_t *cond);
 void print_expr(expr_t *expr);
@@ -37,6 +37,8 @@ void print_indents(int indent);
 void setup_namespaces();
 void close_namespaces();
 void flush_arguments(hashtable_t *args);
+
+void arguments_to_variables(int argc, char* argv[]);
 
 hashtable_t *new_argstable();
 

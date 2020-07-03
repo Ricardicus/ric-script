@@ -1450,7 +1450,11 @@ void print_statements(statement_t *stmt)
   print_statements_(stmt, 0);
 }
 
-void interpret_statements(statement_t *stmt)
+void interpret_statements(
+  int argc,
+  char *argv[],
+  statement_t *stmt
+)
 {
   // "CPU" registers definitions
   DEF_NEW_CONTEXT();
@@ -1463,6 +1467,9 @@ void interpret_statements(statement_t *stmt)
 
   // Setup namespaces
   setup_namespaces();
+
+  // arguments to environment variables
+  arguments_to_variables(argc, argv);
 
   /* Set starting point and end point */
   st = stmt;
@@ -1486,4 +1493,166 @@ void interpret_statements(statement_t *stmt)
   }
 }
 
+static int isAnInt(char *arg) {
+  char *c = arg;
+  while ( *c ) {
+    if ( !isdigit(*c) ){
+      return 0;
+    }
+    ++c;
+  }
+  return 1;
+}
 
+static int isAFloat(char *arg) {
+  char *c = arg;
+  int nbrDots = 0;
+  while ( *c ) {
+    if ( !isdigit(*c) ){
+      // It might be a dot
+      if ( *c != '.' ) {
+        return 0;
+      } else {
+        if ( nbrDots == 1 ){
+          return 0;
+        }
+        nbrDots++;
+      }
+    }
+    ++c;
+  }
+
+  if ( nbrDots == 1 ) {
+    return 1;
+  }
+
+  return 0;
+}
+
+static int typeOfArgument(char *arg)
+{
+  if ( isAFloat(arg) ) {
+    return DOUBLETYPE;
+  }
+
+  if ( isAnInt(arg) ) {
+    return INT32TYPE;
+  }
+
+  return TEXT;
+}
+
+static char *reservedArgs[] = {
+  "-pi", "-p", "-i", "-h", "--help"
+};
+
+static char *arguments[] = {
+  "arg0",
+  "arg1", "arg2", "arg3", "arg4", "arg5",
+  "arg6", "arg7", "arg8", "arg9", "arg10"
+};
+
+static char *argName       = "arg0";
+static char *argumentCount = "argN";
+
+void arguments_to_variables(int argc, char* argv[])
+{
+  /*
+  * Invoking the program with command arguments:
+  * --args value1 value2 ... valueN
+  * will populate the global variables
+  * arg1 arg2 ... argN with the value and
+  * the args variable to N.
+  * max 10 arguments can be set.
+  */
+
+  stackval_t sv;
+  heapval_t *hvp;
+  int argWalk = 2;
+  int argCount = 0;
+  int nbrReserved = sizeof(reservedArgs) / sizeof(*reservedArgs);
+  int maxNbrArgs = sizeof(arguments) / sizeof(*arguments);
+
+  if ( argc < 2 ) {
+    /* Not OK :/ */
+    return;
+  }
+
+  /* Add name of script as first argument */
+  hvp = ast_emalloc(sizeof(heapval_t));
+
+  sv.type = TEXT;
+  sv.t = argv[1];
+
+  hvp->sv = sv;
+
+  /* Placing variable declaration in global variable namespace */
+  hashtable_put(varDecs, arguments[argCount], hvp);
+  argCount++;
+
+  while ( argWalk < argc && argCount < maxNbrArgs ) {
+    char *arg = argv[argWalk];
+    int argWalkReserved = 0;
+    int ignore = 0;
+    int argType;
+
+    // Some arguments are not to be passed to the environment
+    while ( argWalkReserved < nbrReserved ) {
+      if ( strcmp(reservedArgs[argWalkReserved], arg) == 0 ) {
+        // ignore this argument
+        ignore = 1;
+        break;
+      }
+      argWalkReserved++;
+    }
+
+    if ( ignore ) {
+      argWalk++;
+      continue;
+    }
+
+    hvp = ast_emalloc(sizeof(heapval_t));
+
+    argType = typeOfArgument(arg);
+    sv.type = argType;
+    switch ( argType )
+    {
+    case INT32TYPE:
+    {
+      sv.i = (int32_t) atoi(arg);
+      break;
+    }
+    case DOUBLETYPE:
+    {
+      sv.d = (double) atof(arg);
+      break;
+    }
+    case TEXT:
+    {
+      sv.t = arg;
+      break;
+    }
+    default:
+    break;
+    }
+
+    hvp->sv = sv;
+
+    /* Placing variable declaration in global variable namespace */
+    hashtable_put(varDecs, arguments[argCount], hvp);
+    argCount++;
+
+    argWalk++;
+  }
+
+  /* Add space for argN */
+  hvp = ast_emalloc(sizeof(heapval_t));
+
+  sv.type = INT32TYPE;
+  sv.i = (int32_t) argCount;
+
+  hvp->sv = sv;
+
+  /* Placing variable declaration in global variable namespace */
+  hashtable_put(varDecs, argumentCount, hvp);
+}

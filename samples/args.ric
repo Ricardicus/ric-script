@@ -1,0 +1,11 @@
+# Check the arguments passed
+
+"argN: " + argN
+
+"arg0: " + arg0
+
+i = 0
+
+[ argN > 1 ] {
+  "arg1: " + arg1
+}

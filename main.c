@@ -32,7 +32,7 @@ typedef enum mission {
 } mission_t;
 
 int main(int argc, char *argv[]) {
-  mission_t mission = runAsASTPrinter;
+  mission_t mission = runAsIntepreter;
   statement_t *root = NULL;
   MainParserFunc parse;
   int ret = 0;
@@ -57,17 +57,19 @@ int main(int argc, char *argv[]) {
       } else if ( strcmp("--help", argv[i]) == 0){
         usage(argv[0], 0);
       } else {
-        /* Attempt to open the file */
-        fp = fopen(argv[i], "r");
         if ( fp == NULL ) {
-          fprintf(stderr, "Error: failed to open file: '%s'\n", argv[i]);
-          exit(1);
+          /* Attempt to open the file */
+          fp = fopen(argv[i], "r");
+          if ( fp == NULL ) {
+            fprintf(stderr, "Error: failed to open file: '%s'\n", argv[i]);
+            exit(1);
+          }
+          yyin = fp;
         }
-        yyin = fp;
       }
       ++i;
     }
-  } 
+  }
 
   /* Initialize hooks */
   initParser();
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
   case runAsIntepreter:
     if ( root != NULL ) {
       /* Interpret the program */
-      interpret_statements(root);
+      interpret_statements(argc, argv, root);
     } else {
       fprintf(stderr, "Failed to parse program!\r\n");
       ret = 1;
@@ -109,7 +111,7 @@ int main(int argc, char *argv[]) {
       print_statements(root);
       /* Interpret the program */
       printf("\n\nOUTPUT:\n\n");
-      interpret_statements(root);
+      interpret_statements(argc, argv, root);
     } else {
       fprintf(stderr, "Failed to parse program!\r\n");
       ret = 1;

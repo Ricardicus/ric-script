@@ -180,7 +180,7 @@ functionCall_t* newFunCall(const char *id, void *args);
 body_t*         newBody(void *body);
 
 void print_statements(statement_t *root);
-void interpret_statements(statement_t *stmt);
+void interpret_statements(int argc, char *argv[], statement_t *stmt);
 
 typedef enum stackvaltypes {
 	INT32TYPE = 1,
@@ -190,7 +190,7 @@ typedef enum stackvaltypes {
 } stackvaltypes_t;
 
 typedef struct stackval {
-	int32_t type;
+	stackvaltypes_t type;
 	union {
 		double d;
 		int32_t i;

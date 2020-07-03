@@ -4,8 +4,20 @@
 
 "arg0: " + arg0
 
-i = 0
-
-[ argN > 1 ] {
+[ argN == 2 ] {
   "arg1: " + arg1
+} ~[ argN == 3 ] {
+  "arg1: " + arg1
+  "arg2: " + arg2
+} ~[ argN == 4 ] {
+  "arg1: " + arg1
+  "arg2: " + arg2
+  "arg3: " + arg3
+} ~[ argN == 5 ] {
+  "arg1: " + arg1
+  "arg2: " + arg2
+  "arg3: " + arg3
+  "arg4: " + arg4
 }
+
+# Up to 10 args can be passed this way!

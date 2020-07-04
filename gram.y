@@ -217,8 +217,8 @@ middleIfs:
         ifStmt_t *ifs1 = (ifStmt_t *) $1;
         ifStmt_t *ifs2 = (ifStmt_t *) $2;
 
-        ifs1->elif = ifs2;
-        $$ = ifs1;
+        ifs2->elif = ifs1;
+        $$ = ifs2;
     }
     | middleIf {
         $$ = $1;

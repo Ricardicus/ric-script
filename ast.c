@@ -206,7 +206,7 @@ argsList_t* newArgument(expr_t *expr, void *next)
   argl->entity = LANG_ENTITY_ARGS;
   argl->next = next;
   argl->arg = expr;
-  argl->length = 0;
+  argl->length = 1;
 
   if ( argl->next != NULL ) {
     argl->length = argl->next->length + 1;

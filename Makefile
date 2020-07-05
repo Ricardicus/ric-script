@@ -4,13 +4,20 @@ FLEXSPEC = lex.l
 YACCSPEC = gram.y
 
 YACCSOURCES = y.tab.c
-FLEXSOURCES = lex.yy.c 
-RIC_SOURCES = main.c hashtable.c hooks.c ast.c eval.c
+FLEXSOURCES = lex.yy.c
+RIC_SOURCES = main hashtable hooks ast eval lib
+
+RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
+
+CFLAGS = Wall Werror O2
 
 .PHONY: lex yacc test
 
-ric: lex yacc
-	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_SOURCES) 
+%.o: %.c
+	$(CC) -c -o $@ $^ $(addprefix -, $(CFLAGS))
+
+ric: lex yacc $(RIC_OBJS)
+	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) 
 
 test: ric
 	@echo ""
@@ -38,4 +45,4 @@ else
 endif
 
 clean:
-	rm -f main lex.yy.c y.output y.tab.c y.tab.h *.o
+	@rm -f ric *.o

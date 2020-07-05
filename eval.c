@@ -1003,53 +1003,118 @@ void interpret_statements_(
       functionDef_t *funcDef;
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
       argsList_t *argsWalk = funcCall->args;
-      argsList_t *params;
       hashtable_t *newArgumentTable = new_argstable();
       stackval_t sv;
+      libFunction_t *libFunc = NULL;
 
       /* Looking up the function and calling it if it exists */
       funcDef = hashtable_get(funcDecs, funcCall->id.id);
 
+      /* Looking up the function among the library */
+      libFunc = look_up_lib(funcCall->id.id);
+
       /* Check lookup status */
-      if ( funcDef == NULL ) {
+      if ( funcDef == NULL && libFunc == NULL ) {
         fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
         exit(1);
       }
 
-      /* Check that # parameters == # arguments */
-      params = funcDef->params;
+      if ( funcDef != NULL ) {
 
-      if ( params == NULL && argsWalk != NULL ) {
-        fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
-          funcCall->id.id, argsWalk->length );
-        exit(1);
-      }
+        /* Check that # parameters == # arguments */
+        argsList_t *params = funcDef->params;
 
-      if ( params != NULL && argsWalk == NULL ) {
-        fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
-          funcCall->id.id, params->length );
-        exit(1);
-      }
+        if ( params == NULL && argsWalk != NULL ) {
+          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+            funcCall->id.id, argsWalk->length );
+          exit(1);
+        }
 
-      if ( params != NULL && argsWalk != NULL )  {
-        /* Verifying function definition parameters and function call arguments */
-        if ( params->length != argsWalk->length ) {
-          /* print error message */
-          fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
-            funcCall->id.id, params->length, argsWalk->length );
+        if ( params != NULL && argsWalk == NULL ) {
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+            funcCall->id.id, params->length );
+          exit(1);
+        }
+
+        if ( params != NULL && argsWalk != NULL )  {
+          /* Verifying function definition parameters and function call arguments */
+          if ( params->length != argsWalk->length ) {
+            /* print error message */
+            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+              funcCall->id.id, params->length, argsWalk->length );
+            exit(1);
+          }
+
+          /* Populate arguments */
+          while ( argsWalk != NULL && params != NULL ) {
+            stackval_t sv;
+            expr_t *newArg = NULL;
+
+            if ( params->arg->type != EXPR_TYPE_ID ) {
+              /* This is not supposed to happen */
+              printf("Error: parameter in function definition '%s' was invalid\n",
+                funcCall->id.id);
+            }
+
+            /* Evaluate expression */
+            evaluate_expression(argsWalk->arg, PROVIDE_CONTEXT(), args, argVals);
+            
+            /* Fetch the evaluated expression to the arguments table */
+            POP_VAL(&sv, sp, sc);
+
+            switch (sv.type) {
+              case INT32TYPE: {
+                newArg = newExpr_Ival(sv.i);
+                break;
+              }
+              case DOUBLETYPE: {
+                newArg = newExpr_Float(sv.d);
+                break;
+              }
+              case TEXT: {
+                newArg = newExpr_Text(sv.t);
+                break;
+              }
+              default:
+                fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+                exit(1);
+                break;
+            }
+
+            /* Adding expression to argument table */
+            hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+
+            params = params->next;
+            argsWalk = argsWalk->next;
+          }
+
+        }
+
+        PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+        (*(uintptr_t*)st) = (uintptr_t) stmt;
+        PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
+        (*(uintptr_t*)ed) = (uintptr_t) next;
+
+        /* Call the function */
+        if ( funcDecs )
+        interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+
+        POP_VAL(&sv, sp, sc);
+        (*(uintptr_t*)ed) = sv.p;
+        POP_VAL(&sv, sp, sc);
+        (*(uintptr_t*)st) = sv.p;
+
+      } else {
+
+        if ( libFunc->nbrArgs != (int)argsWalk->length ) {
+          fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+            funcCall->id.id, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
           exit(1);
         }
 
         /* Populate arguments */
-        while ( argsWalk != NULL && params != NULL ) {
+        while ( argsWalk != NULL ) {
           stackval_t sv;
-          expr_t *newArg = NULL;
-
-          if ( params->arg->type != EXPR_TYPE_ID ) {
-            /* This is not supposed to happen */
-            printf("Error: parameter in function definition '%s' was invalid\n",
-              funcCall->id.id);
-          }
 
           /* Evaluate expression */
           evaluate_expression(argsWalk->arg, PROVIDE_CONTEXT(), args, argVals);
@@ -1058,45 +1123,34 @@ void interpret_statements_(
           POP_VAL(&sv, sp, sc);
 
           switch (sv.type) {
-            case INT32TYPE: {
-              newArg = newExpr_Ival(sv.i);
+            case INT32TYPE: 
+            {
+              PUSH_INT(sv.i, sp, sc);
               break;
             }
-            case DOUBLETYPE: {
-              newArg = newExpr_Float(sv.d);
+            case DOUBLETYPE:
+            {
+              PUSH_DOUBLE(sv.d, sp, sc);
               break;
             }
-            case TEXT: {
-              newArg = newExpr_Text(sv.t);
+            case TEXT:
+            {
+              PUSH_STRING(sv.t, sp, sc);
               break;
             }
             default:
+            {
               fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
               exit(1);
               break;
+            }
           }
 
-          /* Adding expression to argument table */
-          hashtable_put(newArgumentTable, params->arg->id.id, newArg);
-
-          params = params->next;
           argsWalk = argsWalk->next;
         }
 
+        libFunc->func(sp, sc);
       }
-
-      PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-      (*(uintptr_t*)st) = (uintptr_t) stmt;
-      PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-      (*(uintptr_t*)ed) = (uintptr_t) next;
-
-      /* Call the function */
-      interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
-
-      POP_VAL(&sv, sp, sc);
-      (*(uintptr_t*)ed) = sv.p;
-      POP_VAL(&sv, sp, sc);
-      (*(uintptr_t*)st) = sv.p;
 
       /* Push some value on the stack: When implementing return, this should be fixed */
       PUSH_POINTER((*(uintptr_t*)st), sp, sc);
@@ -1471,6 +1525,9 @@ void interpret_statements(
   // arguments to environment variables
   arguments_to_variables(argc, argv);
 
+  // Set up ric library
+  initialize_ric_lib();
+
   /* Set starting point and end point */
   st = stmt;
   ed = NULL;
@@ -1552,7 +1609,6 @@ static char *arguments[] = {
   "arg6", "arg7", "arg8", "arg9", "arg10"
 };
 
-static char *argName       = "arg0";
 static char *argumentCount = "argN";
 
 void arguments_to_variables(int argc, char* argv[])

@@ -300,6 +300,13 @@ arguments_list:
     }
     | mathContents {
         $$ = newArgument($1, NULL);
+    }
+    | arguments_list ',' stringContents {
+        expr_t *expr = $3;
+        $$ = newArgument(expr, $1);
+    }
+    | stringContents {
+        $$ = newArgument($1, NULL);
     };
 
 parameters_list:

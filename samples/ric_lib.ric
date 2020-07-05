@@ -1,9 +1,8 @@
 # Testing out some predefined functions
 
 exitCode = 2
-message = "Hello! I will exit with exit code: " + exitCode
 
-print ( message )
+print ( "Hello! I will exit with exit code: " + exitCode )
 
 exit ( 2 )
 

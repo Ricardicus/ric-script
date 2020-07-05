@@ -3,8 +3,6 @@
 gcd = 0
 
 @ calcGCD(a, b) {
-    "a " + a 
-    "b " + b
     [ b == 0 ] { 
       gcd = a
     } ~ { 
@@ -18,4 +16,4 @@ y = 48
 
 calcGCD(x, y)
 
-"GCD of " + x + " and " + y + ", is: " + gcd
+print("GCD of " + x + " and " + y + ", is: " + gcd)

@@ -3,7 +3,7 @@
 
 @ neverEnd(message) {
   [ 1 ] {
-    message
+    print(message)
     @
   }
 }

@@ -39,8 +39,14 @@ int ric_print(void **sp, size_t *sc)
     print_string = stv.t;
     printf("%s\n", print_string);
     break;
+    case INT32TYPE:
+    printf("%d\n", stv.i);
+    break;
+    case DOUBLETYPE:
+    printf("%lf\n", stv.d);
+    break;
     default:{
-      fprintf(stderr, "error: function call exit expects a single string as argument.\n");
+      fprintf(stderr, "error: function call 'exit' got unexpected data type as argument.\n");
       exit(1);
     }
     break;

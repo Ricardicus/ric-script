@@ -9,59 +9,59 @@ a = 2;
 a = 1337
 
 # printing a declare variable
-a
+print(a)
 
 # Some math, should print 1337
-a / 2 + 1337/ 2 +1337 % 2 
+print(a / 2 + 1337/ 2 +1337 % 2 )
 
 # Declaration
 b = " hejsan!"
 
 # Using the declaration
-"hello" + " hello!" + b
+print("hello" + " hello!" + b)
 
 # Adding strings with numbers and digits and IDs
-"hello " + 1337.7 + " " + 14 + " " + a 
+print("hello " + 1337.7 + " " + 14 + " " + a)
 
 # Assigning either 1 or 0 to variables 
 # based on conditionals
 b = "hello" == "hello"
 # Should print 1
-b
+print(b)
 
 b = ( "hello" == "hi" )
 # Should print 0
-b
+print(b)
 
 "10.1 > 10.0: "
 b = 10.1 > 10.0
-b
+print(b)
 
 "10.1 < 10.0:"
 b = 10.1 < 10.0
-b
+print(b)
 
 "10.1 <= 10.1:"
 b = 10.1 <= 10.1
-b
+print(b)
 
 "10.1 >= 10.1:"
 b = 10.1 >= 10.1
-b
+print(b)
 
 5 "10.1 >= 10.0: "
 b = 10.1 >= 10.0
-b
+print(b)
 
 "10.1 <= 10.0:"
 b = 10.1 <= 10.0
-b
+print(b)
 
 [ 1 ] {
   
   # should print 1337
   a = 1337
-  a
+  print(a)
 
 }
 
@@ -69,26 +69,26 @@ b
   
   # should not print 1337
   a = 1337
-  a
+  print(a)
 
 }
 
 # Some if-else if- else logic
 p = 1337
 [ p < 1337 ] {
-  "Something went wrong.. Not supposed to be in this 'if' section."
+  print("Something went wrong.. Not supposed to be in this 'if' section.")
 } ~[p == 1338] {
- "There is something wrong.. I am in an 'else-if' section.." 
+ print("There is something wrong.. I am in an 'else-if' section..")
 } ~[p == 1337] {
-  "Yey, I am in an else-if!"
+  print("Yey, I am in an else-if!")
 } ~ {
-  "Nope, something isn't right. I am in an 'else' section.."
+  print("Nope, something isn't right. I am in an 'else' section..")
 }
 
 @ foobar() {
   
   b = "hello from foobar"
-  b
+  print(b)
 
 }
 
@@ -100,7 +100,7 @@ i = 0
 
 [ i < 5 ] {
   i = i + 1
-  i
+  print(i)
   @
 }
 
@@ -108,10 +108,10 @@ i = 0
 a = 1338
 
 [ a == 1337 ] {
-  "Now the variable is: " + a
-  "yey!"
+  print("Now the variable is: " + a)
+  print("yey!")
 } ~ {
-  "A variable was not 1337, it was: " + a
+  print("A variable was not 1337, it was: " + a)
   a = 1337
   "Re-evaluating"
   @
@@ -128,7 +128,7 @@ a = 0
 	[ b < 2 ] {
 		c = 0
 		[ c < 2 ] {
-			"a: " + a + ", b: " + b + ", c: " + c
+      print ( "a: " + a + ", b: " + b + ", c: " + c )
 			c = c + 1
 			@
 		}
@@ -144,7 +144,7 @@ a = 0
 
 @ testFunc(a,b,c) {
   
-  "arg1: " + a + ", arg2: " + b + ", arg3: " + c
+  print("arg1: " + a + ", arg2: " + b + ", arg3: " + c)
 
 }
 
@@ -153,6 +153,6 @@ testFunc(14,12, 15)
 # System call
 $ "echo 'hello, the variable a has the value: " + a + "'"
 
-"Nu e de slut"
+print("Nu e de slut")
 
 

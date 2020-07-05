@@ -1104,6 +1104,12 @@ void interpret_statements_(
         POP_VAL(&sv, sp, sc);
         (*(uintptr_t*)st) = sv.p;
 
+        /* Push some value on the stack: When implementing return, this should be fixed */
+        PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+
+        /* Free the argument value table */
+        flush_arguments(newArgumentTable);
+
       } else {
 
         if ( libFunc->nbrArgs != (int)argsWalk->length ) {
@@ -1152,11 +1158,6 @@ void interpret_statements_(
         libFunc->func(sp, sc);
       }
 
-      /* Push some value on the stack: When implementing return, this should be fixed */
-      PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-
-      /* Free the argument value table */
-      flush_arguments(newArgumentTable);
     }
     break;
     case LANG_ENTITY_CONDITIONAL:

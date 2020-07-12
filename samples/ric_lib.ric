@@ -4,5 +4,5 @@ exitCode = 2
 
 print ( "Hello! I will exit with exit code: " + exitCode )
 
-exit ( 2 )
+exit ( exitCode )
 

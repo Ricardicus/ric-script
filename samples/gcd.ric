@@ -10,9 +10,14 @@ gcd = 0
     }
 }
 
+[ argN < 3 ] {
+	print('usage: ' + arg0 + ' number1 number2')
+	exit(1)
+}
+
 # Numbers to calculate GCD of
-x = 60
-y = 48
+x = arg1
+y = arg2
 
 calcGCD(x, y)
 

@@ -98,7 +98,7 @@ foobar()
 
 i = 0
 
-[ i < 5 ] {
+. [ i < 5 ] {
   i = i + 1
   print(i)
   @
@@ -107,7 +107,7 @@ i = 0
 # A funny feature with this language
 a = 1338
 
-[ a == 1337 ] {
+. [ a == 1337 ] {
   print("Now the variable is: " + a)
   print("yey!")
 } ~ {
@@ -123,11 +123,11 @@ a = 1338
 
 # Nested loops
 a = 0
-[ a < 2 ] {
+. [ a < 2 ] {
   b = 0
-  [ b < 2 ] {
+  . [ b < 2 ] {
     c = 0
-    [ c < 2 ] {
+    . [ c < 2 ] {
       print ( "a: " + a + ", b: " + b + ", c: " + c )
       c = c + 1
       @
@@ -154,4 +154,17 @@ $ "echo 'hello, the variable a has the value: " + a + "'"
 
 print("Nu e de slut")
 
+
+a = 0
+. [ a < 4 ] {
+  a = a + 1
+  print( a )
+  # Deciding on wether or not to continue the loop
+  [ a >= 2 ] {
+    !@
+  }
+  @
+}
+
+print("hello")
 

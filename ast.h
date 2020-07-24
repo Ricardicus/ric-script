@@ -10,6 +10,10 @@
 #include <math.h>
 #include <stdbool.h>
 
+#ifndef BIT
+#define BIT(x) ((1)<<((x)-1))
+#endif
+
 #define EXPR_TYPE_ID    1
 #define EXPR_TYPE_FVAL  2
 #define EXPR_TYPE_IVAL  3
@@ -38,9 +42,10 @@
 #define LANG_ENTITY_FIN          13
 #define LANG_ENTITY_SYSTEM       14
 
-#define LANG_CONDITIONAL_IF      0
-#define LANG_CONDITIONAL_ELIF    1
-#define LANG_CONDITIONAL_ELSE    2
+#define LANG_CONDITIONAL_IF      BIT(1)
+#define LANG_CONDITIONAL_ELIF    BIT(2)
+#define LANG_CONDITIONAL_ELSE    BIT(3)
+#define LANG_CONDITIONAL_CTX     BIT(4)
 
 #define CONDITION_EQ             0
 #define CONDITION_NEQ            1

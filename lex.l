@@ -18,7 +18,7 @@ FLOAT_VAL        [0-9]+"."[0-9]*
 KEYWORD_PROCESS  process
 HASHTAG          [#]
 ID_TOKEN         [_[:alnum:]]
-RETURN_AS_IS     [\"\'+<>:\-/(){}\*%\[\]~!=,@$\\]
+RETURN_AS_IS     [\"\'+<>:\-/()\.{}\*%\[\]~!=,@$\\]
 
 %%
 

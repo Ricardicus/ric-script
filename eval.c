@@ -995,7 +995,10 @@ void interpret_statements_(
     case LANG_ENTITY_BREAK:
     {
       /* Set PC to break 'end' */
-      interpret_statements_(*ed, PROVIDE_CONTEXT(), args, argVals);
+      continueCtx.stmt = *ed;
+      continueCtx.args = args;
+      continueCtx.argVals = argVals;
+      longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
     }
     break;
     case LANG_ENTITY_FUNCCALL:
@@ -1097,7 +1100,7 @@ void interpret_statements_(
 
         /* Call the function */
         if ( funcDecs )
-        interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+          interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
 
         POP_VAL(&sv, sp, sc);
         (*(uintptr_t*)ed) = sv.p;
@@ -1166,13 +1169,16 @@ void interpret_statements_(
       ifStmt_t *ifstmtWalk;
       stackval_t sv;
 
-      if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
-        PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-        (*(uintptr_t*)st) = (uintptr_t) stmt;
-      }
-      if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
-        PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-        (*(uintptr_t*)ed) = (uintptr_t) next;
+      if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
+        /* Handle the continue '@' and break '!@' points' */
+        if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
+          PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+          (*(uintptr_t*)st) = (uintptr_t) stmt;
+        }
+        if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
+          PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
+          (*(uintptr_t*)ed) = (uintptr_t) next;
+        }
       }
 
       /* Read ax for conditional */
@@ -1206,10 +1212,13 @@ void interpret_statements_(
 
       }
 
-      POP_VAL(&sv, sp, sc);
-      (*(uintptr_t*)ed) = sv.p;
-      POP_VAL(&sv, sp, sc);
-      (*(uintptr_t*)st) = sv.p;
+      if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
+        /* Handle the continue '@' and break '!@' points' */
+        POP_VAL(&sv, sp, sc);
+        (*(uintptr_t*)ed) = sv.p;
+        POP_VAL(&sv, sp, sc);
+        (*(uintptr_t*)st) = sv.p;
+      }
 
     }
     break;
@@ -1465,7 +1474,12 @@ void print_statements_(void *stmt, int indent)
       ifStmt_t *ifstmtWalk;
       ifCondition_t *cond = ifstmt->cond;
 
-      printf("if-statement - condition: ");
+      if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
+        printf("loop-if-statement - condition: ");
+      } else {
+        printf("if-statement - condition: ");
+      }
+
       print_condition(cond);
       printf("\n");
       print_statements_(ifstmt->body, indent);

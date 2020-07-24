@@ -2,7 +2,7 @@
 # Just to stress-test the interpreter
 
 @ neverEnd(message) {
-  [ 1 ] {
+  . [ 1 ] {
     print(message)
     @
   }

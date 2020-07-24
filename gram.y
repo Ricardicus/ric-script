@@ -36,7 +36,6 @@ statement_t *root = NULL;
 
 %union { int val_int; double val_double; char id[256]; void *data; }
 
-
 %token<val_int> DIGIT
 %token<val_double> DOUBLE
 %token<id> ID
@@ -68,6 +67,7 @@ statement_t *root = NULL;
 %type<data> mathContents
 %type<data> mathContent
 %type<data> ifStatement
+%type<data> loopStatement
 %type<data> continueStatement
 %type<data> breakStatement
 %type<data> systemStatement
@@ -118,6 +118,9 @@ statement:
         $$ = newStatement(LANG_ENTITY_FUNCCALL, $1);
     }
     | ifStatement {
+        $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
+    }
+    | loopStatement {
         $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
     }
     | mathContents {
@@ -210,7 +213,71 @@ ifStatement:
         ifs->endif = $5;
         
         $$ = ifs;
+    };
+
+loopStatement:
+    '.' '[' condition ']' body {
+        $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
+    }
+    | '.' '[' condition ']' body middleIfs {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
+
+        ifs->elif = $6;
+        
+        $$ = ifs;
+    }
+    | '.' '[' condition ']' body middleIfs endIf {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
+
+        ifs->elif = $6;
+        ifs->endif = $7;
+        
+        $$ = ifs;
+    }
+    | '.' '[' condition ']' body endIf {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
+
+        ifs->endif = $6;
+        
+        $$ = ifs;
     } 
+    | '.' '[' mathContents ']' body {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+
+        $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+    }
+    | '.' '[' mathContents ']' body middleIfs {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+
+        ifs->elif = $6;
+        
+        $$ = ifs;
+    }
+    | '.' '[' mathContents ']' body middleIfs endIf {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+
+        ifs->elif = $6;
+        ifs->endif = $7;
+        
+        $$ = ifs;
+    }
+    | '.' '[' mathContents ']' body endIf {
+        expr_t *expr = newExpr_Ival(0);
+        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+
+        ifs->endif = $6;
+        
+        $$ = ifs;
+    };
 
 middleIfs:
     middleIfs middleIf {
@@ -507,6 +574,10 @@ otherChar:
         $$[1] = 0;
     }
     | '\"' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '.' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

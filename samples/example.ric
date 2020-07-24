@@ -113,7 +113,7 @@ a = 1338
 } ~ {
   print("A variable was not 1337, it was: " + a)
   a = 1337
-  "Re-evaluating"
+  print("Re-evaluating")
   @
 }
 
@@ -164,3 +164,4 @@ a = 0
 }
 
 print("Nu e de slut")
+

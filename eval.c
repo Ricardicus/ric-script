@@ -957,11 +957,10 @@ void interpret_statements_(
     break;
     case LANG_ENTITY_SYSTEM:
     {
-      statement_t *sys_stmt = ((statement_t*)stmt)->content;
-
+      expr_t *sys_var = (expr_t*)((statement_t*)stmt)->content;
       stackval_t sv;
-      expr_t *e = sys_stmt->content;
-      evaluate_expression(e, PROVIDE_CONTEXT(), args, argVals);
+
+      evaluate_expression(sys_var, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&sv, sp, sc);
       switch ( sv.type ) {
       case TEXT:
@@ -1432,10 +1431,10 @@ void print_statements_(void *stmt, int indent)
     break;
     case LANG_ENTITY_SYSTEM:
     {
-      statement_t *sys_stmt = ((statement_t*)stmt)->content;
+      expr_t *sys_txt = ((statement_t*)stmt)->content;
 
       printf("System(");
-      print_expr(((statement_t*)sys_stmt)->content);
+      print_expr(sys_txt);
       printf(");\n");
     }
     break;

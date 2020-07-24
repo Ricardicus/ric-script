@@ -139,9 +139,11 @@ statement:
         $$ = newStatement(LANG_ENTITY_SYSTEM, $1);
     };
 
-systemStatement: '$' stringContents {
-    $$ = newStatement(LANG_ENTITY_EMPTY_STR, $2);
-}
+systemStatement: '$' ID {
+    $$ = newExpr_ID($2);
+} | '$' stringContents {
+    $$ = $2;
+};
 
 continueStatement: '@' {
     $$ = NULL;

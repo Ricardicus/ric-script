@@ -37,13 +37,7 @@ Like this:
 $ make test
 flex lex.l
 yacc -dtv gram.y
-conflicts: 3 shift/reduce, 44 reduce/reduce
-gcc -c -o main.o main.c -Wall -Werror -O2
-gcc -c -o hashtable.o hashtable.c -Wall -Werror -O2
-gcc -c -o hooks.o hooks.c -Wall -Werror -O2
-gcc -c -o ast.o ast.c -Wall -Werror -O2
-gcc -c -o eval.o eval.c -Wall -Werror -O2
-gcc -c -o lib.o lib.c -Wall -Werror -O2
+conflicts: 3 shift/reduce, 48 reduce/reduce
 gcc -o ric y.tab.c lex.yy.c main.o hashtable.o hooks.o ast.o eval.o lib.o 
 
 ============================================
@@ -149,7 +143,7 @@ foobar()
 
 i = 0
 
-[ i < 5 ] {
+. [ i < 5 ] {
   i = i + 1
   print(i)
   @
@@ -158,7 +152,7 @@ i = 0
 # A funny feature with this language
 a = 1338
 
-[ a == 1337 ] {
+. [ a == 1337 ] {
   print("Now the variable is: " + a)
   print("yey!")
 } ~ {
@@ -174,11 +168,11 @@ a = 1338
 
 # Nested loops
 a = 0
-[ a < 2 ] {
+. [ a < 2 ] {
   b = 0
-  [ b < 2 ] {
+  . [ b < 2 ] {
     c = 0
-    [ c < 2 ] {
+    . [ c < 2 ] {
       print ( "a: " + a + ", b: " + b + ", c: " + c )
       c = c + 1
       @
@@ -192,7 +186,6 @@ a = 0
 
 "================"
 
-
 @ testFunc(a,b,c) {
   
   print("arg1: " + a + ", arg2: " + b + ", arg3: " + c)
@@ -204,103 +197,118 @@ testFunc(14,12, 15)
 # System call
 $ "echo 'hello, the variable a has the value: " + a + "'"
 
-print("Nu e de slut")
+a = 0
+. [ a < 4 ] {
+  a = a + 1
+  print( a )
+  # Deciding on wether or not to continue the loop
+  [ a >= 2 ] {
+    !@
+  }
+  @
+}
 
-
-============================================
+print("Nu e de slut")============================================
 Interpretation of file 'samples/example.ric'
 ============================================
 AST:
 
-[0x7f815d6058b0] Declaration: ID('a'), Expr(2)
-[0x7f815d605910] Expr(1337);
-[0x7f815d605970] Expr(1.337000);
-[0x7f815d605ad0] Expr(ADD(ADD(1335,1),1));
-[0x7f815d605c30] Expr(DIV(1337,ADD(1,2)));
-[0x7f815d605cc0] Declaration: ID('a'), Expr(1337)
-[0x7f815d605d80] Function Call: ID('print') args(ID('a'))
-[0x7f815d6060c0] Function Call: ID('print') args(ADD(ADD(DIV(ID('a'),2),DIV(1337,2)),MOD(1337,2)))
-[0x7f815d606160] Declaration: ID('b'), Expr(' hejsan!')
-[0x7f815d606380] Function Call: ID('print') args(ADD(ADD('hello',' hello!'),ID('b')))
-[0x7f815d6067c0] Function Call: ID('print') args(ADD(ADD(ADD(ADD(ADD('hello ','1337.7000'),' '),'14'),' '),ID('a')))
-[0x7f815d606910] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hello']))
-[0x7f815d6069d0] Function Call: ID('print') args(ID('b'))
-[0x7f815d606b20] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hi']))
-[0x7f815d606be0] Function Call: ID('print') args(ID('b'))
-[0x7f815d606c60] Expr('10.100000 > 10.000000: ');
-[0x7f815d606e20] Declaration: ID('b'), Expr(Conditional([10.100000] > [10.000000]))
-[0x7f815d606ee0] Function Call: ID('print') args(ID('b'))
-[0x7f815d606f20] Expr('10.100000 < 10.000000:');
-[0x7f815d607100] Declaration: ID('b'), Expr(Conditional([10.100000] < [10.000000]))
-[0x7f815d6071c0] Function Call: ID('print') args(ID('b'))
-[0x7f815d607220] Expr('10.100000 <= 10.100000:');
-[0x7f815d6073f0] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.100000]))
-[0x7f815d6074b0] Function Call: ID('print') args(ID('b'))
-[0x7f815d607510] Expr('10.100000 >= 10.100000:');
-[0x7f815d6076e0] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.100000]))
-[0x7f815d6077a0] Function Call: ID('print') args(ID('b'))
-[0x7f815d607800] Expr(5);
-[0x7f815d607820] Expr('10.100000 >= 10.000000: ');
-[0x7f815d4041c0] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.000000]))
-[0x7f815d404280] Function Call: ID('print') args(ID('b'))
-[0x7f815d4042e0] Expr('10.100000 <= 10.000000:');
-[0x7f815d4044b0] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.000000]))
-[0x7f815d404570] Function Call: ID('print') args(ID('b'))
-[0x7f815d4047c0] if-statement - condition: [1] > [0]
-[0x7f815d404640]     Declaration: ID('a'), Expr(1337)
-[0x7f815d404700]     Function Call: ID('print') args(ID('a'))
-[0x7f815d404a20] if-statement - condition: [ID('b')] > [0]
-[0x7f815d4048a0]     Declaration: ID('a'), Expr(1337)
-[0x7f815d404960]     Function Call: ID('print') args(ID('a'))
-[0x7f815d404ab0] Declaration: ID('p'), Expr(1337)
-[0x7f815d405d50] if-statement - condition: [ID('p')] < [1337]
-[0x7f815d404bc0]     Function Call: ID('print') args('Something went wrong Not supposed to be in this 'if' section')
+[0x7fcda5c05920] Declaration: ID('a'), Expr(2)
+[0x7fcda5c05980] Expr(1337);
+[0x7fcda5c059e0] Expr(1.337000);
+[0x7fcda5c05b40] Expr(ADD(ADD(1335,1),1));
+[0x7fcda5c05ca0] Expr(DIV(1337,ADD(1,2)));
+[0x7fcda5c05d30] Declaration: ID('a'), Expr(1337)
+[0x7fcda5c05df0] Function Call: ID('print') args(ID('a'))
+[0x7fcda5c06130] Function Call: ID('print') args(ADD(ADD(DIV(ID('a'),2),DIV(1337,2)),MOD(1337,2)))
+[0x7fcda5c061d0] Declaration: ID('b'), Expr(' hejsan!')
+[0x7fcda5c063f0] Function Call: ID('print') args(ADD(ADD('hello',' hello!'),ID('b')))
+[0x7fcda5c06830] Function Call: ID('print') args(ADD(ADD(ADD(ADD(ADD('hello ','1337.7000'),' '),'14'),' '),ID('a')))
+[0x7fcda5c06980] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hello']))
+[0x7fcda5c06a40] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c06b90] Declaration: ID('b'), Expr(Conditional(['hello'] == ['hi']))
+[0x7fcda5c06c50] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c06cd0] Expr('10.100000 > 10.000000: ');
+[0x7fcda5c06e90] Declaration: ID('b'), Expr(Conditional([10.100000] > [10.000000]))
+[0x7fcda5c06f50] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c06f90] Expr('10.100000 < 10.000000:');
+[0x7fcda5c07170] Declaration: ID('b'), Expr(Conditional([10.100000] < [10.000000]))
+[0x7fcda5c07230] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c07290] Expr('10.100000 <= 10.100000:');
+[0x7fcda5c07460] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.100000]))
+[0x7fcda5c07520] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c07580] Expr('10.100000 >= 10.100000:');
+[0x7fcda5c07750] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.100000]))
+[0x7fcda5c07810] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c07870] Expr(5);
+[0x7fcda5c07890] Expr('10.100000 >= 10.000000: ');
+[0x7fcda5c07ac0] Declaration: ID('b'), Expr(Conditional([10.100000] >= [10.000000]))
+[0x7fcda5c07b80] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c07be0] Expr('10.100000 <= 10.000000:');
+[0x7fcda5c07db0] Declaration: ID('b'), Expr(Conditional([10.100000] <= [10.000000]))
+[0x7fcda5c07e70] Function Call: ID('print') args(ID('b'))
+[0x7fcda5c080c0] if-statement - condition: [1] > [0]
+[0x7fcda5c07f40]     Declaration: ID('a'), Expr(1337)
+[0x7fcda5c08000]     Function Call: ID('print') args(ID('a'))
+[0x7fcda5c08320] if-statement - condition: [ID('b')] > [0]
+[0x7fcda5c081a0]     Declaration: ID('a'), Expr(1337)
+[0x7fcda5c08260]     Function Call: ID('print') args(ID('a'))
+[0x7fcda5c083b0] Declaration: ID('p'), Expr(1337)
+[0x7fcda5c09860] if-statement - condition: [ID('p')] < [1337]
+[0x7fcda5c084c0]     Function Call: ID('print') args('Something went wrong.. Not supposed to be in this 'if' section.')
 else-if-statement - condition: [ID('p')] == [1337]
-[0x7f815d405820]         Function Call: ID('print') args('Yey, I am in an else-if!')
+[0x7fcda5c09290]         Function Call: ID('print') args('Yey, I am in an else-if!')
 else-if-statement - condition: [ID('p')] == [1338]
-[0x7f815d405540]         Function Call: ID('print') args('There is something wrong I am in an 'else-if' section')
+[0x7fcda5c08ef0]         Function Call: ID('print') args('There is something wrong.. I am in an 'else-if' section..')
 else-statment:
-[0x7f815d405cd0]     Function Call: ID('print') args('Nope, something isn't right I am in an 'else' section')
-[0x7f815d405f70] Function Declaration: ID('foobar') args()
-[0x7f815d405e60]         Declaration: ID('b'), Expr('hello from foobar')
-[0x7f815d405f10]         Function Call: ID('print') args(ID('b'))
-[0x7f815d405fc0] Function Call: ID('foobar') args()
-[0x7f815d406050] Declaration: ID('i'), Expr(0)
-[0x7f815d406360] if-statement - condition: [ID('i')] < [5]
-[0x7f815d406220]     Declaration: ID('i'), Expr(ADD(ID('i'),1))
-[0x7f815d4062e0]     Function Call: ID('print') args(ID('i'))
-[0x7f815d406300]     === CONTINUE ===
-[0x7f815d4063f0] Declaration: ID('a'), Expr(1338)
-[0x7f815d406ca0] if-statement - condition: [ID('a')] == [1337]
-[0x7f815d4066d0]     Function Call: ID('print') args(ADD('Now the variable is: ',ID('a')))
-[0x7f815d4067a0]     Function Call: ID('print') args('yey!')
+[0x7fcda5c09560]     Function Call: ID('print') args('Nope, something isn't right. I am in an 'else' section..')
+[0x7fcda5c09a80] Function Declaration: ID('foobar') args()
+[0x7fcda5c09970]         Declaration: ID('b'), Expr('hello from foobar')
+[0x7fcda5c09a20]         Function Call: ID('print') args(ID('b'))
+[0x7fcda5c09ad0] Function Call: ID('foobar') args()
+[0x7fcda5c09b60] Declaration: ID('i'), Expr(0)
+[0x7fcda5c09e70] loop-if-statement - condition: [ID('i')] < [5]
+[0x7fcda5c09d30]     Declaration: ID('i'), Expr(ADD(ID('i'),1))
+[0x7fcda5c09df0]     Function Call: ID('print') args(ID('i'))
+[0x7fcda5c09e10]     === CONTINUE ===
+[0x7fcda5c09f00] Declaration: ID('a'), Expr(1338)
+[0x7fcda5d044a0] loop-if-statement - condition: [ID('a')] == [1337]
+[0x7fcda5c0a1e0]     Function Call: ID('print') args(ADD('Now the variable is: ',ID('a')))
+[0x7fcda5c0a2b0]     Function Call: ID('print') args('yey!')
 else-statment:
-[0x7f815d406ad0]     Function Call: ID('print') args(ADD('A variable was not 1337, it was: ',ID('a')))
-[0x7f815d406b60]     Declaration: ID('a'), Expr(1337)
-[0x7f815d406bd0]     Expr('Re-evaluating');
-[0x7f815d406bf0]     === CONTINUE ===
-[0x7f815d406ce0] Expr('================');
-[0x7f815d406e60] Expr(' Nested looping');
-[0x7f815d406f30] Expr('================');
-[0x7f815d4070e0] Declaration: ID('a'), Expr(0)
-[0x7f815d407d10] if-statement - condition: [ID('a')] < [2]
-[0x7f815d407210]     Declaration: ID('b'), Expr(0)
-[0x7f815d407b70]     if-statement - condition: [ID('b')] < [2]
-[0x7f815d407350]         Declaration: ID('c'), Expr(0)
-[0x7f815d4079d0]         if-statement - condition: [ID('c')] < [2]
-[0x7f815d407830]             Function Call: ID('print') args(ADD(ADD(ADD(ADD(ADD('a: ',ID('a')),', b: '),ID('b')),', c: '),ID('c')))
-[0x7f815d407950]             Declaration: ID('c'), Expr(ADD(ID('c'),1))
-[0x7f815d407970]             === CONTINUE ===
-[0x7f815d407af0]         Declaration: ID('b'), Expr(ADD(ID('b'),1))
-[0x7f815d407b10]         === CONTINUE ===
-[0x7f815d407c90]     Declaration: ID('a'), Expr(ADD(ID('a'),1))
-[0x7f815d407cb0]     === CONTINUE ===
-[0x7f815d407d50] Expr('================');
-[0x7f815d408470] Function Declaration: ID('testFunc') args(ID('a'),ID('b'),ID('c'))
-[0x7f815d408410]         Function Call: ID('print') args(ADD(ADD(ADD(ADD(ADD('arg1: ',ID('a')),', arg2: '),ID('b')),', arg3: '),ID('c')))
-[0x7f815d4085e0] Function Call: ID('testFunc') args(14,12,15)
-[0x7f815d408a00] System(ADD(ADD('echo 'hello, the variable a has the value: ',ID('a')),'''));
-[0x7f815d408b20] Function Call: ID('print') args('Nu e de slut')
+[0x7fcda5d042d0]     Function Call: ID('print') args(ADD('A variable was not 1337, it was: ',ID('a')))
+[0x7fcda5d04360]     Declaration: ID('a'), Expr(1337)
+[0x7fcda5d043d0]     Expr('Re-evaluating');
+[0x7fcda5d043f0]     === CONTINUE ===
+[0x7fcda5d044e0] Expr('================');
+[0x7fcda5d04660] Expr(' Nested looping');
+[0x7fcda5d04730] Expr('================');
+[0x7fcda5d048e0] Declaration: ID('a'), Expr(0)
+[0x7fcda5d05510] loop-if-statement - condition: [ID('a')] < [2]
+[0x7fcda5d04a10]     Declaration: ID('b'), Expr(0)
+[0x7fcda5d05370]     loop-if-statement - condition: [ID('b')] < [2]
+[0x7fcda5d04b50]         Declaration: ID('c'), Expr(0)
+[0x7fcda5d051d0]         loop-if-statement - condition: [ID('c')] < [2]
+[0x7fcda5d05030]             Function Call: ID('print') args(ADD(ADD(ADD(ADD(ADD('a: ',ID('a')),', b: '),ID('b')),', c: '),ID('c')))
+[0x7fcda5d05150]             Declaration: ID('c'), Expr(ADD(ID('c'),1))
+[0x7fcda5d05170]             === CONTINUE ===
+[0x7fcda5d052f0]         Declaration: ID('b'), Expr(ADD(ID('b'),1))
+[0x7fcda5d05310]         === CONTINUE ===
+[0x7fcda5d05490]     Declaration: ID('a'), Expr(ADD(ID('a'),1))
+[0x7fcda5d054b0]     === CONTINUE ===
+[0x7fcda5d05550] Expr('================');
+[0x7fcda5c0a630] Function Declaration: ID('testFunc') args(ID('a'),ID('b'),ID('c'))
+[0x7fcda5c0a5d0]         Function Call: ID('print') args(ADD(ADD(ADD(ADD(ADD('arg1: ',ID('a')),', arg2: '),ID('b')),', arg3: '),ID('c')))
+[0x7fcda5c0a7a0] Function Call: ID('testFunc') args(14,12,15)
+[0x7fcda5c0abc0] System(ADD(ADD('echo 'hello, the variable a has the value: ',ID('a')),'''));
+[0x7fcda5c0ac50] Declaration: ID('a'), Expr(0)
+[0x7fcda5c0b090] loop-if-statement - condition: [ID('a')] < [4]
+[0x7fcda5c0ae20]     Declaration: ID('a'), Expr(ADD(ID('a'),1))
+[0x7fcda5c0aee0]     Function Call: ID('print') args(ID('a'))
+[0x7fcda5c0b010]     if-statement - condition: [ID('a')] >= [2]
+[0x7fcda5c0afb0]         === BREAK ===
+[0x7fcda5c0b030]     === CONTINUE ===
+[0x7fcda5c0b1b0] Function Call: ID('print') args('Nu e de slut')
 
 
 OUTPUT:
@@ -354,6 +362,8 @@ a: 1, b: 1, c: 1
 ================
 arg1: 14, arg2: 12, arg3: 15
 hello, the variable a has the value: 2
+1
+2
 Nu e de slut
 ```
 

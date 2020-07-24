@@ -152,9 +152,6 @@ testFunc(14,12, 15)
 # System call
 $ "echo 'hello, the variable a has the value: " + a + "'"
 
-print("Nu e de slut")
-
-
 a = 0
 . [ a < 4 ] {
   a = a + 1
@@ -166,5 +163,4 @@ a = 0
   @
 }
 
-print("hello")
-
+print("Nu e de slut")

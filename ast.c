@@ -87,6 +87,16 @@ expr_t* newExpr_ID(char *id)
   return expr;
 }
 
+expr_t* newExpr_FuncCall(functionCall_t *func)
+{
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+
+  expr->type = EXPR_TYPE_FUNCCALL;
+  expr->func = func;
+
+  return expr;
+}
+
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right)
 {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
@@ -185,6 +195,7 @@ statement_t* newStatement(int type, void *content)
     case LANG_ENTITY_BREAK:
     case LANG_ENTITY_FIN:
     case LANG_ENTITY_SYSTEM:
+    case LANG_ENTITY_RETURN:
       stmt->content = content;
       break;
     default:

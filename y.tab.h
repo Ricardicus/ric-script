@@ -42,34 +42,36 @@
      DIGIT = 258,
      DOUBLE = 259,
      ID = 260,
-     COMMENT = 261,
-     NEWLINE = 262,
-     KEY_FLOAT = 263,
-     KEY_INT = 264,
-     KEY_STR = 265,
-     KEY_STRUCT = 266,
-     KEY_PROCESS = 267,
-     WHITESPACE = 268,
-     OPEN = 269,
-     CLOSE = 270,
-     OTHER = 271
+     RETURN = 261,
+     COMMENT = 262,
+     NEWLINE = 263,
+     KEY_FLOAT = 264,
+     KEY_INT = 265,
+     KEY_STR = 266,
+     KEY_STRUCT = 267,
+     KEY_PROCESS = 268,
+     WHITESPACE = 269,
+     OPEN = 270,
+     CLOSE = 271,
+     OTHER = 272
    };
 #endif
 /* Tokens.  */
 #define DIGIT 258
 #define DOUBLE 259
 #define ID 260
-#define COMMENT 261
-#define NEWLINE 262
-#define KEY_FLOAT 263
-#define KEY_INT 264
-#define KEY_STR 265
-#define KEY_STRUCT 266
-#define KEY_PROCESS 267
-#define WHITESPACE 268
-#define OPEN 269
-#define CLOSE 270
-#define OTHER 271
+#define RETURN 261
+#define COMMENT 262
+#define NEWLINE 263
+#define KEY_FLOAT 264
+#define KEY_INT 265
+#define KEY_STR 266
+#define KEY_STRUCT 267
+#define KEY_PROCESS 268
+#define WHITESPACE 269
+#define OPEN 270
+#define CLOSE 271
+#define OTHER 272
 
 
 
@@ -79,7 +81,7 @@ typedef union YYSTYPE
 #line 37 "gram.y"
 { int val_int; double val_double; char id[256]; void *data; }
 /* Line 1529 of yacc.c.  */
-#line 83 "y.tab.h"
+#line 85 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

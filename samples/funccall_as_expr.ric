@@ -1,0 +1,13 @@
+@ foobar () {
+  return 1337
+  print("will not be reached")
+}
+
+@ foobar_no_return () {
+}
+
+a = 0 + foobar()
+print("0 + foobar() = " + a)
+
+a = 0 + foobar_no_return()
+print("0 + foobar_no_return() = " + a)

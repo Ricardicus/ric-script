@@ -39,6 +39,7 @@ statement_t *root = NULL;
 %token<val_int> DIGIT
 %token<val_double> DOUBLE
 %token<id> ID
+%token RETURN
 %token COMMENT
 %token NEWLINE
 %token KEY_FLOAT
@@ -69,6 +70,7 @@ statement_t *root = NULL;
 %type<data> ifStatement
 %type<data> loopStatement
 %type<data> continueStatement
+%type<data> returnStatement
 %type<data> breakStatement
 %type<data> systemStatement
 %type<data> middleIfs
@@ -135,6 +137,9 @@ statement:
     | breakStatement {
         $$ = newStatement(LANG_ENTITY_BREAK, $1);
     }
+    | returnStatement {
+        $$ = newStatement(LANG_ENTITY_RETURN, $1);
+    }
     | systemStatement {
         $$ = newStatement(LANG_ENTITY_SYSTEM, $1);
     };
@@ -144,6 +149,10 @@ systemStatement: '$' ID {
 } | '$' stringContents {
     $$ = $2;
 };
+
+returnStatement: RETURN mathContents {
+    $$ = $2;
+}
 
 continueStatement: '@' {
     $$ = NULL;
@@ -421,6 +430,9 @@ mathContent:
     }
     | '(' mathContents ')' {
         $$ = $2;
+    }
+    | functionCall {
+        $$ = newExpr_FuncCall($1);
     }
     | '(' condition ')' {
         $$ = newExpr_Cond($2);

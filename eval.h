@@ -11,11 +11,13 @@
 #define JMP_CODE_CONTINUE    1
 
 int evaluate_condition(ifCondition_t *cond,
+  void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
   hashtable_t *argVals);
 void evaluate_expression(
   expr_t *expr,
+  void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
   hashtable_t *argVals);
@@ -34,12 +36,20 @@ void interpret_statements(int argc, char* argv[], statement_t *stmt);
 void print_condition(ifCondition_t *cond);
 void print_expr(expr_t *expr);
 void print_indents(int indent);
+int  print_args(argsList_t *args);
 
 void setup_namespaces();
 void close_namespaces();
 void flush_arguments(hashtable_t *args);
 
 void arguments_to_variables(int argc, char* argv[]);
+
+void call_func(
+  functionCall_t *funcCall,
+  void *stmt, void *next,
+  PROVIDE_CONTEXT_ARGS(),
+  argsList_t *args,
+  hashtable_t *argVals);
 
 hashtable_t *new_argstable();
 

@@ -10,6 +10,7 @@ jmp_buf continueJmpBuf;
 ctx_table_t continueCtx;
 
 int evaluate_condition(ifCondition_t *cond,
+  void* stmt, void* next,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
   hashtable_t *argVals)
@@ -21,10 +22,10 @@ int evaluate_condition(ifCondition_t *cond,
   /* Arbitrary double resoultion, not sure what to set this to */
   double epsilon = 0.00001;
 
-  evaluate_expression(cond->left, PROVIDE_CONTEXT(), args, argVals);
+  evaluate_expression(cond->left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
   POP_VAL(&svLeft, sp, sc);
 
-  evaluate_expression(cond->right, PROVIDE_CONTEXT(), args, argVals);
+  evaluate_expression(cond->right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
   POP_VAL(&svRight, sp, sc);
 
   switch (cond->type) 
@@ -274,6 +275,7 @@ int evaluate_condition(ifCondition_t *cond,
 
 void evaluate_expression(
   expr_t *expr,
+  void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
   hashtable_t *argVals)
@@ -433,10 +435,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -588,10 +590,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -600,7 +602,7 @@ void evaluate_expression(
           break;
         }
         case DOUBLETYPE: {
-          *f0 = svLeft.i;
+          *f0 = svLeft.d;
           break;
         }
         case TEXT: {
@@ -620,7 +622,7 @@ void evaluate_expression(
           break;
         }
         case DOUBLETYPE: {
-          *f1 = svRight.i;
+          *f1 = svRight.d;
           break;
         }
         case TEXT: {
@@ -651,10 +653,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -714,10 +716,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -774,10 +776,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -835,15 +837,243 @@ void evaluate_expression(
     break;
     case EXPR_TYPE_COND:
     {
-      evaluate_condition(expr->cond, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_condition(expr->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       /* Push ax to stack */
       PUSH_INT(*ax, sp, sc);
+      break;
+    }
+    case EXPR_TYPE_FUNCCALL:
+    {
+      stackval_t sv;
+      functionCall_t *func = (functionCall_t *) expr->func;
+
+      call_func(func, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      POP_VAL(&sv, sp, sc);
+
+      /* Push value to the stack */
+      switch (sv.type) {
+        case INT32TYPE: {
+          PUSH_INT(sv.i, sp, sc);
+          break;
+        }
+        case DOUBLETYPE: {
+          PUSH_DOUBLE(sv.d, sp, sc);
+          break;
+        }
+        case TEXT: {
+          PUSH_STRING(sv.t, sp, sc);
+          break;
+        }
+        default:
+          fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+          exit(1);
+          break;
+      }
       break;
     }
     case EXPR_TYPE_EMPTY:
     default:
     break;
   }
+}
+
+void call_func(
+  functionCall_t *funcCall,
+  void *stmt, void *next,
+  PROVIDE_CONTEXT_ARGS(),
+  argsList_t *args,
+  hashtable_t *argVals)
+{
+  functionDef_t *funcDef;
+  argsList_t *argsWalk = funcCall->args;
+  hashtable_t *newArgumentTable = new_argstable();
+  stackval_t sv;
+  stackval_t sv_ret;
+  libFunction_t *libFunc = NULL;
+
+  /* Looking up the function and calling it if it exists */
+  funcDef = hashtable_get(funcDecs, funcCall->id.id);
+
+  /* Looking up the function among the library */
+  libFunc = look_up_lib(funcCall->id.id);
+
+  /* Check lookup status */
+  if ( funcDef == NULL && libFunc == NULL ) {
+    fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+    exit(1);
+  }
+
+  if ( funcDef != NULL ) {
+    uintptr_t spBefore;
+
+    /* Check that # parameters == # arguments */
+    argsList_t *params = funcDef->params;
+
+    if ( params == NULL && argsWalk != NULL ) {
+      fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+        funcCall->id.id, argsWalk->length );
+      exit(1);
+    }
+
+    if ( params != NULL && argsWalk == NULL ) {
+      fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+        funcCall->id.id, params->length );
+      exit(1);
+    }
+
+    if ( params != NULL && argsWalk != NULL )  {
+      /* Verifying function definition parameters and function call arguments */
+      if ( params->length != argsWalk->length ) {
+        /* print error message */
+        fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+          funcCall->id.id, params->length, argsWalk->length );
+        exit(1);
+      }
+
+      /* Populate arguments */
+      while ( argsWalk != NULL && params != NULL ) {
+        stackval_t sv;
+        expr_t *newArg = NULL;
+
+        if ( params->arg->type != EXPR_TYPE_ID ) {
+          /* This is not supposed to happen */
+          printf("Error: parameter in function definition '%s' was invalid\n",
+            funcCall->id.id);
+        }
+
+        /* Evaluate expression */
+        evaluate_expression(argsWalk->arg, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+        
+        /* Fetch the evaluated expression to the arguments table */
+        POP_VAL(&sv, sp, sc);
+
+        switch (sv.type) {
+          case INT32TYPE: {
+            newArg = newExpr_Ival(sv.i);
+            break;
+          }
+          case DOUBLETYPE: {
+            newArg = newExpr_Float(sv.d);
+            break;
+          }
+          case TEXT: {
+            newArg = newExpr_Text(sv.t);
+            break;
+          }
+          default:
+            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+            exit(1);
+            break;
+        }
+
+        /* Adding expression to argument table */
+        hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+
+        params = params->next;
+        argsWalk = argsWalk->next;
+      }
+
+    }
+
+    /* Default return type: a zero */
+    sv_ret.type = INT32TYPE;
+    sv_ret.i = 0;
+
+    PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+    (*(uintptr_t*)st) = (uintptr_t) stmt;
+    PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
+    (*(uintptr_t*)ed) = (uintptr_t) next;
+
+    spBefore = *(uintptr_t*)sp;
+
+    /* Call the function */
+    if ( funcDecs )
+      interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+
+    if ( *(uintptr_t*)sp != spBefore ) {
+      /* No return statement found, pushing 0 on the stack */
+      POP_VAL(&sv_ret, sp, sc);
+    }
+
+    POP_VAL(&sv, sp, sc);
+    (*(uintptr_t*)ed) = sv.p;
+    POP_VAL(&sv, sp, sc);
+    (*(uintptr_t*)st) = sv.p;
+
+    /* Push function return value to the stack */
+    switch (sv_ret.type) {
+      case INT32TYPE: {
+        PUSH_INT(sv_ret.i, sp, sc);
+        break;
+      }
+      case DOUBLETYPE: {
+        PUSH_DOUBLE(sv_ret.d, sp, sc);
+        break;
+      }
+      case TEXT: {
+        PUSH_STRING(sv_ret.t, sp, sc);
+        break;
+      }
+      case POINTERTYPE: {
+        PUSH_POINTER(sv_ret.p, sp, sc);
+      }
+      default:
+        fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+        exit(1);
+        break;
+    }
+
+    /* Free the argument value table */
+    flush_arguments(newArgumentTable);
+
+  } else {
+
+    if ( libFunc->nbrArgs != (int)argsWalk->length ) {
+      fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+        funcCall->id.id, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
+      exit(1);
+    }
+
+    /* Populate arguments */
+    while ( argsWalk != NULL ) {
+      stackval_t sv;
+
+      /* Evaluate expression */
+      evaluate_expression(argsWalk->arg, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      
+      /* Fetch the evaluated expression to the arguments table */
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+        case INT32TYPE: 
+        {
+          PUSH_INT(sv.i, sp, sc);
+          break;
+        }
+        case DOUBLETYPE:
+        {
+          PUSH_DOUBLE(sv.d, sp, sc);
+          break;
+        }
+        case TEXT:
+        {
+          PUSH_STRING(sv.t, sp, sc);
+          break;
+        }
+        default:
+        {
+          fprintf(stderr, "error: 2 Unknown stackval_t type: %d\n", sv.type);
+          exit(1);
+          break;
+        }
+      }
+
+      argsWalk = argsWalk->next;
+    }
+
+    libFunc->func(sp, sc);
+  }
+
 }
 
 void interpret_statements_(
@@ -887,12 +1117,15 @@ void interpret_statements_(
     case LANG_ENTITY_SYSTEM:
       next = ((statement_t*)stmt)->next;
     break;
+    case LANG_ENTITY_RETURN:
+      next = NULL;
+    break;
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
     { 
       stackval_t sv;
       expr_t *e = ((statement_t*)stmt)->content;
-      evaluate_expression(e, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(e, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&sv, sp, sc);
       switch ( sv.type) {
       case INT32TYPE:
@@ -936,7 +1169,7 @@ void interpret_statements_(
       declaration_t* decl = ((statement_t*)stmt)->content;
 
       /* Evaluating the expression among global variables */
-      evaluate_expression(decl->val, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(decl->val, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&sv, sp, sc);
 
       /* Placing value on the heap */
@@ -960,13 +1193,40 @@ void interpret_statements_(
       expr_t *sys_var = (expr_t*)((statement_t*)stmt)->content;
       stackval_t sv;
 
-      evaluate_expression(sys_var, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(sys_var, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       POP_VAL(&sv, sp, sc);
       switch ( sv.type ) {
       case TEXT:
         /* Making the system call */
         system(sv.t);
         break;
+      default:
+        printf("%s.error: unknown type of system call on the stack (%d)\n", 
+          __func__, sv.type);
+        break;
+      }
+    }
+    break;
+    case LANG_ENTITY_RETURN:
+    {
+      expr_t *retVal = (expr_t*)((statement_t*)stmt)->content;
+      stackval_t sv;
+
+      evaluate_expression(retVal, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      POP_VAL(&sv, sp, sc);
+      switch ( sv.type ) {
+      case TEXT:
+        /* Pushing the return value as a string */
+        PUSH_STRING(sv.t, sp, sc);
+        break;
+      case INT32TYPE:
+        /* Pushing the return value as an int */
+        PUSH_INT(sv.i, sp, sc);
+        break;
+      case DOUBLETYPE:
+        /* Pushing the return value as a double */
+        PUSH_DOUBLE(sv.d, sp, sc);
+      break;
       default:
         printf("%s.error: unknown type of system call on the stack (%d)\n", 
           __func__, sv.type);
@@ -1002,164 +1262,13 @@ void interpret_statements_(
     break;
     case LANG_ENTITY_FUNCCALL:
     {
-      functionDef_t *funcDef;
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
-      argsList_t *argsWalk = funcCall->args;
-      hashtable_t *newArgumentTable = new_argstable();
-      stackval_t sv;
-      libFunction_t *libFunc = NULL;
-
-      /* Looking up the function and calling it if it exists */
-      funcDef = hashtable_get(funcDecs, funcCall->id.id);
-
-      /* Looking up the function among the library */
-      libFunc = look_up_lib(funcCall->id.id);
-
-      /* Check lookup status */
-      if ( funcDef == NULL && libFunc == NULL ) {
-        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
-        exit(1);
-      }
-
-      if ( funcDef != NULL ) {
-
-        /* Check that # parameters == # arguments */
-        argsList_t *params = funcDef->params;
-
-        if ( params == NULL && argsWalk != NULL ) {
-          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
-            funcCall->id.id, argsWalk->length );
-          exit(1);
-        }
-
-        if ( params != NULL && argsWalk == NULL ) {
-          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
-            funcCall->id.id, params->length );
-          exit(1);
-        }
-
-        if ( params != NULL && argsWalk != NULL )  {
-          /* Verifying function definition parameters and function call arguments */
-          if ( params->length != argsWalk->length ) {
-            /* print error message */
-            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
-              funcCall->id.id, params->length, argsWalk->length );
-            exit(1);
-          }
-
-          /* Populate arguments */
-          while ( argsWalk != NULL && params != NULL ) {
-            stackval_t sv;
-            expr_t *newArg = NULL;
-
-            if ( params->arg->type != EXPR_TYPE_ID ) {
-              /* This is not supposed to happen */
-              printf("Error: parameter in function definition '%s' was invalid\n",
-                funcCall->id.id);
-            }
-
-            /* Evaluate expression */
-            evaluate_expression(argsWalk->arg, PROVIDE_CONTEXT(), args, argVals);
-            
-            /* Fetch the evaluated expression to the arguments table */
-            POP_VAL(&sv, sp, sc);
-
-            switch (sv.type) {
-              case INT32TYPE: {
-                newArg = newExpr_Ival(sv.i);
-                break;
-              }
-              case DOUBLETYPE: {
-                newArg = newExpr_Float(sv.d);
-                break;
-              }
-              case TEXT: {
-                newArg = newExpr_Text(sv.t);
-                break;
-              }
-              default:
-                fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-                exit(1);
-                break;
-            }
-
-            /* Adding expression to argument table */
-            hashtable_put(newArgumentTable, params->arg->id.id, newArg);
-
-            params = params->next;
-            argsWalk = argsWalk->next;
-          }
-
-        }
-
-        PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-        (*(uintptr_t*)st) = (uintptr_t) stmt;
-        PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-        (*(uintptr_t*)ed) = (uintptr_t) next;
-
-        /* Call the function */
-        if ( funcDecs )
-          interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
-
-        POP_VAL(&sv, sp, sc);
-        (*(uintptr_t*)ed) = sv.p;
-        POP_VAL(&sv, sp, sc);
-        (*(uintptr_t*)st) = sv.p;
-
-        /* Push some value on the stack: When implementing return, this should be fixed */
-        PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-
-        /* Free the argument value table */
-        flush_arguments(newArgumentTable);
-
-      } else {
-
-        if ( libFunc->nbrArgs != (int)argsWalk->length ) {
-          fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
-            funcCall->id.id, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
-          exit(1);
-        }
-
-        /* Populate arguments */
-        while ( argsWalk != NULL ) {
-          stackval_t sv;
-
-          /* Evaluate expression */
-          evaluate_expression(argsWalk->arg, PROVIDE_CONTEXT(), args, argVals);
-          
-          /* Fetch the evaluated expression to the arguments table */
-          POP_VAL(&sv, sp, sc);
-
-          switch (sv.type) {
-            case INT32TYPE: 
-            {
-              PUSH_INT(sv.i, sp, sc);
-              break;
-            }
-            case DOUBLETYPE:
-            {
-              PUSH_DOUBLE(sv.d, sp, sc);
-              break;
-            }
-            case TEXT:
-            {
-              PUSH_STRING(sv.t, sp, sc);
-              break;
-            }
-            default:
-            {
-              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-              exit(1);
-              break;
-            }
-          }
-
-          argsWalk = argsWalk->next;
-        }
-
-        libFunc->func(sp, sc);
-      }
-
+      call_func(
+        funcCall,
+        stmt, next,
+        PROVIDE_CONTEXT(),
+        args, argVals
+      );
     }
     break;
     case LANG_ENTITY_CONDITIONAL:
@@ -1181,7 +1290,7 @@ void interpret_statements_(
       }
 
       /* Read ax for conditional */
-      evaluate_condition(ifstmt->cond, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_condition(ifstmt->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       if ( *ax ) {
         interpret_statements_(ifstmt->body,
           PROVIDE_CONTEXT(), args, argVals);
@@ -1191,7 +1300,7 @@ void interpret_statements_(
         ifstmtWalk = ifstmt->elif;
 
         while ( ifstmtWalk != NULL ) {
-          evaluate_condition(ifstmtWalk->cond, PROVIDE_CONTEXT(), args, argVals);
+          evaluate_condition(ifstmtWalk->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
           if ( *ax ) {
             interpret_statements_(ifstmtWalk->body,
               PROVIDE_CONTEXT(), args, argVals);
@@ -1310,6 +1419,14 @@ void print_expr(expr_t *expr)
     print_condition((ifCondition_t*)expr->cond);
     printf(")");
     break;
+    case EXPR_TYPE_FUNCCALL:
+    {
+      functionCall_t *funcCall = (functionCall_t *)(expr_t*)expr->func;
+      printf("Function Call: ID('%s') args(", funcCall->id.id);
+      argsList_t *args = funcCall->args;
+      print_args(args);
+      printf(")");
+    }
     case EXPR_TYPE_EMPTY:
     default:
     break;

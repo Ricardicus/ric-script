@@ -14,18 +14,19 @@
 #define BIT(x) ((1)<<((x)-1))
 #endif
 
-#define EXPR_TYPE_ID    1
-#define EXPR_TYPE_FVAL  2
-#define EXPR_TYPE_IVAL  3
-#define EXPR_TYPE_UVAL  4
-#define EXPR_TYPE_TEXT  5
-#define EXPR_TYPE_EMPTY 6
-#define EXPR_TYPE_OPADD 7
-#define EXPR_TYPE_OPSUB 8
-#define EXPR_TYPE_OPDIV 9
-#define EXPR_TYPE_OPMOD 10
-#define EXPR_TYPE_OPMUL 11
-#define EXPR_TYPE_COND  12
+#define EXPR_TYPE_ID        1
+#define EXPR_TYPE_FVAL      2
+#define EXPR_TYPE_IVAL      3
+#define EXPR_TYPE_UVAL      4
+#define EXPR_TYPE_TEXT      5
+#define EXPR_TYPE_EMPTY     6
+#define EXPR_TYPE_OPADD     7
+#define EXPR_TYPE_OPSUB     8
+#define EXPR_TYPE_OPDIV     9
+#define EXPR_TYPE_OPMOD     10
+#define EXPR_TYPE_OPMUL     11
+#define EXPR_TYPE_COND      12
+#define EXPR_TYPE_FUNCCALL  13
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -41,6 +42,7 @@
 #define LANG_ENTITY_CONTINUE     12
 #define LANG_ENTITY_FIN          13
 #define LANG_ENTITY_SYSTEM       14
+#define LANG_ENTITY_RETURN       15
 
 #define LANG_CONDITIONAL_IF      BIT(1)
 #define LANG_CONDITIONAL_ELIF    BIT(2)
@@ -109,6 +111,7 @@ typedef struct expr_s {
 		divOP_t div;
 		modOP_t mod;
     ifCondition_t *cond;
+    void *func;
 	};
 } expr_t;
 
@@ -168,6 +171,7 @@ expr_t* newExpr_Ival(int val);
 expr_t* newExpr_Uval(unsigned val);
 expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
+expr_t* newExpr_FuncCall(functionCall_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 expr_t* newExpr_OPSub(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMul(expr_t *left, expr_t *right);

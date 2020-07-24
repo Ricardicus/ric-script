@@ -1,12 +1,10 @@
 # A script showing how the GCD of two numbers can be determined
 
-gcd = 0
-
 @ calcGCD(a, b) {
     [ b == 0 ] { 
-      gcd = a
+      return a
     } ~ { 
-      calcGCD(b , (a % b) )
+      return calcGCD(b , (a % b) )
     }
 }
 
@@ -19,6 +17,6 @@ gcd = 0
 x = arg1
 y = arg2
 
-calcGCD(x, y)
+gcd = calcGCD(x, y)
 
 print("GCD of " + x + " and " + y + ", is: " + gcd)

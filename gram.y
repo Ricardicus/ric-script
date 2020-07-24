@@ -478,6 +478,9 @@ stringContent:
     | '"' stringEditions '"' {
         $$ = $2;
     }
+    | functionCall {
+        $$ = newExpr_FuncCall($1);
+    }
     | '"' '"' {
         /* Empty text */
         $$ = newExpr_Text("");

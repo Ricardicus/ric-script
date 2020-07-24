@@ -167,5 +167,11 @@ a = 0
   @
 }
 
+@ foobar_with_return ( a ) {
+  return a
+}
+
+print( "foobar_with_return( 1337 ) = " + foobar_with_return( 1337 ) )
+
 print("Nu e de slut")
 

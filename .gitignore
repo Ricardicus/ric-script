@@ -9,3 +9,7 @@ ric
 
 # The name I typically give my meson build folders
 builddir
+
+# The name I typically give my python virtual environments
+venv
+

@@ -167,11 +167,18 @@ a = 0
   @
 }
 
-@ foobar_with_return ( a ) {
-  return a
+@ calcGCD(a, b) {
+    [ b == 0 ] { 
+      return a
+    } ~ { 
+      return calcGCD(b , (a % b) )
+    }
 }
 
-print( "foobar_with_return( 1337 ) = " + foobar_with_return( 1337 ) )
+x = 1204320
+y = 12390
+
+print( "Greatest common denominator of " + x + " and " + y + " is: " + calcGCD(x,y) )
 
 print("Nu e de slut")
 

@@ -12,7 +12,7 @@ fp = fileOpen(fileCheck)
 
 print("File has descriptor: " + fp)
 
-content = "Hello world!"
+content = "Hello world!\nNew line right?\nThis is a slash: \\\nNew line?\nHave a good day!\n"
 
 print("Writing this to file: '" + content + "'")
 

@@ -157,6 +157,8 @@ int ric_write_file(void **sp, size_t *sc)
   stackval_t stv;
   FILE *fp;
   char *text = NULL;
+  int backslash = 0;
+  char *c;
 
   POP_VAL(&stv, sp, sc);
 
@@ -184,7 +186,45 @@ int ric_write_file(void **sp, size_t *sc)
     break;
   }
 
-  fprintf(fp, "%s", text);
+  /* Parsing the string, some character combos: '\r', '\n' should be interpreted disctincly */
+  c = text;
+  while ( *c ) {
+
+    if ( !backslash && *c == '\\' ) {
+      backslash = 1;
+      ++c;
+      continue;
+    }
+
+    if ( backslash ) {
+      switch (*c) {
+      case 'n':
+      // Print a new line
+      fprintf(fp, "\n");
+      break;
+      case 'r':
+      // print the other one windows likes
+      fprintf(fp, "\r");
+      break;
+      case '\\':
+      // print a backslash
+      fprintf(fp, "\\");
+      break;
+      case 't':
+      // print a tab
+      fprintf(fp, "\t");
+      break;
+      default:
+      // Ignoring this backslashed one, since I don't understand it..
+      break;
+      }
+    } else {
+      fputc(*c, fp);
+    }
+
+    ++c;
+    backslash = 0;
+  }
 
   /* Pushing 0, as in OK */
   PUSH_INT(0, sp, sc);

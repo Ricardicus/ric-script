@@ -30,14 +30,61 @@ int ric_exit(void **sp, size_t *sc)
 int ric_print(void **sp, size_t *sc)
 {
   stackval_t stv;
-  char *print_string = 0;
 
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
-    case TEXT:
-    print_string = stv.t;
-    printf("%s\n", print_string);
+    case TEXT: 
+    {
+      char *c = stv.t;
+      int backslash = 0;
+
+      /* 
+      * Parsing the string,
+      * some character combos (such as: '\r','\n)
+      * should be interpreted disctincly
+      */
+      while ( *c ) {
+
+        if ( !backslash && *c == '\\' ) {
+          backslash = 1;
+          ++c;
+          continue;
+        }
+
+        if ( backslash ) {
+          switch (*c) {
+          case 'n':
+          // Print a new line
+          printf("\n");
+          break;
+          case 'r':
+          // print the other one windows likes
+          printf("\r");
+          break;
+          case '\\':
+          // print a backslash
+          printf("\\");
+          break;
+          case 't':
+          // print a tab
+          printf("\t");
+          break;
+          default:
+          // Ignoring this backslashed one, since I don't understand it..
+          break;
+          }
+        } else {
+          printf("%c", *c);
+        }
+
+        ++c;
+        backslash = 0;
+      }
+
+      // end with new line
+      printf("\n");
+    }
     break;
     case INT32TYPE:
     printf("%d\n", stv.i);

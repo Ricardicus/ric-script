@@ -17,7 +17,7 @@ int ric_exit(void **sp, size_t *sc)
     exitCode = (int) stv.i;
     break;
     default:{
-      fprintf(stderr, "error: function call exit expects a single integer as argument.\n");
+      fprintf(stderr, "error: function call 'exit' expects a single integer as argument.\n");
       exit(1);
     }
     break;
@@ -46,7 +46,7 @@ int ric_print(void **sp, size_t *sc)
     printf("%lf\n", stv.d);
     break;
     default:{
-      fprintf(stderr, "error: function call 'exit' got unexpected data type as argument.\n");
+      fprintf(stderr, "error: function call 'print' got unexpected data type as argument.\n");
       exit(1);
     }
     break;
@@ -55,10 +55,46 @@ int ric_print(void **sp, size_t *sc)
   return 0;
 }
 
+int ric_is_file(void **sp, size_t *sc)
+{
+  stackval_t stv;
+  FILE *fp;
+  char *filename = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    filename = stv.t;
+    break;
+    default:{
+      fprintf(stderr, "error: function call 'isFile' got unexpected data type as argument, string expected.\n");
+      exit(1);
+    }
+    break;
+  }
+
+  fp = fopen(filename, "r");
+
+  if ( fp != NULL ) {
+    // There is such a file
+    fclose(fp);
+    // Pushing the result 1
+    PUSH_INT(1, sp, sc);
+  } else {
+    // There is no such file, pushing the result 0
+    PUSH_INT(0, sp, sc);
+  }
+
+  return 0;
+}
+
 /* The ric library */
 libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("exit", 1, ric_exit),
-  DECLARE_LIB_FUNCTION("print", 1, ric_print)
+  DECLARE_LIB_FUNCTION("print", 1, ric_print),
+  DECLARE_LIB_FUNCTION("isFile", 1, ric_is_file)
+
 };
 
 void initialize_ric_lib() {

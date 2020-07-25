@@ -1,8 +1,13 @@
 # Testing out some predefined functions
 
+print("Hello!")
+
+fileCheck = "test.txt"
+
+print("Checking if there is a file called: '" + fileCheck + "': " + isFile(fileCheck))
+
 exitCode = 2
 
-print ( "Hello! I will exit with exit code: " + exitCode )
+print ( "I will exit with exit code: " + exitCode )
 
 exit ( exitCode )
-

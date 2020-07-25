@@ -1,6 +1,8 @@
 #ifndef SYS_RIC_LIB_H
 #define SYS_RIC_LIB_H
 
+#include <stdlib.h>
+
 #include "hashtable.h"
 #include "eval.h"
 #include "ast.h"

@@ -4,7 +4,13 @@ print("Hello!")
 
 fileCheck = "test.txt"
 
-print("Checking if there is a file called: '" + fileCheck + "': " + isFile(fileCheck))
+print("Checking if there is a file called: '" + fileCheck + "': ")
+
+[ isFile(fileCheck) ] {
+  print("- Yes, there was such a file.")
+} ~ {
+  print("- No, there was no such file.")
+}
 
 print("Opening a file: " + fileCheck)
 
@@ -14,7 +20,8 @@ print("File has descriptor: " + fp)
 
 content = "Hello world!\nNew line right?\nThis is a slash: \\\nNew line?\nHave a good day!\n"
 
-print("Writing this to file: '" + content + "'")
+print("Writing this to file:")
+print(content)
 
 fileWrite(fp, content)
 

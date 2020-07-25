@@ -307,6 +307,9 @@ void evaluate_expression(
             case EXPR_TYPE_IVAL:
               PUSH_INT(expArg->ival, sp, sc);
               break;
+            case EXPR_TYPE_POINTER:
+              PUSH_POINTER(expArg->p, sp, sc);
+              break;
             case EXPR_TYPE_FVAL:
               PUSH_DOUBLE(expArg->fval, sp, sc);
               break;
@@ -362,6 +365,9 @@ void evaluate_expression(
           case DOUBLETYPE:
             PUSH_DOUBLE(hv->sv.d, sp, sc);
             break;
+          case POINTERTYPE:
+            PUSH_POINTER(hv->sv.p, sp, sc);
+            break;
           case INT32TYPE:
             PUSH_INT(hv->sv.i, sp, sc);
             break;
@@ -399,6 +405,9 @@ void evaluate_expression(
 
       break;
     }
+    case EXPR_TYPE_POINTER:
+    PUSH_POINTER(expr->p, sp, sc);
+    break;
     case EXPR_TYPE_FVAL:
     PUSH_DOUBLE(expr->fval, sp, sc);
     break;
@@ -453,8 +462,11 @@ void evaluate_expression(
         case TEXT: {
           break;
         }
+        case POINTERTYPE: {
+          break;
+        }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -471,8 +483,11 @@ void evaluate_expression(
         case TEXT: {
           break;
         }
+        case POINTERTYPE: {
+          break;
+        }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -580,7 +595,45 @@ void evaluate_expression(
         }
 
         PUSH_STRING(sv.t, sp, sc);
-      }
+      } else if ( svLeft.type == POINTERTYPE && svRight.type == TEXT ) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len+1);
+        snprintf(newText, len+1, "<%" PRIuPTR ">%s", svLeft.p, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if ( svLeft.type == TEXT && svRight.type == POINTERTYPE ) {
+        size_t len = 50 + strlen(svLeft.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len+1);
+        snprintf(newText, len+1, "%s<%" PRIuPTR ">", svLeft.t, svRight.p);
+
+        sv.type = TEXT;
+        sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } 
 
       break;
     }
@@ -611,7 +664,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -631,7 +684,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -674,7 +727,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -694,7 +747,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -738,7 +791,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -759,7 +812,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -797,7 +850,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -817,7 +870,7 @@ void evaluate_expression(
           break;
         }
         default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -862,6 +915,10 @@ void evaluate_expression(
         }
         case TEXT: {
           PUSH_STRING(sv.t, sp, sc);
+          break;
+        }
+        case POINTERTYPE: {
+          PUSH_POINTER(sv.p, sp, sc);
           break;
         }
         default:
@@ -960,6 +1017,11 @@ void call_func(
             newArg = newExpr_Text(sv.t);
             break;
           }
+          case POINTERTYPE: {
+            newArg = newExpr_Pointer(sv.p);
+            printf("DSADSA\n");
+            break;
+          }
           default:
             fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
             exit(1);
@@ -1016,6 +1078,7 @@ void call_func(
       }
       case POINTERTYPE: {
         PUSH_POINTER(sv_ret.p, sp, sc);
+        break;
       }
       default:
         fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
@@ -1027,6 +1090,13 @@ void call_func(
     flush_arguments(newArgumentTable);
 
   } else {
+    /* This is a library function */
+
+    if ( libFunc->nbrArgs > 0 && argsWalk == NULL ) {
+      fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+        funcCall->id.id, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+      exit(1);
+    }
 
     if ( libFunc->nbrArgs != (int)argsWalk->length ) {
       fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
@@ -1060,9 +1130,13 @@ void call_func(
           PUSH_STRING(sv.t, sp, sc);
           break;
         }
+        case POINTERTYPE: {
+          PUSH_POINTER(sv.p, sp, sc);
+          break;
+        }
         default:
         {
-          fprintf(stderr, "error: 2 Unknown stackval_t type: %d\n", sv.type);
+          fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
           exit(1);
           break;
         }

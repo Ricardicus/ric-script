@@ -27,6 +27,7 @@
 #define EXPR_TYPE_OPMUL     11
 #define EXPR_TYPE_COND      12
 #define EXPR_TYPE_FUNCCALL  13
+#define EXPR_TYPE_POINTER   14
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -112,6 +113,7 @@ typedef struct expr_s {
 		modOP_t mod;
     ifCondition_t *cond;
     void *func;
+    uintptr_t p;
 	};
 } expr_t;
 
@@ -171,6 +173,7 @@ expr_t* newExpr_Ival(int val);
 expr_t* newExpr_Uval(unsigned val);
 expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
+expr_t* newExpr_Pointer(uintptr_t val);
 expr_t* newExpr_FuncCall(functionCall_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 expr_t* newExpr_OPSub(expr_t *left, expr_t *right);

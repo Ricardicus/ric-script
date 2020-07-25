@@ -28,6 +28,16 @@ expr_t* newExpr_Cond(ifCondition_t *cond)
   return expr;
 }
 
+expr_t* newExpr_Pointer(uintptr_t val)
+{
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+
+  expr->type = EXPR_TYPE_POINTER;
+  expr->p = val;
+
+  return expr;
+}
+
 expr_t* newExpr_Text(char *text)
 {
   size_t textLen = strlen(text);

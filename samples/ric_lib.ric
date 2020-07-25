@@ -6,6 +6,22 @@ fileCheck = "test.txt"
 
 print("Checking if there is a file called: '" + fileCheck + "': " + isFile(fileCheck))
 
+print("Opening a file: " + fileCheck)
+
+fp = fileOpen(fileCheck)
+
+print("File has descriptor: " + fp)
+
+content = "Hello world!"
+
+print("Writing this to file: '" + content + "'")
+
+fileWrite(fp, content)
+
+print("Closing the file")
+
+fileClose( fp )
+
 exitCode = 2
 
 print ( "I will exit with exit code: " + exitCode )

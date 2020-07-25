@@ -17,6 +17,4 @@
 x = arg1
 y = arg2
 
-gcd = calcGCD(x, y)
-
-print("GCD of " + x + " and " + y + ", is: " + gcd)
+print("GCD of " + x + " and " + y + ", is: " +  calcGCD(x, y) )

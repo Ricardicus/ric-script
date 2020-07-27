@@ -21,11 +21,11 @@ jobs:
       run: meson builddir; cd builddir; ninja
   test:
 
-    runs-on: ubuntu-latest
+    runs-on: python3
     steps:
     - id: pytests
-      uses: fylein/python-pytest-github-action@v1
-      with:
-        args: pip3 install -r tests/requirements.txt; cd tests; pytest
+      run: pip3 install -r requirements.txt
+      run: meson builddir; cd builddir; ninja
+      run: cd tests; pytest
 
 

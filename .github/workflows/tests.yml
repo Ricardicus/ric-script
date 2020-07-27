@@ -19,10 +19,6 @@ jobs:
         action: build
     - id: build-meson
       run: meson builddir; cd builddir; ninja
-  test:
-
-    runs-on: python3
-    steps:
     - id: install-python-deps
       run: pip3 install -r requirements.txt
     - id: build-meson

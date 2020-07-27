@@ -19,3 +19,9 @@ jobs:
         action: build
     - id: build-meson
       run: meson builddir; cd builddir; ninja
+    - id: pytests
+      uses: fylein/python-pytest-github-action@v1
+      with:
+        args: pip3 install -r tests/requirements.txt; cd tests; pytest
+      run: cd tests; pytest
+

@@ -23,9 +23,11 @@ jobs:
 
     runs-on: python3
     steps:
-    - id: pytests
+    - id: install-python-deps
       run: pip3 install -r requirements.txt
+    - id: build-meson
       run: meson builddir; cd builddir; ninja
+    - id: running-pytest  
       run: cd tests; pytest
 
 

@@ -29,6 +29,13 @@ print("Closing the file")
 
 fileClose( fp )
 
+
+# String functions
+string_int = "1336"
+stringed = parseInt(string_int) + 1
+print("'1336' as a string + 1 is: '" + stringed + "'")
+
+
 exitCode = 2
 
 print ( "I will exit with exit code: " + exitCode )

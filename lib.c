@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lib.h"
 
@@ -173,6 +174,33 @@ int ric_open_file(void **sp, size_t *sc)
   return 0;
 }
 
+int ric_atoi(void **sp, size_t *sc)
+{
+  stackval_t stv;
+  char *string = NULL;
+  int result = 0;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    string = stv.t;
+    break;
+    default:{
+      fprintf(stderr, "error: function call 'parseInt' got unexpected data type as argument, string expected.\n");
+      exit(1);
+    }
+    break;
+  }
+
+  result = atoi(string);
+  
+  /* Pushing file pointer */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
 int ric_close_file(void **sp, size_t *sc)
 {
   stackval_t stv;
@@ -283,6 +311,7 @@ int ric_write_file(void **sp, size_t *sc)
 libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("exit", 1, ric_exit),
   DECLARE_LIB_FUNCTION("print", 1, ric_print),
+  DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
   DECLARE_LIB_FUNCTION("isFile", 1, ric_is_file),
   DECLARE_LIB_FUNCTION("fileOpen", 1, ric_open_file),
   DECLARE_LIB_FUNCTION("fileClose", 1, ric_close_file),

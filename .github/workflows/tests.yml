@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Building & Testing
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-and-test:
 
     runs-on: ubuntu-latest
 
@@ -19,3 +19,9 @@ jobs:
         action: build
     - id: build-meson
       run: meson builddir; cd builddir; ninja
+    - id: install-python-deps
+      run: pip3 install -r requirements.txt
+    - id: running-pytest  
+      run: cd tests; pytest
+
+

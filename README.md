@@ -1,3 +1,5 @@
+![](https://github.com/Ricardicus/ric-script/workflows/Building%20&%20Testing/badge.svg)
+
 # Work in progress
 
 Parsing layer complete,

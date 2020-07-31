@@ -962,6 +962,7 @@ void call_func(
 
   if ( funcDef != NULL ) {
     uintptr_t spBefore;
+    int stackAllocSpEd = 0;
 
     /* Check that # parameters == # arguments */
     argsList_t *params = funcDef->params;
@@ -1041,26 +1042,36 @@ void call_func(
     sv_ret.type = INT32TYPE;
     sv_ret.i = 0;
 
-    PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-    (*(uintptr_t*)st) = (uintptr_t) stmt;
-    PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-    (*(uintptr_t*)ed) = (uintptr_t) next;
+    if ( (*(uintptr_t*)st)  != (uintptr_t) stmt ) {
+
+      PUSH_POINTER((*(uintptr_t*)st), sp, sc);
+      (*(uintptr_t*)st) = (uintptr_t) stmt;
+      PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
+      (*(uintptr_t*)ed) = (uintptr_t) next;
+
+      stackAllocSpEd = 1;
+    }
 
     spBefore = *(uintptr_t*)sp;
 
     /* Call the function */
-    if ( funcDecs )
+    if ( funcDecs ) {
+      /* Moving along, interpreting function*/
       interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+    }
 
     if ( *(uintptr_t*)sp != spBefore ) {
       /* No return statement found, pushing 0 on the stack */
       POP_VAL(&sv_ret, sp, sc);
     }
 
-    POP_VAL(&sv, sp, sc);
-    (*(uintptr_t*)ed) = sv.p;
-    POP_VAL(&sv, sp, sc);
-    (*(uintptr_t*)st) = sv.p;
+    if ( stackAllocSpEd ) {
+      /* Resetting original values */
+      POP_VAL(&sv, sp, sc);
+      (*(uintptr_t*)ed) = sv.p;
+      POP_VAL(&sv, sp, sc);
+      (*(uintptr_t*)st) = sv.p;
+    }
 
     /* Push function return value to the stack */
     switch (sv_ret.type) {

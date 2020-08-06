@@ -4,7 +4,8 @@
   "description": "An interactive ric script interpreter",
   "main": "app.js",
   "scripts": {
-    "test": "test"
+    "install": "cd ..; rm -r builddir; make; mkdir builddir; cp ric builddir; cp ric ../node",
+    "test": "cd ../tests; pytest"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "pytest": "^1.0.0",
     "socket.io": "^2.3.0"
   }
 }

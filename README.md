@@ -26,6 +26,24 @@ ninja
 # Ignore the warnings.....
 ```
 
+# Docker
+
+A containarized node.js app has been developed to test the langauge.
+The container exposes the port 3000. 
+## Docker example
+```
+git clone https://github.com/Ricardicus/ric-script
+cd ric_script
+docker build -t node-ric-script:1.0 .
+docker run --rm -d -p 3002:3000 node-ric-script:1.0
+```
+
+Now go visit localhost:3002! 
+
+It looks like this: 
+
+
+
 # Code interpreter
 
 Launching the program with arguments -p or -pi will display 

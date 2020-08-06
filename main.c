@@ -60,11 +60,9 @@ int main(int argc, char *argv[]) {
         if ( fp == NULL ) {
           /* Attempt to open the file */
           fp = fopen(argv[i], "r");
-          if ( fp == NULL ) {
-            fprintf(stderr, "Error: failed to open file: '%s'\n", argv[i]);
-            exit(1);
+          if ( fp != NULL ) {
+            yyin = fp;
           }
-          yyin = fp;
         }
       }
       ++i;

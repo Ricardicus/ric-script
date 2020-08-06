@@ -13,3 +13,5 @@ builddir
 # The name I typically give my python virtual environments
 venv
 
+# Node modules
+node/node_modules

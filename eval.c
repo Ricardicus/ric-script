@@ -1854,7 +1854,7 @@ void arguments_to_variables(int argc, char* argv[])
   hvp = ast_emalloc(sizeof(heapval_t));
 
   sv.type = TEXT;
-  sv.t = argv[1];
+  sv.t = argv[0];
 
   hvp->sv = sv;
 

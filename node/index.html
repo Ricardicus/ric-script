@@ -1,0 +1,154 @@
+<!doctype html>
+  <html>
+    <head>
+      <script src="js/jqeury.v3.5.1.js"></script>
+      <style>
+        textarea {
+          border: 1px solid #888;
+          outline: none;
+          resize: none;
+          font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+          background-color: #888888;
+          border-radius: 5px;
+          color:white;
+        }
+
+        div.btn, div.sample-btn {
+          color: white;
+          background-color: #888888;
+          padding: 0px;
+          border-radius: 20px;
+          width: 200px;
+          height: 80px;
+          text-align: center;
+          vertical-align: middle;
+          line-height: 80px;
+        }
+
+        span.stdout {
+          color: blue;
+        }
+        span.stderr {
+          color: blue;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="terminal"></div>
+      <script type="text/javascript">
+
+$(document).ready(function(){
+
+$("div.btn").hover(function () {
+  $(this).fadeTo("fast", 0.6);
+}, function () {
+  $(this).fadeTo("fast", 1.0);
+});
+
+$("div.sample-btn").hover(function () {
+  $(this).fadeTo("fast", 0.6);
+}, function () {
+  $(this).fadeTo("fast", 1.0);
+});
+
+$("div.sample-btn").click(function () {
+  var sample = $(this).attr("value");
+  $.ajax({
+    type: "GET",
+    url: "/samples/" + sample,
+    success: function(res) {
+      /* Sample will be collected */
+    },
+    error: function(err) {
+      alert("Error");
+    }
+
+  });
+
+});
+
+$("#interpret-btn").click(function(){
+  var content = $("#input-script").val();
+  var args = $("#interpret-args-inpt").val();
+
+  var databdy = {script : content, arguments: args};
+
+  $.ajax({
+    type: "POST",
+    url: "/interpret",
+    data: databdy,
+    success: function(res) {
+      /* Program launched */
+    },
+    error: function(err) {
+      alert("Error");
+    }
+
+  });
+})
+
+});
+
+
+      </script>
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+        var s = io();
+
+        s.on("terminal-output-stdout", (msg) => {
+          $("#output-monitor").css("color", "white");
+          $("#output-monitor").append(msg["message"]);
+        });
+        s.on("terminal-output-stderr", (msg) => {
+          $("#output-monitor").css("color", "#883333");
+          $("#output-monitor").append(msg["message"]);
+        });
+        s.on("terminal-refresh", (msg) => {
+          document.getElementById("output-monitor").innerHTML = "";
+        });
+        s.on("terminal-sample", (msg) => {
+          $("#input-script").val(msg["message"])
+        });
+        s.on("terminal-exit-code", (msg) => {
+          document.getElementById("output-monitor-exit-code").innerHTML = "Exit code: " + msg["message"]
+            + ( msg["message"] == 0 ? " (Success)" : "" );
+        });
+
+      </script>
+
+      <table>
+        <tbody>
+          <tr>
+            <td><center><h1>Input</h1></center></td>
+            <td><center><h1>Output</h1></center></td>
+            <td><center><h1>Samples</h1></center></td>
+          </tr>
+          <tr>
+            <td>
+              <textarea id="input-script" placeholder="" cols="60" rows="40"></textarea>
+            </td>
+            <td>
+              <textarea id="output-monitor" class="monitor" cols="60" rows="40" readonly></textarea>    
+            </td>
+            <td>
+              <div class="sample-btn" value="ric_lib.ric">Standard library</div><br>
+              <div class="sample-btn" value="function_within_function.ric">Function within function</div><br>
+              <div class="sample-btn" value="gcd.ric">GCD calculation</div><br>
+              <div class="sample-btn" value="recursion.ric">Recursion</div><br>
+            </td>
+
+          </tr>
+          <tr><td style="height:100px;"><center>Arguments: <input id="interpret-args-inpt" value="arg1 arg2"></center></td><td></td><td></td></tr>
+          <tr>
+            <td>
+              <center><div class="btn" id="interpret-btn">Interpret</div></center>
+            </td>
+            <td>
+              <center><p id="output-monitor-exit-code"></p></center>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </body>
+  </html>

@@ -1,0 +1,24 @@
+{
+  "name": "ricscript",
+  "version": "1.0.0",
+  "description": "An interactive ric script interpreter",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ricardicus/ric-script.git"
+  },
+  "author": "Rickard Hallerbäck",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ricardicus/ric-script/issues"
+  },
+  "homepage": "https://github.com/Ricardicus/ric-script#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}

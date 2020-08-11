@@ -1,4 +1,5 @@
 import os
+from settings import *
 
 result = ["foo",
 "not bar",
@@ -9,7 +10,7 @@ result = ["foo",
 
 
 def test_function_within_function():
-  script = "./../builddir/ric ../samples/function_within_function.ric"
+  script = "./" + EXECUTABLE + " ../samples/function_within_function.ric"
 
   sample_result = os.popen(script).read()
 

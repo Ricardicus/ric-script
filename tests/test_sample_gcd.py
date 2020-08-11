@@ -1,6 +1,7 @@
 # Pytest suite for the ric script
 # Stand in this directory on launch
 import os
+from settings import *
 from random import randint, seed
 
 # used in the test_gcd function
@@ -11,7 +12,7 @@ def gcd(a,b):
         return gcd(b,a%b)
 
 def test_gcd():
-    gcd_script = "./../builddir/ric ../samples/gcd.ric "
+    gcd_script = "./" + EXECUTABLE + " ../samples/gcd.ric "
 
     number_of_tests = 100
 

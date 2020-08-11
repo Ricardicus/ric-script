@@ -1,7 +1,8 @@
 import os
+from settings import *
 
 def test_exit_code():
-  lib_script = "./../builddir/ric ../samples/ric_lib.ric "
+  lib_script = "./" + EXECUTABLE + " ../samples/ric_lib.ric "
 
 
   ret = os.system(lib_script)
@@ -21,7 +22,7 @@ def test_file_exist():
   "Have a good day!"
   ]
 
-  lib_script = "./../builddir/ric ../samples/ric_lib.ric "
+  lib_script = "./" + EXECUTABLE + " ../samples/ric_lib.ric "
 
   ret = os.system(lib_script)
   if (os.WIFEXITED(ret)):

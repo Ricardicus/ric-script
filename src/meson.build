@@ -19,7 +19,7 @@ else
 	deps = [mathlib]
 endif
 
-network = executable('ric',
+interpreter = executable('ric',
   sources: [sources],
   dependencies: deps,
   include_directories: [includes]

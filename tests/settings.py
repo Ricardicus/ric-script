@@ -1,0 +1,2 @@
+EXECUTABLE = "../builddir/src/ric"
+

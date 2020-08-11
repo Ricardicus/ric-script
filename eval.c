@@ -356,6 +356,7 @@ void evaluate_expression(
       }
 
       if ( walk == NULL ) {
+        functionDef_t *funcDef; // if it is a function pointer
         /* Check among the variables if we have it defined there */
         hv = hashtable_get(varDecs, expr->id.id);
 
@@ -397,10 +398,24 @@ void evaluate_expression(
             break;
           }
 
+          stop = 1;
+        }
+
+        if ( stop ) {
+          break;
+        }
+
+        /* Check among the function declarations if we have it defined there */
+        funcDef = hashtable_get(funcDecs, expr->id.id);
+        if ( funcDef != NULL ) {
+          // Pushing the function definition
+          PUSH_FUNCPTR(funcDef, sp, sc);
+          stop = 1;
         } else {
           fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
           exit(1);
         }
+
       }
 
       break;
@@ -956,8 +971,16 @@ void call_func(
 
   /* Check lookup status */
   if ( funcDef == NULL && libFunc == NULL ) {
-    fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
-    exit(1);
+    heapval_t *hv;
+    /* Check if this is a function pointer call (lowest priority) */
+    hv = hashtable_get(varDecs, funcCall->id.id);
+
+    if ( hv == NULL || hv->sv.type != FUNCPTRTYPE ) {
+      fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+      exit(1);
+    }
+
+    funcDef = hv->sv.func;
   }
 
   if ( funcDef != NULL ) {

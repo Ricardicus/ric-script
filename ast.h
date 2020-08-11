@@ -28,6 +28,7 @@
 #define EXPR_TYPE_COND      12
 #define EXPR_TYPE_FUNCCALL  13
 #define EXPR_TYPE_POINTER   14
+#define EXPR_TYPE_FUNC_PTR  15
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -174,6 +175,7 @@ expr_t* newExpr_Uval(unsigned val);
 expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
 expr_t* newExpr_Pointer(uintptr_t val);
+expr_t* newExpr_FuncPtr(void *func);
 expr_t* newExpr_FuncCall(functionCall_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 expr_t* newExpr_OPSub(expr_t *left, expr_t *right);
@@ -198,7 +200,8 @@ typedef enum stackvaltypes {
 	INT32TYPE = 1,
 	DOUBLETYPE,
 	TEXT,
-	POINTERTYPE
+	POINTERTYPE,
+  FUNCPTRTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -208,6 +211,7 @@ typedef struct stackval {
 		int32_t i;
 		char *t;
 		uintptr_t p;
+    functionDef_t *func;
 	};
 } stackval_t;
 
@@ -314,6 +318,22 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = POINTERTYPE;\
 stackval.p = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
+
+#define PUSH_FUNCPTR(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = FUNCPTRTYPE;\
+stackval.func = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

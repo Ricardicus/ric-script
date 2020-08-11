@@ -1,0 +1,28 @@
+@ foobar0() {
+  print("Foobar!")
+}
+
+@ foobar1(a) {
+  print("Foobar!" + a)
+}
+
+@ foobar2(a, b) {
+  print("Foobar!" + a + b)
+}
+
+@ foobar3(a, b, c) {
+  print("Foobar!" + a + b + c)
+}
+
+# Reusing a to point to different functions
+# These function differ in name and number of arguments
+a = foobar0
+a()
+a = foobar1
+a(" foo")
+
+a = foobar2
+a(" foo","bar")
+
+a = foobar3
+a(" foo ", "bar ", ":)")

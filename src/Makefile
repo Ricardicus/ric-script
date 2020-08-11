@@ -1,3 +1,13 @@
+# Author: Rickard Hallerbäck
+#
+# Builds the interpreter from scratch.
+# If bison is installed, sources for
+# a LALR-parser is generated anew. If not,
+# I have included sources generated on my own
+# system. The LARL-parser and scanner is
+# defined by FLEXSPEC and YACCSPEC.
+# Yacc generated the parser, flex the scanner.
+
 CC = gcc
 
 FLEXSPEC = lex.l

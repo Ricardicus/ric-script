@@ -54,7 +54,7 @@ I expect there are things one can easily solve during the interpretation
 that is harder to compile, but I don't bother too much with that at the moment.
 I am developing the interpreter and while doing so I decide what features
 this language should have. Here is a list of steps I have implemented as
-well as havent implemented:
+well as haven't implemented:
 
 - [x] Function declarations
 - [x] Function calls

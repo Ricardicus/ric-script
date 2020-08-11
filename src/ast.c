@@ -261,6 +261,8 @@ functionDef_t* newFunc(const char *id, void *params, void *body)
 
   memcpy(func->id.id, id, idLen);
 
+  func->id.id[idLen] = 0;
+
   return func;
 }
 
@@ -274,7 +276,10 @@ functionCall_t* newFunCall(const char *id, void *args)
   func->args = args;
 
   func->id.id = ast_emalloc(idLen+1);
+
   memcpy(func->id.id, id, idLen);
+
+  func->id.id[idLen] = 0;
 
   return func;
 }

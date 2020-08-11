@@ -51,12 +51,12 @@ The interpreter GUI looks like this:
 
 This is a work in progress, an the first time I am developing a language.
 I expect there are things one can easily solve during the interpretation
-that is harded to compile, but I don't bother too much with that at the moment.
+that is harder to compile, but I don't bother too much with that at the moment.
 I am developing the interpreter and while doing so I decide what features
 this language should have. Here is a list of steps I have implemented as
 well as havent implemented:
 
-- [x] Function declaratons
+- [x] Function declarations
 - [x] Function calls
 - [x] Function pointer
 - [x] Variable declaratons

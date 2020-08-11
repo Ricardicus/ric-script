@@ -9,3 +9,8 @@ all:
 
 clean: 
 	make clean -C src
+
+test: 
+	make test -C tests
+
+

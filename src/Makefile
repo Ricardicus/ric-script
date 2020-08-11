@@ -34,11 +34,11 @@ test: ric
 	@echo "============================================"
 	@echo "Content of file 'samples/example.ric'"
 	@echo "============================================"
-	@cat samples/example.ric
+	@cat ../samples/example.ric
 	@echo "============================================"
 	@echo "Interpretation of file 'samples/example.ric'"
 	@echo "============================================"
-	@./ric -pi samples/example.ric
+	@./ric -pi ../samples/example.ric
 
 lex: $(FLEXSPEC)
 ifeq (, $(shell which flex))

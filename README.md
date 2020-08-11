@@ -73,6 +73,7 @@ well as haven't implemented:
 - [ ] Standard library for stdin reads
 - [ ] Standard library for cool stuff
 - [ ] Vector expressions and standard library for vector manipulation
+- [ ] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
 
 # Intermediate code generation
 

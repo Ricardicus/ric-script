@@ -59,7 +59,7 @@ well as haven't implemented:
 - [x] Function declarations
 - [x] Function calls
 - [x] Function pointer
-- [x] Variable declaratons
+- [x] Variable declarations
 - [x] Variable usage
 - [x] The '+' operator on strings with string as well as non-string expressions
 - [x] Function delaration overloads

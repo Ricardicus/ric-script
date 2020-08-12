@@ -2,17 +2,25 @@ s = ["hej", 1337, "hejsan"]
 
 print(s)
 
+print(s[0])
+print(s[1])
+print(s[2])
+
 a = 1337
 
 q = [a, s]
 
 print(q)
 
-print(s[0])
-print(s[1])
-print(s[2])
 print(q[0])
 print(q[1])
-print(q[0][0])
-print(q[0][1])
-print(q[0][2])
+
+print(q[1][0])
+print(q[1][1])
+print(q[1][2])
+
+f = [1337, q]
+
+print(f[1][1][0])
+print(f[1][1][1])
+print(f[1][1][2])

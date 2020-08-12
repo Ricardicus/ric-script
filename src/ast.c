@@ -51,10 +51,25 @@ expr_t* newExpr_FuncPtr(void *func)
 expr_t* newExpr_Vector(argsList_t *args)
 {
   int32_t length = 0;
-  argsList_t *walk = args;
+  argsList_t *walk;
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
 
+  /* Reverse the args list order */
+  argsList_t *prev = NULL;
+  argsList_t *current = args;
+  argsList_t *next;
+  while (current != NULL) 
+  { 
+    next = current->next;
+    current->next = prev;
+    prev = current;
+    current = next;
+  }
+
+  args = prev;
+
+  walk = args;
   /* Counting the vectors length */
   while ( walk != NULL ) {
     length++;

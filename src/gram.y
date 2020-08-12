@@ -444,7 +444,6 @@ mathContent:
         $$ = $1;
     }
     | indexedVector {
-
         $$ = $1;
     }
     | '(' mathContents ')' {

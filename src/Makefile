@@ -19,7 +19,7 @@ RIC_SOURCES = main hashtable hooks ast eval lib
 
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
-CFLAGS = Wall Werror O2 Wno-strict-aliasing Wno-unused-result
+CFLAGS = Wall Werror O2 Wno-strict-aliasing Wno-unused-result -Wno-unused-parameter
 
 .PHONY: lex yacc test
 

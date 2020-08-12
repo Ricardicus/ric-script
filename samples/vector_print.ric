@@ -1,0 +1,9 @@
+s = ["hej", 1337, "hejsan"]
+
+print(s)
+
+a = 1337
+
+q = [a, s]
+
+print(q)

@@ -48,6 +48,28 @@ expr_t* newExpr_FuncPtr(void *func)
   return expr;
 }
 
+expr_t* newExpr_Vector(argsList_t *args)
+{
+  unsigned int length = 0;
+  argsList_t *walk = args;
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  vector_t *vec = ast_emalloc(sizeof(vector_t));
+
+  /* Counting the vectors length */
+  while ( walk != NULL ) {
+    length++;
+    walk = walk->next;
+  }
+
+  vec->length = length;
+  vec->content = args;
+
+  expr->type = EXPR_TYPE_VECTOR;
+  expr->vec = vec;
+
+  return expr;
+}
+
 expr_t* newExpr_Text(char *text)
 {
   size_t textLen = strlen(text);

@@ -22,10 +22,10 @@ int evaluate_condition(ifCondition_t *cond,
   /* Arbitrary double resoultion, not sure what to set this to */
   double epsilon = 0.00001;
 
-  evaluate_expression(cond->left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+  evaluate_expression(cond->left, EXPRESSION_ARGS());
   POP_VAL(&svLeft, sp, sc);
 
-  evaluate_expression(cond->right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+  evaluate_expression(cond->right, EXPRESSION_ARGS());
   POP_VAL(&svRight, sp, sc);
 
   switch (cond->type) 
@@ -275,10 +275,7 @@ int evaluate_condition(ifCondition_t *cond,
 
 void evaluate_expression(
   expr_t *expr,
-  void *stmt, void *next,
-  PROVIDE_CONTEXT_ARGS(),
-  argsList_t* args,
-  hashtable_t *argVals)
+  EXPRESSION_PARAMS())
 {
   if ( expr == NULL )
     return;
@@ -298,7 +295,7 @@ void evaluate_expression(
         if ( exp->type == EXPR_TYPE_ID ) {
           expr_t *expArg;
 
-          /* Check among the variables if we have it defined there */
+          /* Check among the arguments if we have it defined there */
           expArg = hashtable_get(argVals, expr->id.id);
 
           if ( expArg != NULL ) {
@@ -309,6 +306,9 @@ void evaluate_expression(
               break;
             case EXPR_TYPE_POINTER:
               PUSH_POINTER(expArg->p, sp, sc);
+              break;
+            case EXPR_TYPE_VECTOR:
+              PUSH_VECTOR(expArg->vec, sp, sc);
               break;
             case EXPR_TYPE_FVAL:
               PUSH_DOUBLE(expArg->fval, sp, sc);
@@ -369,6 +369,9 @@ void evaluate_expression(
           case POINTERTYPE:
             PUSH_POINTER(hv->sv.p, sp, sc);
             break;
+          case VECTORTYPE:
+            PUSH_VECTOR(hv->sv.vec, sp, sc);
+            break;
           case INT32TYPE:
             PUSH_INT(hv->sv.i, sp, sc);
             break;
@@ -426,6 +429,9 @@ void evaluate_expression(
     case EXPR_TYPE_FVAL:
     PUSH_DOUBLE(expr->fval, sp, sc);
     break;
+    case EXPR_TYPE_VECTOR:
+    PUSH_VECTOR(expr->vec, sp, sc);
+    break;
     case EXPR_TYPE_IVAL:
     PUSH_INT(expr->ival, sp, sc);
     break;
@@ -459,10 +465,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, EXPRESSION_ARGS());
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -658,10 +664,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, EXPRESSION_ARGS());
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -721,10 +727,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, EXPRESSION_ARGS());
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -784,10 +790,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, EXPRESSION_ARGS());
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -844,10 +850,10 @@ void evaluate_expression(
       stackval_t svLeft;
       stackval_t svRight;
 
-      evaluate_expression((expr_t*)expr->add.left, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
 
-      evaluate_expression((expr_t*)expr->add.right, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression((expr_t*)expr->add.right, EXPRESSION_ARGS());
       POP_VAL(&svRight, sp, sc);
 
       switch (svLeft.type) {
@@ -934,6 +940,10 @@ void evaluate_expression(
         }
         case POINTERTYPE: {
           PUSH_POINTER(sv.p, sp, sc);
+          break;
+        }
+        case VECTORTYPE: {
+          PUSH_VECTOR(sv.vec, sp, sc);
           break;
         }
         default:
@@ -1023,7 +1033,7 @@ void call_func(
         }
 
         /* Evaluate expression */
-        evaluate_expression(argsWalk->arg, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+        evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
         
         /* Fetch the evaluated expression to the arguments table */
         POP_VAL(&sv, sp, sc);
@@ -1043,7 +1053,10 @@ void call_func(
           }
           case POINTERTYPE: {
             newArg = newExpr_Pointer(sv.p);
-            printf("DSADSA\n");
+            break;
+          }
+          case VECTORTYPE: {
+            newArg = newExpr_Vector(sv.vec->content);
             break;
           }
           default:
@@ -1114,6 +1127,10 @@ void call_func(
         PUSH_POINTER(sv_ret.p, sp, sc);
         break;
       }
+      case VECTORTYPE: {
+        PUSH_VECTOR(sv_ret.vec, sp, sc);
+        break;
+      }
       default:
         fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
         exit(1);
@@ -1143,7 +1160,7 @@ void call_func(
       stackval_t sv;
 
       /* Evaluate expression */
-      evaluate_expression(argsWalk->arg, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
       
       /* Fetch the evaluated expression to the arguments table */
       POP_VAL(&sv, sp, sc);
@@ -1168,6 +1185,10 @@ void call_func(
           PUSH_POINTER(sv.p, sp, sc);
           break;
         }
+        case VECTORTYPE: {
+          PUSH_VECTOR(sv.vec, sp, sc);
+          break;
+        }
         default:
         {
           fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
@@ -1179,7 +1200,7 @@ void call_func(
       argsWalk = argsWalk->next;
     }
 
-    libFunc->func(sp, sc);
+    libFunc->func( EXPRESSION_ARGS() );
   }
 
 }
@@ -1233,7 +1254,7 @@ void interpret_statements_(
     { 
       stackval_t sv;
       expr_t *e = ((statement_t*)stmt)->content;
-      evaluate_expression(e, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(e, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
       switch ( sv.type) {
       case INT32TYPE:
@@ -1277,7 +1298,7 @@ void interpret_statements_(
       declaration_t* decl = ((statement_t*)stmt)->content;
 
       /* Evaluating the expression among global variables */
-      evaluate_expression(decl->val, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(decl->val, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
       /* Placing value on the heap */
@@ -1301,7 +1322,7 @@ void interpret_statements_(
       expr_t *sys_var = (expr_t*)((statement_t*)stmt)->content;
       stackval_t sv;
 
-      evaluate_expression(sys_var, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(sys_var, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
       switch ( sv.type ) {
       case TEXT:
@@ -1320,7 +1341,7 @@ void interpret_statements_(
       expr_t *retVal = (expr_t*)((statement_t*)stmt)->content;
       stackval_t sv;
 
-      evaluate_expression(retVal, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      evaluate_expression(retVal, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
       switch ( sv.type ) {
       case TEXT:
@@ -1330,6 +1351,10 @@ void interpret_statements_(
       case INT32TYPE:
         /* Pushing the return value as an int */
         PUSH_INT(sv.i, sp, sc);
+        break;
+      case VECTORTYPE:
+        /* Pushing the return value as a vector */
+        PUSH_VECTOR(sv.vec, sp, sc);
         break;
       case DOUBLETYPE:
         /* Pushing the return value as a double */
@@ -1529,12 +1554,21 @@ void print_expr(expr_t *expr)
     break;
     case EXPR_TYPE_FUNCCALL:
     {
-      functionCall_t *funcCall = (functionCall_t *)(expr_t*)expr->func;
+      functionCall_t *funcCall = (functionCall_t *)expr->func;
       printf("Function Call: ID('%s') args(", funcCall->id.id);
       argsList_t *args = funcCall->args;
       print_args(args);
       printf(")");
     }
+    break;
+    case EXPR_TYPE_VECTOR:
+    {
+      vector_t *vec = (vector_t *)expr->vec;
+      printf("Vector, content(");
+      print_args(vec->content);
+      printf(")");
+    }
+    break;
     case EXPR_TYPE_EMPTY:
     default:
     break;
@@ -1588,6 +1622,55 @@ void print_indents(int indent) {
   }
 }
 
+int print_vector(
+  vector_t *vec,
+  EXPRESSION_PARAMS())
+{
+  argsList_t *walk = vec->content;
+  
+  printf("[");
+  while ( walk != NULL ) {
+    stackval_t sv;
+    evaluate_expression(walk->arg, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+
+    switch (sv.type) {
+    case INT32TYPE:
+      printf("%" PRIi32 "", sv.i);
+      break;
+    case DOUBLETYPE:
+      printf("%lf", sv.d);
+      break;
+    case TEXT:
+      printf("'%s'", sv.t);
+      break;
+    case POINTERTYPE:
+      printf("<%" PRIuPTR ">", sv.p);
+      break;
+    case FUNCPTRTYPE:
+      printf("<Function: '%s'>", sv.func->id.id);
+      break;
+    case VECTORTYPE:
+      print_vector(sv.vec, EXPRESSION_ARGS());
+      break;
+    default:
+      printf("%s.error: unknown type of value on the stack (%d)\n", 
+        __func__, sv.type);
+      break;
+    }
+
+    walk = walk->next;
+    if ( walk != NULL ) {
+      printf(",");
+    }
+  }
+
+  printf("]");
+  
+  return 0;
+}
+
+
 void flush_arguments(hashtable_t *table)
 {
   if ( table != NULL ) {
@@ -1603,6 +1686,7 @@ int print_args(argsList_t *args)
   if ( print_args(args->next) ) {
     printf(",");
   }
+
   print_expr(args->arg);
   return 1;
 }

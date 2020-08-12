@@ -3,10 +3,11 @@
 #include <string.h>
 
 #include "lib.h"
+#include "eval.h"
 
 hashtable_t *libCallbacks = NULL;
 
-int ric_exit(void **sp, size_t *sc)
+int ric_exit(EXPRESSION_PARAMS())
 {
   stackval_t stv;
   int exitCode = 0;
@@ -28,7 +29,7 @@ int ric_exit(void **sp, size_t *sc)
   return 1;
 }
 
-int ric_print(void **sp, size_t *sc)
+int ric_print(EXPRESSION_PARAMS())
 {
   stackval_t stv;
 
@@ -96,6 +97,15 @@ int ric_print(void **sp, size_t *sc)
     case POINTERTYPE:
     printf("<%" PRIuPTR ">\n", stv.p);
     break;
+    case FUNCPTRTYPE:
+    printf("<Function: '%s'>\n", stv.func->id.id);
+    break;
+    case VECTORTYPE:
+    {
+      print_vector(stv.vec, EXPRESSION_ARGS());
+      printf("\n");
+    }
+    break;
     default: {
       fprintf(stderr, "error: function call 'print' got unexpected data type as argument.\n");
       exit(1);
@@ -106,7 +116,7 @@ int ric_print(void **sp, size_t *sc)
   return 0;
 }
 
-int ric_is_file(void **sp, size_t *sc)
+int ric_is_file(EXPRESSION_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -140,7 +150,7 @@ int ric_is_file(void **sp, size_t *sc)
   return 0;
 }
 
-int ric_open_file(void **sp, size_t *sc)
+int ric_open_file(EXPRESSION_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -174,7 +184,7 @@ int ric_open_file(void **sp, size_t *sc)
   return 0;
 }
 
-int ric_atoi(void **sp, size_t *sc)
+int ric_atoi(EXPRESSION_PARAMS())
 {
   stackval_t stv;
   char *string = NULL;
@@ -201,7 +211,7 @@ int ric_atoi(void **sp, size_t *sc)
   return 0;
 }
 
-int ric_close_file(void **sp, size_t *sc)
+int ric_close_file(EXPRESSION_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -227,7 +237,7 @@ int ric_close_file(void **sp, size_t *sc)
   return 0;
 }
 
-int ric_write_file(void **sp, size_t *sc)
+int ric_write_file(EXPRESSION_PARAMS())
 {
   stackval_t stv;
   FILE *fp;

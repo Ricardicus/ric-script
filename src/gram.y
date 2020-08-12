@@ -67,6 +67,7 @@ statement_t *root = NULL;
 %type<data> functionCall
 %type<data> mathContents
 %type<data> mathContent
+%type<data> vector
 %type<data> ifStatement
 %type<data> loopStatement
 %type<data> continueStatement
@@ -364,11 +365,23 @@ declaration:
     | ID '=' condition {
         expr_t *expr = newExpr_Cond($3);
         $$ = newDeclaration($1,expr);
+    }
+    | ID '=' vector {
+        $$ = newDeclaration($1,$3);
     };
 
 body:
     '{' statements '}' {
         $$ = newBody($2);
+    };
+
+vector:
+    '[' arguments_list ']' {
+      argsList_t *args = (argsList_t*) $2;
+      $$ = newExpr_Vector(args);
+    }
+    | '[' ']' {
+      $$ = newExpr_Vector(NULL);
     };
 
 arguments_list:

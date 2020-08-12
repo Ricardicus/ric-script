@@ -29,6 +29,7 @@
 #define EXPR_TYPE_FUNCCALL  13
 #define EXPR_TYPE_POINTER   14
 #define EXPR_TYPE_FUNC_PTR  15
+#define EXPR_TYPE_VECTOR    16
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -95,6 +96,15 @@ typedef struct ifCondition {
   void *right;
 } ifCondition_t;
 
+// Forward declaration of argsList_t
+struct argsList;
+typedef struct argsList argsList_t;
+
+typedef struct vector_t {
+  unsigned int length;
+  argsList_t *content;
+} vector_t;
+
 typedef struct expr_s {
 	int      type;
 	ID_t     id;
@@ -115,6 +125,7 @@ typedef struct expr_s {
     ifCondition_t *cond;
     void *func;
     uintptr_t p;
+    vector_t *vec;
 	};
 } expr_t;
 
@@ -183,6 +194,7 @@ expr_t* newExpr_OPMul(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 expr_t* newExpr_Cond(ifCondition_t *cond);
+expr_t* newExpr_Vector(argsList_t *args);
 
 ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(const char *id, expr_t *exp);
@@ -201,7 +213,8 @@ typedef enum stackvaltypes {
 	DOUBLETYPE,
 	TEXT,
 	POINTERTYPE,
-  FUNCPTRTYPE
+  FUNCPTRTYPE,
+  VECTORTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -212,6 +225,7 @@ typedef struct stackval {
 		char *t;
 		uintptr_t p;
     functionDef_t *func;
+    vector_t *vec;
 	};
 } stackval_t;
 
@@ -233,6 +247,9 @@ typedef struct heapval {
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
 int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
 void *hp, void *hb, void **st, void **ed, size_t *sc
+#define EXPRESSION_PARAMS() void *stmt, void *next, \
+PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
+#define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals
 #define SETUP_STACK(sp, sb, sz, sc) do {\
 	intptr_t p;\
 	*sb = calloc(sz+1, sizeof(stackval_t));\
@@ -288,6 +305,21 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = INT32TYPE;\
 stackval.i = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
+#define PUSH_VECTOR(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = VECTORTYPE;\
+stackval.vec = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

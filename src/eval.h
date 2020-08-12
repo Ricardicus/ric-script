@@ -37,6 +37,10 @@ void print_condition(ifCondition_t *cond);
 void print_expr(expr_t *expr);
 void print_indents(int indent);
 int  print_args(argsList_t *args);
+int  print_vector(
+  vector_t *vec,
+  EXPRESSION_PARAMS()
+);
 
 void setup_namespaces();
 void close_namespaces();

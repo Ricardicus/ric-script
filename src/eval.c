@@ -10,10 +10,7 @@ jmp_buf continueJmpBuf;
 ctx_table_t continueCtx;
 
 int evaluate_condition(ifCondition_t *cond,
-  void* stmt, void* next,
-  PROVIDE_CONTEXT_ARGS(),
-  argsList_t* args,
-  hashtable_t *argVals)
+  EXPRESSION_PARAMS())
 {
   /* Will set ax either 1 or 0 (or interrupt the program on error) */
   stackval_t svLeft;

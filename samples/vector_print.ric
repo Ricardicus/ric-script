@@ -7,3 +7,12 @@ a = 1337
 q = [a, s]
 
 print(q)
+
+print(s[0])
+print(s[1])
+print(s[2])
+print(q[0])
+print(q[1])
+print(q[0][0])
+print(q[0][1])
+print(q[0][2])

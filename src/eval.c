@@ -429,6 +429,98 @@ void evaluate_expression(
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
     break;
+    case EXPR_TYPE_VECTOR_IDX:
+    {
+      int32_t arrayIndex = 0;
+      vector_t *vec;
+      argsList_t *walk;
+      expr_t *exp = NULL;
+      expr_t *id = expr->vecIdx->id;
+      expr_t *index = expr->vecIdx->index;
+
+      stackval_t sv;
+
+      if ( id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX  ) {
+        evaluate_expression(id, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        if ( sv.type != VECTORTYPE ) {
+          fprintf(stderr, "index error: '%s' is not an array.\n", id->id.id);
+          exit(1);
+        }
+
+        vec = sv.vec;
+      } else {
+        fprintf(stderr, "error: Invalid array indexing\n");
+        exit(1);
+      }
+
+      evaluate_expression(index, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      if ( sv.type != INT32TYPE ) {
+        fprintf(stderr, "index error: Must provide an integer as index\n");
+        exit(1);
+      }
+
+      arrayIndex = sv.i;
+
+      /* check the limits */
+      if ( arrayIndex >= vec->length ) {
+        fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+          arrayIndex,
+          vec->length);
+        exit(1);
+      }
+
+      walk = vec->content;
+      while ( walk != NULL && arrayIndex >= 0 ) {
+        exp = walk->arg;
+        walk = walk->next;
+        --arrayIndex;
+      }
+
+      if ( exp == NULL ) {
+        fprintf(stderr, "Unexpected index error!\n");
+        fprintf(stderr, "Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERROR_ISSUE_URL);
+        exit(1);
+      }
+
+      /* Evaluate the expression */
+      evaluate_expression(exp, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      /* Push value to the stack */
+      switch (sv.type) {
+        case INT32TYPE: {
+          PUSH_INT(sv.i, sp, sc);
+          break;
+        }
+        case DOUBLETYPE: {
+          PUSH_DOUBLE(sv.d, sp, sc);
+          break;
+        }
+        case TEXT: {
+          PUSH_STRING(sv.t, sp, sc);
+          break;
+        }
+        case POINTERTYPE: {
+          PUSH_POINTER(sv.p, sp, sc);
+          break;
+        }
+        case VECTORTYPE: {
+          PUSH_VECTOR(sv.vec, sp, sc);
+          break;
+        }
+        default:
+          fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+          exit(1);
+          break;
+      }
+
+    }
+    break;
     case EXPR_TYPE_IVAL:
     PUSH_INT(expr->ival, sp, sc);
     break;

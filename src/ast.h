@@ -14,22 +14,23 @@
 #define BIT(x) ((1)<<((x)-1))
 #endif
 
-#define EXPR_TYPE_ID        1
-#define EXPR_TYPE_FVAL      2
-#define EXPR_TYPE_IVAL      3
-#define EXPR_TYPE_UVAL      4
-#define EXPR_TYPE_TEXT      5
-#define EXPR_TYPE_EMPTY     6
-#define EXPR_TYPE_OPADD     7
-#define EXPR_TYPE_OPSUB     8
-#define EXPR_TYPE_OPDIV     9
-#define EXPR_TYPE_OPMOD     10
-#define EXPR_TYPE_OPMUL     11
-#define EXPR_TYPE_COND      12
-#define EXPR_TYPE_FUNCCALL  13
-#define EXPR_TYPE_POINTER   14
-#define EXPR_TYPE_FUNC_PTR  15
-#define EXPR_TYPE_VECTOR    16
+#define EXPR_TYPE_ID          1
+#define EXPR_TYPE_FVAL        2
+#define EXPR_TYPE_IVAL        3
+#define EXPR_TYPE_UVAL        4
+#define EXPR_TYPE_TEXT        5
+#define EXPR_TYPE_EMPTY       6
+#define EXPR_TYPE_OPADD       7
+#define EXPR_TYPE_OPSUB       8
+#define EXPR_TYPE_OPDIV       9
+#define EXPR_TYPE_OPMOD       10
+#define EXPR_TYPE_OPMUL       11
+#define EXPR_TYPE_COND        12
+#define EXPR_TYPE_FUNCCALL    13
+#define EXPR_TYPE_POINTER     14
+#define EXPR_TYPE_FUNC_PTR    15
+#define EXPR_TYPE_VECTOR      16
+#define EXPR_TYPE_VECTOR_IDX  17
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -96,14 +97,21 @@ typedef struct ifCondition {
   void *right;
 } ifCondition_t;
 
-// Forward declaration of argsList_t
+// Forward declarations
 struct argsList;
 typedef struct argsList argsList_t;
+struct expr_s;
+typedef struct expr_s expr_t;
 
 typedef struct vector_t {
-  unsigned int length;
+  int32_t length;
   argsList_t *content;
 } vector_t;
+
+typedef struct vectorIndex {
+  expr_t *id;
+  expr_t *index;
+} vectorIndex_t;
 
 typedef struct expr_s {
 	int      type;
@@ -126,6 +134,7 @@ typedef struct expr_s {
     void *func;
     uintptr_t p;
     vector_t *vec;
+    vectorIndex_t *vecIdx;
 	};
 } expr_t;
 
@@ -195,6 +204,7 @@ expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 expr_t* newExpr_Cond(ifCondition_t *cond);
 expr_t* newExpr_Vector(argsList_t *args);
+expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 
 ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(const char *id, expr_t *exp);

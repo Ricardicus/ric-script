@@ -50,7 +50,7 @@ expr_t* newExpr_FuncPtr(void *func)
 
 expr_t* newExpr_Vector(argsList_t *args)
 {
-  unsigned int length = 0;
+  int32_t length = 0;
   argsList_t *walk = args;
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
@@ -190,6 +190,19 @@ expr_t* newExpr_OPDiv(expr_t *left, expr_t *right)
   expr->type = EXPR_TYPE_OPDIV;
   expr->add.left = left;
   expr->add.right = right;
+
+  return expr;
+}
+
+expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index)
+{
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr->vecIdx = ast_emalloc(sizeof(vectorIndex_t));
+
+  expr->type = EXPR_TYPE_VECTOR_IDX;
+  expr->vecIdx->id = id;
+
+  expr->vecIdx->index = index;
 
   return expr;
 }

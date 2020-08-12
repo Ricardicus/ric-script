@@ -52,6 +52,8 @@ statement_t *root = NULL;
 %token CLOSE
 %token OTHER
 %type<id> otherChar
+%type<data> mathContentDigit
+%type<data> indexedVector
 %type<data> stringContents
 %type<data> stringContent
 %type<data> stringEditions
@@ -438,8 +440,12 @@ mathContent:
     | DOUBLE {
         $$ = newExpr_Float(yyval.val_double);
     }
-    | DIGIT {
-        $$ = newExpr_Ival(yyval.val_int);
+    | mathContentDigit {
+        $$ = $1;
+    }
+    | indexedVector {
+
+        $$ = $1;
     }
     | '(' mathContents ')' {
         $$ = $2;
@@ -449,6 +455,31 @@ mathContent:
     }
     | '(' condition ')' {
         $$ = newExpr_Cond($2);
+    };
+
+indexedVector:
+    ID '[' mathContentDigit ']' {
+        expr_t *id = newExpr_ID($1);
+        expr_t *index = $3;
+
+        $$ = newExpr_VectorIndex(id, index);
+    }
+    | ID '[' ID ']' {
+        expr_t *id = newExpr_ID($1);
+        expr_t *index = newExpr_ID($3);
+        $$ = newExpr_VectorIndex(id, index);
+    } 
+    | indexedVector '[' mathContentDigit ']' {
+      $$ = newExpr_VectorIndex($1, $3);
+    }
+    | indexedVector '[' ID ']' {
+      expr_t *index = newExpr_ID($3);
+      $$ = newExpr_VectorIndex($1, index);
+    };
+
+mathContentDigit:
+    DIGIT {
+        $$ = newExpr_Ival(yyval.val_int);
     };
 
 stringContents:

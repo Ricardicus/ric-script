@@ -3,8 +3,16 @@ from settings import *
 
 def test_vector_print():
   output_lines = [
-    "['hejsan',1337,'hej']",
-    "[['hejsan',1337,'hej'],1337]"
+"['hejsan',1337,'hej']",
+"[['hejsan',1337,'hej'],1337]",
+"hejsan",
+"1337",
+"hej",
+"['hejsan',1337,'hej']",
+"1337",
+"hejsan",
+"1337",
+"hej"
   ]
 
   lib_script = "./" + EXECUTABLE + " ../samples/vector_print.ric "

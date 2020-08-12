@@ -59,7 +59,7 @@ well as haven't implemented:
 - [x] Function declarations
 - [x] Function calls
 - [x] Function pointer
-- [x] Variable declaratons
+- [x] Variable declarations
 - [x] Variable usage
 - [x] The '+' operator on strings with string as well as non-string expressions
 - [x] Function delaration overloads
@@ -70,10 +70,11 @@ well as haven't implemented:
 - [x] Basic test suite (using pytest atm)
 - [x] Passing arguments
 - [x] Meson build (beside make, for increased portability)
+- [x] Vector expressions
 - [ ] Standard library for file input
 - [ ] Standard library for stdin reads
 - [ ] Standard library for cool stuff
-- [ ] Vector expressions and standard library for vector manipulation
+- [ ] Standard library for vector manipulation
 - [ ] Passing arguments as vector instead of variables
 - [ ] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
 - [ ] Support for function declarations with different number of parameters but same id without overload

@@ -958,10 +958,7 @@ void evaluate_expression(
 
 void call_func(
   functionCall_t *funcCall,
-  void *stmt, void *next,
-  PROVIDE_CONTEXT_ARGS(),
-  argsList_t *args,
-  hashtable_t *argVals)
+  EXPRESSION_PARAMS())
 {
   functionDef_t *funcDef;
   argsList_t *argsWalk = funcCall->args;
@@ -1395,9 +1392,7 @@ void interpret_statements_(
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
       call_func(
         funcCall,
-        stmt, next,
-        PROVIDE_CONTEXT(),
-        args, argVals
+        EXPRESSION_ARGS()
       );
     }
     break;

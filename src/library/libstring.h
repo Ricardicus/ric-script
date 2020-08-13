@@ -9,9 +9,10 @@
 *
 */
 
+#include "lib.h"
 #include "hashtable.h"
 #include "ast.h"
 
-int ric_atoi(EXPRESSION_PARAMS());
+int ric_atoi(LIBRARY_PARAMS());
 
 #endif

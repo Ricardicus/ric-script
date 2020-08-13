@@ -1,6 +1,6 @@
 #include "libstd.h"
 
-int ric_exit(EXPRESSION_PARAMS())
+int ric_exit(LIBRARY_PARAMS())
 {
   stackval_t stv;
   int exitCode = 0;
@@ -12,7 +12,8 @@ int ric_exit(EXPRESSION_PARAMS())
     exitCode = (int) stv.i;
     break;
     default:{
-      fprintf(stderr, "error: function call 'exit' expects a single integer as argument.\n");
+      fprintf(stderr, "error: function call '%s' expects a single integer as argument.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;
@@ -22,7 +23,7 @@ int ric_exit(EXPRESSION_PARAMS())
   return 1;
 }
 
-int ric_print(EXPRESSION_PARAMS())
+int ric_print(LIBRARY_PARAMS())
 {
   stackval_t stv;
 
@@ -100,7 +101,8 @@ int ric_print(EXPRESSION_PARAMS())
     }
     break;
     default: {
-      fprintf(stderr, "error: function call 'print' got unexpected data type as argument.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;

@@ -15,7 +15,7 @@
 
 #define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
 
-typedef int (*ric_lib_callback_t)(EXPRESSION_PARAMS());
+typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
 
 typedef struct libFunction {
   char *libFuncName;

@@ -36,15 +36,19 @@ RIC_SOURCES = \
 
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
+LIBS = m
+
 CFLAGS = Wall Werror O2 Wno-strict-aliasing Wno-unused-result Wno-unused-parameter
 
 .PHONY: lex yacc test
 
 %.o: %.c
-	$(CC) -c -o $@ $^ $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR))
+	$(CC) -c -o $@ $^ $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR)) \
+$(addprefix -l, $(LIBS))
 
 ric: lex yacc $(RIC_OBJS)
-	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR))
+	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
+$(addprefix -l, $(LIBS))
 
 test: ric
 	@echo ""

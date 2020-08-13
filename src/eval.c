@@ -1287,7 +1287,7 @@ void call_func(
       argsWalk = argsWalk->next;
     }
 
-    libfunc_ret = libFunc->func( EXPRESSION_ARGS() );
+    libfunc_ret = libFunc->func( funcCall->id.id, EXPRESSION_ARGS() );
 
     /* Free the argument value table */
     flush_arguments(newArgumentTable);

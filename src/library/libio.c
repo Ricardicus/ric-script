@@ -1,6 +1,6 @@
 #include "libio.h"
 
-int ric_is_file(EXPRESSION_PARAMS())
+int ric_is_file(LIBRARY_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -13,7 +13,8 @@ int ric_is_file(EXPRESSION_PARAMS())
     filename = stv.t;
     break;
     default:{
-      fprintf(stderr, "error: function call 'isFile' got unexpected data type as argument, string expected.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;
@@ -34,7 +35,7 @@ int ric_is_file(EXPRESSION_PARAMS())
   return 0;
 }
 
-int ric_open_file(EXPRESSION_PARAMS())
+int ric_open_file(LIBRARY_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -47,7 +48,8 @@ int ric_open_file(EXPRESSION_PARAMS())
     filename = stv.t;
     break;
     default:{
-      fprintf(stderr, "error: function call 'openFile' got unexpected data type as argument, string expected.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;
@@ -69,7 +71,7 @@ int ric_open_file(EXPRESSION_PARAMS())
 }
 
 
-int ric_close_file(EXPRESSION_PARAMS())
+int ric_close_file(LIBRARY_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -81,7 +83,8 @@ int ric_close_file(EXPRESSION_PARAMS())
     fp = (FILE*)stv.p;
     break;
     default:{
-      fprintf(stderr, "error: function call 'closeFile' got unexpected data type as argument, pointer expected.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;
@@ -95,7 +98,7 @@ int ric_close_file(EXPRESSION_PARAMS())
   return 0;
 }
 
-int ric_write_file(EXPRESSION_PARAMS())
+int ric_write_file(LIBRARY_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
@@ -110,7 +113,8 @@ int ric_write_file(EXPRESSION_PARAMS())
     fp = (FILE*)stv.p;
     break;
     default:{
-      fprintf(stderr, "error: function call 'writeFile' got unexpected data type as argument, pointer expected.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;
@@ -123,7 +127,8 @@ int ric_write_file(EXPRESSION_PARAMS())
     text = stv.t;
     break;
     default:{
-      fprintf(stderr, "error: function call 'writeFile' got unexpected data type as argument, string expected.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;

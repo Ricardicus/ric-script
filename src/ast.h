@@ -260,6 +260,8 @@ void *hp, void *hb, void **st, void **ed, size_t *sc
 #define EXPRESSION_PARAMS() void *stmt, void *next, \
 PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals
+#define LIBRARY_PARAMS() char *func_name, EXPRESSION_PARAMS()
+#define LIBRARY_FUNC_NAME() func_name
 #define SETUP_STACK(sp, sb, sz, sc) do {\
 	intptr_t p;\
 	*sb = calloc(sz+1, sizeof(stackval_t));\

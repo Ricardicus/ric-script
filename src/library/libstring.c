@@ -1,6 +1,6 @@
 #include "libstring.h"
 
-int ric_atoi(EXPRESSION_PARAMS())
+int ric_atoi(LIBRARY_PARAMS())
 {
   stackval_t stv;
   char *string = NULL;
@@ -13,7 +13,8 @@ int ric_atoi(EXPRESSION_PARAMS())
     string = stv.t;
     break;
     default:{
-      fprintf(stderr, "error: function call 'parseInt' got unexpected data type as argument, string expected.\n");
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;

@@ -9,11 +9,12 @@
 *
 */
 
+#include "lib.h"
 #include "hashtable.h"
 #include "ast.h"
 #include "eval.h"
 
-int ric_print(EXPRESSION_PARAMS());
-int ric_exit(EXPRESSION_PARAMS());
+int ric_print(LIBRARY_PARAMS());
+int ric_exit(LIBRARY_PARAMS());
 
 #endif

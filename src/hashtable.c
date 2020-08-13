@@ -106,8 +106,14 @@ int hashtable_hash(hashtable_t * hashtable,const char * str)
 
 void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 {
-	float load_level = (float) hashtable->ocupied * hashtable->load;
-	float max_load_level = (float) hashtable->size * hashtable->load;
+	float load_level;
+	float max_load_level;
+
+	if ( hashtable == NULL )
+		return;
+	
+	load_level = (float) hashtable->ocupied * hashtable->load;
+	max_load_level = (float) hashtable->size * hashtable->load;
 	if(load_level > max_load_level) 
 	{
 		hashtable_rehash(hashtable);
@@ -152,6 +158,9 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 
 void * hashtable_get(hashtable_t * hashtable, const char * key)
 {
+	if ( hashtable == NULL )
+		return NULL;
+
 	int index = hashtable_hash(hashtable,key);
 	if(hashtable->table[index] == NULL)
 	{

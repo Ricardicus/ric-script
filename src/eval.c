@@ -1092,7 +1092,7 @@ void call_func(
   functionCall_t *funcCall,
   EXPRESSION_PARAMS())
 {
-  functionDef_t *funcDef;
+  functionDef_t *funcDef = NULL;
   argsList_t *argsWalk = funcCall->args;
   hashtable_t *newArgumentTable = new_argstable();
   stackval_t sv;
@@ -1100,65 +1100,89 @@ void call_func(
   expr_t *expArg;
   libFunction_t *libFunc = NULL;
 
-  /* Looking up the function and calling it if it exists */
-  funcDef = hashtable_get(funcDecs, funcCall->id.id);
+  /* Check among the arguments if we have it defined there */
+  expArg = hashtable_get(argVals, funcCall->id.id);
 
-  /* Looking up the function among the library */
-  libFunc = look_up_lib(funcCall->id.id);
-
-  /* Check lookup status */
-  if ( funcDef == NULL && libFunc == NULL ) {
-    heapval_t *hv;
-    /* Check if this is a function pointer call (lowest priority) */
-    hv = hashtable_get(varDecs, funcCall->id.id);
-
-    if ( hv == NULL ) {
-      // Check among the arguments 
-
-      /* Check among the arguments if we have it defined there */
-      expArg = hashtable_get(argVals, funcCall->id.id);
-
-      if ( expArg == NULL ) {
-        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
-        exit(1);
-      }
-
-      /* The argument might be a function! Evaluate and see ... */
-      if ( expArg != NULL ) {
-        /* This was an argument! */
-        switch ( expArg->type ) {
-        case EXPR_TYPE_FUNCCALL:
-          funcDef = expArg->func;
-          break;
-        case EXPR_TYPE_LIBFUNCCALL:
-          libFunc = expArg->func;
-          break;
-        default:
-          fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
-          exit(1);
-          break;
-        }
-
-      }
-
-
-    } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
-      fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+  /* The argument might be a function! Evaluate and see ... */
+  if ( expArg != NULL ) {
+    /* This was an argument! */
+    switch ( expArg->type ) {
+    case EXPR_TYPE_FUNCCALL:
+      funcDef = expArg->func;
+      break;
+    case EXPR_TYPE_LIBFUNCCALL:
+      libFunc = expArg->func;
+      break;
+    default:
+      fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
       exit(1);
-    } else {
-      switch (hv->sv.type) {
-      case FUNCPTRTYPE:
-        funcDef = hv->sv.func;
-        break;
-      case LIBFUNCPTRTYPE:
-        libFunc = hv->sv.libfunc;
-        break;
-        default:
-        // This is just not supposed to be possible, look above.
-        break;
-      }
+      break;
     }
 
+  }
+
+  if ( funcDef == NULL && libFunc == NULL ) {
+
+    /* Looking up the function and calling it if it exists */
+    funcDef = hashtable_get(funcDecs, funcCall->id.id);
+
+    /* Looking up the function among the library */
+    libFunc = look_up_lib(funcCall->id.id);
+
+    /* Check lookup status */
+    if ( funcDef == NULL && libFunc == NULL ) {
+      heapval_t *hv;
+      /* Check if this is a function pointer call (lowest priority) */
+      hv = hashtable_get(varDecs, funcCall->id.id);
+
+      if ( hv == NULL ) {
+        // Check among the arguments 
+
+        /* Check among the arguments if we have it defined there */
+        expArg = hashtable_get(argVals, funcCall->id.id);
+
+        if ( expArg == NULL ) {
+          fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+          exit(1);
+        }
+
+        /* The argument might be a function! Evaluate and see ... */
+        if ( expArg != NULL ) {
+          /* This was an argument! */
+          switch ( expArg->type ) {
+          case EXPR_TYPE_FUNCCALL:
+            funcDef = expArg->func;
+            break;
+          case EXPR_TYPE_LIBFUNCCALL:
+            libFunc = expArg->func;
+            break;
+          default:
+            fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
+            exit(1);
+            break;
+          }
+
+        }
+
+
+      } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
+        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+        exit(1);
+      } else {
+        switch (hv->sv.type) {
+        case FUNCPTRTYPE:
+          funcDef = hv->sv.func;
+          break;
+        case LIBFUNCPTRTYPE:
+          libFunc = hv->sv.libfunc;
+          break;
+          default:
+          // This is just not supposed to be possible, look above.
+          break;
+        }
+      }
+
+    }
   }
 
   if ( funcDef != NULL ) {

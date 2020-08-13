@@ -28,9 +28,9 @@ a = foobar3
 a(" foo ", "bar ", ":)")
 
 # Function with function pointer as argument
-@ hej (arg1,arg2) {
+@ hej (a,b) {
 	# arg1 should be a function pointer
-	arg1( arg2 )
+	a( b )
 }
 
 hej(print, "hejsan")

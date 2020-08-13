@@ -26,3 +26,11 @@ a(" foo","bar")
 
 a = foobar3
 a(" foo ", "bar ", ":)")
+
+# Function with function pointer as argument
+@ hej (arg1,arg2) {
+	# arg1 should be a function pointer
+	arg1( arg2 )
+}
+
+hej(print, "hejsan")

@@ -138,6 +138,15 @@ expr_t *newExpr_FuncCall(functionCall_t *func) {
   return expr;
 }
 
+expr_t *newExpr_LibFuncCall(libFunction_t *func) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+
+  expr->type = EXPR_TYPE_LIBFUNCCALL;
+  expr->func = func;
+
+  return expr;
+}
+
 expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 

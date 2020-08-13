@@ -15,7 +15,8 @@ def test_vector_print():
 "hejsan",
 "hej",
 "1337",
-"hejsan"
+"hejsan",
+"['foo','bar']"
   ]
 
   lib_script = "./" + EXECUTABLE + " ../samples/vector_print.ric "

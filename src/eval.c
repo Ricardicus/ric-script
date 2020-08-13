@@ -313,6 +313,9 @@ void evaluate_expression(
             case EXPR_TYPE_FUNCCALL:
               PUSH_FUNCPTR(expArg->func, sp, sc);
               break;
+            case EXPR_TYPE_LIBFUNCCALL:
+              PUSH_LIBFUNCPTR(expArg->func, sp, sc);
+              break;
             case EXPR_TYPE_TEXT:
             {
               size_t len = strlen(expArg->text);
@@ -344,7 +347,9 @@ void evaluate_expression(
             stop = 1;
           }
         } else {
-          fprintf(stderr, "error: unknown, this is crazy. The interpreter is borken or something.\n");
+          fprintf(stderr, "error: unknown, this is crazy. The interpreter is broken or something.\n\
+Please report back to me.\n\
+- %s\n", GENERAL_ERROR_ISSUE_URL);
           exit(1);
         }
 
@@ -374,6 +379,12 @@ void evaluate_expression(
             break;
           case INT32TYPE:
             PUSH_INT(hv->sv.i, sp, sc);
+            break;
+          case LIBFUNCPTRTYPE:
+            PUSH_LIBFUNCPTR(hv->sv.libfunc, sp, sc);
+            break;
+          case FUNCPTRTYPE:
+            PUSH_FUNCPTR(hv->sv.func, sp, sc);
             break;
           case TEXT: {
             size_t len = strlen(hv->sv.t);
@@ -414,9 +425,19 @@ void evaluate_expression(
           // Pushing the function definition
           PUSH_FUNCPTR(funcDef, sp, sc);
           stop = 1;
-        } else {
-          fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
-          exit(1);
+        }
+
+        if ( !stop ) {
+           /* Check among the standard lib function declarations if we have it defined there */
+          libFunction_t *libFunc = look_up_lib(expr->id.id);
+
+          if ( libFunc != NULL ) {
+            PUSH_LIBFUNCPTR(libFunc, sp, sc);
+            stop = 1;
+          } else {
+            fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
+            exit(1);
+          }
         }
 
       }
@@ -514,6 +535,14 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERR
         }
         case VECTORTYPE: {
           PUSH_VECTOR(sv.vec, sp, sc);
+          break;
+        }
+        case FUNCPTRTYPE: {
+          PUSH_FUNCPTR(sv.func, sp, sc);
+          break;     
+        }
+        case LIBFUNCPTRTYPE: {
+          PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
           break;
         }
         default:
@@ -1038,6 +1067,14 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERR
           PUSH_VECTOR(sv.vec, sp, sc);
           break;
         }
+        case FUNCPTRTYPE: {
+          PUSH_FUNCPTR(sv.func, sp, sc);
+          break;     
+        }
+        case LIBFUNCPTRTYPE: {
+          PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
+          break;
+        }
         default:
           fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
           exit(1);
@@ -1060,6 +1097,7 @@ void call_func(
   hashtable_t *newArgumentTable = new_argstable();
   stackval_t sv;
   stackval_t sv_ret;
+  expr_t *expArg;
   libFunction_t *libFunc = NULL;
 
   /* Looking up the function and calling it if it exists */
@@ -1074,12 +1112,53 @@ void call_func(
     /* Check if this is a function pointer call (lowest priority) */
     hv = hashtable_get(varDecs, funcCall->id.id);
 
-    if ( hv == NULL || hv->sv.type != FUNCPTRTYPE ) {
+    if ( hv == NULL ) {
+      // Check among the arguments 
+
+      /* Check among the arguments if we have it defined there */
+      expArg = hashtable_get(argVals, funcCall->id.id);
+
+      if ( expArg == NULL ) {
+        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+        exit(1);
+      }
+
+      /* The argument might be a function! Evaluate and see ... */
+      if ( expArg != NULL ) {
+        /* This was an argument! */
+        switch ( expArg->type ) {
+        case EXPR_TYPE_FUNCCALL:
+          funcDef = expArg->func;
+          break;
+        case EXPR_TYPE_LIBFUNCCALL:
+          libFunc = expArg->func;
+          break;
+        default:
+          fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
+          exit(1);
+          break;
+        }
+
+      }
+
+
+    } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
       fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
       exit(1);
+    } else {
+      switch (hv->sv.type) {
+      case FUNCPTRTYPE:
+        funcDef = hv->sv.func;
+        break;
+      case LIBFUNCPTRTYPE:
+        libFunc = hv->sv.libfunc;
+        break;
+        default:
+        // This is just not supposed to be possible, look above.
+        break;
+      }
     }
 
-    funcDef = hv->sv.func;
   }
 
   if ( funcDef != NULL ) {
@@ -1146,6 +1225,14 @@ void call_func(
           }
           case VECTORTYPE: {
             newArg = newExpr_Vector(sv.vec->content);
+            break;
+          }
+          case FUNCPTRTYPE: {
+            newArg = newExpr_FuncPtr(sv.func);
+            break;
+          }
+          case LIBFUNCPTRTYPE: {
+            newArg = newExpr_LibFuncCall(sv.libfunc);
             break;
           }
           default:
@@ -1756,6 +1843,9 @@ int print_vector(
       printf("<%" PRIuPTR ">", sv.p);
       break;
     case FUNCPTRTYPE:
+      printf("<Function: '%s'>", sv.func->id.id);
+      break;
+    case LIBFUNCPTRTYPE:
       printf("<Function: '%s'>", sv.func->id.id);
       break;
     case VECTORTYPE:

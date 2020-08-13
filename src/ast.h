@@ -10,6 +10,8 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "hashtable.h"
+
 #ifndef BIT
 #define BIT(x) ((1)<<((x)-1))
 #endif
@@ -31,6 +33,7 @@
 #define EXPR_TYPE_FUNC_PTR    15
 #define EXPR_TYPE_VECTOR      16
 #define EXPR_TYPE_VECTOR_IDX  17
+#define EXPR_TYPE_LIBFUNCCALL 18
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -102,6 +105,8 @@ struct argsList;
 typedef struct argsList argsList_t;
 struct expr_s;
 typedef struct expr_s expr_t;
+struct libFunction;
+typedef struct libFunction libFunction_t;
 
 typedef struct vector_t {
   int32_t length;
@@ -197,6 +202,7 @@ expr_t* newExpr_ID(char *id);
 expr_t* newExpr_Pointer(uintptr_t val);
 expr_t* newExpr_FuncPtr(void *func);
 expr_t* newExpr_FuncCall(functionCall_t *func);
+expr_t* newExpr_LibFuncCall(libFunction_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 expr_t* newExpr_OPSub(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMul(expr_t *left, expr_t *right);
@@ -224,6 +230,7 @@ typedef enum stackvaltypes {
 	TEXT,
 	POINTERTYPE,
   FUNCPTRTYPE,
+  LIBFUNCPTRTYPE,
   VECTORTYPE
 } stackvaltypes_t;
 
@@ -236,6 +243,7 @@ typedef struct stackval {
 		uintptr_t p;
     functionDef_t *func;
     vector_t *vec;
+    libFunction_t *libfunc;
 	};
 } stackval_t;
 
@@ -262,6 +270,15 @@ PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals
 #define LIBRARY_PARAMS() char *func_name, EXPRESSION_PARAMS()
 #define LIBRARY_FUNC_NAME() func_name
+
+typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
+
+typedef struct libFunction {
+  char *libFuncName;
+  int nbrArgs;
+  ric_lib_callback_t func;
+} libFunction_t;
+
 #define SETUP_STACK(sp, sb, sz, sc) do {\
 	intptr_t p;\
 	*sb = calloc(sz+1, sizeof(stackval_t));\
@@ -378,6 +395,22 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = FUNCPTRTYPE;\
 stackval.func = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while(0)
+
+#define PUSH_LIBFUNCPTR(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = LIBFUNCPTRTYPE;\
+stackval.libfunc = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

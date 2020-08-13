@@ -111,4 +111,80 @@ int ric_print(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_append(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  vector_t *vec = NULL;
+  expr_t *entry = NULL;
+  argsList_t *addition = NULL;
+  argsList_t *walk;
+
+  /* Get vector reference */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+    vec = stv.vec;
+    break;
+    default:{
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  /* Get what to append */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case INT32TYPE:
+    entry = newExpr_Ival((int)stv.i); // This.. is not so good! Remind me to fix :)
+    break;
+  case DOUBLETYPE:
+    entry = newExpr_Float(stv.d);
+    break;
+  case TEXT:
+    entry = newExpr_Text(stv.t);
+    break;
+  case POINTERTYPE:
+    entry = newExpr_Pointer(stv.p);
+    break;
+  case FUNCPTRTYPE:
+    entry = newExpr_FuncPtr((void*)stv.p);
+    break;
+  case VECTORTYPE: {
+      vector_t *vecEntry = stv.vec;
+      entry = newExpr_Vector(vecEntry->content);
+    }
+    break;
+  default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  addition = newArgument(entry, NULL);
+
+  walk = vec->content;
+  if ( walk == NULL ) {
+    // Special case
+    vec->content = addition;
+  } else {
+
+    while ( walk->next != NULL ) {
+      walk = walk->next;
+    }
+
+    walk->next = addition;
+  }
+
+  // Increase vector size
+  vec->length++;
+
+  return 0;
+}
+
 

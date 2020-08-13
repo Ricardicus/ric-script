@@ -310,6 +310,9 @@ void evaluate_expression(
             case EXPR_TYPE_FVAL:
               PUSH_DOUBLE(expArg->fval, sp, sc);
               break;
+            case EXPR_TYPE_FUNCCALL:
+              PUSH_FUNCPTR(expArg->func, sp, sc);
+              break;
             case EXPR_TYPE_TEXT:
             {
               size_t len = strlen(expArg->text);

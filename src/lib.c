@@ -11,6 +11,7 @@ libFunction_t ric_library[] = {
   // libstd
   DECLARE_LIB_FUNCTION("exit", 1, ric_exit),
   DECLARE_LIB_FUNCTION("print", 1, ric_print),
+  DECLARE_LIB_FUNCTION("append", 2, ric_append),
   // libstring
   DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
   // libio

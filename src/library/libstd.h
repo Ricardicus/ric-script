@@ -16,5 +16,6 @@
 
 int ric_print(LIBRARY_PARAMS());
 int ric_exit(LIBRARY_PARAMS());
+int ric_append(LIBRARY_PARAMS());
 
 #endif

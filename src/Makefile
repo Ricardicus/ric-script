@@ -38,7 +38,13 @@ RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
 LIBS = m
 
-CFLAGS = Wall Werror O2 Wno-strict-aliasing Wno-unused-result Wno-unused-parameter
+CFLAGS = Wall \
+	Werror \
+	O2 \
+	Wno-strict-aliasing \
+	Wno-unused-result \
+	Wno-unused-parameter \
+	Wno-unused-command-line-argument
 
 .PHONY: lex yacc test
 

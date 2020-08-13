@@ -1,12 +1,17 @@
 # Building the interpreter
 
+# Fetching the library sources
+subdir('library')
+
 target_os = target_machine.system()
 
 cc = meson.get_compiler('c')
 
-includes = include_directories('.')
+includes = [include_directories('.'), library_inc]
+
 sources = ['main.c','hashtable.c','lib.c',
-  'ast.c','hooks.c','eval.c','lex.yy.c','y.tab.c']
+  'ast.c','hooks.c','eval.c','lex.yy.c','y.tab.c',
+  library_sources]
 
 deps = []
 

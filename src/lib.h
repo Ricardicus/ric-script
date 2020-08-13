@@ -7,6 +7,12 @@
 #include "eval.h"
 #include "ast.h"
 
+/* Including the library functions */
+#include "libio.h"
+#include "libmath.h"
+#include "libstd.h"
+#include "libstring.h"
+
 #define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
 
 typedef int (*ric_lib_callback_t)(EXPRESSION_PARAMS());

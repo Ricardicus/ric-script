@@ -71,6 +71,7 @@ well as haven't implemented:
 - [x] Passing arguments
 - [x] Meson build (beside make, for increased portability)
 - [x] Vector expressions
+- [ ] Dictionary expressions
 - [ ] Standard library for file input
 - [ ] Standard library for stdin reads
 - [ ] Standard library for cool stuff

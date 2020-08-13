@@ -1228,6 +1228,7 @@ void call_func(
 
   } else {
     /* This is a library function */
+    int libfunc_ret;
 
     if ( libFunc->nbrArgs > 0 && argsWalk == NULL ) {
       fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
@@ -1286,10 +1287,16 @@ void call_func(
       argsWalk = argsWalk->next;
     }
 
-    libFunc->func( EXPRESSION_ARGS() );
+    libfunc_ret = libFunc->func( EXPRESSION_ARGS() );
 
     /* Free the argument value table */
     flush_arguments(newArgumentTable);
+
+    if ( libfunc_ret != 0 ) {
+      fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
+        funcCall->id.id, libfunc_ret);
+      exit(libfunc_ret);
+    }
   }
 
 }

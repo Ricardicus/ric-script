@@ -409,10 +409,21 @@ void free_expression(expr_t *expr) {
     free_expression((expr_t*)expr->add.right);
     break;
   }
+  case EXPR_TYPE_COND:
+  {
+    ifCondition_t *cond = expr->cond;
+    free_expression((expr_t*)cond->left);
+    free_expression((expr_t*)cond->right);
+  }
+  break;
+  case EXPR_TYPE_VECTOR:
+  break;
+
   case EXPR_TYPE_EMPTY:
   default:
     break;
   }
+
 }
 
 static void free_cond(ifCondition_t *cond)
@@ -430,26 +441,32 @@ void free_ast(statement_t *stmt)
     return;
 
   switch ( eval->entity ) {
-  case LANG_ENTITY_DECL:
-  case LANG_ENTITY_FUNCDECL: 
-  case LANG_ENTITY_FUNCCALL:
+    case LANG_ENTITY_DECL:
+    case LANG_ENTITY_FUNCDECL:
+    case LANG_ENTITY_FUNCCALL:
+    case LANG_ENTITY_CONDITIONAL:
+    case LANG_ENTITY_SYSTEM:
+      next = ((statement_t*)stmt)->next;
     break;
-  case LANG_ENTITY_CONDITIONAL:
-    next = ((statement_t*)stmt)->next;
+    case LANG_ENTITY_RETURN:
+      next = NULL;
     break;
-  case LANG_ENTITY_EMPTY_MATH:
-  case LANG_ENTITY_EMPTY_STR:
-  {
-    expr_t *e = ((statement_t*)stmt)->content;
-    free_expression(e);
-    next = ((statement_t*)stmt)->next;
+    case LANG_ENTITY_EMPTY_MATH:
+    case LANG_ENTITY_EMPTY_STR:
+    { 
+      next = ((statement_t*)stmt)->next;
+      break;
+    }
+    case LANG_ENTITY_BODY: {
+      next = ((body_t*)stmt)->content;
+    }
     break;
-  }
-  case LANG_ENTITY_BODY:
-    next = ((body_t*)stmt)->content;
+    case LANG_ENTITY_FIN: {
+      next = NULL;
+    }
     break;
-  default:
-    break;  
+    default:
+    break;
   }
 
   switch ( eval->entity ) {
@@ -497,6 +514,9 @@ void free_ast(statement_t *stmt)
       }
       break;
     }
+    case LANG_ENTITY_SYSTEM:
+      free_expression(((statement_t*)stmt)->content);
+      break;
     default:
     break;
   }

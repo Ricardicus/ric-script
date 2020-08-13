@@ -9,6 +9,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #define START_SPACE		5
 

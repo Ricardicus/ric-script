@@ -498,9 +498,9 @@ static const yytype_uint16 yyrline[] =
      394,   397,   401,   406,   411,   417,   420,   423,   426,   429,
      432,   437,   440,   443,   446,   449,   452,   455,   460,   466,
      471,   474,   480,   485,   491,   497,   505,   513,   518,   521,
-     524,   527,   531,   537,   560,   565,   568,   573,   578,   583,
-     588,   593,   597,   601,   605,   609,   613,   617,   621,   625,
-     629,   633,   637,   641,   645,   649
+     524,   527,   531,   537,   562,   567,   570,   575,   580,   585,
+     590,   595,   599,   603,   607,   611,   615,   619,   623,   627,
+     631,   635,   639,   643,   647,   651
 };
 #endif
 
@@ -2328,209 +2328,211 @@ yyreduce:
         free(e2);
 
         (yyval.data) = newExpr_Text(textBuffer);
+
+        free(textBuffer);
     }
-#line 2333 "y.tab.c"
+#line 2335 "y.tab.c"
     break;
 
   case 94:
-#line 560 "gram.y"
+#line 562 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 2341 "y.tab.c"
+#line 2343 "y.tab.c"
     break;
 
   case 95:
-#line 565 "gram.y"
+#line 567 "gram.y"
     {
         (yyval.data) = newExpr_Text(yyval.id);
     }
-#line 2349 "y.tab.c"
+#line 2351 "y.tab.c"
     break;
 
   case 96:
-#line 568 "gram.y"
+#line 570 "gram.y"
     {
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%lf", yyval.val_double);
         (yyval.data) = newExpr_Text(buffer);
     }
-#line 2359 "y.tab.c"
+#line 2361 "y.tab.c"
     break;
 
   case 97:
-#line 573 "gram.y"
+#line 575 "gram.y"
     {
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%d", yyval.val_int);
         (yyval.data) = newExpr_Text(buffer);
     }
-#line 2369 "y.tab.c"
+#line 2371 "y.tab.c"
     break;
 
   case 98:
-#line 578 "gram.y"
+#line 580 "gram.y"
     {
         (yyval.data) = newExpr_Text((yyvsp[0].id));
     }
-#line 2377 "y.tab.c"
+#line 2379 "y.tab.c"
     break;
 
   case 99:
-#line 583 "gram.y"
+#line 585 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2386 "y.tab.c"
+#line 2388 "y.tab.c"
     break;
 
   case 100:
-#line 588 "gram.y"
+#line 590 "gram.y"
     {
         (yyval.id)[0] = ' ';
         (yyval.id)[1] = 0;
     }
-#line 2395 "y.tab.c"
+#line 2397 "y.tab.c"
     break;
 
   case 101:
-#line 593 "gram.y"
+#line 595 "gram.y"
     {
         (yyval.id)[0] = '?';
         (yyval.id)[1] = 0;
     }
-#line 2404 "y.tab.c"
+#line 2406 "y.tab.c"
     break;
 
   case 102:
-#line 597 "gram.y"
+#line 599 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2413 "y.tab.c"
+#line 2415 "y.tab.c"
     break;
 
   case 103:
-#line 601 "gram.y"
+#line 603 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2422 "y.tab.c"
+#line 2424 "y.tab.c"
     break;
 
   case 104:
-#line 605 "gram.y"
+#line 607 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2431 "y.tab.c"
+#line 2433 "y.tab.c"
     break;
 
   case 105:
-#line 609 "gram.y"
+#line 611 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2440 "y.tab.c"
+#line 2442 "y.tab.c"
     break;
 
   case 106:
-#line 613 "gram.y"
+#line 615 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2449 "y.tab.c"
+#line 2451 "y.tab.c"
     break;
 
   case 107:
-#line 617 "gram.y"
+#line 619 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2458 "y.tab.c"
+#line 2460 "y.tab.c"
     break;
 
   case 108:
-#line 621 "gram.y"
+#line 623 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2467 "y.tab.c"
+#line 2469 "y.tab.c"
     break;
 
   case 109:
-#line 625 "gram.y"
+#line 627 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2476 "y.tab.c"
+#line 2478 "y.tab.c"
     break;
 
   case 110:
-#line 629 "gram.y"
+#line 631 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2485 "y.tab.c"
+#line 2487 "y.tab.c"
     break;
 
   case 111:
-#line 633 "gram.y"
+#line 635 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2494 "y.tab.c"
+#line 2496 "y.tab.c"
     break;
 
   case 112:
-#line 637 "gram.y"
+#line 639 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2503 "y.tab.c"
+#line 2505 "y.tab.c"
     break;
 
   case 113:
-#line 641 "gram.y"
+#line 643 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2512 "y.tab.c"
+#line 2514 "y.tab.c"
     break;
 
   case 114:
-#line 645 "gram.y"
+#line 647 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2521 "y.tab.c"
+#line 2523 "y.tab.c"
     break;
 
   case 115:
-#line 649 "gram.y"
+#line 651 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2530 "y.tab.c"
+#line 2532 "y.tab.c"
     break;
 
 
-#line 2534 "y.tab.c"
+#line 2536 "y.tab.c"
 
       default: break;
     }
@@ -2762,7 +2764,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 654 "gram.y"
+#line 656 "gram.y"
 
 
 #include "hooks.h"

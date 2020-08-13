@@ -1287,6 +1287,9 @@ void call_func(
     }
 
     libFunc->func( EXPRESSION_ARGS() );
+
+    /* Free the argument value table */
+    flush_arguments(newArgumentTable);
   }
 
 }
@@ -1398,6 +1401,16 @@ void interpret_statements_(
       }
 
       hvp->sv = sv;
+
+      /* Memory management detail */
+      {
+        heapval_t *tmp = (heapval_t *) hashtable_get(varDecs, decl->id.id);
+        if ( tmp != NULL ) {
+          if ( tmp->sv.type == TEXT ) {
+            free(tmp->sv.t);
+          }
+        }
+      }
 
       /* Placing variable declaration in global variable namespace */
       hashtable_put(varDecs, decl->id.id, hvp);
@@ -1559,6 +1572,7 @@ void setup_namespaces() {
   assert(funcDecs != NULL);
   varDecs = hashtable_new(200, 0.8);
   assert(varDecs != NULL);
+  varDecs->data_also = 1;
 }
 
 void close_namespaces() {

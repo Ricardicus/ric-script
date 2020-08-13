@@ -556,6 +556,8 @@ stringEditions:
         free(e2);
 
         $$ = newExpr_Text(textBuffer);
+
+        free(textBuffer);
     }
     | stringEdition {
         $$ = $1;

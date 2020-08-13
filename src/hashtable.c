@@ -132,6 +132,9 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 		{
 			if(strcmp(ptr1->key,key) == 0)
 			{
+        if ( hashtable->data_also ) {
+          free(ptr1->data);
+        }
 				ptr1->data = val;
 				return;
 			}

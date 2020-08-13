@@ -110,6 +110,3 @@ One can also redefine a function multiple times.
 This is exemplified in **samples/function_within_function.ric**.
 
 
-Have a good day!
-
-

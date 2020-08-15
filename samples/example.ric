@@ -217,6 +217,63 @@ a(" foo ", "bar ", ":)")
 
 hej(print, "hejsan")
 
+s = ["hej", 1337, "hejsan"]
+
+print(s)
+
+print(s[0])
+print(s[1])
+print(s[2])
+
+a = 1337
+
+q = [a, s]
+
+print(q)
+
+print(q[0])
+print(q[1])
+
+print(q[1][0])
+print(q[1][1])
+print(q[1][2])
+
+f = [1337, q]
+
+print(f[1][1][0])
+print(f[1][1][1])
+print(f[1][1][2])
+
+h = ["foo"]
+
+append(h, "bar")
+
+print(h)
+
+print( len(h) )
+
+i = 0
+. [ i < len(h) ] {
+  print(h[i])
+  i = i + 1
+  @
+}
+
+append(h, "foo")
+append(h, "bar")
+
+h[0] = "Foobar! foo "
+
+print(h[0])
+
+i = 0
+. [ i < len(h) ] {
+  print(h[i])
+  i = i + 1
+  @
+}
+
+print(h)
 
 print("Nu e de slut")
 

@@ -219,17 +219,12 @@ ifCondition_t *newConditional(int type, expr_t *left, expr_t *right) {
   return cond;
 }
 
-declaration_t *newDeclaration(const char *id, expr_t *expr) {
-  size_t idLen = strlen(id);
+declaration_t *newDeclaration(expr_t *id, expr_t *expr) {
   declaration_t *decl = ast_emalloc(sizeof(declaration_t));
 
   decl->entity = LANG_ENTITY_DECL;
   decl->val = expr;
-  decl->id.id = ast_emalloc(idLen + 1);
-
-  memcpy(decl->id.id, id, idLen);
-
-  decl->id.id[idLen] = 0;
+  decl->id = id;
 
   return decl;
 }

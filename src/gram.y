@@ -359,16 +359,34 @@ functionCall:
 
 declaration: 
     ID '=' stringContents {
-        $$ = newDeclaration($1,$3);
+        expr_t *idexpr = newExpr_ID($1);
+
+        $$ = newDeclaration(idexpr,$3);
     }
     | ID '=' mathContents {
-        $$ = newDeclaration($1,$3);
+        expr_t *idexpr = newExpr_ID($1);
+
+        $$ = newDeclaration(idexpr,$3);
     }
     | ID '=' condition {
-        expr_t *expr = newExpr_Cond($3);
-        $$ = newDeclaration($1,expr);
+        expr_t *idexpr = newExpr_ID($1);
+        expr_t *condexpr = newExpr_Cond($3);
+        $$ = newDeclaration(idexpr,condexpr);
     }
     | ID '=' vector {
+        expr_t *idexpr = newExpr_ID($1);
+        $$ = newDeclaration(idexpr,$3);
+    }
+    | indexedVector '=' stringContents {
+        $$ = newDeclaration($1,$3);
+    }
+    | indexedVector '=' mathContents {
+        $$ = newDeclaration($1,$3);
+    }
+    | indexedVector '=' condition {
+        $$ = newDeclaration($1,$3);
+    }
+    | indexedVector '=' vector {
         $$ = newDeclaration($1,$3);
     };
 

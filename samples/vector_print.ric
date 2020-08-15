@@ -40,3 +40,18 @@ i = 0
   @
 }
 
+append(h, "foo")
+append(h, "bar")
+
+h[0] = "Foobar! foo "
+
+print(h[0])
+
+i = 0
+. [ i < len(h) ] {
+  print(h[i])
+  i = i + 1
+  @
+}
+
+print(h)

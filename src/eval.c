@@ -1504,37 +1504,107 @@ void interpret_statements_(
     case LANG_ENTITY_DECL:
     {
       stackval_t sv;
+      expr_t *id;
       heapval_t *hvp = ast_emalloc(sizeof(heapval_t));
       declaration_t* decl = ((statement_t*)stmt)->content;
+      id = decl->id;
 
-      /* Evaluating the expression among global variables */
-      evaluate_expression(decl->val, EXPRESSION_ARGS());
-      POP_VAL(&sv, sp, sc);
+      switch ( id->type ) {
+      case EXPR_TYPE_ID: {
+        char *idStr = id->id.id;
 
-      /* Placing value on the heap */
-      if ( sv.type == TEXT ) {
-        /* Special case */
-        char *c = sv.t;
-        size_t len = strlen(c)+1;
-        char *newText = ast_emalloc(len);
-        snprintf(newText,len,"%s",c);
-        sv.t = newText;
-      }
+        /* Evaluating the expression among global variables */
+        evaluate_expression(decl->val, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
 
-      hvp->sv = sv;
+        /* Placing value on the heap */
+        if ( sv.type == TEXT ) {
+          /* Special case */
+          char *c = sv.t;
+          size_t len = strlen(c)+1;
+          char *newText = ast_emalloc(len);
+          snprintf(newText,len,"%s",c);
+          sv.t = newText;
+        }
 
-      /* Memory management detail */
-      {
-        heapval_t *tmp = (heapval_t *) hashtable_get(varDecs, decl->id.id);
-        if ( tmp != NULL ) {
-          if ( tmp->sv.type == TEXT ) {
-            free(tmp->sv.t);
+        hvp->sv = sv;
+        id = decl->id;
+
+        /* Memory management detail */
+        {
+          heapval_t *tmp = (heapval_t *) hashtable_get(varDecs, idStr);
+          if ( tmp != NULL ) {
+            if ( tmp->sv.type == TEXT ) {
+              free(tmp->sv.t);
+            }
           }
         }
+
+        /* Placing variable declaration in global variable namespace */
+        hashtable_put(varDecs, idStr, hvp);
+      }
+      break;
+      case EXPR_TYPE_VECTOR_IDX: {
+        vector_t *vec;
+        int32_t arrayIndex;
+        argsList_t *walk;
+        expr_t **expToSet = NULL;
+        expr_t *vecid = id->vecIdx->id;
+        expr_t *index = id->vecIdx->index;
+
+        stackval_t sv;
+
+        evaluate_expression(vecid, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        if ( sv.type != VECTORTYPE ) {
+          fprintf(stderr, "index error: '%s' is not an array.\n", id->id.id);
+          GENERAL_REPORT_ISSUE_MSG();
+          exit(1);
+        }
+
+        vec = sv.vec;
+
+        evaluate_expression(index, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        if ( sv.type != INT32TYPE ) {
+          fprintf(stderr, "index error: Must provide an integer as index\n");
+          exit(1);
+        }
+
+        arrayIndex = sv.i;
+
+        /* check the limits */
+        if ( arrayIndex >= vec->length ) {
+          fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+            arrayIndex,
+            vec->length);
+          exit(1);
+        }
+
+        walk = vec->content;
+        while ( walk != NULL && arrayIndex >= 0 ) {
+          expToSet = &walk->arg;
+          walk = walk->next;
+          --arrayIndex;
+        }
+
+        if ( *expToSet == NULL ) {
+          fprintf(stderr, "Unexpected index error!\n");
+          GENERAL_REPORT_ISSUE_MSG();
+          exit(1);
+        }
+
+        /* Placing this expression into the array */
+        *expToSet = decl->val;
+      }
+      break;
+      default:
+        GENERAL_REPORT_ISSUE_MSG();
+        break;
       }
 
-      /* Placing variable declaration in global variable namespace */
-      hashtable_put(varDecs, decl->id.id, hvp);
     }
     break;
     case LANG_ENTITY_SYSTEM:
@@ -1730,6 +1800,14 @@ void print_expr(expr_t *expr)
     break;
     case EXPR_TYPE_TEXT:
     printf("'%s'", expr->text);
+    break;
+    case EXPR_TYPE_VECTOR_IDX: {
+      vectorIndex_t *vecIdx = expr->vecIdx;
+      printf("ListIdx, ID: ");
+      print_expr(vecIdx->id);
+      printf(", index: ");
+      print_expr(vecIdx->index);
+    }
     break;
     case EXPR_TYPE_OPADD:
     printf("ADD(");
@@ -1955,7 +2033,24 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_DECL:
     {
       declaration_t* decl = ((statement_t*)stmt)->content;
-      printf("Declaration: ID('%s'), Expr(", decl->id.id);
+      expr_t *declId = decl->id;
+
+      switch (declId->type) {
+      case EXPR_TYPE_ID: {
+        printf("Declaration: ID('%s'), Expr(", declId->id.id);
+        break;
+      }
+      case EXPR_TYPE_VECTOR_IDX: {
+        printf("Declaration: ");
+        print_expr(declId);
+        printf(", Expr(");
+        break;
+      }
+      default:
+        fprintf(stderr, "Unexpected expression in declaration statment\n");
+        GENERAL_REPORT_ISSUE_MSG();
+        break;
+      }
       print_expr(decl->val);
       printf(")\n");
     }
@@ -2027,7 +2122,7 @@ void print_statements_(void *stmt, int indent)
       }
 
       // Print the else if it is not NULL
-      if ( ifstmt->endif != NULL ){
+      if ( ifstmt->endif != NULL ) {
         ifstmtWalk = ifstmt->endif;
         print_indents(indent);
         printf("else-statment:\n");

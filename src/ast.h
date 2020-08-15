@@ -64,6 +64,11 @@
 #define CONDITION_LE             5
 
 #define GENERAL_ERROR_ISSUE_URL  "https://github.com/Ricardicus/ric-script"
+#define GENERAL_REPORT_ISSUE_MSG() do {\
+        fprintf(stderr, "Please include the script and file an error report to me here:\n");\
+        fprintf(stderr, "    - %s\n", GENERAL_ERROR_ISSUE_URL);\
+        exit(1);\
+} while(0);
 
 typedef struct ID_s {
 	char *id;
@@ -145,7 +150,7 @@ typedef struct expr_s {
 
 typedef struct declaration_s {
 	int entity;
-	ID_t   id;
+	expr_t *id;
 	expr_t *val;
 } declaration_t;
 
@@ -213,7 +218,7 @@ expr_t* newExpr_Vector(argsList_t *args);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 
 ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
-declaration_t*  newDeclaration(const char *id, expr_t *exp);
+declaration_t*  newDeclaration(expr_t *id, expr_t *exp);
 statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, ifCondition_t *cond, void *body);

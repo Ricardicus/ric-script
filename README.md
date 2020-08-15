@@ -3,6 +3,8 @@
 
 # Work in progress
 
+I am developing my first programming language!
+
 Parsing layer complete,
 will dig into the code generation or interpretation now. 
 Not sure what target there will be yet.

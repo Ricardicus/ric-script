@@ -45,7 +45,7 @@ int ric_power(LIBRARY_PARAMS())
 
   result = pow(arg1, arg2);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -77,7 +77,7 @@ int ric_log(LIBRARY_PARAMS())
 
   result = log(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -109,7 +109,7 @@ int ric_sqrt(LIBRARY_PARAMS())
 
   result = sqrt(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -141,7 +141,7 @@ int ric_sin(LIBRARY_PARAMS())
 
   result = sin(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -174,7 +174,7 @@ int ric_cos(LIBRARY_PARAMS())
 
   result = cos(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -207,7 +207,7 @@ int ric_tan(LIBRARY_PARAMS())
 
   result = tan(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -240,7 +240,7 @@ int ric_exp(LIBRARY_PARAMS())
 
   result = exp(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -272,7 +272,7 @@ int ric_abs(LIBRARY_PARAMS())
 
   result = fabs(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -304,7 +304,7 @@ int ric_floor(LIBRARY_PARAMS())
 
   result = floor(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;
@@ -336,7 +336,7 @@ int ric_ceil(LIBRARY_PARAMS())
 
   result = ceil(arg1);
 
-  /* Pushing file pointer */
+  /* Pushing result */
   PUSH_DOUBLE(result, sp, sc);
 
   return 0;

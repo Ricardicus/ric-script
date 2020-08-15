@@ -187,4 +187,44 @@ int ric_append(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_len(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  vector_t *argVec = NULL;
+  char *argText = NULL;
+  int32_t result = 0;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+    argVec = (vector_t*) stv.vec;
+    break;
+    case TEXT:
+    argText = stv.t;
+    break;
+    default:{
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  if ( argVec != NULL ) {
+    result = argVec->length;
+  } else if ( argText != NULL ){
+    result = (int32_t) strlen(argText);
+  } else {
+    /* The switch above should have taken care avout this */
+    return 1;
+  }
+
+  /* Pushing result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
 

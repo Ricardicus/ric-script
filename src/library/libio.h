@@ -18,3 +18,4 @@ int ric_close_file(LIBRARY_PARAMS());
 int ric_write_file(LIBRARY_PARAMS());
 
 #endif
+

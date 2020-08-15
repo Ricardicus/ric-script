@@ -16,7 +16,10 @@ def test_vector_print():
 "hej",
 "1337",
 "hejsan",
-"['foo','bar']"
+"['foo','bar']",
+"2",
+"foo",
+"bar"
   ]
 
   lib_script = "./" + EXECUTABLE + " ../samples/vector_print.ric "

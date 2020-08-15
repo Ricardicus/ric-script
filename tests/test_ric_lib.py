@@ -38,3 +38,10 @@ def test_file_exist():
   for i in range(0,len(file_content)):
     assert file_content[i] == real_file_content[i]
 
+def test_output():
+
+  lib_script = "./" + EXECUTABLE + " ../samples/ric_lib.ric "
+
+  ric_result = os.popen(lib_script).read()
+
+  assert "The length of this text before the column including the space behind and the column itself is: 95" in ric_result

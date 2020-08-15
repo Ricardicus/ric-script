@@ -26,3 +26,4 @@ int ric_floor(LIBRARY_PARAMS());
 int ric_ceil(LIBRARY_PARAMS());
 
 #endif
+

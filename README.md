@@ -5,10 +5,12 @@
 
 I am developing my first programming language!
 
-Parsing layer complete,
-will dig into the code generation or interpretation now. 
-Not sure what target there will be yet.
-
+Parsing layer complete, continously working on the 
+interpreter for my language now. In the future I might
+make it possible to compile the program to some sort 
+of intermediate codes that I can build a much smaller
+interpreter for (some sort of virtual RISC).
+Not sure what target there will be (if so).
 
 The samples folder contains ric scripts with OK syntax.
 

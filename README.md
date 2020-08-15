@@ -77,10 +77,7 @@ well as haven't implemented:
 - [x] Vector expressions
 - [ ] Reference counting garbage collector
 - [ ] Dictionary expressions
-- [ ] Standard library for file input
-- [ ] Standard library for stdin reads
-- [ ] Standard library for cool stuff
-- [ ] Standard library for vector manipulation
+- [ ] Bigger standard library, more battery power (for reference, see: **src/library**)
 - [ ] Passing arguments as vector instead of variables
 - [ ] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
 - [ ] Support for function declarations with different number of parameters but same id without overload

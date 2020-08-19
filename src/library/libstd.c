@@ -11,7 +11,7 @@ int ric_exit(LIBRARY_PARAMS())
     case INT32TYPE:
     exitCode = (int) stv.i;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' expects a single integer as argument.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
@@ -126,7 +126,7 @@ int ric_append(LIBRARY_PARAMS())
     case VECTORTYPE:
     vec = stv.vec;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
@@ -204,7 +204,7 @@ int ric_len(LIBRARY_PARAMS())
     case TEXT:
     argText = stv.t;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
         LIBRARY_FUNC_NAME());
       return 1;
@@ -214,7 +214,7 @@ int ric_len(LIBRARY_PARAMS())
 
   if ( argVec != NULL ) {
     result = argVec->length;
-  } else if ( argText != NULL ){
+  } else if ( argText != NULL ) {
     result = (int32_t) strlen(argText);
   } else {
     /* The switch above should have taken care avout this */

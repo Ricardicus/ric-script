@@ -20,7 +20,7 @@ void usage(char *argv0, int ret)
   fprintf((ret == 0 ? stdout : stderr),
     "  -h|--help: print this help\r\n");
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
-  fprintf((ret == 0 ? stdout : stderr), 
+  fprintf((ret == 0 ? stdout : stderr),
     "%s compiled: %s %s\r\n", argv0, __DATE__, __TIME__);
   exit(ret);
 }
@@ -46,15 +46,15 @@ int main(int argc, char *argv[]) {
   if ( argc > 1 ) {
     int i = 1;
     while ( i < argc ) {
-      if ( strcmp("-p", argv[i]) == 0){
+      if ( strcmp("-p", argv[i]) == 0 ) {
         mission = runAsASTPrinter;
-      } else if ( strcmp("-i", argv[i]) == 0){
+      } else if ( strcmp("-i", argv[i]) == 0 ) {
         mission = runAsIntepreter;
-      } else if ( strcmp("-pi", argv[i]) == 0){
+      } else if ( strcmp("-pi", argv[i]) == 0 ) {
         mission = runAsASTPrinterAndInterpreter;
-      } else if ( strcmp("-h", argv[i]) == 0){
+      } else if ( strcmp("-h", argv[i]) == 0 ) {
         usage(argv[0], 0);
-      } else if ( strcmp("--help", argv[i]) == 0){
+      } else if ( strcmp("--help", argv[i]) == 0 ) {
         usage(argv[0], 0);
       } else {
         if ( fp == NULL ) {

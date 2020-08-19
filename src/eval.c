@@ -130,7 +130,7 @@ int evaluate_condition(ifCondition_t *cond,
       *f0 = svLeft.d;
       *f1 = svRight.d;
 
-      if ( *f0 - *f1 < -epsilon || fabs(*f0 - *f1) < epsilon) {
+      if ( *f0 - *f1 < -epsilon || fabs(*f0 - *f1) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -138,7 +138,7 @@ int evaluate_condition(ifCondition_t *cond,
     } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
       *f1 = (double) svRight.i;
 
-      if ( svLeft.d - *f1 < -epsilon || fabs(svLeft.d - *f1) < epsilon) {
+      if ( svLeft.d - *f1 < -epsilon || fabs(svLeft.d - *f1) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -169,7 +169,7 @@ int evaluate_condition(ifCondition_t *cond,
       *f0 = svLeft.d;
       *f1 = svRight.d;
 
-      if ( *f0 - *f1 > epsilon || fabs(*f0 - *f1) < epsilon) {
+      if ( *f0 - *f1 > epsilon || fabs(*f0 - *f1) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -177,7 +177,7 @@ int evaluate_condition(ifCondition_t *cond,
     } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
       *f1 = (double) svRight.i;
 
-      if ( svLeft.d - *f1 > epsilon || fabs(svLeft.d - *f1) < epsilon) {
+      if ( svLeft.d - *f1 > epsilon || fabs(svLeft.d - *f1) < epsilon ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -464,7 +464,7 @@ Please report back to me.\n\
 
       stackval_t sv;
 
-      if ( id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX  ) {
+      if ( id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX ) {
         evaluate_expression(id, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
 
@@ -1466,7 +1466,7 @@ void interpret_statements_(
       expr_t *e = ((statement_t*)stmt)->content;
       evaluate_expression(e, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
-      switch ( sv.type) {
+      switch ( sv.type ) {
       case INT32TYPE:
       printf("%" PRIi32 "\n", sv.i);
       break;
@@ -1913,7 +1913,7 @@ void print_condition(ifCondition_t *cond)
 
 void print_indents(int indent) {
   int i = 0;
-  while ( i < indent ){
+  while ( i < indent ) {
     printf("    ");
     ++i;
   }
@@ -2172,7 +2172,7 @@ void interpret_statements(
   st = stmt;
   ed = NULL;
 
-  if ( setjmp(endingJmpBuf) == JMP_CODE_INITIAL) {
+  if ( setjmp(endingJmpBuf) == JMP_CODE_INITIAL ) {
     /* Start descending and evaluating the AST */
     interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
   } else {
@@ -2193,7 +2193,7 @@ void interpret_statements(
 static int isAnInt(char *arg) {
   char *c = arg;
   while ( *c ) {
-    if ( !isdigit(*c) ){
+    if ( !isdigit(*c) ) {
       return 0;
     }
     ++c;
@@ -2205,12 +2205,12 @@ static int isAFloat(char *arg) {
   char *c = arg;
   int nbrDots = 0;
   while ( *c ) {
-    if ( !isdigit(*c) ){
+    if ( !isdigit(*c) ) {
       // It might be a dot
       if ( *c != '.' ) {
         return 0;
       } else {
-        if ( nbrDots == 1 ){
+        if ( nbrDots == 1 ) {
           return 0;
         }
         nbrDots++;

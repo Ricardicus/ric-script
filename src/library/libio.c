@@ -12,7 +12,7 @@ int ric_is_file(LIBRARY_PARAMS())
     case TEXT:
     filename = stv.t;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
@@ -47,7 +47,7 @@ int ric_open_file(LIBRARY_PARAMS())
     case TEXT:
     filename = stv.t;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
@@ -82,7 +82,7 @@ int ric_close_file(LIBRARY_PARAMS())
     case POINTERTYPE:
     fp = (FILE*)stv.p;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
@@ -112,7 +112,7 @@ int ric_write_file(LIBRARY_PARAMS())
     case POINTERTYPE:
     fp = (FILE*)stv.p;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
@@ -126,7 +126,7 @@ int ric_write_file(LIBRARY_PARAMS())
     case TEXT:
     text = stv.t;
     break;
-    default:{
+    default: {
       fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
         LIBRARY_FUNC_NAME());
       exit(1);

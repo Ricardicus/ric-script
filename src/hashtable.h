@@ -13,13 +13,13 @@ extern "C" {
 
 #define START_SPACE		5
 
-typedef struct key_val_pair{
+typedef struct key_val_pair {
 	char * key;
 	void * data;
 	struct key_val_pair * next;
 } entry_t;
 
-typedef struct hash{
+typedef struct hash {
 	int size;
 	int ocupied;
 	int data_also;

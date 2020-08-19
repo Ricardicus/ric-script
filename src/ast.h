@@ -68,7 +68,7 @@
         fprintf(stderr, "Please include the script and file an error report to me here:\n");\
         fprintf(stderr, "    - %s\n", GENERAL_ERROR_ISSUE_URL);\
         exit(1);\
-} while(0);
+} while (0);
 
 typedef struct ID_s {
 	char *id;
@@ -327,7 +327,7 @@ stackval.d = a;\
 **((stackval_t**)sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 #define PUSH_INT(a, sp, sc) do {\
 stackval_t stackval;\
 if ( *sc >= RIC_STACKSIZE ) {\
@@ -342,7 +342,7 @@ stackval.i = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 #define PUSH_VECTOR(a, sp, sc) do {\
 stackval_t stackval;\
 if ( *sc >= RIC_STACKSIZE ) {\
@@ -357,7 +357,7 @@ stackval.vec = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 #define PUSH_STRING(a, sp, sc) do {\
 stackval_t stackval;\
 if ( *sc >= RIC_STACKSIZE ) {\
@@ -372,7 +372,7 @@ stackval.t = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 #define PUSH_POINTER(a, sp, sc) do {\
 stackval_t stackval;\
 if ( *sc >= RIC_STACKSIZE ) {\
@@ -387,7 +387,7 @@ stackval.p = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 
 #define PUSH_FUNCPTR(a, sp, sc) do {\
 stackval_t stackval;\
@@ -403,7 +403,7 @@ stackval.func = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 
 #define PUSH_LIBFUNCPTR(a, sp, sc) do {\
 stackval_t stackval;\
@@ -419,7 +419,7 @@ stackval.libfunc = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\
-} while(0)
+} while (0)
 
 #define POP_VAL(a, sp, sc) do {\
 if ( *sc == 0 ) {\
@@ -448,7 +448,7 @@ if (hv.sv.type == TEXT) {\
   hv.toFree = false;\
 }\
 hv.occupied = true;\
-while( i < size ) {\
+while ( i < size ) {\
 	if ( !((heapval_t*) hp)[i].occupied ) {\
 		((heapval_t*) hp)[i] = hv;\
 		*hpv = &((heapval_t*) hp)[i];\
@@ -470,7 +470,7 @@ if ( i == size ) {\
 #define FREE_HEAP(hp, hpb) do { \
 int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\
-while( i < size ) {\
+while ( i < size ) {\
 	if ( ((heapval_t*) hp)[i].occupied &&\
    ((heapval_t*) hp)[i].toFree ) {\
 		free(((heapval_t*) hp)[i].sv.t);\

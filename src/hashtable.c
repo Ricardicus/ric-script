@@ -24,14 +24,12 @@ static void free_hashtable_table(hashtable_t * hash)
 	int i = 0;
 	struct key_val_pair * ptr1;
 	struct key_val_pair * ptr2;
-	while(i<size)
-	{
+	while (i<size) {
 		ptr1 = hash->table[i];
-		while(ptr1!=NULL)
-		{
+		while (ptr1!=NULL) {
 			ptr2 = ptr1;
 			ptr1 = ptr1->next;
-			if ( hash->data_also ){
+			if ( hash->data_also ) {
 				free(ptr2->data);
 			}
 			free(ptr2);
@@ -48,11 +46,9 @@ void hashtable_rehash(hashtable_t * hashtable)
 	hashtable_t * newhash = hashtable_new(newsize,hashtable->load);
 	newhash->data_also = hashtable->data_also;
 	int i = 0;
-	while(i<size_old)
-	{
+	while (i<size_old) {
 		struct key_val_pair * ptr = hashtable->table[i];
-		while(ptr!=NULL)
-		{
+		while (ptr!=NULL) {
 			newhash->put(newhash,ptr->key,ptr->data);
 			ptr = ptr->next;
 		}
@@ -76,11 +72,9 @@ void for_each_pair(hashtable_t * hash, void (*callback)(void*,void*) )
 	int i = 0;
 	struct key_val_pair * ptr1;
 	struct key_val_pair * ptr2;
-	while(i<size)
-	{
+	while (i<size) {
 		ptr1 = hash->table[i];
-		while(ptr1!=NULL)
-		{
+		while (ptr1!=NULL) {
 			ptr2 = ptr1;
 			ptr1 = ptr1->next;
 
@@ -95,8 +89,7 @@ int hashtable_hash(hashtable_t * hashtable,const char * str)
 {	
 	int size = hashtable->size;
 	int hash = 0;
-	while(*str)
-	{
+	while (*str) {
 		hash+=*str * *str;
 		str++;
 	}
@@ -114,30 +107,24 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 	
 	load_level = (float) hashtable->ocupied * hashtable->load;
 	max_load_level = (float) hashtable->size * hashtable->load;
-	if(load_level > max_load_level) 
-	{
+	if(load_level > max_load_level) {
 		hashtable_rehash(hashtable);
 		hashtable->put(hashtable,key,val);
 		return;
 	} 
 	int index = hashtable_hash(hashtable,key);
-	if(hashtable->table[index] == NULL)
-	{
+	if(hashtable->table[index] == NULL) {
 		hashtable->table[index] = malloc(sizeof(entry_t));
 		hashtable->table[index]->key = key;
 		hashtable->table[index]->data = val;
 		hashtable->table[index]->next = NULL;
 		hashtable->ocupied++;
 		return;
-	} 
-	else 
-	{
+	} else {
 		struct key_val_pair * ptr1 = hashtable->table[index];
 		struct key_val_pair * ptr2;
-		while(ptr1 != NULL)
-		{
-			if(strcmp(ptr1->key,key) == 0)
-			{
+		while (ptr1 != NULL) {
+			if (strcmp(ptr1->key,key) == 0) {
         if ( hashtable->data_also ) {
           free(ptr1->data);
         }
@@ -162,15 +149,12 @@ void * hashtable_get(hashtable_t * hashtable, const char * key)
 		return NULL;
 
 	int index = hashtable_hash(hashtable,key);
-	if(hashtable->table[index] == NULL)
-	{
+	if (hashtable->table[index] == NULL) {
 		return NULL;
 	}
 	struct key_val_pair * p = hashtable->table[index];
-	while(p!=NULL)
-	{	
-		if(strcmp(p->key,key) == 0)
-		{
+	while (p!=NULL) {	
+		if (strcmp(p->key,key) == 0) {
 			return p->data;
 		}
 		p = p->next;
@@ -184,13 +168,10 @@ void print_table_as_chars(hashtable_t * hashtable)
 	int size = hashtable->size;
 	struct key_val_pair * ptr;
 
-	while(i<size)
-	{
-		if(hashtable->table[i] != NULL)
-		{
+	while (i<size) {
+		if (hashtable->table[i] != NULL) {
 			ptr = hashtable->table[i];
-			while(ptr!=NULL)
-			{
+			while (ptr!=NULL) {
 				printf("key: %s - > data: %s\n",ptr->key,(char*)ptr->data);
 				ptr=ptr->next;
 			}

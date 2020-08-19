@@ -1,5 +1,6 @@
 ![](https://github.com/Ricardicus/ric-script/workflows/Building%20&%20Testing/badge.svg)
 ![Building docker image](https://github.com/Ricardicus/ric-script/workflows/Building%20docker%20image/badge.svg)
+![Source code style linter](https://github.com/Ricardicus/ric-script/workflows/Source%20code%20style%20linter/badge.svg)
 
 # Work in progress
 

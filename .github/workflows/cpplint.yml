@@ -26,4 +26,4 @@ jobs:
     - id: install-python-deps
       run: pip3 install -r requirements.txt
     - id: style-check
-      run: meson builddir; cd builddir; ninja cpplinter
+      run: meson builddir; cd builddir; ninja cpplint

@@ -22,7 +22,7 @@ int ric_atoi(LIBRARY_PARAMS())
 
   result = atoi(string);
   
-  /* Pushing file pointer */
+  /* Pushing the parsed value */
   PUSH_INT(result, sp, sc);
 
   return 0;

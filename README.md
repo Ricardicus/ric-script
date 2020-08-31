@@ -76,7 +76,7 @@ well as haven't implemented:
 - [x] Passing arguments
 - [x] Meson build (beside make, for increased portability)
 - [x] Vector expressions
-- [ ] Garbage collector (mark & sweep)
+- [x] Garbage collector (mark & sweep)
 - [ ] Dictionary expressions
 - [ ] Bigger standard library, more battery power (for reference, see: **src/library**)
 - [ ] Passing arguments as vector instead of variables

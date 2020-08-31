@@ -46,8 +46,9 @@ int  print_vector(
 void setup_namespaces();
 void close_namespaces();
 void flush_arguments(hashtable_t *args);
+void flush_heapval(void *key, void *val);
 
-void arguments_to_variables(int argc, char* argv[]);
+void arguments_to_variables(int argc, char* argv[], void *hp);
 
 void call_func(
   functionCall_t *funcCall,

@@ -458,13 +458,7 @@ while ( i < size ) {\
 		((heapval_t*) hp)[i] = hv;\
 		*hpv = &((heapval_t*) hp)[i];\
 		break;\
-	} else if ( upd != NULL && ((heapval_t*) hp)[i].sv.type == TEXT ) {\
-    if ( strcmp(hv.sv.t, ((heapval_t*) hp)[i].sv.t) == 0 ) {\
-      *hpv = &((heapval_t*) hp)[i];\
-      *(int*)upd = 0;\
-      break;\
-    }\
-  }\
+	}\
 	++i;\
 }\
 if ( i == size ) {\

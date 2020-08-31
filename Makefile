@@ -14,8 +14,8 @@ clean:
 test: 
 	make test -C tests
 
-check:
-ifeq (, which cpplint)
+cpplint:
+ifeq (, which $@)
 	@echo "install cpplint before attempting to make check"
 else
 	cpplint --exclude=src/y.tab.* --exclude=src/lex.yy.c \

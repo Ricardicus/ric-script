@@ -375,8 +375,19 @@ void free_expression(expr_t *expr) {
     free_expression((expr_t *)cond->left);
     free_expression((expr_t *)cond->right);
   } break;
-  case EXPR_TYPE_VECTOR:
+  case EXPR_TYPE_VECTOR: {
+    vector_t *vec = expr->vec;
+    int32_t len = vec->length;
+    int32_t vecWalk = 0;
+    argsList_t *v = vec->content;
+
+    while ( vecWalk < len ) {
+      //free_expression(v->arg);
+      v = v->next;
+      ++vecWalk;
+    }
     break;
+  }
 
   case EXPR_TYPE_EMPTY:
   default:
@@ -401,6 +412,8 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_FUNCDECL:
   case LANG_ENTITY_FUNCCALL:
   case LANG_ENTITY_CONDITIONAL:
+  case LANG_ENTITY_CONTINUE:
+  case LANG_ENTITY_BREAK:
   case LANG_ENTITY_SYSTEM:
     next = ((statement_t *)stmt)->next;
     break;
@@ -427,7 +440,12 @@ void free_ast(statement_t *stmt) {
     declaration_t *decl = ((statement_t *)stmt)->content;
     /* Evaluating the expression among global variables */
     free_expression(decl->val);
+    free_expression(decl->id);
   } break;
+  case LANG_ENTITY_EMPTY_STR: {
+    free_expression(((statement_t *)stmt)->content);
+    break;
+  }
   case LANG_ENTITY_FUNCDECL: {
     functionDef_t *funcDef = ((statement_t *)stmt)->content;
     free(funcDef->id.id);

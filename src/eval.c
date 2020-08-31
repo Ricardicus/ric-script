@@ -1488,12 +1488,13 @@ void interpret_statements_(
     {
       stackval_t sv;
       expr_t *id;
-      heapval_t *hvp = ast_emalloc(sizeof(heapval_t));
+      heapval_t *hvp = NULL;
       declaration_t* decl = ((statement_t*)stmt)->content;
       id = decl->id;
 
       switch ( id->type ) {
       case EXPR_TYPE_ID: {
+        int heapUpdated;
         char *idStr = id->id.id;
 
         /* Evaluating the expression among global variables */
@@ -1510,18 +1511,9 @@ void interpret_statements_(
           sv.t = newText;
         }
 
-        hvp->sv = sv;
-        id = decl->id;
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        /* Memory management detail */
-        {
-          heapval_t *tmp = (heapval_t *) hashtable_get(varDecs, idStr);
-          if ( tmp != NULL ) {
-            if ( tmp->sv.type == TEXT ) {
-              free(tmp->sv.t);
-            }
-          }
-        }
+        id = decl->id;
 
         /* Placing variable declaration in global variable namespace */
         hashtable_put(varDecs, idStr, hvp);
@@ -1749,11 +1741,11 @@ void setup_namespaces() {
   assert(funcDecs != NULL);
   varDecs = hashtable_new(200, 0.8);
   assert(varDecs != NULL);
-  varDecs->data_also = 1;
 }
 
 void close_namespaces() {
   hashtable_free(funcDecs);
+  for_each_pair(varDecs, flush_heapval);
   hashtable_free(varDecs);
 }
 
@@ -1956,9 +1948,27 @@ int print_vector(
   return 0;
 }
 
+static void flush_arg(void *key, void *val)
+{
+  expr_t *e = (expr_t*)val;
+  (void)key;
+  if ( e->type == EXPR_TYPE_TEXT ) {
+    free(e->text);
+  }
+}
+
+void flush_heapval(void *key, void *val)
+{
+  heapval_t *e = (heapval_t*)val;
+  (void)key;
+  if ( e->sv.type == TEXT ) {
+    //free(e->sv.t);
+  }
+}
 
 void flush_arguments(hashtable_t *table)
 {
+  for_each_pair(table, flush_arg);
   if ( table != NULL ) {
     hashtable_free(table);
   }
@@ -2149,7 +2159,7 @@ void interpret_statements(
   setup_namespaces();
 
   // arguments to environment variables
-  arguments_to_variables(argc, argv);
+  arguments_to_variables(argc, argv, hp);
 
   // Set up ric library
   initialize_ric_lib();
@@ -2237,7 +2247,7 @@ static char *arguments[] = {
 
 static char *argumentCount = "argN";
 
-void arguments_to_variables(int argc, char* argv[])
+void arguments_to_variables(int argc, char* argv[], void *hp)
 {
   /*
   * Invoking the program with command arguments:
@@ -2248,8 +2258,9 @@ void arguments_to_variables(int argc, char* argv[])
   * max 10 arguments can be set.
   */
 
+  int heapUpdated;
   stackval_t sv;
-  heapval_t *hvp;
+  heapval_t *hvp = NULL;
   int argWalk = 2;
   int argCount = 0;
   int nbrReserved = sizeof(reservedArgs) / sizeof(*reservedArgs);
@@ -2261,12 +2272,16 @@ void arguments_to_variables(int argc, char* argv[])
   }
 
   /* Add name of script as first argument */
-  hvp = ast_emalloc(sizeof(heapval_t));
 
   sv.type = TEXT;
-  sv.t = argv[0];
+  {
+    size_t len = strlen(argv[0]);
+    char *newText = ast_emalloc(len+1);
+    snprintf(newText, len+1, "%s", argv[0]);
+    sv.t = newText;
+  }
 
-  hvp->sv = sv;
+  ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
   /* Placing variable declaration in global variable namespace */
   hashtable_put(varDecs, arguments[argCount], hvp);
@@ -2293,8 +2308,6 @@ void arguments_to_variables(int argc, char* argv[])
       continue;
     }
 
-    hvp = ast_emalloc(sizeof(heapval_t));
-
     argType = typeOfArgument(arg);
     sv.type = argType;
     switch ( argType )
@@ -2311,12 +2324,17 @@ void arguments_to_variables(int argc, char* argv[])
     }
     case TEXT:
     {
-      sv.t = arg;
+      size_t len = strlen(arg);
+      char *newText = ast_emalloc(len+1);
+      snprintf(newText, len+1, "%s", arg);
+      sv.t = newText;
       break;
     }
     default:
     break;
     }
+
+    ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
     hvp->sv = sv;
 
@@ -2328,12 +2346,10 @@ void arguments_to_variables(int argc, char* argv[])
   }
 
   /* Add space for argN */
-  hvp = ast_emalloc(sizeof(heapval_t));
-
   sv.type = INT32TYPE;
   sv.i = (int32_t) argCount;
 
-  hvp->sv = sv;
+  ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
   /* Placing variable declaration in global variable namespace */
   hashtable_put(varDecs, argumentCount, hvp);

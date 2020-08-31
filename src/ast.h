@@ -229,6 +229,7 @@ body_t*         newBody(void *body);
 
 void print_statements(statement_t *root);
 void interpret_statements(int argc, char *argv[], statement_t *stmt);
+void free_expression(expr_t *expr);
 
 typedef enum stackvaltypes {
 	INT32TYPE = 1,

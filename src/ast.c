@@ -340,6 +340,12 @@ void free_expression(expr_t *expr) {
   case EXPR_TYPE_IVAL:
   case EXPR_TYPE_UVAL:
     break;
+  case EXPR_TYPE_VECTOR_IDX: {
+    vectorIndex_t *vecIdx = expr->vecIdx;
+    free_expression(vecIdx->id);
+    free_expression(vecIdx->index);
+  }
+  break;
   case EXPR_TYPE_TEXT: {
     free(expr->text);
     break;
@@ -449,6 +455,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_FUNCDECL: {
     functionDef_t *funcDef = ((statement_t *)stmt)->content;
     free(funcDef->id.id);
+    free_ast(funcDef->body);
   } break;
   case LANG_ENTITY_FUNCCALL: {
     functionCall_t *funcCall = ((statement_t *)stmt)->content;

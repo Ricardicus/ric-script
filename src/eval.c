@@ -1572,6 +1572,8 @@ void interpret_statements_(
         }
 
         /* Placing this expression into the array */
+        free_expression(*expToSet);
+        free(*expToSet);
         *expToSet = decl->val;
       }
       break;

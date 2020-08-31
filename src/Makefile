@@ -21,6 +21,9 @@ FLEXSOURCES = lex.yy.c
 # are placed in this folder
 LIB_DIR = library
 
+# Set to nothing if not debugging
+DEBUG_FLAGS = 
+
 RIC_SOURCES = \
 	main \
 	hashtable \
@@ -51,11 +54,11 @@ CFLAGS = Wall \
 
 %.o: %.c
 	$(CC) -c -o $@ $^ $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR)) \
-$(addprefix -l, $(LIBS))
+$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
 
 ric: lex yacc $(RIC_OBJS)
 	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
-$(addprefix -l, $(LIBS))
+$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
 
 test: ric
 	@echo ""
@@ -83,6 +86,7 @@ else
 endif
 
 clean:
-	@rm -f ric *.o
+	rm -f ric $(RIC_OBJS)
+
 
 

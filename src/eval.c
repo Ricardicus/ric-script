@@ -318,24 +318,7 @@ void evaluate_expression(
               break;
             case EXPR_TYPE_TEXT:
             {
-              size_t len = strlen(expArg->text);
-              stackval_t sv;
-              heapval_t *hvp;
-              int heapUpdated;
-              char *newText = ast_emalloc(len+1);
-              snprintf(newText, len+1, "%s", expArg->text);
-
-              sv.type = TEXT;
-              sv.t = newText;
-
-              ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-              if ( !heapUpdated ) {
-                free(newText);
-                sv = hvp->sv;
-              }
-
-              PUSH_STRING(sv.t, sp, sc);
+              PUSH_STRING(expArg->text, sp, sc);
               break;
             }
             default:

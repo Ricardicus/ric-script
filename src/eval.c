@@ -1588,6 +1588,9 @@ void interpret_statements_(
         break;
       }
 
+      // Mark and sweep the heap
+      mark_and_sweep(varDecs, hp);
+
     }
     break;
     case LANG_ENTITY_SYSTEM:
@@ -1737,9 +1740,6 @@ void interpret_statements_(
     default:
     break;
   }
-
-  // Mark and sweep
-  mark_and_sweep(varDecs, hp);
 
   interpret_statements_(next, PROVIDE_CONTEXT(), args, argVals);
 }

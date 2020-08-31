@@ -28,6 +28,7 @@ RIC_SOURCES = \
 	ast \
 	eval \
 	lib \
+	garbage \
 	$(LIB_DIR)/libio \
 	$(LIB_DIR)/libmath \
 	$(LIB_DIR)/libstd \

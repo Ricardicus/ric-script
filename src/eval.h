@@ -5,6 +5,7 @@
 
 #include "ast.h"
 #include "hashtable.h"
+#include "garbage.h"
 #include "lib.h"
 
 #define JMP_CODE_INITIAL     0

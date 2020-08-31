@@ -1738,6 +1738,9 @@ void interpret_statements_(
     break;
   }
 
+  // Mark and sweep
+  mark_and_sweep(varDecs, hp);
+
   interpret_statements_(next, PROVIDE_CONTEXT(), args, argVals);
 }
 

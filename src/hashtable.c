@@ -68,10 +68,15 @@ void hashtable_free(hashtable_t * hash)
 
 void for_each_pair(hashtable_t * hash, void (*callback)(void*,void*) )
 {
-	int size = hash->size;
+	int size;
 	int i = 0;
 	struct key_val_pair * ptr1;
 	struct key_val_pair * ptr2;
+
+  if ( hash == NULL )
+    return;
+
+  size = hash->size;
 	while (i<size) {
 		ptr1 = hash->table[i];
 		while (ptr1!=NULL) {
@@ -82,7 +87,7 @@ void for_each_pair(hashtable_t * hash, void (*callback)(void*,void*) )
 		}
 		i++;
 	}
-	free(hash->table);
+
 }
 
 int hashtable_hash(hashtable_t * hashtable,const char * str)

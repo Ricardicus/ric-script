@@ -126,6 +126,7 @@ typedef struct vectorIndex {
 typedef struct expr_s {
 	int      type;
 	ID_t     id;
+
 	union {
 		double   fval;
 		int32_t  ival;
@@ -256,12 +257,16 @@ typedef struct heapval {
 	stackval_t sv;
 	bool occupied;
 	bool toFree;
+  uint32_t mark;
 } heapval_t;
 
 // Number of elements on the stack of this interpreter (arbitrary number?)
 #define RIC_STACKSIZE 1024
 // Number of elements on the heap of this interpreter (arbitrary number?)
 #define RIC_HEAPSIZE  4096
+// maximum number of variables in the langauge, need to be known by current
+// garbage collector algorithm (making a list of all active)
+#define RIC_MAX_NBR_VARS 4096
 
 #define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc;
 #define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc

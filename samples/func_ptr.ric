@@ -33,4 +33,10 @@ a(" foo ", "bar ", ":)")
 	a( b )
 }
 
+@ willprint (a) {
+  print(a)
+}
+
 hej(print, "hejsan")
+hej(willprint, "hej")
+

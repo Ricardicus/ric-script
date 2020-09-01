@@ -9,7 +9,8 @@ def test_file_exist():
 "Foobar! foo",
 "Foobar! foobar",
 "Foobar! foo bar :)",
-"hejsan"
+"hejsan",
+"hej"
   ]
 
   lib_script = "./" + EXECUTABLE + " ../samples/func_ptr.ric "

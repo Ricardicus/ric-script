@@ -34,7 +34,7 @@ expr_t *newExpr_Pointer(uintptr_t val) {
 expr_t *newExpr_FuncPtr(void *func) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
-  expr->type = EXPR_TYPE_FUNC_PTR;
+  expr->type = EXPR_TYPE_FUNCPTR;
   expr->func = func;
 
   return expr;
@@ -138,10 +138,10 @@ expr_t *newExpr_FuncCall(functionCall_t *func) {
   return expr;
 }
 
-expr_t *newExpr_LibFuncCall(libFunction_t *func) {
+expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
-  expr->type = EXPR_TYPE_LIBFUNCCALL;
+  expr->type = EXPR_TYPE_LIBFUNCPTR;
   expr->func = func;
 
   return expr;

@@ -270,6 +270,69 @@ int evaluate_condition(ifCondition_t *cond,
   return 0;
 }
 
+/*
+expr_t*  evaluate_vector(
+  vector_t *vec,
+  EXPRESSION_PARAMS()
+)
+{
+  // The idea is to create a new vector based on
+  // a raw one, where all identifiers have been replaced
+  // with their actual value
+  expr_t *newVec = newExpr_Vector(NULL);
+  argsList_t *newContent = NULL;
+  argsList_t *walk = vec->content;
+
+  while ( walk != NULL ) {
+    stackval_t sv;
+    expr_t *newExp;
+    evaluate_expression(walk->arg, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+
+    switch (sv.type) {
+    case INT32TYPE:
+      newExp = newExpr_Ival(sv.i);
+      break;
+    case DOUBLETYPE:
+      newExp = newExpr_Float(sv.d);
+      break;
+    case TEXT:
+      newExp = newExpr_Text(sv.t);
+      break;
+    case POINTERTYPE:
+      newExp = newExpr_Pointer(sv.p);
+      break;
+    case FUNCPTRTYPE:
+      newExp = newExpr_FuncPtr(sv.func);
+      printf("<Function: '%s'>", sv.func->id.id);
+      break;
+    case LIBFUNCPTRTYPE:
+      printf("<Function: '%s'>", sv.func->id.id);
+      break;
+    case VECTORTYPE:
+      print_vector(sv.vec, EXPRESSION_ARGS());
+      break;
+    default:
+      printf("%s.error: unknown type of value on the stack (%d)\n", 
+        __func__, sv.type);
+      GENERAL_REPORT_ISSUE_MSG();
+      break;
+    }
+
+    newContent = newArgument(e, newContent);
+    newVec->length++;
+    newVec->content = newContent;
+
+    walk = walk->next;
+    if ( walk != NULL ) {
+      printf(",");
+    }
+  }
+
+  printf("]");
+}
+*/
+
 void evaluate_expression(
   expr_t *expr,
   EXPRESSION_PARAMS())
@@ -310,10 +373,10 @@ void evaluate_expression(
             case EXPR_TYPE_FVAL:
               PUSH_DOUBLE(expArg->fval, sp, sc);
               break;
-            case EXPR_TYPE_FUNCCALL:
+            case EXPR_TYPE_FUNCPTR:
               PUSH_FUNCPTR(expArg->func, sp, sc);
               break;
-            case EXPR_TYPE_LIBFUNCCALL:
+            case EXPR_TYPE_LIBFUNCPTR:
               PUSH_LIBFUNCPTR(expArg->func, sp, sc);
               break;
             case EXPR_TYPE_TEXT:
@@ -432,6 +495,12 @@ Please report back to me.\n\
     break;
     case EXPR_TYPE_FVAL:
     PUSH_DOUBLE(expr->fval, sp, sc);
+    break;
+    case EXPR_TYPE_FUNCPTR:
+    PUSH_FUNCPTR(expr->func, sp, sc);
+    break;
+    case EXPR_TYPE_LIBFUNCPTR:
+    PUSH_LIBFUNCPTR(expr->func, sp, sc);
     break;
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
@@ -1090,10 +1159,10 @@ void call_func(
   if ( expArg != NULL ) {
     /* This was an argument! */
     switch ( expArg->type ) {
-    case EXPR_TYPE_FUNCCALL:
+    case EXPR_TYPE_FUNCPTR:
       funcDef = expArg->func;
       break;
-    case EXPR_TYPE_LIBFUNCCALL:
+    case EXPR_TYPE_LIBFUNCPTR:
       libFunc = expArg->func;
       break;
     default:
@@ -1136,7 +1205,7 @@ void call_func(
           case EXPR_TYPE_FUNCCALL:
             funcDef = expArg->func;
             break;
-          case EXPR_TYPE_LIBFUNCCALL:
+          case EXPR_TYPE_LIBFUNCPTR:
             libFunc = expArg->func;
             break;
           default:
@@ -1239,7 +1308,7 @@ void call_func(
             break;
           }
           case LIBFUNCPTRTYPE: {
-            newArg = newExpr_LibFuncCall(sv.libfunc);
+            newArg = newExpr_LibFuncPtr(sv.libfunc);
             break;
           }
           default:
@@ -1509,6 +1578,9 @@ void interpret_statements_(
           char *newText = ast_emalloc(len);
           snprintf(newText,len,"%s",c);
           sv.t = newText;
+        } else if ( sv.type == VECTORTYPE ) {
+          // Now we have to evaluate all expressions
+
         }
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);

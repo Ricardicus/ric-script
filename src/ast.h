@@ -30,10 +30,11 @@
 #define EXPR_TYPE_COND        12
 #define EXPR_TYPE_FUNCCALL    13
 #define EXPR_TYPE_POINTER     14
-#define EXPR_TYPE_FUNC_PTR    15
+#define EXPR_TYPE_FUNCPTR     15
 #define EXPR_TYPE_VECTOR      16
 #define EXPR_TYPE_VECTOR_IDX  17
-#define EXPR_TYPE_LIBFUNCCALL 18
+#define EXPR_TYPE_LIBFUNCPTR  18
+
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -208,7 +209,7 @@ expr_t* newExpr_ID(char *id);
 expr_t* newExpr_Pointer(uintptr_t val);
 expr_t* newExpr_FuncPtr(void *func);
 expr_t* newExpr_FuncCall(functionCall_t *func);
-expr_t* newExpr_LibFuncCall(libFunction_t *func);
+expr_t* newExpr_LibFuncPtr(libFunction_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
 expr_t* newExpr_OPSub(expr_t *left, expr_t *right);
 expr_t* newExpr_OPMul(expr_t *left, expr_t *right);

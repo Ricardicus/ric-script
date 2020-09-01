@@ -43,6 +43,11 @@ int  print_vector(
   EXPRESSION_PARAMS()
 );
 
+expr_t*  evaluate_vector(
+  vector_t *vec,
+  EXPRESSION_PARAMS()
+);
+
 void setup_namespaces();
 void close_namespaces();
 void flush_arguments(hashtable_t *args);

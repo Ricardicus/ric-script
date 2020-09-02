@@ -4,12 +4,15 @@
 * Garbage collection
 */
 #include "ast.h"
+#include "eval.h"
 #include "hashtable.h"
 #include <time.h>
 
 void mark_and_sweep(
   hashtable_t *varDecs,
-  heapval_t* heap);
+  EXPRESSION_PARAMS());
+
+void free_heap(void *hp, void *hbp);
 
 uint32_t get_mark_value();
 

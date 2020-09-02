@@ -388,10 +388,14 @@ void free_expression(expr_t *expr) {
     argsList_t *v = vec->content;
 
     while ( vecWalk < len ) {
-      //free_expression(v->arg);
+      if ( v->arg != NULL )
+        free_expression(v->arg);
       v = v->next;
       ++vecWalk;
     }
+
+    free(vec->content);
+    free(vec);
     break;
   }
 

@@ -449,7 +449,7 @@ if ( upd != NULL ) {\
   *(int*)upd = 1;\
 }\
 hv.sv = *a;\
-if (hv.sv.type == TEXT) {\
+if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE ) {\
 	hv.toFree = true;\
 } else {\
   hv.toFree = false;\
@@ -467,19 +467,6 @@ if ( i == size ) {\
 	fprintf(stderr, "Error: Heap full\n");\
 	exit(1);\
 } } while (0);
-
-#define FREE_HEAP(hp, hpb) do { \
-int32_t size = (*(heapval_t*)hp).sv.i;\
-int32_t i = 0;\
-while ( i < size ) {\
-	if ( ((heapval_t*) hp)[i].occupied &&\
-   ((heapval_t*) hp)[i].toFree ) {\
-		free(((heapval_t*) hp)[i].sv.t);\
-	}\
-	++i;\
-}\
-free(hpb);\
-} while (0);
 
 #define FREE_STACK(sp, spb) do { \
 free(spb);\

@@ -55,3 +55,8 @@ i = 0
 }
 
 print(h)
+
+s = [ "hejsan" ]
+s = [s, "hej"]
+print(s)
+

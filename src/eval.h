@@ -42,8 +42,9 @@ int  print_vector(
   vector_t *vec,
   EXPRESSION_PARAMS()
 );
+void free_vector(vector_t *vec);
 
-expr_t*  evaluate_vector(
+expr_t*  copy_vector(
   vector_t *vec,
   EXPRESSION_PARAMS()
 );

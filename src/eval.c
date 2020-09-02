@@ -270,18 +270,30 @@ int evaluate_condition(ifCondition_t *cond,
   return 0;
 }
 
-/*
-expr_t*  evaluate_vector(
+void free_vector(vector_t *vec) {
+  /*argsList_t *walk = vec->content;
+
+  while ( walk != NULL ) {
+    if ( walk->arg != NULL ) {
+      free_expression(walk->arg);
+    }
+    walk->arg = NULL;
+    walk = walk->next;
+  }*/
+}
+
+expr_t*  copy_vector(
   vector_t *vec,
-  EXPRESSION_PARAMS()
-)
-{
+  EXPRESSION_PARAMS()) {
   // The idea is to create a new vector based on
   // a raw one, where all identifiers have been replaced
   // with their actual value
   expr_t *newVec = newExpr_Vector(NULL);
   argsList_t *newContent = NULL;
   argsList_t *walk = vec->content;
+  argsList_t *prev = NULL;
+  argsList_t *current;
+  argsList_t *walknext;
 
   while ( walk != NULL ) {
     stackval_t sv;
@@ -304,14 +316,14 @@ expr_t*  evaluate_vector(
       break;
     case FUNCPTRTYPE:
       newExp = newExpr_FuncPtr(sv.func);
-      printf("<Function: '%s'>", sv.func->id.id);
       break;
     case LIBFUNCPTRTYPE:
-      printf("<Function: '%s'>", sv.func->id.id);
+      newExp = newExpr_LibFuncPtr(sv.libfunc);
       break;
-    case VECTORTYPE:
-      print_vector(sv.vec, EXPRESSION_ARGS());
+    case VECTORTYPE: {
+      newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
       break;
+    }
     default:
       printf("%s.error: unknown type of value on the stack (%d)\n", 
         __func__, sv.type);
@@ -319,19 +331,29 @@ expr_t*  evaluate_vector(
       break;
     }
 
-    newContent = newArgument(e, newContent);
-    newVec->length++;
-    newVec->content = newContent;
+    newContent = newArgument(newExp, newContent);
+    newVec->vec->length++;
+    newVec->vec->content = newContent;
 
     walk = walk->next;
-    if ( walk != NULL ) {
-      printf(",");
-    }
   }
 
-  printf("]");
+  /* Reverse the order of the vector expressions */
+  /* Reverse the args list order */
+  prev = NULL;
+  current = newVec->vec->content;
+  while (current != NULL) {
+    walknext = current->next;
+    current->next = prev;
+    prev = current;
+    current = walknext;
+  }
+
+  newVec->vec->content = prev;
+
+  return newVec;
 }
-*/
+
 
 void evaluate_expression(
   expr_t *expr,
@@ -1534,8 +1556,6 @@ void interpret_statements_(
       break;
       }
 
-
-
       next = ((statement_t*)stmt)->next;
       break;
     }
@@ -1579,8 +1599,9 @@ void interpret_statements_(
           snprintf(newText,len,"%s",c);
           sv.t = newText;
         } else if ( sv.type == VECTORTYPE ) {
-          // Now we have to evaluate all expressions
-
+          expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+          sv.vec = e->vec;
+          free(e);
         }
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
@@ -1655,7 +1676,7 @@ void interpret_statements_(
       }
 
       // Mark and sweep the heap
-      mark_and_sweep(varDecs, hp);
+      mark_and_sweep(varDecs, EXPRESSION_ARGS());
 
     }
     break;
@@ -2250,7 +2271,7 @@ void interpret_statements(
     close_namespaces();
 
     // free heap
-    FREE_HEAP(hp, hb);
+    free_heap(hp, hb);
 
     // Free stack
     FREE_STACK(sp, sb);

@@ -153,9 +153,11 @@ int ric_append(LIBRARY_PARAMS())
   case FUNCPTRTYPE:
     entry = newExpr_FuncPtr((void*)stv.p);
     break;
+  case LIBFUNCPTRTYPE:
+    entry = newExpr_LibFuncPtr((void*)stv.p);
+    break;
   case VECTORTYPE: {
-      vector_t *vecEntry = stv.vec;
-      entry = newExpr_Vector(vecEntry->content);
+      entry = copy_vector(stv.vec, EXPRESSION_ARGS());
     }
     break;
   default: {

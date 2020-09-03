@@ -22,7 +22,7 @@ FLEXSOURCES = lex.yy.c
 LIB_DIR = library
 
 # Set to nothing if not debugging
-DEBUG_FLAGS = 
+DEBUG_FLAGS = -g
 
 RIC_SOURCES = \
 	main \
@@ -52,11 +52,21 @@ CFLAGS = Wall \
 
 .PHONY: lex yacc test
 
+RULES = $(RIC_OBJS:.o=.d)
+
+all: ric
+
+include $(RULES)
+
+%.d: %.c
+	@rm -f $@;
+	@$(CC) -M -I. -I$(LIB_DIR) $< > $@
+
 %.o: %.c
-	$(CC) -c -o $@ $^ $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR)) \
+	$(CC) -c -o $@ $< $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR)) \
 $(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
 
-ric: lex yacc $(RIC_OBJS)
+ric: lex yacc $(RIC_OBJS) $(RULES)
 	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
 $(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
 
@@ -86,7 +96,7 @@ else
 endif
 
 clean:
-	rm -f ric $(RIC_OBJS)
+	rm -f ric $(RIC_OBJS) *.d $(LIB_DIR)/*.d
 
 
 

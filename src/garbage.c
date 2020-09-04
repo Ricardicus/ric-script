@@ -65,8 +65,11 @@ void mark_and_sweep (
         if ( heap[i].sv.type == TEXT ) {
           free(heap[i].sv.t);
         } else if ( heap[i].sv.type == VECTORTYPE ) {
-          free_vector(heap[i].sv.vec);
-          free(heap[i].sv.vec);
+          expr_t *e = newExpr_Vector(NULL);
+          free(e->vec);
+          e->vec = heap[i].sv.vec;
+          free_expression(e);
+          free(e);
         }
         heap[i].toFree = false;
       }
@@ -87,7 +90,11 @@ void free_heap(void *hp, void *hbp) {
         if ( ((heapval_t*) hp)[i].sv.type == TEXT ) {
           free(((heapval_t*) hp)[i].sv.t);
         } else if ( ((heapval_t*) hp)[i].sv.type == VECTORTYPE ) {
-          free_vector(((heapval_t*) hp)[i].sv.vec);
+          expr_t *e = newExpr_Vector(NULL);
+          free(e->vec);
+          e->vec = ((heapval_t*) hp)[i].sv.vec;
+          free_expression(e);
+          free(e);
         }
     }
     ++i;

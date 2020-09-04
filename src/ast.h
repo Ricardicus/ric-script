@@ -218,6 +218,7 @@ expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 expr_t* newExpr_Cond(ifCondition_t *cond);
 expr_t* newExpr_Vector(argsList_t *args);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
+expr_t* newExpr_Copy(expr_t *exp);
 
 ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(expr_t *id, expr_t *exp);
@@ -227,6 +228,8 @@ ifStmt_t*       newIfStatement(int ifType, ifCondition_t *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 functionCall_t* newFunCall(const char *id, void *args);
 body_t*         newBody(void *body);
+
+argsList_t*     copy_argsList(argsList_t *args);
 
 void print_statements(statement_t *root);
 void interpret_statements(int argc, char *argv[], statement_t *stmt);

@@ -1,8 +1,9 @@
 # Bison debug outpu
 y.output
 
-# object files
+# object and dependency files
 *.o
+*.d
 
 # Executable
 ric

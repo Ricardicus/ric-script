@@ -1,0 +1,22 @@
+name: Memory leakage detection
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: make
+    - name: Run valgrind on example.ric
+      run: valgrind --leak-check=full ./ric samples/example.ric
+    - name: Run valgrind on vector_print.ric
+      run: valgrind --leak-check=full ./ric samples/vector_print.ric
+

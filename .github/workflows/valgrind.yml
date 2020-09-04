@@ -27,3 +27,6 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/function_within_function.ric
     - name: Run valgrind on gcd.ric
       run: valgrind --leak-check=full ./ric samples/gcd.ric 21390 3210
+    - name: Run valgrind on demo.ric
+      run: valgrind --leak-check=full ./ric samples/demo.ric
+

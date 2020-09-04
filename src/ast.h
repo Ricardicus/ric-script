@@ -312,9 +312,7 @@ typedef struct libFunction {
 	*hb = calloc(hz+2, sizeof(heapval_t));\
 	assert(*hb != NULL);\
 	p = ((intptr_t)*hb) % sizeof(heapval_t);\
-	if ( p != 0 ) {\
-		p = (sizeof(heapval_t) - ( p % sizeof(heapval_t) ));\
-	}\
+	p = (sizeof(heapval_t) - ( p % sizeof(heapval_t) ));\
 	hpbv.sv.type = INT32TYPE;\
 	hpbv.sv.i = (int32_t)hz;\
 	hpbv.occupied = true;\

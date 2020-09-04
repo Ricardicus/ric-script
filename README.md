@@ -168,7 +168,6 @@ hej(print, "hejsan")
 
 ```
 $ ./ric samples/demo.ric
-
 True condition
 Untrue condition
 A variable was not 1337, it was: 1338

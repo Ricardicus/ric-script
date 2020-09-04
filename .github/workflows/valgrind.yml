@@ -21,4 +21,7 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/example.ric
     - name: Run valgrind on vector_print.ric
       run: valgrind --leak-check=full ./ric samples/vector_print.ric
-
+    - name: Run valgrind on func_ptr.ric
+      run: valgrind --leak-check=full ./ric samples/func_ptr.ric
+    - name: Run valgrind on function_within_function.ric
+      run: valgrind --leak-check=full ./ric samples/function_within_function.ric

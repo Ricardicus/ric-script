@@ -13,8 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+    - name: Build project
       run: make
+    - name: Install Valgrind
+      run: apt-get install valgrind
     - name: Run valgrind on example.ric
       run: valgrind --leak-check=full ./ric samples/example.ric
     - name: Run valgrind on vector_print.ric

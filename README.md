@@ -164,3 +164,28 @@ hej(willprint, "hej")
 hej(print, "hejsan")
 ```
 
+## Output:
+
+```
+$ ./ric samples/demo.ric
+
+True condition
+Untrue condition
+A variable was not 1337, it was: 1338
+Re-evaluating
+Now the variable is: 1337
+yey!
+len(h): 2
+len(h): 3
+len(h): 2
+h:
+[['hej','hopp','hejsan'],'hoppsan']
+Traversing and printing h: 
+====================
+h[0]: ['hej','hopp','hejsan']
+h[1]: hoppsan
+====================
+hej
+hejsan
+```
+

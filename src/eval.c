@@ -675,12 +675,10 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERR
           *f0 = svLeft.d;
           break;
         }
-        case TEXT: {
+        case TEXT:
+        case VECTORTYPE:
+        case POINTERTYPE: 
           break;
-        }
-        case POINTERTYPE: {
-          break;
-        }
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
@@ -696,12 +694,10 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERR
           *f1 = svRight.d;
           break;
         }
-        case TEXT: {
+        case TEXT:
+        case VECTORTYPE:
+        case POINTERTYPE: 
           break;
-        }
-        case POINTERTYPE: {
-          break;
-        }
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
@@ -849,7 +845,45 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERR
         }
 
         PUSH_STRING(sv.t, sp, sc);
-      } 
+      } else if ( svLeft.type == VECTORTYPE && svRight.type == TEXT ) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len+1);
+        snprintf(newText, len+1, "<List:size=%" PRIi32 ">%s", svLeft.vec->length, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if ( svLeft.type == TEXT && svRight.type == VECTORTYPE ) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len+1);
+        snprintf(newText, len+1, "%s<List:size=%" PRIi32 ">", svLeft.t, svRight.vec->length);
+
+        sv.type = TEXT;
+        sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      }
 
       break;
     }

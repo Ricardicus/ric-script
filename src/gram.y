@@ -528,6 +528,12 @@ stringContents:
 
         $$ = newExpr_OPAdd(e1,e2);
     }
+    | stringContents '+' indexedVector  {
+        expr_t *e1 = (expr_t*)$1;
+        expr_t *e2 = (expr_t*)$3;
+
+        $$ = newExpr_OPAdd(e1,e2);
+    }
     | stringContent {
         $$ = $1;
     };
@@ -663,6 +669,14 @@ otherChar:
         $$[1] = 0;
     }
     | '.' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '[' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | ']' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

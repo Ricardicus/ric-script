@@ -309,7 +309,7 @@ typedef struct libFunction {
 #define SETUP_HEAP(hp, hb, hz) do {\
 	intptr_t p;\
 	heapval_t hpbv;\
-	*hb = calloc(hz+1, sizeof(heapval_t));\
+	*hb = calloc(hz+2, sizeof(heapval_t));\
 	assert(*hb != NULL);\
 	p = ((intptr_t)*hb) % sizeof(heapval_t);\
 	if ( p != 0 ) {\

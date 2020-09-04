@@ -38,9 +38,8 @@ void mark_and_sweep (
   hashtable_t *varDecs,
   EXPRESSION_PARAMS()) {
   int i = 0;
-  int32_t size = (*(heapval_t*)hp).sv.i;
-  heapval_t *heap = (heapval_t*)hp;
-  int32_t heapWalk = 0;
+  int32_t size = (*(heapval_t*)hb).sv.i;
+  heapval_t *heap = (heapval_t*)hb;
   uint32_t markVal;
 
   argCount = 0;
@@ -57,7 +56,8 @@ void mark_and_sweep (
   }
 
   /* Sweep the heap values that haven't got the mark */
-  while ( heapWalk < size ) {
+  i = 0;
+  while ( i < size - 1 ) {
     if ( heap[i].occupied && 
         heap[i].mark != markVal) {
       // Sweep this value
@@ -77,7 +77,7 @@ void mark_and_sweep (
       heap[i].occupied = false;
     }
 
-    ++heapWalk;
+    ++i;
   }
 
 }

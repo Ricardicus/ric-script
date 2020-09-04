@@ -1,0 +1,71 @@
+# Conditionals
+[ 1 == 1 ] {
+  print("True condition")
+}
+
+[ 1 == 0 ] {
+  # You shall not pass - Gandalf
+} ~ {
+  print("Untrue condition")
+}
+
+# Placing a dot in front of a condition
+# makes it a return spot, operator '@' returns there.
+a = 1338
+
+. [ a == 1337 ] {
+  print("Now the variable is: " + a)
+  print("yey!")
+} ~ {
+  print("A variable was not 1337, it was: " + a)
+  a = 1337
+  print("Re-evaluating")
+  @
+}
+
+# Lists
+h = [ "hej", "hopp" ]
+print("len(h): " + len(h))
+
+append(h, "hejsan")
+
+print("len(h): " + len(h))
+
+h = [h, "hoppsan"]
+
+print("len(h): " + len(h))
+print("h:")
+print(h)
+print("Traversing and printing h: ")
+print("====================")
+
+i = 0
+. [ i < len(h) ] {
+  printf("h[" + i + "]: ")
+  print(h[i])
+  i = i + 1
+  @
+}
+
+print("====================")
+
+# Function definitions and pointers
+
+# Defining a function
+@ hej (a, b) {
+  # Calling a with b as argument.
+  # a should be a function pointer (dynamically type)
+  # otherwise execution stops (no exception handling)
+  # with error message
+  a(b)
+}
+
+# Defining a function
+@ willprint (a) {
+  print(a)
+}
+
+# Calling out 'hej' function with our 'willprint' function as first argument
+hej(willprint, "hej")
+# Calling out 'hej' function with standard library 'print' function as first argument
+hej(print, "hejsan")

@@ -40,7 +40,7 @@ The container exposes the port 3000.
 ## Docker example
 ```
 git clone https://github.com/Ricardicus/ric-script
-cd ric_script
+cd ric-script
 docker build -t node-ric-script:1.0 .
 docker run --rm -d -p 3002:3000 node-ric-script:1.0
 ```

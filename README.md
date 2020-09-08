@@ -88,7 +88,7 @@ well as haven't implemented:
 
 
 
-# Snapshot of language syntax
+# Snapshot of the language syntax
 
 ```
 # Conditionals

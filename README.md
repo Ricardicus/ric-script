@@ -19,6 +19,21 @@ The samples folder contains ric scripts with OK syntax.
 # Build
 
 On linux or mac use meson or GNU make
+```
+# on linux or mac
+make
+# or, with meson:
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+meson builddir
+cd builddir
+ninja
+# Now the interpreter binary 'ric' will be found under
+# the folder 'src'
+```
+
+
 For windows only meson works:
 
 ```

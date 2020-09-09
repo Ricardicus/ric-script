@@ -2,12 +2,12 @@ import os
 from settings import *
 
 def test_exit_code():
-  lib_script = "./" + EXECUTABLE + " ../samples/ric_lib.ric "
-
+  lib_script = callSample('ric_lib.ric')
 
   ret = os.system(lib_script)
-  if (os.WIFEXITED(ret)):
-    ret = os.WEXITSTATUS(ret)
+  if ( os.name != 'nt' ):
+    if (os.WIFEXITED(ret)):
+      ret = os.WEXITSTATUS(ret)
 
   assert ret == 2
 
@@ -22,11 +22,12 @@ def test_file_exist():
   "Have a good day!"
   ]
 
-  lib_script = "./" + EXECUTABLE + " ../samples/ric_lib.ric "
+  lib_script = callSample('ric_lib.ric')
 
   ret = os.system(lib_script)
-  if (os.WIFEXITED(ret)):
-    ret = os.WEXITSTATUS(ret)
+  if (os.name != 'nt'):
+    if (os.WIFEXITED(ret)):
+      ret = os.WEXITSTATUS(ret)
 
   # Will throw exception if file does not exist
   f = open(file, "r")
@@ -40,7 +41,7 @@ def test_file_exist():
 
 def test_output():
 
-  lib_script = "./" + EXECUTABLE + " ../samples/ric_lib.ric "
+  lib_script = callSample('ric_lib.ric')
 
   ric_result = os.popen(lib_script).read()
 

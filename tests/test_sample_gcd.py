@@ -12,7 +12,7 @@ def gcd(a,b):
         return gcd(b,a%b)
 
 def test_gcd():
-    gcd_script = "./" + EXECUTABLE + " ../samples/gcd.ric "
+    gcd_script = callSample('gcd.ric')
 
     number_of_tests = 100
 

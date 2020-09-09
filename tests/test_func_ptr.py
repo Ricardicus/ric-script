@@ -13,7 +13,7 @@ def test_file_exist():
 "hej"
   ]
 
-  lib_script = "./" + EXECUTABLE + " ../samples/func_ptr.ric "
+  lib_script = callSample('func_ptr.ric')
 
   ric_result = os.popen(lib_script).read().splitlines()
 

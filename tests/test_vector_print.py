@@ -29,7 +29,7 @@ def test_vector_print():
 "[['hejsan'],'hej']"
   ]
 
-  lib_script = "./" + EXECUTABLE + " ../samples/vector_print.ric "
+  lib_script = callSample('vector_print.ric')
 
   ric_result = os.popen(lib_script).read().splitlines()
 

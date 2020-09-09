@@ -8,9 +8,8 @@ result = ["foo",
 "hejsan",
 "tjenare"]
 
-
 def test_function_within_function():
-  script = "./" + EXECUTABLE + " ../samples/function_within_function.ric"
+  script = callSample('function_within_function.ric')
 
   sample_result = os.popen(script).read()
 

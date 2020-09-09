@@ -28,7 +28,7 @@ def test_vector_print():
 "1338.000000"
   ]
 
-  lib_script = "./" + EXECUTABLE + " ../samples/math.ric "
+  lib_script = callSample('math.ric')
 
   ric_result = os.popen(lib_script).read().splitlines()
 

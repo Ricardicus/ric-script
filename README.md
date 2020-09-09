@@ -23,7 +23,7 @@ For windows only meson works:
 
 ```
 # on windows
-python -m venv venv
+python3 -m venv venv
 venv\Source\activate
 pip install -r requirements.txt
 meson builddir

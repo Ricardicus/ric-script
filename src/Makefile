@@ -70,17 +70,6 @@ ric: lex yacc $(RIC_OBJS) $(RULES)
 	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
 $(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
 
-test: ric
-	@echo ""
-	@echo "============================================"
-	@echo "Content of file 'samples/example.ric'"
-	@echo "============================================"
-	@cat ../samples/example.ric
-	@echo "============================================"
-	@echo "Interpretation of file 'samples/example.ric'"
-	@echo "============================================"
-	@./ric -pi ../samples/example.ric
-
 lex: $(FLEXSPEC)
 ifeq (, $(shell which flex))
 	@echo "flex is not installed, not generating new lexer"

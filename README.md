@@ -1,4 +1,4 @@
-![](https://github.com/Ricardicus/ric-script/workflows/Building%20&%20Testing/badge.svg)
+![Building and testing](https://github.com/Ricardicus/ric-script/workflows/Building%20and%20testing/badge.svg)
 ![Building docker image](https://github.com/Ricardicus/ric-script/workflows/Building%20docker%20image/badge.svg)
 ![Style linter](https://github.com/Ricardicus/ric-script/workflows/Style%20linter/badge.svg)
 ![Memory leakage detection](https://github.com/Ricardicus/ric-script/workflows/Memory%20leakage%20detection/badge.svg)
@@ -19,11 +19,26 @@ The samples folder contains ric scripts with OK syntax.
 # Build
 
 On linux or mac use meson or GNU make
+```
+# on linux or mac
+make
+# or, with meson:
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+meson builddir
+cd builddir
+ninja
+# Now the interpreter binary 'ric' will be found under
+# the folder 'src'
+```
+
+
 For windows only meson works:
 
 ```
 # on windows
-python -m venv venv
+python3 -m venv venv
 venv\Source\activate
 pip install -r requirements.txt
 meson builddir
@@ -40,7 +55,7 @@ The container exposes the port 3000.
 ## Docker example
 ```
 git clone https://github.com/Ricardicus/ric-script
-cd ric_script
+cd ric-script
 docker build -t node-ric-script:1.0 .
 docker run --rm -d -p 3002:3000 node-ric-script:1.0
 ```
@@ -88,7 +103,7 @@ well as haven't implemented:
 
 
 
-# Snapshot of language syntax
+# Snapshot of the language syntax
 
 ```
 # Conditionals
@@ -168,7 +183,6 @@ hej(print, "hejsan")
 
 ```
 $ ./ric samples/demo.ric
-
 True condition
 Untrue condition
 A variable was not 1337, it was: 1338

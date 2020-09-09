@@ -1,4 +1,4 @@
-# Batteries included
+# This is where batteries are included
 
 Here I implement functions implemented in the language
 by default. I try to make some sort of partitioning

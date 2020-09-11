@@ -56,10 +56,9 @@ RULES = $(RIC_OBJS:.o=.d)
 
 all: ric
 
-include $(RULES)
+-include $(RULES)
 
 %.d: %.c
-	@rm -f $@;
 	@$(CC) -M -I. -I$(LIB_DIR) $< > $@
 
 %.o: %.c

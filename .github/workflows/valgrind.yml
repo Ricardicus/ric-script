@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  valgrind:
 
     runs-on: ubuntu-latest
 
@@ -27,8 +27,9 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/func_ptr.ric
     - name: Run valgrind on function_within_function.ric
       run: valgrind --leak-check=full ./ric samples/function_within_function.ric
-    - name: Run valgrind on gcd.ric
+    - name: Run valgrind on gcd.ric with arguments
       run: valgrind --leak-check=full ./ric samples/gcd.ric 21390 3210
     - name: Run valgrind on demo.ric
       run: valgrind --leak-check=full ./ric samples/demo.ric
-
+    - name: Run valgrind on args.ric with arguments
+      run: valgrind --leak-check=full ./ric samples/args.ric 1 2 3 hello

@@ -93,9 +93,9 @@ well as haven't implemented:
 - [x] Meson build (beside make, for increased portability)
 - [x] Vector expressions
 - [x] Garbage collector (mark & sweep)
+- [x] Passing arguments as vector instead of variables
 - [ ] Dictionary expressions
 - [ ] Bigger standard library, more battery power (for reference, see: **src/library**)
-- [ ] Passing arguments as vector instead of variables
 - [ ] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files

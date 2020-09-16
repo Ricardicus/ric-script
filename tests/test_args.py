@@ -8,6 +8,11 @@ def test_no_args():
   "args: ['./../builddir/src/ric','../samples/args.ric']"
   ]
 
+  if (os.name == 'nt'):
+    # Windows
+    output_lines[1] = "args: ['.\\..\\builddir\\src\\ric.exe','..\\samples\\args.ric']"
+
+
   lib_script = callSample('args.ric')
 
   ric_result = os.popen(lib_script).read().splitlines()
@@ -24,6 +29,10 @@ def test_some_args_ints():
   "Number of arguments: 5",
   "args: ['./../builddir/src/ric','../samples/args.ric',1,2,3]"
   ]
+
+  if (os.name == 'nt'):
+    # Windows
+    output_lines[1] = "args: ['.\\..\\builddir\\src\\ric.exe','..\\samples\\args.ric',1,2,3]"
 
   args = [1,2,3]
 
@@ -42,6 +51,10 @@ def test_some_args_strings():
   "Number of arguments: 5",
   "args: ['./../builddir/src/ric','../samples/args.ric','a','ab','abc']"
   ]
+
+  if (os.name == 'nt'):
+    # Windows
+    output_lines[1] = "args: ['.\\..\\builddir\\src\\ric.exe','..\\samples\\args.ric','a','ab','abc']"
 
   args = ['a','ab','abc']
 

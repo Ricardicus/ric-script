@@ -25,7 +25,9 @@ def test_some_args_ints():
   "args: ['./../builddir/src/ric','../samples/args.ric',1,2,3]"
   ]
 
-  lib_script = callSample('args.ric 1 2 3')
+  args = [1,2,3]
+
+  lib_script = callSampleArgs('args.ric', args)
 
   ric_result = os.popen(lib_script).read().splitlines()
 
@@ -41,7 +43,9 @@ def test_some_args_strings():
   "args: ['./../builddir/src/ric','../samples/args.ric','a','ab','abc']"
   ]
 
-  lib_script = callSample('args.ric a ab abc')
+  args = ['a','ab','abc']
+
+  lib_script = callSampleArgs('args.ric', args)
 
   ric_result = os.popen(lib_script).read().splitlines()
 

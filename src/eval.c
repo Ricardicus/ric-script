@@ -2454,6 +2454,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
     if ( argContent == NULL ) {
       argContent = newArgContent;
       argContent->length = 1;
+      argContent->next = NULL;
     } else {
       newArgContent->next = argContent;
       newArgContent->length = argContent->length + 1;

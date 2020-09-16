@@ -8,13 +8,13 @@
     }
 }
 
-[ argN < 3 ] {
-	print('usage: ' + arg0 + ' number1 number2')
+[ len(args) < 4 ] {
+	print('usage: ' + args[0] + ' number1 number2')
 	exit(1)
 }
 
 # Numbers to calculate GCD of
-x = arg1
-y = arg2
+x = args[2]
+y = args[3]
 
 print("GCD of " + x + " and " + y + ", is: " + calcGCD(x, y) )

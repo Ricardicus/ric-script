@@ -157,10 +157,10 @@ typedef struct declaration_s {
 } declaration_t;
 
 typedef struct argsList {
-	int entity;
+  int entity;
   unsigned int length;
-	expr_t *arg;
-	struct argsList *next;
+  expr_t *arg;
+  struct argsList *next;
 } argsList_t;
 
 typedef struct statement_s {

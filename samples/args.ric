@@ -1,29 +1,6 @@
 # Check the arguments passed
 
-print("argN: " + argN)
+print("Number of arguments: " + len(args))
+printf("args: ")
+print(args)
 
-print("arg0: " + arg0)
-
-[ argN == 2 ] {
-  print("arg1: " + arg1)
-} ~[ argN == 3 ] {
-  print("arg1: " + arg1)
-  print("arg2: " + arg2)
-} ~[ argN == 4 ] {
-  print("arg1: " + arg1)
-  print("arg2: " + arg2)
-  print("arg3: " + arg3)
-} ~[ argN == 5 ] {
-  print("arg1: " + arg1)
-  print("arg2: " + arg2)
-  print("arg3: " + arg3)
-  print("arg4: " + arg4)
-} ~[ argN == 6 ] {
-  print("arg1: " + arg1)
-  print("arg2: " + arg2)
-  print("arg3: " + arg3)
-  print("arg4: " + arg4)
-  print("arg5: " + arg5)
-}
-
-# Up to 10 args can be passed this way!

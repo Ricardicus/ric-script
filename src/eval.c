@@ -2374,53 +2374,39 @@ static char *arguments[] = {
   "arg6", "arg7", "arg8", "arg9", "arg10"
 };
 
-static char *argumentCount = "argN";
+static char *argumentListName = "args";
 
 void arguments_to_variables(int argc, char* argv[], void *hp)
 {
   /*
   * Invoking the program with command arguments:
   * --args value1 value2 ... valueN
-  * will populate the global variables
-  * arg1 arg2 ... argN with the value and
-  * the args variable to N.
-  * max 10 arguments can be set.
+  * will populate the global variable
+  * args, which is a vector with max 10 arguments.
   */
 
   int heapUpdated;
   stackval_t sv;
   heapval_t *hvp = NULL;
-  int argWalk = 2;
+  int argWalk = 0;
   int argCount = 0;
   int nbrReserved = sizeof(reservedArgs) / sizeof(*reservedArgs);
   int maxNbrArgs = sizeof(arguments) / sizeof(*arguments);
+  expr_t *args;
+  argsList_t *argContent = NULL;
 
   if ( argc < 2 ) {
     /* Not OK :/ */
     return;
   }
 
-  /* Add name of script as first argument */
-
-  sv.type = TEXT;
-  {
-    size_t len = strlen(argv[0]);
-    char *newText = ast_emalloc(len+1);
-    snprintf(newText, len+1, "%s", argv[0]);
-    sv.t = newText;
-  }
-
-  ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-  /* Placing variable declaration in global variable namespace */
-  hashtable_put(varDecs, arguments[argCount], hvp);
-  argCount++;
-
   while ( argWalk < argc && argCount < maxNbrArgs ) {
     char *arg = argv[argWalk];
     int argWalkReserved = 0;
     int ignore = 0;
     int argType;
+    expr_t *newArgExp;
+    argsList_t *newArgContent;
 
     // Some arguments are not to be passed to the environment
     while ( argWalkReserved < nbrReserved ) {
@@ -2437,49 +2423,55 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
       continue;
     }
 
+    newArgContent = ast_emalloc(sizeof(argsList_t));
+
     argType = typeOfArgument(arg);
     sv.type = argType;
     switch ( argType )
     {
     case INT32TYPE:
     {
-      sv.i = (int32_t) atoi(arg);
+      newArgExp = newExpr_Ival(atoi(arg));
       break;
     }
     case DOUBLETYPE:
     {
-      sv.d = (double) atof(arg);
+      newArgExp = newExpr_Float(atof(arg));
       break;
     }
     case TEXT:
     {
-      size_t len = strlen(arg);
-      char *newText = ast_emalloc(len+1);
-      snprintf(newText, len+1, "%s", arg);
-      sv.t = newText;
+      newArgExp = newExpr_Text(arg);
       break;
     }
     default:
+      fprintf(stderr, "There was something strange with the provided argument..\r\n");
+      GENERAL_REPORT_ISSUE_MSG();
     break;
     }
 
-    ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-    hvp->sv = sv;
-
-    /* Placing variable declaration in global variable namespace */
-    hashtable_put(varDecs, arguments[argCount], hvp);
-    argCount++;
+    newArgContent->arg = newArgExp;
+    if ( argContent == NULL ) {
+      argContent = newArgContent;
+      argContent->length = 1;
+    } else {
+      newArgContent->next = argContent;
+      newArgContent->length = argContent->length + 1;
+      argContent = newArgContent;
+    }
 
     argWalk++;
   }
 
+  args = newExpr_Vector(argContent);
+
   /* Add space for argN */
-  sv.type = INT32TYPE;
-  sv.i = (int32_t) argCount;
+  sv.type = VECTORTYPE;
+  sv.vec = args->vec;
+  free(args);
 
   ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
   /* Placing variable declaration in global variable namespace */
-  hashtable_put(varDecs, argumentCount, hvp);
+  hashtable_put(varDecs, argumentListName, hvp);
 }

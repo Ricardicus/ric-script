@@ -99,7 +99,7 @@ well as haven't implemented:
 - [ ] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
-
+- [ ] Better interactive mode, like the one running  ´$ python´ in the terminal
 
 
 

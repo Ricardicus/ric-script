@@ -59,8 +59,14 @@ int main(int argc, char *argv[]) {
           fp = fopen(argv[i], "r");
           if ( fp != NULL ) {
             yyin = fp;
+            mission = runAsIntepreter;
+          } else {
+            fprintf(stderr, "file: '%s' could no be opened.\n", argv[i]);
+            exit(1);
           }
         }
+
+        mission = runAsIntepreter;
       }
       ++i;
     }

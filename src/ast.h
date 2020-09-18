@@ -484,7 +484,7 @@ DEF_NEW_CONTEXT()
 
 #define PRINT_INTERACTIVE_BANNER() do {\
   printf("You are running in interactive mode. Stop it by typing: 'quit'.\n");\
-  printf("This is in it's very early stage... You will not be able to do much!\n");\
+  printf("This is in it's very early stage... it only supports one liners!\n");\
 } while (0)
 
 #endif

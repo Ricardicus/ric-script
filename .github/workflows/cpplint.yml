@@ -20,9 +20,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v1
-    - uses: BSFishy/meson-build@v1.0.1
-      with:
-        action: build
     - id: install-python-deps
       run: pip3 install -r requirements.txt
     - id: style-check

@@ -203,3 +203,29 @@ hej
 hejsan
 ```
 
+# Interactive prompt
+
+This is implemented as of today in its earliest stage.
+What I mean by that, is that you have to do what you want to
+do in a single line.. I have not made an effort of deciding
+when to keep reading line after another without interpreting.
+For example, one typically makes a new line when opening
+a body bracket ('{'). In the future, I want to fix this. 
+But I am glad that it works anyhow. You can still
+do what you want, as long as you keep it on one line
+
+```
+$ ./ric
+You are running in interactive mode. Stop it by typing: 'quit'.
+This is in it's very early stage... You will not be able to do much!
+>> a = 1337
+>> print(a)
+1337
+>> # Making a function declaration, in one line...
+>> @ foobar (a) { print(a) }
+>> # calling this function
+>> foobar(a)
+1337
+>> quit()
+```
+

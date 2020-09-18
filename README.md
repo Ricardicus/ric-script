@@ -215,7 +215,7 @@ But I am glad that it works anyhow. You can still
 do what you want, as long as you keep it on one line
 
 ```
-(venv) ➜  ric-script git:(master) ✗ ./ric
+$ ./ric
 You are running in interactive mode. Stop it by typing: 'quit'.
 This is in it's very early stage... You will not be able to do much!
 >> a = 1337
@@ -226,7 +226,6 @@ This is in it's very early stage... You will not be able to do much!
 >> # calling this function
 >> foobar(a)
 1337
+>> quit
 ```
 
->> ^C 
-```

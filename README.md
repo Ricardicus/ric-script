@@ -226,6 +226,6 @@ This is in it's very early stage... You will not be able to do much!
 >> # calling this function
 >> foobar(a)
 1337
->> quit
+>> quit()
 ```
 

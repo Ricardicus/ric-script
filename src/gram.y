@@ -687,9 +687,47 @@ otherChar:
 
 %%
 
+#include <stdlib.h>
+#include <string.h>
 #include "hooks.h"
+
+typedef struct yy_buffer_state * YY_BUFFER_STATE;
+extern int yyparse();
+extern YY_BUFFER_STATE yy_scan_string(char * str);
+extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
 
 void initParser() {
     setParser(yyparse);
     setRoot(&root);
+}
+
+void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func) {
+    char lineBuffer[256];
+
+    memset(lineBuffer, 0, sizeof(lineBuffer));
+
+    PRINT_INTERACTIVE_BANNER();
+
+    printf(">> ");
+    while ( fgets(lineBuffer, sizeof(lineBuffer), stdin) != NULL ) {
+        YY_BUFFER_STATE buffer;
+
+        /* Check if the user wants to quit */
+        if ( strstr(lineBuffer, "quit") != NULL ) {
+            func(argc, argv, NULL, 1);
+            return;
+        }
+
+        /* Parse from read line */
+        buffer = yy_scan_string(lineBuffer);
+        yyparse();
+        yy_delete_buffer(buffer);
+
+        if ( root != NULL ) {
+            func(argc, argv, root, 0);
+        }
+
+        printf(">> ");
+        memset(lineBuffer, 0, sizeof(lineBuffer));
+    }
 }

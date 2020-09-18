@@ -233,6 +233,7 @@ argsList_t*     copy_argsList(argsList_t *args);
 
 void print_statements(statement_t *root);
 void interpret_statements(int argc, char *argv[], statement_t *stmt);
+void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown);
 void free_expression(expr_t *expr);
 
 typedef enum stackvaltypes {
@@ -274,6 +275,7 @@ typedef struct heapval {
 #define RIC_MAX_NBR_VARS 4096
 
 #define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc;
+#define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb; static void *st, *ed; static size_t sc;
 #define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc
 #define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc
 #define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc }
@@ -479,6 +481,11 @@ void free_ast(statement_t *stmt);
 typedef struct context_full_t {
 DEF_NEW_CONTEXT()
 } context_full_t;
+
+#define PRINT_INTERACTIVE_BANNER() do {\
+  printf("You are running in interactive mode. Stop it by typing: 'quit'.\n");\
+  printf("This is in it's very early stage... You will not be able to do much!\n");\
+} while (0)
 
 #endif
 

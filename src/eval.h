@@ -10,6 +10,9 @@
 
 #define JMP_CODE_INITIAL     0
 #define JMP_CODE_CONTINUE    1
+#define JMP_CODE_TEARDOWN    2
+
+#define MAX_NBR_ARGUMENTS    10
 
 int evaluate_condition(ifCondition_t *cond,
   void *stmt, void *next,
@@ -33,6 +36,7 @@ void interpret_statements_(
   hashtable_t *argVals);
 
 void interpret_statements(int argc, char* argv[], statement_t *stmt);
+void interpret_statements_interactive(int argc, char* argv[], statement_t *stmt, int teardown);
 
 void print_condition(ifCondition_t *cond);
 void print_expr(expr_t *expr);

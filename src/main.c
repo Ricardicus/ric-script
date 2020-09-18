@@ -28,19 +28,16 @@ void usage(char *argv0, int ret)
 typedef enum mission {
   runAsIntepreter,
   runAsASTPrinter,
-  runAsASTPrinterAndInterpreter
+  runAsASTPrinterAndInterpreter,
+  runAsInteractive
 } mission_t;
 
 int main(int argc, char *argv[]) {
-  mission_t mission = runAsIntepreter;
+  mission_t mission = runAsInteractive;
   statement_t *root = NULL;
   MainParserFunc parse;
   int ret = 0;
   FILE *fp = NULL;
-
-  if ( argc == 1 ) {
-    usage(argv[0], 0);
-  }
 
   /* Check inputs */
   if ( argc > 1 ) {
@@ -49,7 +46,7 @@ int main(int argc, char *argv[]) {
       if ( strcmp("-p", argv[i]) == 0 ) {
         mission = runAsASTPrinter;
       } else if ( strcmp("-i", argv[i]) == 0 ) {
-        mission = runAsIntepreter;
+        mission = runAsInteractive;
       } else if ( strcmp("-pi", argv[i]) == 0 ) {
         mission = runAsASTPrinterAndInterpreter;
       } else if ( strcmp("-h", argv[i]) == 0 ) {
@@ -75,15 +72,18 @@ int main(int argc, char *argv[]) {
   /* Get parser function */
   parse = getParser();
 
-  /* Parse the program */
-  parse();
-
-  /* Get the root statement */
-  root = getRoot();
-
   switch ( mission ) {
+  case runAsInteractive: {
+    /* Run the interactive mode */
+    runInteractive(argc, argv, interpret_statements_interactive);
+  }
   break;
   case runAsIntepreter:
+    /* Parse the program */
+    parse();
+
+    /* Get the root statement */
+    root = getRoot();
     if ( root != NULL ) {
       /* Interpret the program */
       interpret_statements(argc, argv, root);
@@ -93,6 +93,11 @@ int main(int argc, char *argv[]) {
     }
     break;
   case runAsASTPrinter:
+    /* Parse the program */
+    parse();
+
+    /* Get the root statement */
+    root = getRoot();
     if ( root != NULL ) {
       /* Printt the program */
       printf("AST:\n\n");
@@ -103,6 +108,11 @@ int main(int argc, char *argv[]) {
     }
     break;
   case runAsASTPrinterAndInterpreter:
+    /* Parse the program */
+    parse();
+
+    /* Get the root statement */
+    root = getRoot();
     if ( root != NULL ) {
       /* Print the program */
       printf("AST:\n\n");

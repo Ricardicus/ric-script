@@ -2315,6 +2315,82 @@ void interpret_statements(
   }
 }
 
+void interpret_statements_interactive(
+  int argc,
+  char *argv[],
+  statement_t *stmt,
+  int teardown
+)
+{
+  static int firstCall = 1;
+  // "CPU" registers definitions
+  DEF_NEW_CONTEXT_STATIC();
+
+  if ( firstCall ) {
+    // Setup stack
+    SETUP_STACK(&sp, &sb, RIC_STACKSIZE, &sc);
+
+    // Setup heap
+    SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
+
+    // Setup namespaces
+    setup_namespaces();
+
+    // arguments to environment variables
+    arguments_to_variables(argc, argv, hp);
+
+    // Set up ric library
+    initialize_ric_lib();
+
+    /* Set starting point and end point */
+    st = stmt;
+    ed = NULL;
+
+    /* Flag that setup has been done already */
+    firstCall = 0;
+  }
+
+  if ( stmt != NULL ) {
+    switch ( setjmp(endingJmpBuf) ) {
+    case JMP_CODE_INITIAL:
+        /* Start descending and evaluating the AST */
+      interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
+      break;
+    case JMP_CODE_TEARDOWN:
+      // Close namespaces
+      close_namespaces();
+
+      // free heap
+      free_heap(hp, hb);
+
+      // Free stack
+      FREE_STACK(sp, sb);
+
+      // Free memory associated with the AST
+      free_ast(stmt);
+      break;
+    default:
+      break;
+    }
+  }
+
+  if ( teardown != 0 ) {
+    // Close namespaces
+    close_namespaces();
+
+    // free heap
+    free_heap(hp, hb);
+
+    // Free stack
+    FREE_STACK(sp, sb);
+
+    // Free memory associated with the AST
+    free_ast(stmt);
+
+    firstCall = 1;
+  }
+}
+
 static int isAnInt(char *arg) {
   char *c = arg;
   while ( *c ) {
@@ -2368,12 +2444,6 @@ static char *reservedArgs[] = {
   "-pi", "-p", "-i", "-h", "--help"
 };
 
-static char *arguments[] = {
-  "arg0",
-  "arg1", "arg2", "arg3", "arg4", "arg5",
-  "arg6", "arg7", "arg8", "arg9", "arg10"
-};
-
 static char *argumentListName = "args";
 
 void arguments_to_variables(int argc, char* argv[], void *hp)
@@ -2391,7 +2461,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   int argWalk = 0;
   int argCount = 0;
   int nbrReserved = sizeof(reservedArgs) / sizeof(*reservedArgs);
-  int maxNbrArgs = sizeof(arguments) / sizeof(*arguments);
+  int maxNbrArgs = MAX_NBR_ARGUMENTS;
   expr_t *args;
   argsList_t *argContent = NULL;
 

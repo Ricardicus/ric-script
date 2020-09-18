@@ -1,4 +1,5 @@
 wheel
+ninja
 meson
 pytest
 cpplint

@@ -217,7 +217,7 @@ do what you want, as long as you keep it on one line
 ```
 $ ./ric
 You are running in interactive mode. Stop it by typing: 'quit'.
-This is in it's very early stage... You will not be able to do much!
+This is in it's very early stage... it only supports one liners!
 >> a = 1337
 >> print(a)
 1337

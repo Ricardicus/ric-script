@@ -53,6 +53,7 @@ statement_t *root = NULL;
 %token OTHER
 %type<id> otherChar
 %type<data> mathContentDigit
+%type<data> mathContentDouble
 %type<data> indexedVector
 %type<data> stringContents
 %type<data> stringContent
@@ -432,19 +433,19 @@ parameters_list:
     };
 
 mathContents:
-    mathContents '+' mathContents {
+    mathContents '+' mathContent {
         $$ = newExpr_OPAdd($1,$3);
     }
-    | mathContents '-' mathContents {
+    | mathContents '-' mathContent {
         $$ = newExpr_OPSub($1,$3);
     }
-    | mathContents '*' mathContents {
+    | mathContents '*' mathContent {
         $$ = newExpr_OPMul($1,$3);
     }
-    | mathContents '%' mathContents {
+    | mathContents '%' mathContent {
         $$ = newExpr_OPMod($1,$3);
     }
-    | mathContents '/' mathContents {
+    | mathContents '/' mathContent {
         $$ = newExpr_OPDiv($1,$3);
     }
     | mathContent {
@@ -455,11 +456,21 @@ mathContent:
     ID {
         $$ = newExpr_ID($1);
     }
-    | DOUBLE {
-        $$ = newExpr_Float(yyval.val_double);
+    | mathContentDouble {
+        $$ = $1;
+    }
+    | '-' mathContentDouble {
+        expr_t *e = (expr_t*) $2;
+        double val = e->fval * -1.0;
+        $$ = newExpr_Float(val);
     }
     | mathContentDigit {
         $$ = $1;
+    }
+    | '-' mathContentDigit {
+        expr_t *e = (expr_t*) $2;
+        int val = e->ival * -1;
+        $$ = newExpr_Ival(val);
     }
     | indexedVector {
         $$ = $1;
@@ -499,6 +510,11 @@ mathContentDigit:
         $$ = newExpr_Ival(yyval.val_int);
     };
 
+mathContentDouble:
+    DOUBLE {
+        $$ = newExpr_Float(yyval.val_double);
+    };
+
 stringContents:
     stringContents '+' stringContent {
         expr_t *e1 = (expr_t*)$1;
@@ -512,18 +528,20 @@ stringContents:
 
         $$ = newExpr_OPAdd(e1,e2);
     }
-    | stringContents '+' DOUBLE  {
+    | stringContents '+' mathContentDouble  {
         expr_t *e1 = (expr_t*)$1;
+        expr_t *d = (expr_t*)$3;
         char buffer[256];
-        snprintf(buffer, sizeof(buffer), "%.4f", $3);
+        snprintf(buffer, sizeof(buffer), "%.4f", d->fval);
         expr_t *e2 = newExpr_Text(buffer);
 
         $$ = newExpr_OPAdd(e1,e2);
     }
-    | stringContents '+' DIGIT  {
+    | stringContents '+' mathContentDigit  {
         expr_t *e1 = (expr_t*)$1;
+        expr_t *d = (expr_t*)$3;
         char buffer[256];
-        snprintf(buffer, sizeof(buffer), "%d", $3);
+        snprintf(buffer, sizeof(buffer), "%d", d->ival);
         expr_t *e2 = newExpr_Text(buffer);
 
         $$ = newExpr_OPAdd(e1,e2);
@@ -591,14 +609,16 @@ stringEdition:
     ID {
         $$ = newExpr_Text(yyval.id);
     }
-    | DOUBLE {
+    | mathContentDouble {
         char buffer[256];
-        snprintf(buffer, sizeof(buffer), "%lf", yyval.val_double);
+        expr_t *e = (expr_t*)$1;
+        snprintf(buffer, sizeof(buffer), "%lf", e->fval);
         $$ = newExpr_Text(buffer);
     }
-    | DIGIT {
+    | mathContentDigit {
         char buffer[256];
-        snprintf(buffer, sizeof(buffer), "%d", yyval.val_int);
+        expr_t *e = (expr_t*)$1;
+        snprintf(buffer, sizeof(buffer), "%d", e->ival);
         $$ = newExpr_Text(buffer);
     }
     | otherChar {

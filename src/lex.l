@@ -27,11 +27,11 @@ RETURN_AS_IS     [\"\'+<>:?\-/()\.{}\*%\[\]~!=,@$\\]
 	// Comment
 }
 
--?{DIGIT_VAL}+ {
+{DIGIT_VAL}+ {
 	yylval.val_int = atoi(yytext);
 	return DIGIT;
 }
--?{FLOAT_VAL} {
+{FLOAT_VAL} {
 	yylval.val_double = atof(yytext);
 	return DOUBLE;
 }

@@ -156,7 +156,11 @@ systemStatement: '$' ID {
 
 returnStatement: RETURN mathContents {
     $$ = $2;
-}
+} | RETURN stringContents {
+    $$ = $2;
+} | RETURN ID {
+    $$ = newExpr_ID($2);
+};
 
 continueStatement: '@' {
     $$ = NULL;

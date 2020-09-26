@@ -4,7 +4,7 @@
   "description": "An interactive ric script interpreter",
   "main": "app.js",
   "scripts": {
-    "install": "cd ..; rm -fr builddir; make; mkdir builddir; cp ric builddir; cp ric ../node",
+    "install": "cd .. && rm -fr builddir && meson builddir && cd builddir && ninja && cp src/ric ../node",
     "test": "cd ../tests; pytest"
   },
   "repository": {

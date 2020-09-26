@@ -1,5 +1,5 @@
 # Pull base image, using Ubuntu latest
-FROM ubuntu:latest
+FROM ubuntu:16.04
 
 # Install Node.js
 RUN apt-get update && apt-get install --yes curl

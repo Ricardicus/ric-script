@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 # Install Node.js
 RUN apt-get update && apt-get install --yes curl
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install --yes nodejs build-essential bison flex
+RUN apt-get install --yes nodejs build-essential cmake bison flex
 
 # Install meson
 RUN apt install --yes software-properties-common

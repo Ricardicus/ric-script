@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
       if ( strcmp("-p", argv[i]) == 0 ) {
         mission = runAsASTPrinter;
       } else if ( strcmp("-i", argv[i]) == 0 ) {
-        mission = runAsInteractive;
+        mission = runAsIntepreter;
       } else if ( strcmp("-pi", argv[i]) == 0 ) {
         mission = runAsASTPrinterAndInterpreter;
       } else if ( strcmp("-h", argv[i]) == 0 ) {
@@ -60,9 +60,6 @@ int main(int argc, char *argv[]) {
           if ( fp != NULL ) {
             yyin = fp;
             mission = runAsIntepreter;
-          } else {
-            fprintf(stderr, "file: '%s' could no be opened.\n", argv[i]);
-            exit(1);
           }
         }
 

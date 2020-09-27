@@ -11,7 +11,7 @@ RUN apt install --yes software-properties-common
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install --yes python3.7 python3-pip python3-setuptools \
                        python3-wheel ninja-build
-RUN pip3 install meson==0.52.0 ninja
+RUN pip3 install --upgrade pip && pip install meson==0.52.0 ninja
 
 COPY . /src
 WORKDIR /src/node

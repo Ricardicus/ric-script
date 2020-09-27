@@ -67,7 +67,7 @@ app.post('/interpret', function(req, res) {
   console.log(args)
 
   /* Interpreter MUST be in the path */
-  child = spawn("ric", args)
+  child = spawn("ric", args, {stdio: 'pipe'})
 
   child.stdout.on('data', function(data) {
       io.emit("terminal-output-stdout", {message: data.toString('utf8')});

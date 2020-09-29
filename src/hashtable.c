@@ -66,7 +66,7 @@ void hashtable_free(hashtable_t * hash)
 	free(hash);
 }
 
-void for_each_pair(hashtable_t * hash, void (*callback)(void*,void*) )
+void for_each_pair(hashtable_t *hash, void (*callback)(void*,void*) )
 {
 	int size;
 	int i = 0;

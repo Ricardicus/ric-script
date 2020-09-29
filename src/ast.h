@@ -34,7 +34,7 @@
 #define EXPR_TYPE_VECTOR      16
 #define EXPR_TYPE_VECTOR_IDX  17
 #define EXPR_TYPE_LIBFUNCPTR  18
-
+#define EXPR_TYPE_DICT        19
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -147,6 +147,7 @@ typedef struct expr_s {
     uintptr_t p;
     vector_t *vec;
     vectorIndex_t *vecIdx;
+    hashtable_t *hash;
 	};
 } expr_t;
 
@@ -208,6 +209,7 @@ expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
 expr_t* newExpr_Pointer(uintptr_t val);
 expr_t* newExpr_FuncPtr(void *func);
+expr_t* newExpr_Dictionary(hashtable_t *hash);
 expr_t* newExpr_FuncCall(functionCall_t *func);
 expr_t* newExpr_LibFuncPtr(libFunction_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);

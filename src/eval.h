@@ -68,6 +68,8 @@ void call_func(
   hashtable_t *argVals);
 
 hashtable_t *new_argstable();
+hashtable_t* hashtable_heapvals_copy(
+  hashtable_t *hash, EXPRESSION_PARAMS());
 
 typedef struct ctx_table_t {
   void *stmt;

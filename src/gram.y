@@ -500,11 +500,20 @@ indexedVector:
         expr_t *id = newExpr_ID($1);
         expr_t *index = newExpr_ID($3);
         $$ = newExpr_VectorIndex(id, index);
-    } 
+    }
+    | ID '[' stringContents ']' {
+        expr_t *id = newExpr_ID($1);
+        expr_t *index = newExpr_ID($3);
+        $$ = newExpr_VectorIndex(id, index);
+    }
     | indexedVector '[' mathContentDigit ']' {
       $$ = newExpr_VectorIndex($1, $3);
     }
     | indexedVector '[' ID ']' {
+      expr_t *index = newExpr_ID($3);
+      $$ = newExpr_VectorIndex($1, index);
+    }
+    | indexedVector '[' stringContents ']' {
       expr_t *index = newExpr_ID($3);
       $$ = newExpr_VectorIndex($1, index);
     };

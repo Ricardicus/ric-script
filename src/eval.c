@@ -1874,7 +1874,6 @@ void setup_namespaces() {
 
 void close_namespaces() {
   hashtable_free(funcDecs);
-  for_each_pair(varDecs, flush_heapval);
   hashtable_free(varDecs);
 }
 
@@ -2083,15 +2082,6 @@ static void flush_arg(void *key, void *val)
   (void)key;
   if ( e->type == EXPR_TYPE_TEXT ) {
     free(e->text);
-  }
-}
-
-void flush_heapval(void *key, void *val)
-{
-  heapval_t *e = (heapval_t*)val;
-  (void)key;
-  if ( e->sv.type == TEXT ) {
-    //free(e->sv.t);
   }
 }
 
@@ -2546,3 +2536,229 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   /* Placing variable declaration in global variable namespace */
   hashtable_put(varDecs, argumentListName, hvp);
 }
+
+/*
+* Used in configuring static members variables of functions
+* I needed this solution, since the hashtable_t callback
+* signature only accepts two arguments.  
+*/
+static int staticConfigHash = 0;
+static int staticConfigHp = 0;
+
+void callback_heapvals_copy_content(void* key, void* val) {
+  static hashtable_t *hash = NULL;
+  static void *hp_static = NULL;
+  char *newKey;
+  int heapUpdated;
+  stackval_t sv;
+  heapval_t *hvp = NULL;
+
+  if ( (int*)val == &staticConfigHash ) {
+    // This means we set the hash
+    hash = (hashtable_t*)key;
+    return;
+  } else if ( (int*)val == &staticConfigHp ) {
+    // This means we set the heap pointer
+    hp_static = key;
+    return;
+  }
+
+  if ( hash == NULL || hp_static == NULL )
+    return;
+
+  newKey = calloc(strlen(key)+2, 1);
+  if ( newKey == NULL ) {
+    fprintf(stderr, "%s error: Failed to allocate memory\r\n", __func__);
+    exit(1);
+  }
+
+  /* Setting key, easy does it... */
+  snprintf(newKey, strlen((char*)key)+1, "%s", (char*)key);
+
+  /* Setting value, more of a hassle... */
+  sv = ((heapval_t*)val)->sv;
+
+  switch ( sv.type ) {
+  case INT32TYPE:
+  case POINTERTYPE:
+  case DOUBLETYPE:
+    /* No memory management needed */
+    break;
+  case TEXT: {
+    char *newT = calloc(strlen(sv.t)+2, 1);
+    if ( newT == NULL ) {
+      fprintf(stderr, "%s error: Failed to allocate memory\r\n", __func__);
+      exit(1);
+    }
+    snprintf(newT, strlen(sv.t)+1, "%s", sv.t);
+    sv.t = newT;
+    break;
+  }
+  case FUNCPTRTYPE: {
+    /* Copy ID and body */
+    char *newT = calloc(strlen(sv.func->id.id)+2, 1);
+    argsList_t *newParams = NULL;
+    argsList_t *walk;
+    /* Reverse the args list order */
+    argsList_t *prev = NULL;
+    argsList_t *current;
+    argsList_t *next;
+
+    statement_t *newBody = calloc(1,sizeof(statement_t));
+    if ( newT == NULL || newBody == NULL ) {
+      fprintf(stderr, "%s error: Failed to allocate memory\r\n", __func__);
+      exit(1);
+    }
+    snprintf(newT, strlen(sv.t)+1, "%s", sv.t);
+    sv.func->id.id = newT;
+    *newBody = *sv.func->body;
+    sv.func->body = newBody;
+
+    walk = sv.func->params;
+
+    while ( walk != NULL ) {
+      argsList_t *newParam = calloc(1, sizeof(argsList_t));
+      if ( newParam == NULL ) {
+        fprintf(stderr, "%s error: failed to allocate memory\r\n", __func__);
+        exit(1);
+      }
+
+      *newParam = *walk;
+      newParam->arg = newExpr_Copy(walk->arg);
+
+      if ( newParams == NULL ) {
+        newParams = newParam;
+      } else {
+        /* Will reorder after the loop */
+        newParam->next = newParams;
+        newParams = newParam;
+      }
+
+      walk = walk->next;
+    }
+
+    /* Reverse the args list order */
+    current = newParams;
+    while (current != NULL) {
+      next = current->next;
+      current->next = prev;
+      prev = current;
+      current = next;
+    }
+
+    newParams = prev;
+    newParams->length = sv.func->params->length;
+    newParams->entity = sv.func->params->entity;
+
+    sv.func->params = newParams;
+    break;
+  }
+  case LIBFUNCPTRTYPE: {
+    libFunction_t *libfunc = calloc(1, sizeof(libFunction_t));
+    *libfunc = *sv.libfunc;
+    size_t len = strlen(sv.libfunc->libFuncName) + 2;
+    char *name = calloc(len, 1);
+    if ( name == NULL ) {
+      fprintf(stderr, "%s error: Failed to allocate memory\n", __func__);
+      exit(1);
+    }
+
+    snprintf(name, len, "%s", sv.libfunc->libFuncName);
+    libfunc->libFuncName = name;
+    sv.libfunc = libfunc;
+    break;
+  }
+  case VECTORTYPE: {
+    vector_t *newVec = calloc(1, sizeof(vector_t));
+    argsList_t *newVecContents = NULL;
+    argsList_t *walk;
+    /* Reverse the args list order */
+    argsList_t *prev = NULL;
+    argsList_t *current;
+    argsList_t *next;
+
+    if ( newVec == NULL ) {
+      fprintf(stderr, "%s error: Failed to allocate memory\n", __func__);
+      exit(1);
+    }
+
+    newVec->length = sv.vec->length;
+
+    walk = sv.vec->content;
+    while ( walk != NULL ) {
+      argsList_t *newVecContent = calloc(1, sizeof(argsList_t));
+      if ( newVecContent == NULL ) {
+        fprintf(stderr, "%s error: failed to allocate memory\r\n", __func__);
+        exit(1);
+      }
+
+      *newVecContent = *walk;
+      newVecContent->arg = newExpr_Copy(walk->arg);
+
+      if ( newVecContents == NULL ) {
+        newVecContents = newVecContent;
+      } else {
+        /* Will reorder after the loop */
+        newVecContent->next = newVecContents;
+        newVecContents = newVecContent;
+      }
+
+      walk = walk->next;
+    }
+
+    /* Reverse the args list order */
+    current = newVecContents;
+    while (current != NULL) {
+      next = current->next;
+      current->next = prev;
+      prev = current;
+      current = next;
+    }
+
+    newVecContents = prev;
+    newVecContents->length = sv.vec->content->length;
+    newVecContents->entity = sv.vec->content->entity;
+
+    newVec->content = newVecContents;
+
+    sv.vec = newVec;
+    break;
+  }
+  default:
+    break;
+  }
+
+  ALLOC_HEAP(&sv, hp_static, &hvp, &heapUpdated);
+
+  /* Adding value to the new hashtable */
+  hashtable_put(hash, newKey, hvp);
+}
+
+/* Definately not thread safe, like, it could go really bad */
+hashtable_t* hashtable_heapvals_copy(
+  hashtable_t *hash, EXPRESSION_PARAMS()) {
+  int size = hash->size;
+  hashtable_t * hashtable = malloc(sizeof(hashtable_t));
+  if ( hashtable == NULL ) {
+    fprintf(stderr, "Failed to allocate memory. Shutting down.\r\n");
+    exit(1);
+    return NULL;
+  }
+
+  hashtable->size = size;
+  hashtable->ocupied = 0;
+  hashtable->data_also = 1;
+  hashtable->load = hash->load;
+  hashtable->table = (entry_t**) calloc(size,sizeof(entry_t*));
+  hashtable->put = hashtable_put;
+
+  /* Initialize this procedure */
+  callback_heapvals_copy_content(hashtable, &staticConfigHash);
+  callback_heapvals_copy_content(hp, &staticConfigHp);
+
+  /* Copy all keys and values to our new hashtable */
+  for_each_pair(hash, callback_heapvals_copy_content);
+
+  return hashtable;
+}
+

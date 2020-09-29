@@ -630,8 +630,8 @@ void free_ast(statement_t *stmt) {
     argsList_t *args = funcDef->params;
     free(funcDef->id.id);
     while ( args != NULL ) {
-     free_expression(args->arg);
-     args = args->next;
+      free_expression(args->arg);
+      args = args->next;
     }
     free_ast(funcDef->body);
   } break;

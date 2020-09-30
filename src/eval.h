@@ -71,6 +71,8 @@ hashtable_t *new_argstable();
 hashtable_t* hashtable_heapvals_copy(
   hashtable_t *hash, EXPRESSION_PARAMS());
 
+dictionary_t *allocNewDictionary(dictionary_t *, EXPRESSION_PARAMS());
+
 typedef struct ctx_table_t {
   void *stmt;
   argsList_t *args;

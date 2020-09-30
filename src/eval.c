@@ -603,6 +603,9 @@ Please report back to me.\n\
             ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
             break;
           }
+          case DICTTYPE: {
+            break;
+          }
           default:
             fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
             exit(1);
@@ -2634,228 +2637,190 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   hashtable_put(varDecs, argumentListName, hvp);
 }
 
-/*
-* Used in configuring static members variables of functions
-* I needed this solution, since the hashtable_t callback
-* signature only accepts two arguments.  
-*/
-static int staticConfigHash = 0;
-static int staticConfigHp = 0;
+dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
+  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
 
-void callback_heapvals_copy_content(void* key, void* val) {
-  static hashtable_t *hash = NULL;
-  static void *hp_static = NULL;
-  char *newKey;
-  int heapUpdated;
-  stackval_t sv;
-  heapval_t *hvp = NULL;
-
-  if ( (int*)val == &staticConfigHash ) {
-    // This means we set the hash
-    hash = (hashtable_t*)key;
-    return;
-  } else if ( (int*)val == &staticConfigHp ) {
-    // This means we set the heap pointer
-    hp_static = key;
-    return;
-  }
-
-  if ( hash == NULL || hp_static == NULL )
-    return;
-
-  newKey = calloc(strlen(key)+2, 1);
-  if ( newKey == NULL ) {
-    fprintf(stderr, "%s error: Failed to allocate memory\r\n", __func__);
-    exit(1);
-  }
-
-  /* Setting key, easy does it... */
-  snprintf(newKey, strlen((char*)key)+1, "%s", (char*)key);
-
-  /* Setting value, more of a hassle... */
-  sv = ((heapval_t*)val)->sv;
-
-  switch ( sv.type ) {
-  case INT32TYPE:
-  case POINTERTYPE:
-  case DOUBLETYPE:
-    /* No memory management needed */
-    break;
-  case TEXT: {
-    char *newT = calloc(strlen(sv.t)+2, 1);
-    if ( newT == NULL ) {
-      fprintf(stderr, "%s error: Failed to allocate memory\r\n", __func__);
-      exit(1);
-    }
-    snprintf(newT, strlen(sv.t)+1, "%s", sv.t);
-    sv.t = newT;
-    break;
-  }
-  case FUNCPTRTYPE: {
-    /* Copy ID and body */
-    char *newT = calloc(strlen(sv.func->id.id)+2, 1);
-    argsList_t *newParams = NULL;
-    argsList_t *walk;
-    /* Reverse the args list order */
-    argsList_t *prev = NULL;
-    argsList_t *current;
-    argsList_t *next;
-
-    statement_t *newBody = calloc(1,sizeof(statement_t));
-    if ( newT == NULL || newBody == NULL ) {
-      fprintf(stderr, "%s error: Failed to allocate memory\r\n", __func__);
-      exit(1);
-    }
-    snprintf(newT, strlen(sv.t)+1, "%s", sv.t);
-    sv.func->id.id = newT;
-    *newBody = *sv.func->body;
-    sv.func->body = newBody;
-
-    walk = sv.func->params;
-
+  if ( dict->initialized == 0 ) {
+    keyValList_t *walk = dict->keyVals;
     while ( walk != NULL ) {
-      argsList_t *newParam = calloc(1, sizeof(argsList_t));
-      if ( newParam == NULL ) {
-        fprintf(stderr, "%s error: failed to allocate memory\r\n", __func__);
+      /* Dictionary already initialized, evaluate expressions in the key-value list */
+      expr_t *expKey = walk->key;
+      expr_t *expVal = walk->val;
+      char *newKeyStr = NULL;  // Storing the key
+      heapval_t *hvp = NULL;  // Storing the value
+      stackval_t sv;
+      int dummy;  // todo: remove the need for this..
+
+      evaluate_expression(expKey, EXPRESSION_ARGS());
+
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          newKeyStr = ast_emalloc(len+2);
+          snprintf(newKeyStr, len+2, "%s", sv.t);
+          break;
+        }
+        default:
+        fprintf(stderr, "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
         exit(1);
+        break;
       }
 
-      *newParam = *walk;
-      newParam->arg = newExpr_Copy(walk->arg);
+      evaluate_expression(expVal, EXPRESSION_ARGS());
 
-      if ( newParams == NULL ) {
-        newParams = newParam;
-      } else {
-        /* Will reorder after the loop */
-        newParam->next = newParams;
-        newParams = newParam;
+      POP_VAL(&sv, sp, sc);
+      /* Push all values to the heap */
+      switch ( sv.type ) {
+      case DOUBLETYPE:
+      case POINTERTYPE:
+      case INT32TYPE:
+      case LIBFUNCPTRTYPE:
+      case FUNCPTRTYPE:
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        break;
+      case VECTORTYPE: {
+        expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+        expr_t *newVecExpr = NULL;
+        stackval_t newStackVal;
+
+        eTemp->type = EXPR_TYPE_VECTOR;
+        eTemp->vec = sv.vec;
+
+        newVecExpr = newExpr_Copy(eTemp);
+        free(eTemp);
+
+        newStackVal = sv;
+        newStackVal.vec = newVecExpr->vec;
+
+        free(newVecExpr);
+
+        ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+        break;
       }
+      case TEXT: {
+        size_t len = strlen(sv.t);
+        stackval_t newStackVal;
+        heapval_t *hvp;
+
+        char *newText = ast_emalloc(len+1);
+        snprintf(newText, len+1, "%s", sv.t);
+
+        newStackVal = sv;
+        newStackVal.t = newText;
+
+        ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+        break;
+      }
+      case DICTTYPE: {
+        dictionary_t *newDict = allocNewDictionary(dict, EXPRESSION_ARGS());
+        stackval_t newStackVal = sv;
+
+        newStackVal.dict = newDict;
+
+        ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+        break;
+      }
+      default:
+        fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+        exit(1);
+        break;
+      }
+
+      /* Adding heap allocated value to dictionary hash table */
+      hashtable_put(newDict->hash, newKeyStr, hvp);
 
       walk = walk->next;
     }
+  } else {
+    /* Dictionary already initialized, traverse hashtable */
+    hashtable_t *hash = dict->hash;
+    int size = hash->size;
+    int i = 0;
+    struct key_val_pair *walk;
+    while ( i < size ) {
+      walk = hash->table[i];
+      while ( walk != NULL ) {
+        // Time to evaluate the keys and the values
+        char *key = walk->key;
+        heapval_t *hpVal = (heapval_t*)walk->data;
+        char *newKeyStr = NULL;  // Storing the key
+        heapval_t *hvp = NULL;  // Storing the value
+        stackval_t sv;
+        int dummy;  // todo: remove the need for this..
+        size_t len = strlen(key);
+        newKeyStr = ast_emalloc(len+2);
+        snprintf(newKeyStr, len+2, "%s", key);
 
-    /* Reverse the args list order */
-    current = newParams;
-    while (current != NULL) {
-      next = current->next;
-      current->next = prev;
-      prev = current;
-      current = next;
-    }
+        sv = hpVal->sv;
+        /* Push all values to the heap */
+        switch ( sv.type ) {
+        case DOUBLETYPE:
+        case POINTERTYPE:
+        case INT32TYPE:
+        case LIBFUNCPTRTYPE:
+        case FUNCPTRTYPE:
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          break;
+        case VECTORTYPE: {
+          expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+          expr_t *newVecExpr = NULL;
+          stackval_t newStackVal;
 
-    newParams = prev;
-    newParams->length = sv.func->params->length;
-    newParams->entity = sv.func->params->entity;
+          eTemp->type = EXPR_TYPE_VECTOR;
+          eTemp->vec = sv.vec;
 
-    sv.func->params = newParams;
-    break;
-  }
-  case LIBFUNCPTRTYPE: {
-    libFunction_t *libfunc = calloc(1, sizeof(libFunction_t));
-    *libfunc = *sv.libfunc;
-    size_t len = strlen(sv.libfunc->libFuncName) + 2;
-    char *name = calloc(len, 1);
-    if ( name == NULL ) {
-      fprintf(stderr, "%s error: Failed to allocate memory\n", __func__);
-      exit(1);
-    }
+          newVecExpr = newExpr_Copy(eTemp);
+          free(eTemp);
 
-    snprintf(name, len, "%s", sv.libfunc->libFuncName);
-    libfunc->libFuncName = name;
-    sv.libfunc = libfunc;
-    break;
-  }
-  case VECTORTYPE: {
-    vector_t *newVec = calloc(1, sizeof(vector_t));
-    argsList_t *newVecContents = NULL;
-    argsList_t *walk;
-    /* Reverse the args list order */
-    argsList_t *prev = NULL;
-    argsList_t *current;
-    argsList_t *next;
+          newStackVal = sv;
+          newStackVal.vec = newVecExpr->vec;
 
-    if ( newVec == NULL ) {
-      fprintf(stderr, "%s error: Failed to allocate memory\n", __func__);
-      exit(1);
-    }
+          free(newVecExpr);
 
-    newVec->length = sv.vec->length;
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          stackval_t newStackVal;
+          heapval_t *hvp;
 
-    walk = sv.vec->content;
-    while ( walk != NULL ) {
-      argsList_t *newVecContent = calloc(1, sizeof(argsList_t));
-      if ( newVecContent == NULL ) {
-        fprintf(stderr, "%s error: failed to allocate memory\r\n", __func__);
-        exit(1);
+          char *newText = ast_emalloc(len+1);
+          snprintf(newText, len+1, "%s", sv.t);
+
+          newStackVal = sv;
+          newStackVal.t = newText;
+
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        case DICTTYPE: {
+          dictionary_t *newDict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          stackval_t newStackVal = sv;
+
+          newStackVal.dict = newDict;
+
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        default:
+          fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+          exit(1);
+          break;
+        }
+
+        /* Adding heap allocated value to dictionary hash table */
+        hashtable_put(newDict->hash, newKeyStr, hvp);
+
+        walk = walk->next;
       }
-
-      *newVecContent = *walk;
-      newVecContent->arg = newExpr_Copy(walk->arg);
-
-      if ( newVecContents == NULL ) {
-        newVecContents = newVecContent;
-      } else {
-        /* Will reorder after the loop */
-        newVecContent->next = newVecContents;
-        newVecContents = newVecContent;
-      }
-
-      walk = walk->next;
+      i++;
     }
-
-    /* Reverse the args list order */
-    current = newVecContents;
-    while (current != NULL) {
-      next = current->next;
-      current->next = prev;
-      prev = current;
-      current = next;
-    }
-
-    newVecContents = prev;
-    newVecContents->length = sv.vec->content->length;
-    newVecContents->entity = sv.vec->content->entity;
-
-    newVec->content = newVecContents;
-
-    sv.vec = newVec;
-    break;
-  }
-  default:
-    break;
   }
 
-  ALLOC_HEAP(&sv, hp_static, &hvp, &heapUpdated);
+  newDict->initialized = 1;
 
-  /* Adding value to the new hashtable */
-  hashtable_put(hash, newKey, hvp);
+  return newDict;
 }
-
-/* Definately not thread safe, like, it could go really bad */
-hashtable_t* hashtable_heapvals_copy(
-  hashtable_t *hash, EXPRESSION_PARAMS()) {
-  int size = hash->size;
-  hashtable_t * hashtable = malloc(sizeof(hashtable_t));
-  if ( hashtable == NULL ) {
-    fprintf(stderr, "Failed to allocate memory. Shutting down.\r\n");
-    exit(1);
-    return NULL;
-  }
-
-  hashtable->size = size;
-  hashtable->ocupied = 0;
-  hashtable->data_also = 1;
-  hashtable->load = hash->load;
-  hashtable->table = (entry_t**) calloc(size,sizeof(entry_t*));
-  hashtable->put = hashtable_put;
-
-  /* Initialize this procedure */
-  callback_heapvals_copy_content(hashtable, &staticConfigHash);
-  callback_heapvals_copy_content(hp, &staticConfigHp);
-
-  /* Copy all keys and values to our new hashtable */
-  for_each_pair(hash, callback_heapvals_copy_content);
-
-  return hashtable;
-}
-

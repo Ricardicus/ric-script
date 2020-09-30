@@ -263,7 +263,8 @@ typedef enum stackvaltypes {
 	POINTERTYPE,
   FUNCPTRTYPE,
   LIBFUNCPTRTYPE,
-  VECTORTYPE
+  VECTORTYPE,
+  DICTTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -276,6 +277,7 @@ typedef struct stackval {
     functionDef_t *func;
     vector_t *vec;
     libFunction_t *libfunc;
+    dictionary_t *dict;
 	};
 } stackval_t;
 
@@ -446,6 +448,22 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = LIBFUNCPTRTYPE;\
 stackval.libfunc = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+
+#define PUSH_DICTIONARY(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = DICTTYPE;\
+stackval.dict = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

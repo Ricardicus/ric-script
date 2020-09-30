@@ -427,6 +427,8 @@ dictionary_key_val:
       keyVal->entity = EXPR_TYPE_DICT;
       keyVal->key = $1;
       keyVal->val = $3;
+
+      $$ = keyVal;
     }
     | stringContents ':' stringContents {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
@@ -434,6 +436,8 @@ dictionary_key_val:
       keyVal->entity = EXPR_TYPE_DICT;
       keyVal->key = $1;
       keyVal->val = $3;
+
+      $$ = keyVal;
     };
 
 body:
@@ -555,8 +559,7 @@ indexedVector:
       $$ = newExpr_VectorIndex($1, index);
     }
     | indexedVector '[' stringContents ']' {
-      expr_t *index = newExpr_ID($3);
-      $$ = newExpr_VectorIndex($1, index);
+      $$ = newExpr_VectorIndex($1, $3);
     };
 
 mathContentDigit:

@@ -52,6 +52,10 @@ void mark_and_sweep (
   while ( i < argCount ) {
     heapval_t *hv = hashtable_get(varDecs, variableIDS[i]);
     hv->mark = markVal;
+
+    if ( hv->sv.type == DICTTYPE ) {
+      mark_and_sweep(hv->sv.dict->hash, EXPRESSION_ARGS());
+    }
     ++i;
   }
 

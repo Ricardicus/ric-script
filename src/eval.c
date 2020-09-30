@@ -527,6 +527,103 @@ Please report back to me.\n\
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
     break;
+    case EXPR_TYPE_DICT: {
+      dictionary_t *dict = expr->dict;
+
+      if ( dict->initialized == 0 ) {
+        keyValList_t *walk = dict->keyVals;
+        while ( walk != NULL ) {
+          // Time to evaluate the keys and the values
+          expr_t *expKey = walk->key;
+          expr_t *expVal = walk->val;
+          char *newKeyStr = NULL;  // Storing the key
+          heapval_t *hvp = NULL;  // Storing the value
+          stackval_t sv;
+          int dummy;  // todo: remove the need for this..
+
+          evaluate_expression(expKey, EXPRESSION_ARGS());
+
+          POP_VAL(&sv, sp, sc);
+
+          switch (sv.type) {
+            case TEXT: {
+              size_t len = strlen(sv.t);
+              newKeyStr = ast_emalloc(len+2);
+              snprintf(newKeyStr, len+2, "%s", sv.t);
+              break;
+            }
+            default:
+            fprintf(stderr, "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
+            exit(1);
+            break;
+          }
+
+          evaluate_expression(expVal, EXPRESSION_ARGS());
+
+          POP_VAL(&sv, sp, sc);
+          /* Push all values to the heap */
+          switch ( sv.type ) {
+          case DOUBLETYPE:
+          case POINTERTYPE:
+          case INT32TYPE:
+          case LIBFUNCPTRTYPE:
+          case FUNCPTRTYPE:
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            break;
+          case VECTORTYPE: {
+            expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+            expr_t *newVecExpr = NULL;
+            stackval_t newStackVal;
+
+            eTemp->type = EXPR_TYPE_VECTOR;
+            eTemp->vec = sv.vec;
+
+            newVecExpr = newExpr_Copy(eTemp);
+            free(eTemp);
+
+            newStackVal = sv;
+            newStackVal.vec = newVecExpr->vec;
+
+            free(newVecExpr);
+
+            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            break;
+          }
+          case TEXT: {
+            size_t len = strlen(sv.t);
+            stackval_t newStackVal;
+            heapval_t *hvp;
+
+            char *newText = ast_emalloc(len+1);
+            snprintf(newText, len+1, "%s", sv.t);
+
+            newStackVal = sv;
+            newStackVal.t = newText;
+
+            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            break;
+          }
+          default:
+            fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+            exit(1);
+            break;
+          }
+
+          /* Adding heap allocated value to dictionary hash table */
+          hashtable_put(dict->hash, newKeyStr, hvp);
+
+          walk = walk->next;
+        }
+
+        dict->initialized = 1;
+
+      }
+
+
+
+      PUSH_VECTOR(expr->vec, sp, sc);
+      break;
+    }
     case EXPR_TYPE_VECTOR_IDX:
     {
       int32_t arrayIndex = 0;

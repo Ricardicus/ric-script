@@ -60,6 +60,9 @@ statement_t *root = NULL;
 %type<data> stringEditions
 %type<data> stringEdition
 %type<data> declaration
+%type<data> dictionary
+%type<data> dictionary_keys_vals
+%type<data> dictionary_key_val
 %type<data> statements
 %type<data> statement
 %type<data> program
@@ -373,6 +376,11 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
+    | ID '=' dictionary {
+        expr_t *idexpr = newExpr_ID($1);
+
+        $$ = newDeclaration(idexpr,$3);
+    }
     | ID '=' condition {
         expr_t *idexpr = newExpr_ID($1);
         expr_t *condexpr = newExpr_Cond($3);
@@ -393,6 +401,39 @@ declaration:
     }
     | indexedVector '=' vector {
         $$ = newDeclaration($1,$3);
+    };
+
+dictionary:
+    '{' dictionary_keys_vals '}' {
+      $$ = newExpr_Dictionary($2);
+    };
+
+dictionary_keys_vals:
+    dictionary_keys_vals ',' dictionary_key_val {
+      keyValList_t *left = (keyValList_t*)$1;
+      keyValList_t *right = (keyValList_t*)$3;
+
+      left->next = right;
+      $$ = left;
+    }
+    | dictionary_key_val {
+      $$ = $1;
+    };
+
+dictionary_key_val:
+    stringContents ':' mathContents {
+      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
+
+      keyVal->entity = EXPR_TYPE_DICT;
+      keyVal->key = $1;
+      keyVal->val = $3;
+    }
+    | stringContents ':' stringContents {
+      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
+
+      keyVal->entity = EXPR_TYPE_DICT;
+      keyVal->key = $1;
+      keyVal->val = $3;
     };
 
 body:

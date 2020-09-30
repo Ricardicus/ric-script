@@ -75,6 +75,25 @@ expr_t *newExpr_Vector(argsList_t *args) {
   return expr;
 }
 
+expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr->dict = ast_emalloc(sizeof(dictionary_t));
+
+  expr->type = EXPR_TYPE_DICT;
+
+  expr->dict->initialized = 0;
+  expr->dict->keyVals = keyVals;
+  expr->dict->hash = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+
+  if ( expr->dict->hash == NULL ) {
+    fprintf(stderr, "Failed to allocate memory\n");
+    exit(1);
+  }
+
+  return expr;
+}
+
 expr_t *newExpr_Text(char *text) {
   size_t textLen = strlen(text);
   expr_t *expr = ast_emalloc(sizeof(expr_t));

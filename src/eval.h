@@ -53,6 +53,8 @@ expr_t*  copy_vector(
   EXPRESSION_PARAMS()
 );
 
+
+int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS());
 void setup_namespaces();
 void close_namespaces();
 void flush_arguments(hashtable_t *args);

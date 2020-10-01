@@ -1269,6 +1269,10 @@ Please report back to me.\n\
           PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
           break;
         }
+        case DICTTYPE: {
+          PUSH_DICTIONARY(sv.dict, sp, sc);
+          break;
+        }
         default:
           fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
           exit(1);
@@ -1454,7 +1458,7 @@ void call_func(
             break;
           }
           default:
-            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+            fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
             exit(1);
             break;
         }
@@ -1525,6 +1529,10 @@ void call_func(
         PUSH_VECTOR(sv_ret.vec, sp, sc);
         break;
       }
+      case DICTTYPE: {
+        PUSH_DICTIONARY(sv_ret.dict, sp, sc);
+        break;
+      }
       default:
         fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
         exit(1);
@@ -1582,6 +1590,10 @@ void call_func(
         }
         case VECTORTYPE: {
           PUSH_VECTOR(sv.vec, sp, sc);
+          break;
+        }
+        case DICTTYPE: {
+          PUSH_DICTIONARY(sv.dict, sp, sc);
           break;
         }
         default:
@@ -2161,6 +2173,53 @@ void print_indents(int indent) {
     printf("    ");
     ++i;
   }
+}
+
+int print_dictionary(dictionary_t *dict,
+  EXPRESSION_PARAMS()) {
+  hashtable_t *hash = dict->hash;
+  int size = hash->size;
+  int i = 0;
+  int keyCount = 0;
+  int keyCountTotal = 0;
+  struct key_val_pair *ptr;
+
+  if ( dict->initialized == 0 ) {
+    return -1;
+  }
+
+  i = 0;
+  while ( i < size) {
+    ptr = hash->table[i];
+    while (ptr != NULL) {
+      keyCount++;
+      ptr = ptr->next;
+    }
+    i++;
+  }
+
+  keyCountTotal = keyCount;
+
+  if ( keyCountTotal > 0 ) {
+    printf("<Dictionary, keys: [");
+    keyCount = 0;
+    i = 0;
+    while ( i < size) {
+      ptr = hash->table[i];
+      while (ptr != NULL) {
+        printf("%s%s", (keyCount > 0 ? ", ": ""), ptr->key);
+        keyCount++;
+        ptr = ptr->next;
+      }
+      i++;
+    }
+
+    printf("]>");
+  } else {
+    printf("<Dictionary, no keys in it>");
+  }
+
+  return 0;
 }
 
 int print_vector(

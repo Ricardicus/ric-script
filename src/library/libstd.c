@@ -91,6 +91,11 @@ int ric_print(LIBRARY_PARAMS())
     case POINTERTYPE:
     printf("<%" PRIuPTR ">\n", stv.p);
     break;
+    case DICTTYPE: {
+      print_dictionary(stv.dict, EXPRESSION_ARGS());
+      printf("\n");
+      break;
+    }
     case FUNCPTRTYPE:
     printf("<Function: '%s'>\n", stv.func->id.id);
     break;
@@ -180,6 +185,10 @@ int ric_printf(LIBRARY_PARAMS())
     case FUNCPTRTYPE:
     printf("<Function: '%s'>", stv.func->id.id);
     break;
+    case DICTTYPE: {
+      print_dictionary(stv.dict, EXPRESSION_ARGS());
+      break;
+    }
     case VECTORTYPE:
     {
       print_vector(stv.vec, EXPRESSION_ARGS());

@@ -9,7 +9,8 @@ def test_dict_print():
 "1337",
 "f",
 "hej",
-"<Dictionary, no keys in it>"
+"<Dictionary, no keys in it>",
+"<Dictionary, keys: [a, b]>"
 ]
 
   lib_script = callSample('dictionary.ric')

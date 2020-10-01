@@ -399,6 +399,9 @@ declaration:
     | indexedVector '=' condition {
         $$ = newDeclaration($1,$3);
     }
+    | indexedVector '=' dictionary {
+        $$ = newDeclaration($1,$3);
+    }
     | indexedVector '=' vector {
         $$ = newDeclaration($1,$3);
     };

@@ -1,0 +1,17 @@
+d = {"a" : "b", "c" : "d", "1337" : 1337}
+
+print(d)
+
+print(d["a"])
+print(d["c"])
+print(d["1337"] - 1 + 1)
+
+d["e"] = "f"
+print(d["e"])
+
+d["e"] = "hej"
+print(d["e"])
+
+d = {}
+
+print(d)

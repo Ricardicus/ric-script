@@ -401,6 +401,9 @@ void evaluate_expression(
             case EXPR_TYPE_LIBFUNCPTR:
               PUSH_LIBFUNCPTR(expArg->func, sp, sc);
               break;
+            case EXPR_TYPE_DICT:
+              PUSH_DICTIONARY(expArg->dict, sp, sc);
+              break;
             case EXPR_TYPE_TEXT:
             {
               PUSH_STRING(expArg->text, sp, sc);
@@ -454,6 +457,9 @@ Please report back to me.\n\
           case FUNCPTRTYPE:
             PUSH_FUNCPTR(hv->sv.func, sp, sc);
             break;
+          case DICTTYPE:
+            PUSH_DICTIONARY(hv->sv.dict, sp, sc);
+            break;
           case TEXT: {
             size_t len = strlen(hv->sv.t);
             stackval_t sv;
@@ -503,7 +509,7 @@ Please report back to me.\n\
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
             stop = 1;
           } else {
-            fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
+            fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
             exit(1);
           }
         }
@@ -527,11 +533,16 @@ Please report back to me.\n\
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
     break;
+    case EXPR_TYPE_DICT:
+    PUSH_DICTIONARY(expr->dict, sp, sc);
+    break;
     case EXPR_TYPE_VECTOR_IDX:
     {
       int32_t arrayIndex = 0;
       vector_t *vec;
+      dictionary_t *dict;
       argsList_t *walk;
+      int isDict = 0;
       expr_t *exp = NULL;
       expr_t *id = expr->vecIdx->id;
       expr_t *index = expr->vecIdx->index;
@@ -542,87 +553,162 @@ Please report back to me.\n\
         evaluate_expression(id, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
 
-        if ( sv.type != VECTORTYPE ) {
-          fprintf(stderr, "index error: '%s' is not an array.\n", id->id.id);
+        if ( sv.type != VECTORTYPE && sv.type != DICTTYPE ) {
+          fprintf(stderr, "index error: '%s' is a datatype the does not support indexing.\n", id->id.id);
           exit(1);
         }
 
-        vec = sv.vec;
+        if ( sv.type == VECTORTYPE ) {
+          vec = sv.vec;
+          isDict = 0;
+        } else if ( sv.type == DICTTYPE ) {
+          isDict = 1;
+          dict = sv.dict;
+        }
       } else {
-        fprintf(stderr, "error: Invalid array indexing\n");
+        fprintf(stderr, "error: Invalid indexing\n");
         exit(1);
       }
 
       evaluate_expression(index, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
-      if ( sv.type != INT32TYPE ) {
-        fprintf(stderr, "index error: Must provide an integer as index\n");
-        exit(1);
-      }
-
-      arrayIndex = sv.i;
-
-      /* check the limits */
-      if ( arrayIndex >= vec->length ) {
-        fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-          arrayIndex,
-          vec->length);
-        exit(1);
-      }
-
-      walk = vec->content;
-      while ( walk != NULL && arrayIndex >= 0 ) {
-        exp = walk->arg;
-        walk = walk->next;
-        --arrayIndex;
-      }
-
-      if ( exp == NULL ) {
-        fprintf(stderr, "Unexpected index error!\n");
-        fprintf(stderr, "Please include the script and file an error report to me here:\n    %s\n\
-This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERROR_ISSUE_URL);
-        exit(1);
-      }
-
-      /* Evaluate the expression */
-      evaluate_expression(exp, EXPRESSION_ARGS());
-      POP_VAL(&sv, sp, sc);
-
-      /* Push value to the stack */
-      switch (sv.type) {
-        case INT32TYPE: {
-          PUSH_INT(sv.i, sp, sc);
-          break;
-        }
-        case DOUBLETYPE: {
-          PUSH_DOUBLE(sv.d, sp, sc);
-          break;
-        }
-        case TEXT: {
-          PUSH_STRING(sv.t, sp, sc);
-          break;
-        }
-        case POINTERTYPE: {
-          PUSH_POINTER(sv.p, sp, sc);
-          break;
-        }
-        case VECTORTYPE: {
-          PUSH_VECTOR(sv.vec, sp, sc);
-          break;
-        }
-        case FUNCPTRTYPE: {
-          PUSH_FUNCPTR(sv.func, sp, sc);
-          break;     
-        }
-        case LIBFUNCPTRTYPE: {
-          PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
-          break;
-        }
-        default:
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+      if ( isDict == 0 ) {
+        /* Array indexing */
+        if ( sv.type != INT32TYPE ) {
+          fprintf(stderr, "index error: Must provide an integer as index\n");
           exit(1);
-          break;
+        }
+
+        arrayIndex = sv.i;
+
+        /* check the limits */
+        if ( arrayIndex >= vec->length ) {
+          fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+            arrayIndex,
+            vec->length);
+          exit(1);
+        }
+
+        walk = vec->content;
+        while ( walk != NULL && arrayIndex >= 0 ) {
+          exp = walk->arg;
+          walk = walk->next;
+          --arrayIndex;
+        }
+
+        if ( exp == NULL ) {
+          fprintf(stderr, "Unexpected index error!\n");
+          fprintf(stderr, "Please include the script and file an error report to me here:\n    %s\n\
+  This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERROR_ISSUE_URL);
+          exit(1);
+        }
+
+        /* Evaluate the expression */
+        evaluate_expression(exp, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        /* Push value to the stack */
+        switch (sv.type) {
+          case INT32TYPE: {
+            PUSH_INT(sv.i, sp, sc);
+            break;
+          }
+          case DOUBLETYPE: {
+            PUSH_DOUBLE(sv.d, sp, sc);
+            break;
+          }
+          case TEXT: {
+            PUSH_STRING(sv.t, sp, sc);
+            break;
+          }
+          case POINTERTYPE: {
+            PUSH_POINTER(sv.p, sp, sc);
+            break;
+          }
+          case VECTORTYPE: {
+            PUSH_VECTOR(sv.vec, sp, sc);
+            break;
+          }
+          case FUNCPTRTYPE: {
+            PUSH_FUNCPTR(sv.func, sp, sc);
+            break;     
+          }
+          case LIBFUNCPTRTYPE: {
+            PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
+            break;
+          }
+          case DICTTYPE: {
+            PUSH_DICTIONARY(sv.dict, sp, sc);
+            break;
+          }
+          default:
+            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+            exit(1);
+            break;
+        }
+
+      } else {
+        /* Dictionary indexing */
+        char *key = NULL;
+        heapval_t *hpv;
+
+        if ( sv.type != TEXT ) {
+          fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
+          exit(1);
+        }
+
+        key = sv.t;
+
+        /* find heapval */
+        hpv = hashtable_get(dict->hash, key);
+        if ( hpv == NULL ) {
+          fprintf(stderr, "error: key '%s' not present in dictionary\n", key);
+          exit(1);
+        }
+
+        sv = hpv->sv;
+
+        /* Push value to the stack */
+        switch (sv.type) {
+          case INT32TYPE: {
+            PUSH_INT(sv.i, sp, sc);
+            break;
+          }
+          case DOUBLETYPE: {
+            PUSH_DOUBLE(sv.d, sp, sc);
+            break;
+          }
+          case TEXT: {
+            PUSH_STRING(sv.t, sp, sc);
+            break;
+          }
+          case POINTERTYPE: {
+            PUSH_POINTER(sv.p, sp, sc);
+            break;
+          }
+          case VECTORTYPE: {
+            PUSH_VECTOR(sv.vec, sp, sc);
+            break;
+          }
+          case FUNCPTRTYPE: {
+            PUSH_FUNCPTR(sv.func, sp, sc);
+            break;     
+          }
+          case LIBFUNCPTRTYPE: {
+            PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
+            break;
+          }
+          case DICTTYPE: {
+            PUSH_DICTIONARY(sv.dict, sp, sc);
+            break;
+          }
+          default:
+            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+            exit(1);
+            break;
+        }
+
       }
 
     }
@@ -1183,6 +1269,10 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERR
           PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
           break;
         }
+        case DICTTYPE: {
+          PUSH_DICTIONARY(sv.dict, sp, sc);
+          break;
+        }
         default:
           fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
           exit(1);
@@ -1368,7 +1458,7 @@ void call_func(
             break;
           }
           default:
-            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+            fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
             exit(1);
             break;
         }
@@ -1439,6 +1529,10 @@ void call_func(
         PUSH_VECTOR(sv_ret.vec, sp, sc);
         break;
       }
+      case DICTTYPE: {
+        PUSH_DICTIONARY(sv_ret.dict, sp, sc);
+        break;
+      }
       default:
         fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
         exit(1);
@@ -1496,6 +1590,10 @@ void call_func(
         }
         case VECTORTYPE: {
           PUSH_VECTOR(sv.vec, sp, sc);
+          break;
+        }
+        case DICTTYPE: {
+          PUSH_DICTIONARY(sv.dict, sp, sc);
           break;
         }
         default:
@@ -1636,20 +1734,23 @@ void interpret_statements_(
           expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
           sv.vec = e->vec;
           free(e);
+        } else if ( sv.type == DICTTYPE ) {
+          dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          sv.dict = dict;
         }
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-        id = decl->id;
 
         /* Placing variable declaration in global variable namespace */
         hashtable_put(varDecs, idStr, hvp);
       }
       break;
       case EXPR_TYPE_VECTOR_IDX: {
-        vector_t *vec;
+        vector_t *vec = NULL;
+        dictionary_t *dict = NULL;
         int32_t arrayIndex;
         argsList_t *walk;
+        int isDict = 0;
         expr_t **expToSet = NULL;
         expr_t *vecid = id->vecIdx->id;
         expr_t *index = id->vecIdx->index;
@@ -1659,49 +1760,99 @@ void interpret_statements_(
         evaluate_expression(vecid, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
 
-        if ( sv.type != VECTORTYPE ) {
-          fprintf(stderr, "index error: '%s' is not an array.\n", id->id.id);
+        if ( sv.type != VECTORTYPE && sv.type != DICTTYPE ) {
+          fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
           GENERAL_REPORT_ISSUE_MSG();
           exit(1);
         }
 
-        vec = sv.vec;
-
-        evaluate_expression(index, EXPRESSION_ARGS());
-        POP_VAL(&sv, sp, sc);
-
-        if ( sv.type != INT32TYPE ) {
-          fprintf(stderr, "index error: Must provide an integer as index\n");
-          exit(1);
+        if ( sv.type == DICTTYPE ) {
+          isDict = 1;
+          dict = sv.dict;
+        } else {
+          isDict = 0;
         }
 
-        arrayIndex = sv.i;
+        if ( isDict == 0 ) {
+          /* Assigning a vector */
+          vec = sv.vec;
 
-        /* check the limits */
-        if ( arrayIndex >= vec->length ) {
-          fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-            arrayIndex,
-            vec->length);
-          exit(1);
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if ( sv.type != INT32TYPE ) {
+            fprintf(stderr, "index error: Must provide an integer as index\n");
+            exit(1);
+          }
+
+          arrayIndex = sv.i;
+
+          /* check the limits */
+          if ( arrayIndex >= vec->length ) {
+            fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+              arrayIndex,
+              vec->length);
+            exit(1);
+          }
+
+          walk = vec->content;
+          while ( walk != NULL && arrayIndex >= 0 ) {
+            expToSet = &walk->arg;
+            walk = walk->next;
+            --arrayIndex;
+          }
+
+          if ( *expToSet == NULL ) {
+            fprintf(stderr, "Unexpected index error!\n");
+            GENERAL_REPORT_ISSUE_MSG();
+            exit(1);
+          }
+
+          /* Placing this expression into the array */
+          free_expression(*expToSet);
+          free(*expToSet);
+          *expToSet = decl->val;
+        } else {
+          /* Assigning a dictionary */
+          char *key = NULL;
+          heapval_t *hvp = NULL;
+          int dummy;
+
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if ( sv.type != TEXT ) {
+            fprintf(stderr, "index error: Must provide a string as key\n");
+            exit(1);
+          }
+
+          key = ast_emalloc(strlen(sv.t)+2);
+          snprintf(key, strlen(sv.t)+1, "%s", sv.t);
+
+          /* Evaluating the expression among global variables */
+          evaluate_expression(decl->val, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          /* Placing value on the heap */
+          if ( sv.type == TEXT ) {
+            /* Special case */
+            char *c = sv.t;
+            size_t len = strlen(c)+1;
+            char *newText = ast_emalloc(len);
+            snprintf(newText,len,"%s",c);
+            sv.t = newText;
+          } else if ( sv.type == VECTORTYPE ) {
+            expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+            sv.vec = e->vec;
+            free(e);
+          } else if ( sv.type == DICTTYPE ) {
+            dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+            sv.dict = dict;
+          }
+
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          hashtable_put(dict->hash, key, hvp);
         }
-
-        walk = vec->content;
-        while ( walk != NULL && arrayIndex >= 0 ) {
-          expToSet = &walk->arg;
-          walk = walk->next;
-          --arrayIndex;
-        }
-
-        if ( *expToSet == NULL ) {
-          fprintf(stderr, "Unexpected index error!\n");
-          GENERAL_REPORT_ISSUE_MSG();
-          exit(1);
-        }
-
-        /* Placing this expression into the array */
-        free_expression(*expToSet);
-        free(*expToSet);
-        *expToSet = decl->val;
       }
       break;
       default:
@@ -1711,7 +1862,6 @@ void interpret_statements_(
 
       // Mark and sweep the heap
       mark_and_sweep(varDecs, EXPRESSION_ARGS());
-
     }
     break;
     case LANG_ENTITY_SYSTEM:
@@ -1874,7 +2024,6 @@ void setup_namespaces() {
 
 void close_namespaces() {
   hashtable_free(funcDecs);
-  for_each_pair(varDecs, flush_heapval);
   hashtable_free(varDecs);
 }
 
@@ -2026,6 +2175,53 @@ void print_indents(int indent) {
   }
 }
 
+int print_dictionary(dictionary_t *dict,
+  EXPRESSION_PARAMS()) {
+  hashtable_t *hash = dict->hash;
+  int size = hash->size;
+  int i = 0;
+  int keyCount = 0;
+  int keyCountTotal = 0;
+  struct key_val_pair *ptr;
+
+  if ( dict->initialized == 0 ) {
+    return -1;
+  }
+
+  i = 0;
+  while ( i < size ) {
+    ptr = hash->table[i];
+    while (ptr != NULL) {
+      keyCount++;
+      ptr = ptr->next;
+    }
+    i++;
+  }
+
+  keyCountTotal = keyCount;
+
+  if ( keyCountTotal > 0 ) {
+    printf("<Dictionary, keys: [");
+    keyCount = 0;
+    i = 0;
+    while ( i < size ) {
+      ptr = hash->table[i];
+      while (ptr != NULL) {
+        printf("%s%s", (keyCount > 0 ? ", ": ""), ptr->key);
+        keyCount++;
+        ptr = ptr->next;
+      }
+      i++;
+    }
+
+    printf("]>");
+  } else {
+    printf("<Dictionary, no keys in it>");
+  }
+
+  return 0;
+}
+
 int print_vector(
   vector_t *vec,
   EXPRESSION_PARAMS())
@@ -2083,15 +2279,6 @@ static void flush_arg(void *key, void *val)
   (void)key;
   if ( e->type == EXPR_TYPE_TEXT ) {
     free(e->text);
-  }
-}
-
-void flush_heapval(void *key, void *val)
-{
-  heapval_t *e = (heapval_t*)val;
-  (void)key;
-  if ( e->sv.type == TEXT ) {
-    //free(e->sv.t);
   }
 }
 
@@ -2546,3 +2733,188 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   /* Placing variable declaration in global variable namespace */
   hashtable_put(varDecs, argumentListName, hvp);
 }
+
+dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
+  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  newDict->hash = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+
+  if ( dict->initialized == 0 ) {
+    keyValList_t *walk = dict->keyVals;
+    while ( walk != NULL ) {
+      /* Dictionary already initialized, evaluate expressions in the key-value list */
+      expr_t *expKey = walk->key;
+      expr_t *expVal = walk->val;
+      char *newKeyStr = NULL;  // Storing the key
+      heapval_t *hvp = NULL;  // Storing the value
+      stackval_t sv;
+      int dummy;  // todo: remove the need for this..
+
+      evaluate_expression(expKey, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          newKeyStr = ast_emalloc(len+2);
+          snprintf(newKeyStr, len+2, "%s", sv.t);
+          break;
+        }
+        default:
+        fprintf(stderr, "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
+        exit(1);
+        break;
+      }
+
+      evaluate_expression(expVal, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+      /* Push all values to the heap */
+      switch ( sv.type ) {
+      case DOUBLETYPE:
+      case POINTERTYPE:
+      case INT32TYPE:
+      case LIBFUNCPTRTYPE:
+      case FUNCPTRTYPE:
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        break;
+      case VECTORTYPE: {
+        expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+        expr_t *newVecExpr = NULL;
+        stackval_t newStackVal;
+
+        eTemp->type = EXPR_TYPE_VECTOR;
+        eTemp->vec = sv.vec;
+
+        newVecExpr = newExpr_Copy(eTemp);
+        free(eTemp);
+
+        newStackVal = sv;
+        newStackVal.vec = newVecExpr->vec;
+
+        free(newVecExpr);
+
+        ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+        break;
+      }
+      case TEXT: {
+        size_t len = strlen(sv.t);
+        stackval_t newStackVal;
+
+        char *newText = ast_emalloc(len+1);
+        snprintf(newText, len+1, "%s", sv.t);
+
+        newStackVal = sv;
+        newStackVal.t = newText;
+
+        ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+        break;
+      }
+      case DICTTYPE: {
+        dictionary_t *newDict = allocNewDictionary(dict, EXPRESSION_ARGS());
+        stackval_t newStackVal = sv;
+
+        newStackVal.dict = newDict;
+
+        ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+        break;
+      }
+      default:
+        fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+        exit(1);
+        break;
+      }
+      /* Adding heap allocated value to dictionary hash table */
+      hashtable_put(newDict->hash, newKeyStr, hvp);
+
+      walk = walk->next;
+    }
+  } else {
+    /* Dictionary already initialized, traverse hashtable */
+    hashtable_t *hash = dict->hash;
+    int size = hash->size;
+    int i = 0;
+    struct key_val_pair *walk;
+    while ( i < size ) {
+      walk = hash->table[i];
+      while ( walk != NULL ) {
+        // Time to evaluate the keys and the values
+        char *key = walk->key;
+        heapval_t *hpVal = (heapval_t*)walk->data;
+        char *newKeyStr = NULL;  // Storing the key
+        heapval_t *hvp = NULL;  // Storing the value
+        stackval_t sv;
+        int dummy;  // todo: remove the need for this..
+        size_t len = strlen(key);
+        newKeyStr = ast_emalloc(len+2);
+        snprintf(newKeyStr, len+2, "%s", key);
+
+        sv = hpVal->sv;
+        /* Push all values to the heap */
+        switch ( sv.type ) {
+        case DOUBLETYPE:
+        case POINTERTYPE:
+        case INT32TYPE:
+        case LIBFUNCPTRTYPE:
+        case FUNCPTRTYPE:
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          break;
+        case VECTORTYPE: {
+          expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+          expr_t *newVecExpr = NULL;
+          stackval_t newStackVal;
+
+          eTemp->type = EXPR_TYPE_VECTOR;
+          eTemp->vec = sv.vec;
+
+          newVecExpr = newExpr_Copy(eTemp);
+          free(eTemp);
+
+          newStackVal = sv;
+          newStackVal.vec = newVecExpr->vec;
+
+          free(newVecExpr);
+
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          stackval_t newStackVal;
+
+          char *newText = ast_emalloc(len+1);
+          snprintf(newText, len+1, "%s", sv.t);
+
+          newStackVal = sv;
+          newStackVal.t = newText;
+
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        case DICTTYPE: {
+          dictionary_t *newDict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          stackval_t newStackVal = sv;
+
+          newStackVal.dict = newDict;
+
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        default:
+          fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+          exit(1);
+          break;
+        }
+        /* Adding heap allocated value to dictionary hash table */
+        hashtable_put(newDict->hash, newKeyStr, hvp);
+
+        walk = walk->next;
+      }
+      i++;
+    }
+  }
+
+  newDict->initialized = 1;
+
+  return newDict;
+}
+

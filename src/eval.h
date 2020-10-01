@@ -53,6 +53,8 @@ expr_t*  copy_vector(
   EXPRESSION_PARAMS()
 );
 
+
+int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS());
 void setup_namespaces();
 void close_namespaces();
 void flush_arguments(hashtable_t *args);
@@ -68,6 +70,10 @@ void call_func(
   hashtable_t *argVals);
 
 hashtable_t *new_argstable();
+hashtable_t* hashtable_heapvals_copy(
+  hashtable_t *hash, EXPRESSION_PARAMS());
+
+dictionary_t *allocNewDictionary(dictionary_t *, EXPRESSION_PARAMS());
 
 typedef struct ctx_table_t {
   void *stmt;

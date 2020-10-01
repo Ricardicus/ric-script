@@ -34,7 +34,7 @@
 #define EXPR_TYPE_VECTOR      16
 #define EXPR_TYPE_VECTOR_IDX  17
 #define EXPR_TYPE_LIBFUNCPTR  18
-
+#define EXPR_TYPE_DICT        19
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -63,6 +63,9 @@
 #define CONDITION_GEQ            3
 #define CONDITION_GE             4
 #define CONDITION_LE             5
+
+#define DICTIONARY_STANDARD_SIZE 1024
+#define DICTIONARY_STANDARD_LOAD 0.8
 
 #define GENERAL_ERROR_ISSUE_URL  "https://github.com/Ricardicus/ric-script"
 #define GENERAL_REPORT_ISSUE_MSG() do {\
@@ -113,6 +116,8 @@ struct expr_s;
 typedef struct expr_s expr_t;
 struct libFunction;
 typedef struct libFunction libFunction_t;
+struct keyValList;
+typedef struct keyValList keyValList_t;
 
 typedef struct vector_t {
   int32_t length;
@@ -123,6 +128,12 @@ typedef struct vectorIndex {
   expr_t *id;
   expr_t *index;
 } vectorIndex_t;
+
+typedef struct dictionary {
+  int initialized;
+  keyValList_t *keyVals;
+  hashtable_t *hash;
+} dictionary_t;
 
 typedef struct expr_s {
 	int      type;
@@ -147,6 +158,7 @@ typedef struct expr_s {
     uintptr_t p;
     vector_t *vec;
     vectorIndex_t *vecIdx;
+    dictionary_t *dict;
 	};
 } expr_t;
 
@@ -162,6 +174,13 @@ typedef struct argsList {
   expr_t *arg;
   struct argsList *next;
 } argsList_t;
+
+typedef struct keyValList {
+  int entity;
+  expr_t *key;
+  expr_t *val;
+  struct keyValList *next;
+} keyValList_t;
 
 typedef struct statement_s {
 	int entity;
@@ -208,6 +227,7 @@ expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
 expr_t* newExpr_Pointer(uintptr_t val);
 expr_t* newExpr_FuncPtr(void *func);
+expr_t* newExpr_Dictionary(keyValList_t *keyVals);
 expr_t* newExpr_FuncCall(functionCall_t *func);
 expr_t* newExpr_LibFuncPtr(libFunction_t *func);
 expr_t* newExpr_OPAdd(expr_t *left, expr_t *right);
@@ -243,7 +263,8 @@ typedef enum stackvaltypes {
 	POINTERTYPE,
   FUNCPTRTYPE,
   LIBFUNCPTRTYPE,
-  VECTORTYPE
+  VECTORTYPE,
+  DICTTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -256,6 +277,7 @@ typedef struct stackval {
     functionDef_t *func;
     vector_t *vec;
     libFunction_t *libfunc;
+    dictionary_t *dict;
 	};
 } stackval_t;
 
@@ -426,6 +448,22 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = LIBFUNCPTRTYPE;\
 stackval.libfunc = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+
+#define PUSH_DICTIONARY(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = DICTTYPE;\
+stackval.dict = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

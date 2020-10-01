@@ -75,6 +75,19 @@ expr_t *newExpr_Vector(argsList_t *args) {
   return expr;
 }
 
+expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr->dict = ast_emalloc(sizeof(dictionary_t));
+
+  expr->type = EXPR_TYPE_DICT;
+
+  expr->dict->initialized = 0;
+  expr->dict->keyVals = keyVals;
+  expr->dict->hash = NULL;
+
+  return expr;
+}
+
 expr_t *newExpr_Text(char *text) {
   size_t textLen = strlen(text);
   expr_t *expr = ast_emalloc(sizeof(expr_t));
@@ -456,6 +469,27 @@ void free_expression(expr_t *expr) {
     free_expression((expr_t *)expr->add.right);
     break;
   }
+  case EXPR_TYPE_DICT: {
+    dictionary_t *dict = expr->dict;
+
+    if ( dict->initialized ) {
+      hashtable_free(dict->hash);
+      free(dict->hash);
+    } else {
+      keyValList_t *walk = dict->keyVals;
+      keyValList_t *walk_next;
+
+      while ( walk != NULL ) {
+        walk_next = walk->next;
+        free_expression(walk->key);
+        free_expression(walk->val);
+        free(walk);
+        walk = walk_next;
+      }
+    }
+
+    break;
+  }
   case EXPR_TYPE_COND: {
     ifCondition_t *cond = expr->cond;
     free_expression((expr_t *)cond->left);
@@ -630,8 +664,8 @@ void free_ast(statement_t *stmt) {
     argsList_t *args = funcDef->params;
     free(funcDef->id.id);
     while ( args != NULL ) {
-     free_expression(args->arg);
-     args = args->next;
+      free_expression(args->arg);
+      args = args->next;
     }
     free_ast(funcDef->body);
   } break;

@@ -548,8 +548,7 @@ indexedVector:
     }
     | ID '[' stringContents ']' {
         expr_t *id = newExpr_ID($1);
-        expr_t *index = newExpr_ID($3);
-        $$ = newExpr_VectorIndex(id, index);
+        $$ = newExpr_VectorIndex(id, $3);
     }
     | indexedVector '[' mathContentDigit ']' {
       $$ = newExpr_VectorIndex($1, $3);

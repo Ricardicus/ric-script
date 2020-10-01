@@ -509,7 +509,7 @@ Please report back to me.\n\
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
             stop = 1;
           } else {
-            fprintf(stderr, "Failed to find ID: %s\n", expr->id.id);
+            fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
             exit(1);
           }
         }
@@ -1730,8 +1730,10 @@ void interpret_statements_(
           sv.vec = e->vec;
           free(e);
         } else if ( sv.type == DICTTYPE ) {
+          printf("1.1\n");
           dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
           sv.dict = dict;
+          printf("1.2\n");
         }
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
@@ -1769,7 +1771,7 @@ void interpret_statements_(
           isDict = 0;
         }
 
-        if ( isDict ) {
+        if ( isDict == 0 ) {
           /* Assigning a vector */
           vec = sv.vec;
 
@@ -1811,7 +1813,7 @@ void interpret_statements_(
         } else {
           /* Assigning a dictionary */
           char *key = NULL;
-          heapval_t *hvp;
+          heapval_t *hvp = NULL;
           int dummy;
           dict = sv.dict;
 
@@ -1848,7 +1850,7 @@ void interpret_statements_(
           }
 
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-
+          printf("hashtable_put dict->hash (%s)\n", key);
           hashtable_put(dict->hash, key, hvp);
         }
       }
@@ -2773,7 +2775,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         exit(1);
         break;
       }
-
+      printf("hashtable_put newDict (%s)\n", newKeyStr);
       /* Adding heap allocated value to dictionary hash table */
       hashtable_put(newDict->hash, newKeyStr, hvp);
 
@@ -2788,6 +2790,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
     while ( i < size ) {
       walk = hash->table[i];
       while ( walk != NULL ) {
+        printf("walk != NULL\n");
         // Time to evaluate the keys and the values
         char *key = walk->key;
         heapval_t *hpVal = (heapval_t*)walk->data;
@@ -2856,7 +2859,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           exit(1);
           break;
         }
-
+        printf("newdict hashtable_put\n");
         /* Adding heap allocated value to dictionary hash table */
         hashtable_put(newDict->hash, newKeyStr, hvp);
 

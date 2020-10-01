@@ -469,6 +469,27 @@ void free_expression(expr_t *expr) {
     free_expression((expr_t *)expr->add.right);
     break;
   }
+  case EXPR_TYPE_DICT: {
+    dictionary_t *dict = expr->dict;
+
+    if ( dict->initialized ) {
+      hashtable_free(dict->hash);
+      free(dict->hash);
+    } else {
+      keyValList_t *walk = dict->keyVals;
+      keyValList_t *walk_next;
+
+      while ( walk != NULL ) {
+        walk_next = walk->next;
+        free_expression(walk->key);
+        free_expression(walk->val);
+        free(walk);
+        walk = walk_next;
+      }
+    }
+
+    break;
+  }
   case EXPR_TYPE_COND: {
     ifCondition_t *cond = expr->cond;
     free_expression((expr_t *)cond->left);

@@ -2189,7 +2189,7 @@ int print_dictionary(dictionary_t *dict,
   }
 
   i = 0;
-  while ( i < size) {
+  while ( i < size ) {
     ptr = hash->table[i];
     while (ptr != NULL) {
       keyCount++;
@@ -2204,7 +2204,7 @@ int print_dictionary(dictionary_t *dict,
     printf("<Dictionary, keys: [");
     keyCount = 0;
     i = 0;
-    while ( i < size) {
+    while ( i < size ) {
       ptr = hash->table[i];
       while (ptr != NULL) {
         printf("%s%s", (keyCount > 0 ? ", ": ""), ptr->key);
@@ -2917,3 +2917,4 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
   return newDict;
 }
+

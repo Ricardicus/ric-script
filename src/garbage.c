@@ -4,19 +4,6 @@
 
 #include "garbage.h"
 
-char *variableIDS[RIC_MAX_NBR_VARS];
-int argCount = 0;
-
-static void list_ids(void *key, void *val)
-{
-  if ( argCount > RIC_MAX_NBR_VARS )
-    return;
-
-  (void)val;
-  variableIDS[argCount] = (char*) key;
-  argCount++;
-}
-
 uint32_t get_mark_value()
 {
   static int initial = 1;
@@ -37,18 +24,31 @@ uint32_t get_mark_value()
 void mark_and_sweep (
   hashtable_t *varDecs,
   EXPRESSION_PARAMS()) {
+  char *variableIDS[RIC_MAX_NBR_VARS];
+  int argCount = 0;
   int i = 0;
   int32_t size = (*(heapval_t*)hb).sv.i;
   heapval_t *heap = (heapval_t*)hb;
   uint32_t markVal;
+  int hashSize = varDecs->size;
+  struct key_val_pair *ptr;
 
   argCount = 0;
-  for_each_pair(varDecs, list_ids);
+  while ( i < hashSize ) {
+    ptr = varDecs->table[i];
+    while (ptr != NULL) {
+      variableIDS[argCount] = ptr->key;
+      argCount++;     
+      ptr = ptr->next;
+    }
+    i++;
+  }
 
   /* Get a mark value for this session */
   markVal = get_mark_value();
 
   /* Mark all variables in the heap */
+  i = 0;
   while ( i < argCount ) {
     heapval_t *hv = hashtable_get(varDecs, variableIDS[i]);
     hv->mark = markVal;

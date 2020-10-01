@@ -547,14 +547,11 @@ Please report back to me.\n\
       expr_t *id = expr->vecIdx->id;
       expr_t *index = expr->vecIdx->index;
 
-      printf("(0)\n");
       stackval_t sv;
 
       if ( id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX ) {
         evaluate_expression(id, EXPRESSION_ARGS());
-        printf("0.0.1\n");
         POP_VAL(&sv, sp, sc);
-        printf("0.0.2\n");
 
         if ( sv.type != VECTORTYPE && sv.type != DICTTYPE ) {
           fprintf(stderr, "index error: '%s' is a datatype the does not support indexing.\n", id->id.id);
@@ -573,9 +570,7 @@ Please report back to me.\n\
         exit(1);
       }
 
-      printf("(0.1)\n");
       evaluate_expression(index, EXPRESSION_ARGS());
-      printf("(0.2)\n");
       POP_VAL(&sv, sp, sc);
 
       if ( isDict == 0 ) {
@@ -662,8 +657,6 @@ Please report back to me.\n\
           fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
           exit(1);
         }
-
-        printf("(0.1)\n");
 
         key = sv.t;
 
@@ -1730,15 +1723,11 @@ void interpret_statements_(
           sv.vec = e->vec;
           free(e);
         } else if ( sv.type == DICTTYPE ) {
-          printf("1.1\n");
           dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
           sv.dict = dict;
-          printf("1.2\n");
         }
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-        id = decl->id;
 
         /* Placing variable declaration in global variable namespace */
         hashtable_put(varDecs, idStr, hvp);
@@ -1767,6 +1756,7 @@ void interpret_statements_(
 
         if ( sv.type == DICTTYPE ) {
           isDict = 1;
+          dict = sv.dict;
         } else {
           isDict = 0;
         }
@@ -1815,7 +1805,6 @@ void interpret_statements_(
           char *key = NULL;
           heapval_t *hvp = NULL;
           int dummy;
-          dict = sv.dict;
 
           evaluate_expression(index, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
@@ -1850,7 +1839,6 @@ void interpret_statements_(
           }
 
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          printf("hashtable_put dict->hash (%s)\n", key);
           hashtable_put(dict->hash, key, hvp);
         }
       }
@@ -2689,6 +2677,8 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
 
 dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  newDict->hash = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
 
   if ( dict->initialized == 0 ) {
     keyValList_t *walk = dict->keyVals;
@@ -2750,7 +2740,6 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       case TEXT: {
         size_t len = strlen(sv.t);
         stackval_t newStackVal;
-        heapval_t *hvp;
 
         char *newText = ast_emalloc(len+1);
         snprintf(newText, len+1, "%s", sv.t);
@@ -2775,7 +2764,6 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         exit(1);
         break;
       }
-      printf("hashtable_put newDict (%s)\n", newKeyStr);
       /* Adding heap allocated value to dictionary hash table */
       hashtable_put(newDict->hash, newKeyStr, hvp);
 
@@ -2790,7 +2778,6 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
     while ( i < size ) {
       walk = hash->table[i];
       while ( walk != NULL ) {
-        printf("walk != NULL\n");
         // Time to evaluate the keys and the values
         char *key = walk->key;
         heapval_t *hpVal = (heapval_t*)walk->data;
@@ -2834,7 +2821,6 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case TEXT: {
           size_t len = strlen(sv.t);
           stackval_t newStackVal;
-          heapval_t *hvp;
 
           char *newText = ast_emalloc(len+1);
           snprintf(newText, len+1, "%s", sv.t);
@@ -2859,7 +2845,6 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           exit(1);
           break;
         }
-        printf("newdict hashtable_put\n");
         /* Adding heap allocated value to dictionary hash table */
         hashtable_put(newDict->hash, newKeyStr, hvp);
 

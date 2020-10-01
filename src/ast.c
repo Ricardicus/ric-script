@@ -83,13 +83,7 @@ expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
 
   expr->dict->initialized = 0;
   expr->dict->keyVals = keyVals;
-  expr->dict->hash = hashtable_new(
-    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
-
-  if ( expr->dict->hash == NULL ) {
-    fprintf(stderr, "Failed to allocate memory\n");
-    exit(1);
-  }
+  expr->dict->hash = NULL;
 
   return expr;
 }

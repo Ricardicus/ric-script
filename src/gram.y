@@ -413,12 +413,15 @@ dictionary_keys_vals:
       keyValList_t *left = (keyValList_t*)$1;
       keyValList_t *right = (keyValList_t*)$3;
 
-      left->next = right;
-      $$ = left;
+      right->next = left;
+      $$ = right;
     }
     | dictionary_key_val {
       $$ = $1;
-    };
+    }
+    | {
+        $$ = NULL;
+    }
 
 dictionary_key_val:
     stringContents ':' mathContents {
@@ -427,6 +430,7 @@ dictionary_key_val:
       keyVal->entity = EXPR_TYPE_DICT;
       keyVal->key = $1;
       keyVal->val = $3;
+      keyVal->next = NULL;
 
       $$ = keyVal;
     }
@@ -436,6 +440,7 @@ dictionary_key_val:
       keyVal->entity = EXPR_TYPE_DICT;
       keyVal->key = $1;
       keyVal->val = $3;
+      keyVal->next = NULL;
 
       $$ = keyVal;
     };

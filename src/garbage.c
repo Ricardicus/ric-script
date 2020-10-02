@@ -74,7 +74,6 @@ void mark_and_sweep (
           free_expression(e);
           free(e);
         } else if ( heap[i].sv.type == DICTTYPE ) {
-          printf("Found dict on the heap\n");
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(heap[i].sv.dict);
         }
@@ -102,8 +101,7 @@ void free_heap(void *hp, void *hbp) {
           e->vec = ((heapval_t*) hp)[i].sv.vec;
           free_expression(e);
           free(e);
-        } else if ( ((heapval_t*) hp)[i].sv.type == DICTTYPE) {
-          printf("Found dict on the heap\n");
+        } else if ( ((heapval_t*) hp)[i].sv.type == DICTTYPE ) {
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(((heapval_t*) hp)[i].sv.dict);
         }

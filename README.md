@@ -254,7 +254,6 @@ This is in it's very early stage... it only supports one liners!
 ```
 # Including batteries
 
-I am working on the functions built in the language.
-I include functions by adding them in the list defined
-[here](https://github.com/Ricardicus/ric-script/blob/master/src/lib.c),
-and the function implementations are partitioned in a way that makes sense to me [here](https://github.com/Ricardicus/ric-script/blob/master/src/library).
+I am contiuously working [the standard library of the language](https://github.com/Ricardicus/ric-script/blob/master/src/library).
+If you feel like contributing to this project, I would be more than happy to see some PRs in this department.
+

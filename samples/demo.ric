@@ -69,3 +69,23 @@ print("====================")
 hej(willprint, "hej")
 # Calling out 'hej' function with standard library 'print' function as first argument
 hej(print, "hejsan")
+
+# Dictionary expressions
+
+s = {"hello": "world", "elit": 1337}
+print(s)
+print(s["hello"])
+print(s["elit"])
+
+# extending with more fields
+s["new field"] = 1337
+print(s)
+print(s["new field"])
+
+# extending with another dictionary
+s["dict"] = {"hello": "world"}
+print(s)
+print(s["dict"]["hello"])
+
+
+

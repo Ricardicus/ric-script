@@ -70,7 +70,7 @@ The interpreter GUI looks like this:
 
 # Code interpreter
 
-This is a work in progress, an the first time I am developing a language.
+This is a work in progress and the first time I am developing a language.
 I expect there are things one can easily solve during the interpretation
 that is harder to compile, but I don't bother too much with that at the moment.
 I am developing the interpreter and while doing so I decide what features

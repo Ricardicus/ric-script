@@ -254,6 +254,7 @@ This is in it's very early stage... it only supports one liners!
 ```
 # Including batteries
 
-I am contiuously working [the standard library of the language](https://github.com/Ricardicus/ric-script/blob/master/src/library).
-If you feel like contributing to this project, I would be more than happy to see some PRs in this department.
+I am contiuously working on this languages [standard library](https://github.com/Ricardicus/ric-script/blob/master/src/library).
+
+If you feel like contributing to this project, I would be more than happy to see some PRs in this department!
 

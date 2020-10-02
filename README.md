@@ -256,5 +256,5 @@ This is in it's very early stage... it only supports one liners!
 
 I am working on the functions built in the language.
 I include functions by adding them in the list defined
-[here]: https://github.com/Ricardicus/ric-script/blob/master/src/lib.c,
-and the function implementations are [here]: https://github.com/Ricardicus/ric-script/blob/master/src/library.
+[here](https://github.com/Ricardicus/ric-script/blob/master/src/lib.c),
+and the function implementations are partitioned in a way that makes sense to me [here](https://github.com/Ricardicus/ric-script/blob/master/src/library).

@@ -51,7 +51,7 @@ ninja
 # Docker
 
 A containarized node.js app has been developed to test the langauge.
-The container exposes the port 3000. 
+The docker image exposes the port 3000. 
 ## Docker example
 ```
 git clone https://github.com/Ricardicus/ric-script

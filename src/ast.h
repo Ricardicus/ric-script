@@ -490,7 +490,7 @@ if ( upd != NULL ) {\
   *(int*)upd = 1;\
 }\
 hv.sv = *a;\
-if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE ) {\
+if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || hv.sv.type == DICTTYPE ) {\
 	hv.toFree = true;\
 } else {\
   hv.toFree = false;\

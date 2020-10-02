@@ -486,8 +486,9 @@ void free_expression(expr_t *expr) {
         free(walk);
         walk = walk_next;
       }
-    }
 
+    }
+    free(dict);
     break;
   }
   case EXPR_TYPE_COND: {
@@ -522,6 +523,7 @@ void free_expression(expr_t *expr) {
   default:
     break;
   }
+
 }
 
 

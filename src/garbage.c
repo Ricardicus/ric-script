@@ -4,7 +4,9 @@
 
 #include "garbage.h"
 
-uint32_t get_mark_value()
+static uint32_t markVal = 0;
+
+uint32_t set_mark_value()
 {
   static int initial = 1;
   uint32_t r;
@@ -18,7 +20,8 @@ uint32_t get_mark_value()
 
   initial = 0;
 
-  return r;
+  markVal = r;
+  return markVal;
 }
 
 void mark_and_sweep (
@@ -29,7 +32,6 @@ void mark_and_sweep (
   int i = 0;
   int32_t size = (*(heapval_t*)hb).sv.i;
   heapval_t *heap = (heapval_t*)hb;
-  uint32_t markVal;
   int hashSize = varDecs->size;
   struct key_val_pair *ptr;
 
@@ -43,9 +45,6 @@ void mark_and_sweep (
     }
     i++;
   }
-
-  /* Get a mark value for this session */
-  markVal = get_mark_value();
 
   /* Mark all variables in the heap */
   i = 0;
@@ -74,6 +73,10 @@ void mark_and_sweep (
           e->vec = heap[i].sv.vec;
           free_expression(e);
           free(e);
+        } else if ( heap[i].sv.type == DICTTYPE ) {
+          printf("Found dict on the heap\n");
+          hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
+          free(heap[i].sv.dict);
         }
         heap[i].toFree = false;
       }
@@ -83,8 +86,8 @@ void mark_and_sweep (
 
     ++i;
   }
-
 }
+
 void free_heap(void *hp, void *hbp) {
   int32_t size = (*(heapval_t*)hp).sv.i;
   int32_t i = 0;
@@ -99,6 +102,10 @@ void free_heap(void *hp, void *hbp) {
           e->vec = ((heapval_t*) hp)[i].sv.vec;
           free_expression(e);
           free(e);
+        } else if ( ((heapval_t*) hp)[i].sv.type == DICTTYPE) {
+          printf("Found dict on the heap\n");
+          hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
+          free(((heapval_t*) hp)[i].sv.dict);
         }
     }
     ++i;

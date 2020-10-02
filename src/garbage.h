@@ -14,6 +14,6 @@ void mark_and_sweep(
 
 void free_heap(void *hp, void *hbp);
 
-uint32_t get_mark_value();
+uint32_t set_mark_value();
 
 #endif

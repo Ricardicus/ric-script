@@ -528,6 +528,7 @@ mathContent:
         expr_t *e = (expr_t*) $2;
         int val = e->ival * -1;
         $$ = newExpr_Ival(val);
+        free($2);
     }
     | indexedVector {
         $$ = $1;
@@ -598,6 +599,7 @@ stringContents:
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%.4f", d->fval);
         expr_t *e2 = newExpr_Text(buffer);
+        free($3);
 
         $$ = newExpr_OPAdd(e1,e2);
     }
@@ -607,6 +609,7 @@ stringContents:
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%d", d->ival);
         expr_t *e2 = newExpr_Text(buffer);
+        free($3);
 
         $$ = newExpr_OPAdd(e1,e2);
     }
@@ -678,12 +681,14 @@ stringEdition:
         expr_t *e = (expr_t*)$1;
         snprintf(buffer, sizeof(buffer), "%lf", e->fval);
         $$ = newExpr_Text(buffer);
+        free($1);
     }
     | mathContentDigit {
         char buffer[256];
         expr_t *e = (expr_t*)$1;
         snprintf(buffer, sizeof(buffer), "%d", e->ival);
         $$ = newExpr_Text(buffer);
+        free($1);
     }
     | otherChar {
         $$ = newExpr_Text($1);

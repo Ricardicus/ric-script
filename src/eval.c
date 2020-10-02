@@ -1851,6 +1851,8 @@ void interpret_statements_(
           }
 
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+          // Check if collision, if so, free key
           hashtable_put(dict->hash, key, hvp);
         }
       }
@@ -1861,6 +1863,7 @@ void interpret_statements_(
       }
 
       // Mark and sweep the heap
+      (void)set_mark_value();
       mark_and_sweep(varDecs, EXPRESSION_ARGS());
     }
     break;
@@ -2738,6 +2741,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
   newDict->hash = hashtable_new(
     DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  newDict->hash->key_also = 1;
 
   if ( dict->initialized == 0 ) {
     keyValList_t *walk = dict->keyVals;

@@ -11,7 +11,8 @@ hashtable_t * hashtable_new(int size, float load)
 
 	hashtable->size = size;
 	hashtable->ocupied = 0;
-	hashtable->data_also = 0; // to be modified by user
+	hashtable->data_also = 0;  // to be modified by user
+  hashtable->key_also = 0;  // to be modified by user
 	hashtable->load = load;
 	hashtable->table = (entry_t**) calloc(size,sizeof(entry_t*));
 	hashtable->put = hashtable_put;
@@ -32,6 +33,9 @@ static void free_hashtable_table(hashtable_t * hash)
 			if ( hash->data_also ) {
 				free(ptr2->data);
 			}
+      if ( hash->key_also ) {
+        free(ptr2->key);
+      }
 			free(ptr2);
 		}
 		i++;
@@ -132,6 +136,10 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 			if (strcmp(ptr1->key,key) == 0) {
         if ( hashtable->data_also ) {
           free(ptr1->data);
+        }
+        if ( hashtable->key_also ) {
+          free(ptr1->key);
+          ptr1->key = key;
         }
 				ptr1->data = val;
 				return;

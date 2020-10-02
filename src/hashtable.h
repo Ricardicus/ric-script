@@ -23,6 +23,7 @@ typedef struct hash {
 	int size;
 	int ocupied;
 	int data_also;
+  int key_also;
 	float load;
 	entry_t ** table;
 	void (*put)(struct hash*,char*,void *);

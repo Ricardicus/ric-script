@@ -33,3 +33,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/demo.ric
     - name: Run valgrind on args.ric with arguments
       run: valgrind --leak-check=full ./ric samples/args.ric 1 2 3 hello
+    - name: Run valgrind on dictionary.ric
+      run: valgrind --leak-check=full ./ric samples/dictionary.ric

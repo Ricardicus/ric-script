@@ -1457,6 +1457,13 @@ void call_func(
             newArg = newExpr_LibFuncPtr(sv.libfunc);
             break;
           }
+          case DICTTYPE: {
+            expr_t *e = ast_emalloc(sizeof(expr_t));
+            e->type = EXPR_TYPE_DICT;
+            e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+            newArg = e;
+            break;
+          }
           default:
             fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
             exit(1);
@@ -2282,6 +2289,9 @@ static void flush_arg(void *key, void *val)
   (void)key;
   if ( e->type == EXPR_TYPE_TEXT ) {
     free(e->text);
+  } else if ( e->type == EXPR_TYPE_DICT ) {
+    hashtable_free(e->dict->hash);
+    free(e->dict);
   }
 }
 

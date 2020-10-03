@@ -22,3 +22,6 @@ tests/__pycache__
 
 # Mac osX 
 .DS_Store
+src/ric.dSYM
+ric.dSYM
+

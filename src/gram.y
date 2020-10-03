@@ -359,10 +359,20 @@ function:
 
 functionCall:
     ID '(' arguments_list ')' {
-        $$ = newFunCall($1,$3);
-    } | 
-    ID '(' ')' {
-        $$ = newFunCall($1,NULL);
+        expr_t *id = newExpr_ID($1);
+        $$ = newFunCall(id,$3);
+    }
+    | ID '(' ')' {
+        expr_t *id = newExpr_ID($1);
+        $$ = newFunCall(id,NULL);
+    }
+    | indexedVector '(' arguments_list ')' {
+        expr_t *id = (expr_t*)$1;
+        $$ = newFunCall(id,$3);
+    }
+    | indexedVector '(' ')' {
+        expr_t *id = (expr_t*)$1;
+        $$ = newFunCall(id,NULL);
     };
 
 declaration: 

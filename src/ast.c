@@ -383,19 +383,12 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
   return func;
 }
 
-functionCall_t *newFunCall(const char *id, void *args) {
-  size_t idLen = strlen(id);
+functionCall_t *newFunCall(expr_t *id, void *args) {
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
 
   func->entity = LANG_ENTITY_FUNCCALL;
-
   func->args = args;
-
-  func->id.id = ast_emalloc(idLen + 1);
-
-  memcpy(func->id.id, id, idLen);
-
-  func->id.id[idLen] = 0;
+  func->id = id;
 
   return func;
 }
@@ -673,7 +666,7 @@ void free_ast(statement_t *stmt) {
   } break;
   case LANG_ENTITY_FUNCCALL: {
     functionCall_t *funcCall = ((statement_t *)stmt)->content;
-    free(funcCall->id.id);
+    free_expression(funcCall->id);
   } break;
   case LANG_ENTITY_CONDITIONAL: {
     ifStmt_t *ifstmt = ((statement_t *)stmt)->content;

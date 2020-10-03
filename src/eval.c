@@ -1297,9 +1297,34 @@ void call_func(
   stackval_t sv_ret;
   expr_t *expArg;
   libFunction_t *libFunc = NULL;
+  char *funcID;
+
+  /* Evaluate id */
+  evaluate_expression(funcCall->id, EXPRESSION_ARGS());
+  POP_VAL(&sv, sp, sc);
+
+  switch ( sv.type ) {
+  case TEXT:
+    funcID = sv.t;
+    break;
+  case FUNCPTRTYPE: {
+    functionDef_t *func = sv.func;
+    funcID = func->id.id;
+    break;
+  }
+  case LIBFUNCPTRTYPE: {
+    libFunction_t *func = sv.libfunc;
+    funcID = func->libFuncName;
+    break;
+  }
+  default:
+    fprintf(stderr, "error: invalid function call\n");
+    exit(1);
+    break;
+  }
 
   /* Check among the arguments if we have it defined there */
-  expArg = hashtable_get(argVals, funcCall->id.id);
+  expArg = hashtable_get(argVals, funcID);
 
   /* The argument might be a function! Evaluate and see ... */
   if ( expArg != NULL ) {
@@ -1322,25 +1347,25 @@ void call_func(
   if ( funcDef == NULL && libFunc == NULL ) {
 
     /* Looking up the function and calling it if it exists */
-    funcDef = hashtable_get(funcDecs, funcCall->id.id);
+    funcDef = hashtable_get(funcDecs, funcID);
 
     /* Looking up the function among the library */
-    libFunc = look_up_lib(funcCall->id.id);
+    libFunc = look_up_lib(funcID);
 
     /* Check lookup status */
     if ( funcDef == NULL && libFunc == NULL ) {
       heapval_t *hv;
       /* Check if this is a function pointer call (lowest priority) */
-      hv = hashtable_get(varDecs, funcCall->id.id);
+      hv = hashtable_get(varDecs, funcID);
 
       if ( hv == NULL ) {
         // Check among the arguments 
 
         /* Check among the arguments if we have it defined there */
-        expArg = hashtable_get(argVals, funcCall->id.id);
+        expArg = hashtable_get(argVals, funcID);
 
         if ( expArg == NULL ) {
-          fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+          fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
           exit(1);
         }
 
@@ -1362,9 +1387,8 @@ void call_func(
 
         }
 
-
       } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
-        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcCall->id.id);
+        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
         exit(1);
       } else {
         switch (hv->sv.type) {
@@ -1392,13 +1416,13 @@ void call_func(
 
     if ( params == NULL && argsWalk != NULL ) {
       fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
-        funcCall->id.id, argsWalk->length );
+        funcID, argsWalk->length );
       exit(1);
     }
 
     if ( params != NULL && argsWalk == NULL ) {
       fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
-        funcCall->id.id, params->length );
+        funcID, params->length );
       exit(1);
     }
 
@@ -1407,7 +1431,7 @@ void call_func(
       if ( params->length != argsWalk->length ) {
         /* print error message */
         fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
-          funcCall->id.id, params->length, argsWalk->length );
+          funcID, params->length, argsWalk->length);
         exit(1);
       }
 
@@ -1419,7 +1443,7 @@ void call_func(
         if ( params->arg->type != EXPR_TYPE_ID ) {
           /* This is not supposed to happen */
           printf("Error: parameter in function definition '%s' was invalid\n",
-            funcCall->id.id);
+            funcID);
         }
 
         /* Evaluate expression */
@@ -1555,13 +1579,13 @@ void call_func(
 
     if ( libFunc->nbrArgs > 0 && argsWalk == NULL ) {
       fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
-        funcCall->id.id, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+        funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
       exit(1);
     }
 
     if ( libFunc->nbrArgs != (int)argsWalk->length ) {
       fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
-        funcCall->id.id, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
+        funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
       exit(1);
     }
 
@@ -1614,14 +1638,14 @@ void call_func(
       argsWalk = argsWalk->next;
     }
 
-    libfunc_ret = libFunc->func( funcCall->id.id, EXPRESSION_ARGS() );
+    libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS() );
 
     /* Free the argument value table */
     flush_arguments(newArgumentTable);
 
     if ( libfunc_ret != 0 ) {
       fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
-        funcCall->id.id, libfunc_ret);
+        funcID, libfunc_ret);
       exit(libfunc_ret);
     }
   }
@@ -2117,11 +2141,13 @@ void print_expr(expr_t *expr)
     break;
     case EXPR_TYPE_FUNCCALL:
     {
-      functionCall_t *funcCall = (functionCall_t *)expr->func;
-      printf("Function Call: ID('%s') args(", funcCall->id.id);
+      functionCall_t *funcCall = expr->func;
+      printf("Function call: <");
+      print_expr(funcCall->id);
+      printf("> args(");
       argsList_t *args = funcCall->args;
       print_args(args);
-      printf(")");
+      printf(")\n");
     }
     break;
     case EXPR_TYPE_VECTOR:
@@ -2412,7 +2438,9 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_FUNCCALL:
     {
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
-      printf("Function Call: ID('%s') args(", funcCall->id.id);
+      printf("Function call: <");
+      print_expr(funcCall->id);
+      printf("> args(");
       argsList_t *args = funcCall->args;
       print_args(args);
       printf(")\n");

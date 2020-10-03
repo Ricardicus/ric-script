@@ -202,7 +202,7 @@ typedef struct functionDef {
 
 typedef struct functionCall {
 	int entity;
-	ID_t id;
+	expr_t *id;
 	argsList_t *args;
 } functionCall_t;
 
@@ -246,7 +246,7 @@ statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, ifCondition_t *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
-functionCall_t* newFunCall(const char *id, void *args);
+functionCall_t* newFunCall(expr_t *id, void *args);
 body_t*         newBody(void *body);
 
 argsList_t*     copy_argsList(argsList_t *args);

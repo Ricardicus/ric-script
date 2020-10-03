@@ -19,6 +19,7 @@ int ric_printf(LIBRARY_PARAMS());
 int ric_exit(LIBRARY_PARAMS());
 int ric_append(LIBRARY_PARAMS());
 int ric_len(LIBRARY_PARAMS());
+int ric_contains(LIBRARY_PARAMS());
 
 #endif
 

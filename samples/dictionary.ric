@@ -36,4 +36,7 @@ print(s["a"]["b"]["c"]["d"])
 s["foobar"] = foobar
 s["foobar"]()
 
+# Checking stdlib 'contains' function
+print(contains(s, "foobar"))
+print(contains(s, "barfoo"))
 

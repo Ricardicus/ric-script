@@ -284,6 +284,110 @@ int ric_append(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_contains(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  vector_t *argVec = NULL;
+  dictionary_t *argDict = NULL;
+  char *containText = NULL;
+  int32_t containInt = 0;
+  int32_t result = 0;
+  int searchForInt = 0;  // Lazy, search for int or text.
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+    argVec = stv.vec;
+    break;
+    case DICTTYPE:
+    argDict = stv.dict;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' expected dictionary or list as first argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  // Pop arg2
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    containText = stv.t;
+    searchForInt = 0;
+    break;
+    case INT32TYPE:
+    containInt = stv.i;
+    searchForInt = 1;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' expected text or integer as first argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  if ( argVec != NULL ) {
+    /* Search in a vector */
+    argsList_t *walk = argVec->content;
+
+    while ( walk != NULL ) {
+      /* Evaluate expression */
+      evaluate_expression(walk->arg, EXPRESSION_ARGS());
+      POP_VAL(&stv, sp, sc);
+
+      if ( searchForInt ) {
+        /* Check if is int and number match */
+        if ( stv.type == INT32TYPE && stv.i == containInt ) {
+          result = 1;
+          break;
+        }
+      } else {
+        /* Check if is text */
+        if ( stv.type == TEXT && strcmp(stv.t, containText) == 0 ) {
+          result = 1;
+          break;
+        }
+      }
+      walk = walk->next;
+    }
+  } else if ( argDict != NULL ) {
+    /* Search in a dictionary */
+    hashtable_t *hash = argDict->hash;
+    int hashSize = hash->size;
+    struct key_val_pair *ptr;
+    int i = 0;
+
+    if ( searchForInt ) {
+      /* all keys are strings */
+      result = 0;
+    } else {
+      while ( i < hashSize && result == 0 ) {
+        ptr = hash->table[i];
+        while (ptr != NULL) {
+          /* Check if match */
+          if ( strcmp((char*)ptr->key, containText) == 0 ) {
+            result = 1;
+            break;
+          }
+          ptr = ptr->next;
+        }
+        i++;
+      }
+    }
+  }
+
+  /* Pushing result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
 int ric_len(LIBRARY_PARAMS())
 {
   stackval_t stv;

@@ -72,3 +72,9 @@ s = [foo, bar]
 s[0]()
 s[1]()
 
+# Testing stdlib 'contains' function
+s = ["foobar", 1337]
+print(contains(s, 1338))
+print(contains(s, 1337))
+print(contains(s, "barfoo"))
+print(contains(s, "foobar"))

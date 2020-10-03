@@ -446,6 +446,16 @@ dictionary_key_val:
       keyVal->next = NULL;
 
       $$ = keyVal;
+    }
+    | stringContents ':' dictionary {
+      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
+
+      keyVal->entity = EXPR_TYPE_DICT;
+      keyVal->key = $1;
+      keyVal->val = $3;
+      keyVal->next = NULL;
+
+      $$ = keyVal;
     };
 
 body:

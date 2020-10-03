@@ -2824,7 +2824,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         break;
       }
       case DICTTYPE: {
-        dictionary_t *newDict = allocNewDictionary(dict, EXPRESSION_ARGS());
+        dictionary_t *newDict = allocNewDictionary(expVal->dict, EXPRESSION_ARGS());
         stackval_t newStackVal = sv;
 
         newStackVal.dict = newDict;

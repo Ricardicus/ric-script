@@ -194,6 +194,18 @@ print(s["new field"])
 s["dict"] = {"hello": "world"}
 print(s)
 print(s["dict"]["hello"])
+
+# Calling a function pointer in a list and a dictionary
+@ foo () { print("foo") }
+@ bar () { print("bar") }
+
+d = {"foo": foo, "bar": bar}
+d["foo"]()
+d["bar"]()
+
+l = [foo, bar]
+l[0]()
+l[1]()
 ```
 
 ## Output:
@@ -225,6 +237,10 @@ world
 1337
 <Dictionary, keys: [dict, elit, hello, new field]>
 world
+foo
+bar
+foo
+bar
 ```
 
 # Interactive prompt

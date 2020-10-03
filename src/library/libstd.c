@@ -309,7 +309,7 @@ int ric_contains(LIBRARY_PARAMS())
     argText = stv.t;
     break;
     default: {
-      fprintf(stderr, "error: function '%s' expected dictionary or list as first argument.\n",
+      fprintf(stderr, "error: function '%s' expected string, dictionary or list as first argument.\n",
         LIBRARY_FUNC_NAME());
       return 1;
     }

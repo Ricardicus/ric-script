@@ -28,3 +28,12 @@ foo(d)
 
 s = {"a": {"b": {"c": {"d": "e"}}}}
 print(s["a"]["b"]["c"]["d"])
+
+@ foobar () {
+  print("foobar")
+}
+
+s["foobar"] = foobar
+s["foobar"]()
+
+

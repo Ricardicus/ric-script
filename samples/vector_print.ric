@@ -60,3 +60,15 @@ s = [ "hejsan" ]
 s = [s, "hej"]
 print(s)
 
+@ foo () {
+  print("foo")
+}
+
+@ bar () {
+  print("bar")
+}
+
+s = [foo, bar]
+s[0]()
+s[1]()
+

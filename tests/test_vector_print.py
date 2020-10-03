@@ -26,8 +26,10 @@ def test_vector_print():
 "foo",
 "bar",
 "['Foobar! foo ','bar','foo','bar']",
-"[['hejsan'],'hej']"
-  ]
+"[['hejsan'],'hej']",
+"foo",
+"bar"
+]
 
   lib_script = callSample('vector_print.ric')
 

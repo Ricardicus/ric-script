@@ -289,6 +289,7 @@ int ric_contains(LIBRARY_PARAMS())
   stackval_t stv;
   vector_t *argVec = NULL;
   dictionary_t *argDict = NULL;
+  char *argText = NULL;
   char *containText = NULL;
   int32_t containInt = 0;
   int32_t result = 0;
@@ -303,6 +304,9 @@ int ric_contains(LIBRARY_PARAMS())
     break;
     case DICTTYPE:
     argDict = stv.dict;
+    break;
+    case TEXT:
+    argText = stv.t;
     break;
     default: {
       fprintf(stderr, "error: function '%s' expected dictionary or list as first argument.\n",
@@ -378,6 +382,22 @@ int ric_contains(LIBRARY_PARAMS())
           ptr = ptr->next;
         }
         i++;
+      }
+    }
+  } else if ( argText != NULL ) {
+    if ( searchForInt ) {
+      /* Check if int is in the text */
+      char buffer[50];
+
+      snprintf(buffer, sizeof(buffer), "%" PRIi32 "", containInt);
+      
+      if ( strstr(argText, buffer) != NULL ) {
+        result = 1;
+      }
+    } else {
+      /* Check if is text */
+      if ( strstr(argText, containText) != NULL ) {
+        result = 1;
       }
     }
   }

@@ -113,6 +113,9 @@ int ric_load(LIBRARY_PARAMS())
   /* Free the loaded ast (with function defs extracted */
   free_ast(root);
 
+  /* closing file descriptor */
+  fclose(fp);
+
   return result;
 }
 

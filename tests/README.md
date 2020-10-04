@@ -15,7 +15,7 @@ cd builddir
 ninja
 ```
 
-3. Stand in this directory (not 'builddir')
+3. Stand in this testing directory (ric-script/tests)
 4. Launch pytest:
 
 ``` 

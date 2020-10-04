@@ -244,7 +244,7 @@ foo
 bar
 ```
 
-## loading external scripts
+## Loading external scripts
 
 To load function definitions from other scripts, use this function:
 ```

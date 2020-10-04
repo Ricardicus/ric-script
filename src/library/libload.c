@@ -47,10 +47,6 @@ int ric_load(LIBRARY_PARAMS())
 
   /* Get the root statement */
   root = getRoot();
-  walk = root;
-  while ( walk != NULL ) {
-    walk = walk->next;
-  }
 
   /* Get current main scripts root */
   mainRoot = getMainRoot();

@@ -244,6 +244,14 @@ foo
 bar
 ```
 
+## loading external scripts
+
+To load function definitions from other scripts, use this function:
+```
+load("another-script.ric")
+# Now all functions in 'another-script.ric' is usable here
+```
+
 # Interactive prompt
 
 This is implemented as of today in its earliest stage.

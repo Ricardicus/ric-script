@@ -17,6 +17,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("contains", 2, ric_contains),
   // libstring
   DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
+  DECLARE_LIB_FUNCTION("split", 2, ric_split),
   // libio
   DECLARE_LIB_FUNCTION("isFile", 1, ric_is_file),
   DECLARE_LIB_FUNCTION("fileOpen", 1, ric_open_file),

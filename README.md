@@ -246,7 +246,7 @@ bar
 
 ## Loading external scripts
 
-Use **load** to load function definitions from external scripts:
+Use **load** to import function definitions from other ric-scripts:
 ```
 load("another-script.ric")
 # Now all functions in 'another-script.ric' is usable here

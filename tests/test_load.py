@@ -7,7 +7,10 @@ def test_load():
 "yes, loading works!"
 ]
 
-  lib_script = callSample('load.ric')
+  if os.name == 'nt':
+    lib_script = callSample('load_nt.ric')
+  else:
+    lib_script = callSample('load.ric')
 
   ric_result = os.popen(lib_script).read().splitlines()
 

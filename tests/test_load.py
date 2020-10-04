@@ -3,11 +3,11 @@ from settings import *
 
 def test_load():
   output_lines = [
-"foobar",
-"yes, loading works!",
 "foo",
 "bar",
-"Foobar foobar"
+"Foobar foobar",
+"foobar",
+"yes, loading works!"
 ]
 
   if os.name == 'nt':

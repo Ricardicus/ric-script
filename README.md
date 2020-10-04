@@ -100,7 +100,7 @@ well as haven't implemented:
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, like the one Python has
-
+- [ ] socket interface, making it possible to build web apps
 
 
 # Snapshot of the language syntax

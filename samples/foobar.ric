@@ -2,3 +2,23 @@
   print("foobar")
   print(a)
 }
+
+@ foo() {
+  print("foo")
+}
+
+print("Hello!")
+
+@ bar() {
+  print("bar")
+}
+
+print("hello")
+print("hello")
+
+@ foobarfoobar() {
+  print("Foobar foobar")
+}
+
+
+ 

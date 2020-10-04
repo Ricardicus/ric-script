@@ -1,4 +1,7 @@
 # This script is developed to be used in the test suite
 load("..\samples\foobar.ric")
 foobar("yes, loading works!")
+foo()
+bar()
+foobarfoobar()
 

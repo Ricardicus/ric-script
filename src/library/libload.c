@@ -62,9 +62,9 @@ int ric_load(LIBRARY_PARAMS())
     int extracted = 0;
     if ( walk->entity == LANG_ENTITY_FUNCDECL ) {
       /* Extract this statement from the new ast */
+      extracted = 1;
       if ( walkPrev != NULL ) {
         walkPrev->next = walk->next;
-        extracted = 1;
       }
 
       if ( newFuncDefs == NULL ) {
@@ -75,12 +75,12 @@ int ric_load(LIBRARY_PARAMS())
         newFuncDefs = walk;
       }
 
-      if ( root == walk ) {
+      if ( root->entity == LANG_ENTITY_FUNCDECL ) {
         root = walk->next;
       }
     }
 
-    if ( extracted == 0 && walkPrev != NULL ) {
+    if ( extracted == 0 ) {
       walkPrev = walk;
     }
 

@@ -108,6 +108,8 @@ int ric_split(LIBRARY_PARAMS())
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
   free(vec);
 
+  free(buffer);
+
   /* Pushing the parsed value */
   PUSH_VECTOR(stv.vec, sp, sc);
 

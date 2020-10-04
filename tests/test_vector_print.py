@@ -32,7 +32,8 @@ def test_vector_print():
 "0",
 "1",
 "0",
-"1"
+"1",
+"['hejsan','hoppsan','falleralera']"
 ]
 
   lib_script = callSample('vector_print.ric')

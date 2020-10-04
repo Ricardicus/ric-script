@@ -72,9 +72,16 @@ s = [foo, bar]
 s[0]()
 s[1]()
 
-# Testing stdlib 'contains' function
+# Testing libstd 'contains' function
 s = ["foobar", 1337]
 print(contains(s, 1338))
 print(contains(s, 1337))
 print(contains(s, "barfoo"))
 print(contains(s, "foobar"))
+
+# Testing libstring 'split' function
+s = "hejsan hoppsan falleralera"
+v = split(s, " ")
+print(v)
+
+

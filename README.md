@@ -96,11 +96,12 @@ well as haven't implemented:
 - [x] Passing arguments as vector instead of variables
 - [x] Dictionary expressions
 - [ ] Bigger standard library, more battery power (for reference, see: **src/library**)
-- [ ] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
+- [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_) (**implemented only function loading**)
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, like the one Python has
-
+- [ ] Socket interface
+- [ ] Threading interface
 
 
 # Snapshot of the language syntax
@@ -241,6 +242,14 @@ foo
 bar
 foo
 bar
+```
+
+## Loading external scripts
+
+To load function definitions from other scripts, use this function:
+```
+load("another-script.ric")
+# Now all functions in 'another-script.ric' is usable here
 ```
 
 # Interactive prompt

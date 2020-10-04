@@ -33,8 +33,9 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("exp", 1, ric_exp),
   DECLARE_LIB_FUNCTION("abs", 1, ric_abs),
   DECLARE_LIB_FUNCTION("floor", 1, ric_floor),
-  DECLARE_LIB_FUNCTION("ceil", 1, ric_ceil)
-
+  DECLARE_LIB_FUNCTION("ceil", 1, ric_ceil),
+  // libload
+  DECLARE_LIB_FUNCTION("load", 1, ric_load)
 };
 
 void initialize_ric_lib() {

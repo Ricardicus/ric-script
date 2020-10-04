@@ -12,6 +12,7 @@
 #include "libmath.h"
 #include "libstd.h"
 #include "libstring.h"
+#include "libload.h"
 
 #define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
 

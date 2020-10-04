@@ -87,6 +87,8 @@ int main(int argc, char *argv[]) {
 
     /* Get the root statement */
     root = getRoot();
+    /* Set main root statement */
+    setMainRoot(root);
     if ( root != NULL ) {
       /* Interpret the program */
       interpret_statements(argc, argv, root);
@@ -101,6 +103,9 @@ int main(int argc, char *argv[]) {
 
     /* Get the root statement */
     root = getRoot();
+    /* Set main root statement */
+    setMainRoot(root);
+
     if ( root != NULL ) {
       /* Printt the program */
       printf("AST:\n\n");
@@ -116,6 +121,8 @@ int main(int argc, char *argv[]) {
 
     /* Get the root statement */
     root = getRoot();
+    /* Set main root statement */
+    setMainRoot(root);
     if ( root != NULL ) {
       /* Print the program */
       printf("AST:\n\n");

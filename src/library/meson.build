@@ -4,5 +4,6 @@ library_sources = files([
   'libio.c',
   'libmath.c',
   'libstd.c',
-  'libstring.c'
+  'libstring.c',
+  'libload.c'
 ])

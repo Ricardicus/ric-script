@@ -2577,6 +2577,29 @@ void interpret_statements_interactive(
   }
 
   if ( stmt != NULL ) {
+
+    /* Check if load */
+    if ( stmt->entity == LANG_ENTITY_FUNCCALL ) {
+      stackval_t stv;
+      libFunction_t *libFunc;
+
+      functionCall_t *call = (functionCall_t*)stmt->content;
+      evaluate_expression(call->id, NULL, NULL, PROVIDE_CONTEXT_INIT(), NULL, NULL);
+
+      POP_VAL(&stv, &sp, &sc);
+      if ( stv.type == LIBFUNCPTRTYPE ) {
+        libFunc = stv.libfunc;
+
+        /* Check if this is a load call */
+        if ( strcmp(libFunc->libFuncName, "load") == 0 ) {
+          printf("Sorry, load in interactive mode is not implemented yet\n");
+          return;
+        }
+      }
+
+    }
+
+
     switch ( setjmp(endingJmpBuf) ) {
     case JMP_CODE_INITIAL:
         /* Start descending and evaluating the AST */

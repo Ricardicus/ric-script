@@ -101,6 +101,7 @@ well as haven't implemented:
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, like the one Python has
 - [ ] Socket interface
+- [ ] Threading interface
 
 
 # Snapshot of the language syntax

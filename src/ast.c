@@ -245,6 +245,7 @@ declaration_t *newDeclaration(expr_t *id, expr_t *expr) {
 statement_t *newStatement(int type, void *content) {
   statement_t *stmt = ast_emalloc(sizeof(statement_t));
   stmt->entity = type;
+  stmt->next = NULL;
 
   switch (type) {
   case LANG_ENTITY_DECL:

@@ -435,7 +435,6 @@ Please report back to me.\n\
         functionDef_t *funcDef; // if it is a function pointer
         /* Check among the variables if we have it defined there */
         hv = hashtable_get(varDecs, expr->id.id);
-
         if ( hv != NULL ) {
 
           switch ( hv->sv.type ) {
@@ -1348,7 +1347,6 @@ void call_func(
 
     /* Looking up the function and calling it if it exists */
     funcDef = hashtable_get(funcDecs, funcID);
-
     /* Looking up the function among the library */
     libFunc = look_up_lib(funcID);
 

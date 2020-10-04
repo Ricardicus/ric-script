@@ -1,0 +1,3 @@
+load("../samples/foobar.ric")
+foobar("yes, loading works!")
+

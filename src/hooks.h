@@ -11,6 +11,8 @@ void setParser( MainParserFunc func );
 void setRoot(statement_t **newRoot);
 MainParserFunc getParser();
 statement_t *getRoot();
+void setMainRoot(statement_t *newRoot);
+statement_t *getMainRoot();
 
 /* Implemented in gram.y */
 void initParser();

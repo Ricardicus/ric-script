@@ -1,4 +1,3 @@
-
 # Author: Rickard Hallerbäck
 
 all:

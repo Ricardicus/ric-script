@@ -16,7 +16,7 @@ test:
 
 cpplint:
 ifeq (, which $@)
-	@echo "install cpplint before attempting to make check"
+	@echo "install cpplint before attempting to make cpplint"
 else
 	cpplint --exclude=src/y.tab.* --exclude=src/lex.yy.c \
 --filter=-build/include_subdir,-build/header_guard,-legal/copyright,-build/include_what_you_use,\

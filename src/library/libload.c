@@ -111,10 +111,6 @@ int ric_load(LIBRARY_PARAMS())
   }
 
   /* Free the loaded ast (with function defs extracted */
-  walk = root;
-  while ( walk != NULL ) {
-    walk = walk->next;
-  }
   free_ast(root);
 
   return result;

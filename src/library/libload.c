@@ -119,3 +119,4 @@ int ric_load(LIBRARY_PARAMS())
 
   return result;
 }
+

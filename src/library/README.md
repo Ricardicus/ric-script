@@ -12,6 +12,6 @@ is aborted. In the parent directory there is a file
 named **lib.c**, in this file I give functions a name
 and specify the number of arguments the expect. 
 
-They are registered there, in **../lib.c**, but implemented
+They are registered there, in [lib.c](https://github.com/Ricardicus/ric-script/blob/master/src/lib.c), but implemented
 here. 
 

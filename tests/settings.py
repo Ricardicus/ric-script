@@ -10,7 +10,7 @@ def callSample(sample):
     return '{0} {1} '.format(binaryPath, samplePath)
   else:
     # Not windows
-    reteurn "./{0} ../samples/{1} ".format(EXECUTABLE, sample)
+    return "./{0} ../samples/{1} ".format(EXECUTABLE, sample)
 
 def callSampleArgs(sample, args):
   if (os.name == 'nt'):

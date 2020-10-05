@@ -21,7 +21,7 @@ else
 endif
 
 cpplint:
-ifeq (, $(shell which $@))
+ifeq (, $(shell which cpplint))
 	@echo "install cpplint before attempting to make cpplint"
 else
 	cpplint --exclude=src/y.tab.* --exclude=src/lex.yy.c \

@@ -24,14 +24,12 @@ uint32_t set_mark_value()
   return markVal;
 }
 
-void mark_and_sweep (
+static void mark (
   hashtable_t *varDecs,
   EXPRESSION_PARAMS()) {
   char *variableIDS[RIC_MAX_NBR_VARS];
   int argCount = 0;
   int i = 0;
-  int32_t size = (*(heapval_t*)hb).sv.i;
-  heapval_t *heap = (heapval_t*)hb;
   int hashSize = varDecs->size;
   struct key_val_pair *ptr;
 
@@ -53,10 +51,18 @@ void mark_and_sweep (
     hv->mark = markVal;
 
     if ( hv->sv.type == DICTTYPE ) {
-      mark_and_sweep(hv->sv.dict->hash, EXPRESSION_ARGS());
+      mark(hv->sv.dict->hash, EXPRESSION_ARGS());
     }
     ++i;
   }
+}
+
+static void sweep (
+  hashtable_t *varDecs,
+  EXPRESSION_PARAMS()) {
+  int i = 0;
+  int32_t size = (*(heapval_t*)hb).sv.i;
+  heapval_t *heap = (heapval_t*)hb;
 
   /* Sweep the heap values that haven't got the mark */
   i = 0;
@@ -87,6 +93,15 @@ void mark_and_sweep (
   }
 }
 
+void mark_and_sweep (
+  hashtable_t *varDecs,
+  EXPRESSION_PARAMS()) {
+  /* Mark objects to keep */
+  mark(varDecs, EXPRESSION_ARGS());
+  /* Sweep the rest */
+  sweep(varDecs, EXPRESSION_ARGS());
+}
+
 void free_heap(void *hp, void *hbp) {
   int32_t size = (*(heapval_t*)hp).sv.i;
   int32_t i = 0;
@@ -110,4 +125,6 @@ void free_heap(void *hp, void *hbp) {
   }
   free(hbp);
 }
+
+
 

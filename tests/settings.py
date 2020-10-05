@@ -7,23 +7,17 @@ def callSample(sample):
     # Windows
     binaryPath = os.path.join('..', 'builddir', 'src', 'ric.exe')
     samplePath = os.path.join('..', 'samples', sample)
-    return binaryPath + " " + samplePath + " "
+    return '{0} {1} '.format(binaryPath, samplePath)
   else:
     # Not windows
-    return "./" + EXECUTABLE + " ../samples/" + sample + " "
+    reteurn "./{0} ../samples/{1} ".format(EXECUTABLE, sample)
 
 def callSampleArgs(sample, args):
   if (os.name == 'nt'):
     # Windows
     binaryPath = os.path.join('..', 'builddir', 'src', 'ric.exe')
     samplePath = os.path.join('..', 'samples', sample)
-    argsString = " "
-    for arg in args:
-      argsString += str(arg) + " "
-    return binaryPath + " " + samplePath + argsString
+    return '{0} {1} {2}'.format(binaryPath, samplePath, ' '.join(args))
   else:
     # Not windows
-    argsString = " "
-    for arg in args:
-      argsString += str(arg) + " "
-    return "./" + EXECUTABLE + " ../samples/" + sample + argsString
+    return './{0} ../samples/{1} {2}'.format(EXECUTABLE, sample, ' '.join(args))

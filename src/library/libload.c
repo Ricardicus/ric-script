@@ -8,9 +8,6 @@ extern FILE *yyin;
 int ric_load(LIBRARY_PARAMS())
 {
   statement_t *root = NULL;
-  statement_t *newFuncDefs = NULL;
-  statement_t *newFuncDefsStart = NULL;
-  statement_t *mainRoot = NULL;
   statement_t *walk = NULL;
   statement_t *walkPrev = NULL;
   MainParserFunc parse;
@@ -18,6 +15,9 @@ int ric_load(LIBRARY_PARAMS())
   int result = 0;
   FILE *fp = NULL;
   char *loadFile = NULL;
+  statement_t *mainRoot = NULL;
+  statement_t *importedFuncDecs = NULL;
+  statement_t *importedFuncDecsStart = NULL;
 
   // Read arg1, the name of the script
   POP_VAL(&stv, sp, sc);
@@ -48,66 +48,64 @@ int ric_load(LIBRARY_PARAMS())
   /* Get the root statement */
   root = getRoot();
 
-  /* Get current main scripts root */
+  /* Get main root statement */
   mainRoot = getMainRoot();
 
   /* Traverse the new AST and load its function definitions into the program */
   walk = root;
   walkPrev = NULL;
   while ( walk != NULL ) {
-    int extracted = 0;
     if ( walk->entity == LANG_ENTITY_FUNCDECL ) {
       /* Extract this statement from the new ast */
-      extracted = 1;
-      if ( walkPrev != NULL ) {
-        walkPrev->next = walk->next;
-      }
+      if ( importedFuncDecs == NULL ) {
+        importedFuncDecs = malloc(sizeof(statement_t));
+        if ( importedFuncDecs == NULL ) {
+          fprintf(stderr, "error: failed to allocate memory\n");
+          exit(1);
+        }
 
-      if ( newFuncDefs == NULL ) {
-        newFuncDefs = walk;
-        newFuncDefsStart = newFuncDefs;
+        *importedFuncDecs = *walk;
+        importedFuncDecs->next = NULL;
+
+        importedFuncDecsStart = importedFuncDecs;
       } else {
-        newFuncDefs->next = walk;
-        newFuncDefs = walk;
+        statement_t *newImport = malloc(sizeof(statement_t));
+        if ( newImport == NULL ) {
+          fprintf(stderr, "error: failed to allocate memory\n");
+          exit(1);
+        }   
+        
+        *newImport = *walk;
+        importedFuncDecs->next = newImport;
+        importedFuncDecs = newImport;
+        importedFuncDecs->next = NULL;
       }
 
-      if ( root->entity == LANG_ENTITY_FUNCDECL ) {
-        root = walk->next;
-      }
-    }
-
-    if ( extracted == 0 ) {
-      walkPrev = walk;
     }
 
     walk = walk->next;
   }
 
-  if ( newFuncDefs != NULL ) {
-    /* Insert the new function declaration at the end of the main program */
-    statement_t *tmp = newFuncDefs->next;
-    newFuncDefs->next = NULL;
-
-    walk = newFuncDefsStart;
-    while ( walk != NULL ) {
-      walk = walk->next;
-    }
-    // Set the last statement in the function defs next to null
-    interpret_statements_(newFuncDefsStart, PROVIDE_CONTEXT(), args, argVals);
-    newFuncDefs->next = tmp;
-
-    /* Place these statements at the end of the main program, so it gets cleaned up */
-    walk = mainRoot;
-    walkPrev = walk;
+  if ( importedFuncDecsStart != NULL ) {
+    interpret_statements_(importedFuncDecsStart, PROVIDE_CONTEXT(), args, argVals);
+    /* Clean up */
+    walk = importedFuncDecsStart;
+    walkPrev = importedFuncDecsStart;
     while ( walk != NULL ) {
       walkPrev = walk;
       walk = walk->next;
+      free(walkPrev);
     }
-    walkPrev->next = newFuncDefsStart;
   }
 
-  /* Free the loaded ast (with function defs extracted */
-  free_ast(root);
+  /* Place loaded ast into main ast making it ready for cleanup */
+  walk = mainRoot;
+  walkPrev = mainRoot;
+  while ( walk != NULL ) {
+    walkPrev = walk;
+    walk = walk->next;
+  }
+  walkPrev->next = root;
 
   /* closing file descriptor */
   fclose(fp);

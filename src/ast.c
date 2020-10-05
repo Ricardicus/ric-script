@@ -624,6 +624,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CONTINUE:
   case LANG_ENTITY_BREAK:
   case LANG_ENTITY_SYSTEM:
+  case LANG_ENTITY_FIN:
     next = ((statement_t *)stmt)->next;
     break;
   case LANG_ENTITY_RETURN:
@@ -636,9 +637,6 @@ void free_ast(statement_t *stmt) {
   }
   case LANG_ENTITY_BODY: {
     next = ((body_t *)stmt)->content;
-  } break;
-  case LANG_ENTITY_FIN: {
-    next = NULL;
   } break;
   default:
     break;

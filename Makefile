@@ -4,11 +4,21 @@ all:
 	make -C src
 	@mv src/ric ric
 
-clean: 
+clean:
 	make clean -C src
 
-test: 
+test:
 	make test -C tests
+
+install: all
+	cp ric /usr/local/bin
+
+uninstall:
+ifeq (, which ric)
+	@echo "ric-script has not been installed"
+else
+	rm $(shell which ric)
+endif
 
 cpplint:
 ifeq (, which $@)

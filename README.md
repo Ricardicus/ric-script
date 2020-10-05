@@ -107,6 +107,8 @@ well as haven't implemented:
 # Snapshot of the language syntax
 
 ```
+#!/usr/bin/ric
+
 # Conditionals
 [ 1 == 1 ] {
   print("True condition")

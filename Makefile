@@ -11,7 +11,7 @@ test:
 	make test -C tests
 
 install: all
-	cp ric /usr/local/bin
+	cp ric /usr/bin
 
 uninstall:
 ifeq (, $(shell which ric))

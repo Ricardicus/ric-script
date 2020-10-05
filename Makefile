@@ -14,14 +14,14 @@ install: all
 	cp ric /usr/local/bin
 
 uninstall:
-ifeq (, which ric)
+ifeq (, $(shell which ric))
 	@echo "ric-script has not been installed"
 else
 	rm $(shell which ric)
 endif
 
 cpplint:
-ifeq (, which $@)
+ifeq (, $(shell which $@))
 	@echo "install cpplint before attempting to make cpplint"
 else
 	cpplint --exclude=src/y.tab.* --exclude=src/lex.yy.c \

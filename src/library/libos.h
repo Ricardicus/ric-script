@@ -13,6 +13,7 @@
 #include "ast.h"
 
 int ric_sleep(LIBRARY_PARAMS());
+int ric_is_directory(LIBRARY_PARAMS());
 
 #endif
 

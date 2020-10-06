@@ -694,6 +694,9 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_SYSTEM:
     free_expression(((statement_t *)stmt)->content);
     break;
+  case LANG_ENTITY_FIN:
+    free(stmt);
+    break;
   default:
     break;
   }

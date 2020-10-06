@@ -13,6 +13,7 @@
 #include "libstd.h"
 #include "libstring.h"
 #include "libload.h"
+#include "libos.h"
 
 #define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
 

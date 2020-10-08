@@ -448,4 +448,66 @@ int ric_len(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_keys(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  dictionary_t *argDict = NULL;
+  argsList_t *vecContent = NULL;
+  expr_t *resultVec = NULL;
+  int32_t result = 0;
+  heapval_t *hpv = NULL;
+  int dummy;
 
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case DICTTYPE:
+    argDict = stv.dict;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' expected dictionary as first argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  if ( argDict != NULL ) {
+    /* list the dictionary */
+    hashtable_t *hash = argDict->hash;
+    int hashSize = hash->size;
+    struct key_val_pair *ptr;
+    int i = 0;
+
+    while ( i < hashSize && result == 0 ) {
+      ptr = hash->table[i];
+      while (ptr != NULL) {
+        /* Add this key to the list */
+        expr_t *e;
+        argsList_t *a;
+        e = newExpr_Text((char*)ptr->key);
+        a = newArgument(e, vecContent);
+        vecContent = a;
+        ptr = ptr->next;
+      }
+      i++;
+    }
+
+  } else {
+    fprintf(stderr, "error %s: unexpected error\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  resultVec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = resultVec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(resultVec);
+
+  /* Pushing the list of keys */
+  PUSH_VECTOR(stv.vec, sp, sc);
+
+  return 0;
+}

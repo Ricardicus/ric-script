@@ -40,3 +40,7 @@ s["foobar"]()
 print(contains(s, "foobar"))
 print(contains(s, "barfoo"))
 
+# Checkoing stdlib 'keys' function
+print(keys(s))
+print(keys(d))
+print(keys(d["a"]))

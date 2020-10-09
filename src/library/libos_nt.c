@@ -109,7 +109,7 @@ int ric_ls(LIBRARY_PARAMS())
     } while (FindNextFile(hFind, &fdFile));
   }
 
-  FindClose(hFind); //Always, Always, clean things up!
+  FindClose(hFind);
 
   vec = newExpr_Vector(vecContent);
 

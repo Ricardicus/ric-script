@@ -1040,6 +1040,7 @@ Please report back to me.\n\
     {
       stackval_t svLeft;
       stackval_t svRight;
+      char *leftStr = NULL;
 
       evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
@@ -1057,8 +1058,7 @@ Please report back to me.\n\
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Cannot multiply strings..\n");
-          exit(1);
+          leftStr = svLeft.t;
           break;
         }
         default:
@@ -1074,6 +1074,11 @@ Please report back to me.\n\
         }
         case DOUBLETYPE: {
           *f1 = svRight.i;
+
+          if ( leftStr != NULL ) {
+            fprintf(stderr, "error: Cannot multiply string with float\n");
+            exit(1);
+          }
           break;
         }
         case TEXT: {
@@ -1095,6 +1100,27 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 * *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 * *r1, sp, sc);
+      } else if ( svLeft.type == TEXT && svRight.type == INT32TYPE ) {
+        heapval_t *hpv;
+        stackval_t stv;
+        size_t strLen = strlen(leftStr);
+        int32_t mult = *r1;
+        int32_t i = 0;
+        int dummy;
+        char *newStr = ast_emalloc(strLen*mult + 2);
+
+        while ( i < mult ) {
+          snprintf(newStr+(i*strLen), strLen+1, "%s", leftStr);
+          ++i;
+        }
+
+        newStr[(mult * strLen) + 1] = 0;
+
+        stv.type = TEXT;
+        stv.t = newStr;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_STRING(stv.t, sp, sc);
       }
 
       break;

@@ -275,6 +275,10 @@ i = 0
 
 print(h)
 
+# Multiply string with integers
+s = "hej " * 3
+print(s)
+
 print("Nu e de slut")
 
 

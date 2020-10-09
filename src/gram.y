@@ -633,11 +633,17 @@ stringContents:
 
         $$ = newExpr_OPAdd(e1,e2);
     }
-    | stringContents '+' indexedVector  {
+    | stringContents '*' mathContentDigit  {
         expr_t *e1 = (expr_t*)$1;
         expr_t *e2 = (expr_t*)$3;
 
-        $$ = newExpr_OPAdd(e1,e2);
+        $$ = newExpr_OPMul(e1,e2);
+    }
+    | stringContents '*' indexedVector  {
+        expr_t *e1 = (expr_t*)$1;
+        expr_t *e2 = (expr_t*)$3;
+
+        $$ = newExpr_OPMul(e1,e2);
     }
     | stringContent {
         $$ = $1;

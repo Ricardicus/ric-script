@@ -40,7 +40,8 @@ libFunction_t ric_library[] = {
   // libos
   DECLARE_LIB_FUNCTION("sleep", 1, ric_sleep),
   DECLARE_LIB_FUNCTION("isDir", 1, ric_is_directory),
-  DECLARE_LIB_FUNCTION("ls", 1, ric_ls)
+  DECLARE_LIB_FUNCTION("ls", 1, ric_ls),
+  DECLARE_LIB_FUNCTION("cd", 1, ric_cd)
 };
 
 void initialize_ric_lib() {

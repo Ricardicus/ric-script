@@ -122,3 +122,32 @@ int ric_ls(LIBRARY_PARAMS())
   PUSH_VECTOR(stv.vec, sp, sc);
   return 0;
 }
+
+int ric_cd(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  char *argText;
+  int result = 0;
+
+  // pop arg 1 - directory to search in
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    argText = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  result = SetCurrentDirectory(argText);
+
+  /* Pushing the result */
+  PUSH_INT(result, sp, sc);
+  return 0;
+}
+

@@ -99,7 +99,7 @@ int ric_ls(LIBRARY_PARAMS())
   } else {
     do {
       if (strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0) {
-        snprintf(sPath, sizeof(sPath), "%s\\%s", sDir, fdFile.cFileName);
+        snprintf(sPath, sizeof(sPath), "%s\\%s", argText, fdFile.cFileName);
         expr_t *e;
         argsList_t *a;
         e = newExpr_Text(sPath);

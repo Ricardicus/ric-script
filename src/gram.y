@@ -85,7 +85,7 @@ statement_t *root = NULL;
 %type<data> middleIf
 %type<data> endIf
 %type<data> condition
-%type<data> oneorzero
+%type<data> logical
 
 %right'=' 
 %left '+' '-'
@@ -221,17 +221,17 @@ expression:
     };
 
 ifStatement:
-    '[' oneorzero ']' body {
+    '[' logical ']' body {
         $$ = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
     }
-    | '[' oneorzero ']' body middleIfs {
+    | '[' logical ']' body middleIfs {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
 
         ifs->elif = $5;
         
         $$ = ifs;
     }
-    | '[' oneorzero ']' body middleIfs endIf {
+    | '[' logical ']' body middleIfs endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
 
         ifs->elif = $5;
@@ -239,7 +239,7 @@ ifStatement:
         
         $$ = ifs;
     }
-    | '[' oneorzero ']' body endIf {
+    | '[' logical ']' body endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
 
         ifs->endif = $5;
@@ -248,13 +248,13 @@ ifStatement:
     };
 
 loopStatement:
-    '.' '[' oneorzero ']' body {
+    '.' '[' logical ']' body {
         expr_t *expr = newExpr_Ival(0);
         expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
         $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
     }
-    | '.' '[' oneorzero ']' body middleIfs {
+    | '.' '[' logical ']' body middleIfs {
         expr_t *expr = newExpr_Ival(0);
         expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
@@ -264,7 +264,7 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' oneorzero ']' body middleIfs endIf {
+    | '.' '[' logical ']' body middleIfs endIf {
         expr_t *expr = newExpr_Ival(0);
         expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
@@ -275,7 +275,7 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' oneorzero ']' body endIf {
+    | '.' '[' logical ']' body endIf {
         expr_t *expr = newExpr_Ival(0);
         expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
@@ -299,7 +299,7 @@ middleIfs:
     };
 
 middleIf:
-    '~' '[' oneorzero ']' body {
+    '~' '[' logical ']' body {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELIF, $3, $5);
        
         $$ = ifs;
@@ -311,7 +311,7 @@ endIf:
         $$ = ifs;
     };
 
-oneorzero:
+logical:
     condition {
         $$ = $1;
     }

@@ -543,7 +543,7 @@ static const char *const yytname[] =
   "'\"'", "' '", "'?'", "'\\\\'", "$accept", "program", "statements",
   "statement", "systemStatement", "returnStatement", "continueStatement",
   "breakStatement", "expressions", "expression", "ifStatement",
-  "loopStatement", "middleIfs", "middleIf", "endIf", "oneorzero",
+  "loopStatement", "middleIfs", "middleIf", "endIf", "logical",
   "condition", "function", "functionCall", "declaration", "dictionary",
   "dictionary_keys_vals", "dictionary_key_val", "body", "vector",
   "arguments_list", "parameters_list", "mathContent", "indexedVector",

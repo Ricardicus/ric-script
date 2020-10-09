@@ -104,6 +104,8 @@ int evaluate_condition(ifCondition_t *cond,
       } else {
         *ax = 0;
       }
+    } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
+      *ax = !(strcmp(svLeft.t, svRight.t) == 0);
     }
     break;
   }
@@ -1054,7 +1056,7 @@ Please report back to me.\n\
           break;
         }
         case DOUBLETYPE: {
-          *f0 = svLeft.i;
+          *f0 = svLeft.d;
           break;
         }
         case TEXT: {
@@ -1073,7 +1075,7 @@ Please report back to me.\n\
           break;
         }
         case DOUBLETYPE: {
-          *f1 = svRight.i;
+          *f1 = svRight.d;
 
           if ( leftStr != NULL ) {
             fprintf(stderr, "error: Cannot multiply string with float\n");
@@ -1546,7 +1548,9 @@ void call_func(
     /* Call the function */
     if ( funcDecs ) {
       /* Moving along, interpreting function*/
+      *depth = *depth + 1;
       interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+      *depth = *depth - 1;
     }
 
     if ( *(uintptr_t*)sp != spBefore ) {
@@ -1715,6 +1719,7 @@ void interpret_statements_(
     case LANG_ENTITY_FUNCCALL:
     case LANG_ENTITY_CONDITIONAL:
     case LANG_ENTITY_SYSTEM:
+    case LANG_ENTITY_EXPR:
       next = ((statement_t*)stmt)->next;
     break;
     case LANG_ENTITY_RETURN:
@@ -1796,6 +1801,7 @@ void interpret_statements_(
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
+        //printf("%s assign at depth %zu\n", idStr, *depth);
         /* Placing variable declaration in global variable namespace */
         hashtable_put(varDecs, idStr, hvp);
       }
@@ -2025,6 +2031,47 @@ void interpret_statements_(
       }
     }
     break;
+    case LANG_ENTITY_EXPR:
+    {
+      stackval_t sv;
+      size_t stackCount = *sc;
+      expr_t *e = ((statement_t*)stmt)->content;
+
+      switch ( e->type ) {
+        case EXPR_TYPE_FUNCCALL: {
+
+          functionCall_t *funcCall = e->func;
+          call_func(
+            funcCall,
+            EXPRESSION_ARGS()
+          );
+
+          /* Printing result of function call, if string or vector */
+          while ( *sc > stackCount ) {
+            POP_VAL(&sv, sp, sc);
+            switch (sv.type) {
+              case TEXT:
+              printf("%s\n", sv.t);
+              break;
+              case VECTORTYPE:
+              print_vector(sv.vec, EXPRESSION_ARGS());
+              printf("\n");
+              break;
+              default:
+              break;
+            }
+          }
+
+          break;
+        }
+        default:
+        break;
+
+
+      }
+
+    }
+    break;
     case LANG_ENTITY_CONDITIONAL:
     {
       ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
@@ -2046,8 +2093,10 @@ void interpret_statements_(
       /* Read ax for conditional */
       evaluate_condition(ifstmt->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       if ( *ax ) {
+        *depth = *depth + 1;
         interpret_statements_(ifstmt->body,
           PROVIDE_CONTEXT(), args, argVals);
+        *depth = *depth - 1;
       } else {
         // Walk through the elifs.
         int stop = 0;
@@ -2056,8 +2105,10 @@ void interpret_statements_(
         while ( ifstmtWalk != NULL ) {
           evaluate_condition(ifstmtWalk->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
           if ( *ax ) {
+            *depth = *depth + 1;
             interpret_statements_(ifstmtWalk->body,
               PROVIDE_CONTEXT(), args, argVals);
+            *depth = *depth - 1;
             stop = 1;
             break;
           }
@@ -2068,7 +2119,9 @@ void interpret_statements_(
           // Print the else if it is not NULL
           if ( ifstmt->endif != NULL ) {
             ifstmtWalk = ifstmt->endif;
+            *depth = *depth + 1;
             interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args, argVals);
+            *depth = *depth - 1;
           }
         }
 
@@ -2189,7 +2242,7 @@ void print_expr(expr_t *expr)
       printf("> args(");
       argsList_t *args = funcCall->args;
       print_args(args);
-      printf(")\n");
+      printf(")");
     }
     break;
     case EXPR_TYPE_VECTOR:
@@ -2402,6 +2455,8 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
     case LANG_ENTITY_SYSTEM:
+    case LANG_ENTITY_EXPR:
+    case LANG_ENTITY_RETURN:
       printf("[0x%lx] ", (uintptr_t)stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
@@ -2417,6 +2472,7 @@ void print_statements_(void *stmt, int indent)
   switch ( eval->entity ) {
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
+    case LANG_ENTITY_EXPR:
     {
       printf("Expr(");
       print_expr(((statement_t*)stmt)->content);
@@ -2467,6 +2523,14 @@ void print_statements_(void *stmt, int indent)
       printf("=== BREAK ===\n");
     }
     break;
+    case LANG_ENTITY_RETURN:
+    {
+      expr_t *retVal = (expr_t*)((statement_t*)stmt)->content;
+      printf("RETURN ->");
+      print_expr(retVal);
+      printf("\n");
+    }
+    break;
     case LANG_ENTITY_FUNCDECL:
     {
       functionDef_t *funcDef = ((statement_t*)stmt)->content;
@@ -2475,17 +2539,6 @@ void print_statements_(void *stmt, int indent)
       print_args(params);
       printf(")\n");
       print_statements_(funcDef->body,indent+1);
-    }
-    break;
-    case LANG_ENTITY_FUNCCALL:
-    {
-      functionCall_t *funcCall = ((statement_t*)stmt)->content;
-      printf("Function call: <");
-      print_expr(funcCall->id);
-      printf("> args(");
-      argsList_t *args = funcCall->args;
-      print_args(args);
-      printf(")\n");
     }
     break;
     case LANG_ENTITY_CONDITIONAL:
@@ -2567,6 +2620,9 @@ void interpret_statements(
   st = stmt;
   ed = NULL;
 
+  /* Set starting depth */
+  depth = 0;
+
   if ( setjmp(endingJmpBuf) == JMP_CODE_INITIAL ) {
     /* Start descending and evaluating the AST */
     interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
@@ -2616,6 +2672,9 @@ void interpret_statements_interactive(
     st = stmt;
     ed = NULL;
 
+    /* Set starting depth */
+    depth = 0;
+
     /* Flag that setup has been done already */
     firstCall = 0;
   }
@@ -2623,21 +2682,25 @@ void interpret_statements_interactive(
   if ( stmt != NULL ) {
 
     /* Check if load */
-    if ( stmt->entity == LANG_ENTITY_FUNCCALL ) {
+    if ( stmt->entity == LANG_ENTITY_EXPR ) {
       stackval_t stv;
       libFunction_t *libFunc;
 
-      functionCall_t *call = (functionCall_t*)stmt->content;
-      evaluate_expression(call->id, NULL, NULL, PROVIDE_CONTEXT_INIT(), NULL, NULL);
+      expr_t *e = (expr_t*)stmt->content;
 
-      POP_VAL(&stv, &sp, &sc);
-      if ( stv.type == LIBFUNCPTRTYPE ) {
-        libFunc = stv.libfunc;
+      if ( e->type == EXPR_TYPE_FUNCCALL ) {
+        functionCall_t *call = e->func;
+        evaluate_expression(call->id, NULL, NULL, PROVIDE_CONTEXT_INIT(), NULL, NULL);
 
-        /* Check if this is a load call */
-        if ( strcmp(libFunc->libFuncName, "load") == 0 ) {
-          printf("Sorry, load in interactive mode is not implemented yet\n");
-          return;
+        POP_VAL(&stv, &sp, &sc);
+        if ( stv.type == LIBFUNCPTRTYPE ) {
+          libFunc = stv.libfunc;
+
+          /* Check if this is a load call */
+          if ( strcmp(libFunc->libFuncName, "load") == 0 ) {
+            printf("Sorry, load in interactive mode is not implemented yet\n");
+            return;
+          }
         }
       }
 

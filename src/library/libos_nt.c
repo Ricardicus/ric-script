@@ -151,3 +151,38 @@ int ric_cd(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_is_file(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  FILE *fp;
+  char *filename = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    filename = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  fp = fopen(filename, "r+");
+
+  if ( fp != NULL ) {
+    // There is such a file
+    fclose(fp);
+    // Pushing the result 1
+    PUSH_INT(1, sp, sc);
+  } else {
+    // There is no such file, pushing the result 0
+    PUSH_INT(0, sp, sc);
+  }
+
+  return 0;
+}
+

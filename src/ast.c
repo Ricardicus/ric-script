@@ -259,6 +259,7 @@ statement_t *newStatement(int type, void *content) {
   case LANG_ENTITY_FIN:
   case LANG_ENTITY_SYSTEM:
   case LANG_ENTITY_RETURN:
+  case LANG_ENTITY_EXPR:
     stmt->content = content;
     break;
   default:
@@ -384,14 +385,18 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
   return func;
 }
 
-functionCall_t *newFunCall(expr_t *id, void *args) {
+expr_t *newFunCall(expr_t *id, void *args) {
+  expr_t *e = ast_emalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
 
   func->entity = LANG_ENTITY_FUNCCALL;
   func->args = args;
   func->id = id;
 
-  return func;
+  e->type = EXPR_TYPE_FUNCCALL;
+  e->func = func;
+
+  return e;
 }
 
 ifStmt_t *newIfStatement(int ifType, ifCondition_t *cond, void *body) {

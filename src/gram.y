@@ -66,12 +66,13 @@ statement_t *root = NULL;
 %type<data> statements
 %type<data> statement
 %type<data> program
+%type<data> expressions
+%type<data> expression
 %type<data> arguments_list
 %type<data> parameters_list
 %type<data> body
 %type<data> function
 %type<data> functionCall
-%type<data> mathContents
 %type<data> mathContent
 %type<data> vector
 %type<data> ifStatement
@@ -123,8 +124,8 @@ statement:
     | function {
         $$ = newStatement(LANG_ENTITY_FUNCDECL, $1);
     }
-    | functionCall {
-        $$ = newStatement(LANG_ENTITY_FUNCCALL, $1);
+    | expressions {
+        $$ = newStatement(LANG_ENTITY_EXPR, $1);
     }
     | ifStatement {
         $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
@@ -132,12 +133,6 @@ statement:
     | loopStatement {
         $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
     }
-    | mathContents {
-        $$ = newStatement(LANG_ENTITY_EMPTY_MATH, $1);
-    }
-    | stringContents {
-        $$ = newStatement(LANG_ENTITY_EMPTY_STR, $1);
-    } 
     | continueStatement {
         $$ = newStatement(LANG_ENTITY_CONTINUE, $1);
     }
@@ -157,12 +152,8 @@ systemStatement: '$' ID {
     $$ = $2;
 };
 
-returnStatement: RETURN mathContents {
+returnStatement: RETURN expressions {
     $$ = $2;
-} | RETURN stringContents {
-    $$ = $2;
-} | RETURN ID {
-    $$ = newExpr_ID($2);
 };
 
 continueStatement: '@' {
@@ -172,6 +163,67 @@ continueStatement: '@' {
 breakStatement: '!' '@' {
     $$ = NULL;
 };
+
+expressions: 
+    expression {
+      $$ = $1;
+    }
+    | expressions '+' expression {
+      expr_t *e1 = (expr_t*)$1;
+      expr_t *e2 = (expr_t*)$3;
+
+      $$ = newExpr_OPAdd(e1,e2);
+    }
+    | expressions '*' expression {
+      expr_t *e1 = (expr_t*)$1;
+      expr_t *e2 = (expr_t*)$3;
+
+      $$ = newExpr_OPMul(e1,e2);
+    }
+    | expressions '-' expression {
+      expr_t *e1 = (expr_t*)$1;
+      expr_t *e2 = (expr_t*)$3;
+
+      $$ = newExpr_OPSub(e1,e2);
+    }
+    | expressions '%' expression {
+      expr_t *e1 = (expr_t*)$1;
+      expr_t *e2 = (expr_t*)$3;
+
+      $$ = newExpr_OPMod(e1,e2);
+    }
+    | expressions '/' expression {
+      expr_t *e1 = (expr_t*)$1;
+      expr_t *e2 = (expr_t*)$3;
+
+      $$ = newExpr_OPDiv(e1,e2);
+    };
+
+expression:
+    indexedVector {
+      $$ = $1;
+    }
+    | mathContent {
+      $$ = $1;
+    }
+    | functionCall {
+      $$ = $1;
+    }
+    | stringContent {
+      $$ = $1;
+    }
+    | ID {
+      $$ = newExpr_ID($1);
+    }
+    | condition {
+      expr_t *e = ast_emalloc(sizeof(expr_t));
+      e->type = EXPR_TYPE_COND;
+      e->cond = $1;
+      $$ = e;
+    }
+    | '(' expressions ')' {
+      $$ = $2;
+    };
 
 ifStatement:
     '[' condition ']' body {
@@ -199,13 +251,13 @@ ifStatement:
         
         $$ = ifs;
     } 
-    | '[' mathContents ']' body {
+    | '[' expressions ']' body {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
 
         $$ = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
     }
-    | '[' mathContents ']' body middleIfs {
+    | '[' expressions ']' body middleIfs {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
 
@@ -215,7 +267,7 @@ ifStatement:
         
         $$ = ifs;
     }
-    | '[' mathContents ']' body middleIfs endIf {
+    | '[' expressions ']' body middleIfs endIf {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
 
@@ -226,7 +278,7 @@ ifStatement:
         
         $$ = ifs;
     }
-    | '[' mathContents ']' body endIf {
+    | '[' expressions ']' body endIf {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
 
@@ -263,13 +315,13 @@ loopStatement:
         
         $$ = ifs;
     } 
-    | '.' '[' mathContents ']' body {
+    | '.' '[' expressions ']' body {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
 
         $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
     }
-    | '.' '[' mathContents ']' body middleIfs {
+    | '.' '[' expressions ']' body middleIfs {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
 
@@ -279,7 +331,7 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' mathContents ']' body middleIfs endIf {
+    | '.' '[' expressions ']' body middleIfs endIf {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
 
@@ -290,7 +342,7 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' mathContents ']' body endIf {
+    | '.' '[' expressions ']' body endIf {
         expr_t *expr = newExpr_Ival(0);
         ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
 
@@ -327,25 +379,22 @@ endIf:
     };
 
 condition:
-    mathContents '=' '=' mathContents {
+    expression '=' '=' expression {
         $$ = newConditional(CONDITION_EQ, $1, $4);
     }
-    | stringContents '=' '=' stringContents {
-        $$ = newConditional(CONDITION_EQ, $1, $4);
-    }
-    | mathContents '!' '=' mathContents {
+    | expression '!' '=' expression {
         $$ = newConditional(CONDITION_NEQ, $1, $4);
     }
-    | mathContents '<' '=' mathContents {
+    | expression '<' '=' expression {
         $$ = newConditional(CONDITION_LEQ, $1, $4);
     }
-    | mathContents '>' '=' mathContents {
+    | expression '>' '=' expression {
         $$ = newConditional(CONDITION_GEQ, $1, $4);
     }
-    | mathContents '<' mathContents {
+    | expression '<' expression {
         $$ = newConditional(CONDITION_LE, $1, $3);
     }
-    | mathContents '>' mathContents {
+    | expression '>' expression {
         $$ = newConditional(CONDITION_GE, $1, $3);
     };
 
@@ -376,12 +425,7 @@ functionCall:
     };
 
 declaration: 
-    ID '=' stringContents {
-        expr_t *idexpr = newExpr_ID($1);
-
-        $$ = newDeclaration(idexpr,$3);
-    }
-    | ID '=' mathContents {
+    ID '=' expressions {
         expr_t *idexpr = newExpr_ID($1);
 
         $$ = newDeclaration(idexpr,$3);
@@ -391,22 +435,11 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | ID '=' condition {
-        expr_t *idexpr = newExpr_ID($1);
-        expr_t *condexpr = newExpr_Cond($3);
-        $$ = newDeclaration(idexpr,condexpr);
-    }
     | ID '=' vector {
         expr_t *idexpr = newExpr_ID($1);
         $$ = newDeclaration(idexpr,$3);
     }
-    | indexedVector '=' stringContents {
-        $$ = newDeclaration($1,$3);
-    }
-    | indexedVector '=' mathContents {
-        $$ = newDeclaration($1,$3);
-    }
-    | indexedVector '=' condition {
+    | indexedVector '=' expressions {
         $$ = newDeclaration($1,$3);
     }
     | indexedVector '=' dictionary {
@@ -437,7 +470,7 @@ dictionary_keys_vals:
     }
 
 dictionary_key_val:
-    stringContents ':' mathContents {
+    stringContents ':' expressions {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
       keyVal->entity = EXPR_TYPE_DICT;
@@ -483,18 +516,11 @@ vector:
     };
 
 arguments_list:
-    arguments_list ',' mathContents {
+    arguments_list ',' expressions {
         expr_t *expr = $3;
         $$ = newArgument(expr, $1);
     }
-    | mathContents {
-        $$ = newArgument($1, NULL);
-    }
-    | arguments_list ',' stringContents {
-        expr_t *expr = $3;
-        $$ = newArgument(expr, $1);
-    }
-    | stringContents {
+    | expressions {
         $$ = newArgument($1, NULL);
     };
 
@@ -509,58 +535,20 @@ parameters_list:
         $$ = newArgument(expr, NULL);
     };
 
-mathContents:
-    mathContents '+' mathContent {
-        $$ = newExpr_OPAdd($1,$3);
-    }
-    | mathContents '-' mathContent {
-        $$ = newExpr_OPSub($1,$3);
-    }
-    | mathContents '*' mathContent {
-        $$ = newExpr_OPMul($1,$3);
-    }
-    | mathContents '%' mathContent {
-        $$ = newExpr_OPMod($1,$3);
-    }
-    | mathContents '/' mathContent {
-        $$ = newExpr_OPDiv($1,$3);
-    }
-    | mathContent {
-        $$ = $1;
-    };
-
 mathContent:
-    ID {
-        $$ = newExpr_ID($1);
-    }
-    | mathContentDouble {
+    mathContentDouble {
         $$ = $1;
     }
     | '-' mathContentDouble {
-        expr_t *e = (expr_t*) $2;
-        double val = e->fval * -1.0;
-        $$ = newExpr_Float(val);
+        expr_t *neg = newExpr_Ival(-1);
+        $$ = newExpr_OPMul(neg, $2);
     }
     | mathContentDigit {
         $$ = $1;
     }
     | '-' mathContentDigit {
-        expr_t *e = (expr_t*) $2;
-        int val = e->ival * -1;
-        $$ = newExpr_Ival(val);
-        free($2);
-    }
-    | indexedVector {
-        $$ = $1;
-    }
-    | '(' mathContents ')' {
-        $$ = $2;
-    }
-    | functionCall {
-        $$ = newExpr_FuncCall($1);
-    }
-    | '(' condition ')' {
-        $$ = newExpr_Cond($2);
+        expr_t *neg = newExpr_Ival(-1);
+        $$ = newExpr_OPMul(neg, $2);
     };
 
 indexedVector:
@@ -655,9 +643,6 @@ stringContent:
     }
     | '"' stringEditions '"' {
         $$ = $2;
-    }
-    | functionCall {
-        $$ = newExpr_FuncCall($1);
     }
     | '"' '"' {
         /* Empty text */

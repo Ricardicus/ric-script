@@ -35,5 +35,5 @@ def test_vector_print():
   assert len(output_lines) == len(ric_result)
 
   for i in range(0,len(ric_result)):
-    assert output_lines[i] == ric_result[i]
+    assert output_lines[i] == ric_result[i], "Error at line " + str(i)
 

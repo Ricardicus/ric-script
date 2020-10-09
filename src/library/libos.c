@@ -144,3 +144,36 @@ int ric_cd(LIBRARY_PARAMS())
 }
 
 
+int ric_is_file(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  char *filename = NULL;
+  struct stat path_stat;
+  int result;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    filename = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  stat(filename, &path_stat);
+  if ( S_ISDIR(path_stat.st_mode) ) {
+    result = 0;
+  } else {
+    result = 1;
+  }
+
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+

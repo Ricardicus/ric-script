@@ -102,7 +102,7 @@ well as haven't implemented:
 - [ ] Better interactive mode, like the one Python has
 - [ ] Socket interface
 - [ ] Threading interface
-- [ ] Bigger standard library, more battery power (for reference, see: **src/library**)
+- [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
 
 # Snapshot of the language syntax

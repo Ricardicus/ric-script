@@ -1974,11 +1974,29 @@ void interpret_statements_(
     break;
     case LANG_ENTITY_FUNCCALL:
     {
+      stackval_t sv;
+      size_t stackCount = *sc;
       functionCall_t *funcCall = ((statement_t*)stmt)->content;
       call_func(
         funcCall,
         EXPRESSION_ARGS()
       );
+
+      /* Printing result of function call, if string or vector */
+      while ( *sc > stackCount ) {
+        POP_VAL(&sv, sp, sc);
+        switch (sv.type) {
+          case TEXT:
+          printf("%s\n", sv.t);
+          break;
+          case VECTORTYPE:
+          print_vector(sv.vec, EXPRESSION_ARGS());
+          printf("\n");
+          break;
+          default:
+          break;
+        }
+      }
     }
     break;
     case LANG_ENTITY_CONDITIONAL:

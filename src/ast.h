@@ -212,7 +212,7 @@ typedef struct ifStmt {
 	void *elif;
 	void *endif;
 	body_t *body;
-	ifCondition_t *cond;
+	expr_t *cond;
 } ifStmt_t;
 
 typedef struct entity_eval {
@@ -241,11 +241,11 @@ expr_t* newExpr_Vector(argsList_t *args);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
 
-ifCondition_t*  newConditional(int type, expr_t *left, expr_t *right);
+expr_t*         newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(expr_t *id, expr_t *exp);
 statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(expr_t *exp, void *next);
-ifStmt_t*       newIfStatement(int ifType, ifCondition_t *cond, void *body);
+ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
 body_t*         newBody(void *body);

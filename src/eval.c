@@ -2090,8 +2090,20 @@ void interpret_statements_(
         }
       }
 
+      evaluate_expression(ifstmt->cond, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      switch ( sv.type ) {
+        case INT32TYPE:
+        *ax = (sv.i != 0);
+        break;
+        default:
+        fprintf(stderr, "Invalid conditional expression.\n");
+        exit(1);
+        break;
+      }
+
       /* Read ax for conditional */
-      evaluate_condition(ifstmt->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
       if ( *ax ) {
         *depth = *depth + 1;
         interpret_statements_(ifstmt->body,
@@ -2103,7 +2115,20 @@ void interpret_statements_(
         ifstmtWalk = ifstmt->elif;
 
         while ( ifstmtWalk != NULL ) {
-          evaluate_condition(ifstmtWalk->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+
+          evaluate_expression(ifstmtWalk->cond, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          switch ( sv.type ) {
+            case INT32TYPE:
+            *ax = (sv.i != 0);
+            break;
+            default:
+            fprintf(stderr, "Invalid conditional expression.\n");
+            exit(1);
+            break;
+          }
+
           if ( *ax ) {
             *depth = *depth + 1;
             interpret_statements_(ifstmtWalk->body,
@@ -2545,7 +2570,7 @@ void print_statements_(void *stmt, int indent)
     {
       ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
       ifStmt_t *ifstmtWalk;
-      ifCondition_t *cond = ifstmt->cond;
+      expr_t *cond = ifstmt->cond;
 
       if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
         printf("loop-if-statement - condition: ");
@@ -2553,7 +2578,7 @@ void print_statements_(void *stmt, int indent)
         printf("if-statement - condition: ");
       }
 
-      print_condition(cond);
+      print_expr(cond);
       printf("\n");
       print_statements_(ifstmt->body, indent);
 
@@ -2563,7 +2588,7 @@ void print_statements_(void *stmt, int indent)
       while ( ifstmtWalk != NULL ) {
         print_indents(indent);
         printf("else-if-statement - condition: ");
-        print_condition(ifstmtWalk->cond);
+        print_expr(ifstmtWalk->cond);
         printf("\n");
         print_statements_(ifstmtWalk->body, indent+1);
         ifstmtWalk = ifstmtWalk->elif;

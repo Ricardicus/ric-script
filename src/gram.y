@@ -85,6 +85,7 @@ statement_t *root = NULL;
 %type<data> middleIf
 %type<data> endIf
 %type<data> condition
+%type<data> oneorzero
 
 %right'=' 
 %left '+' '-'
@@ -168,31 +169,31 @@ expressions:
     expression {
       $$ = $1;
     }
-    | expressions '+' expression {
+    | expressions '+' expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPAdd(e1,e2);
     }
-    | expressions '*' expression {
+    | expressions '*' expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPMul(e1,e2);
     }
-    | expressions '-' expression {
+    | expressions '-' expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPSub(e1,e2);
     }
-    | expressions '%' expression {
+    | expressions '%' expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPMod(e1,e2);
     }
-    | expressions '/' expression {
+    | expressions '/' expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$3;
 
@@ -215,28 +216,22 @@ expression:
     | ID {
       $$ = newExpr_ID($1);
     }
-    | condition {
-      expr_t *e = ast_emalloc(sizeof(expr_t));
-      e->type = EXPR_TYPE_COND;
-      e->cond = $1;
-      $$ = e;
-    }
     | '(' expressions ')' {
       $$ = $2;
     };
 
 ifStatement:
-    '[' condition ']' body {
+    '[' oneorzero ']' body {
         $$ = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
     }
-    | '[' condition ']' body middleIfs {
+    | '[' oneorzero ']' body middleIfs {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
 
         ifs->elif = $5;
         
         $$ = ifs;
     }
-    | '[' condition ']' body middleIfs endIf {
+    | '[' oneorzero ']' body middleIfs endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
 
         ifs->elif = $5;
@@ -244,45 +239,8 @@ ifStatement:
         
         $$ = ifs;
     }
-    | '[' condition ']' body endIf {
+    | '[' oneorzero ']' body endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
-
-        ifs->endif = $5;
-        
-        $$ = ifs;
-    } 
-    | '[' expressions ']' body {
-        expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
-
-        $$ = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
-    }
-    | '[' expressions ']' body middleIfs {
-        expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
-
-        ifs->elif = $5;
-        
-        $$ = ifs;
-    }
-    | '[' expressions ']' body middleIfs endIf {
-        expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
-
-        ifs->elif = $5;
-        ifs->endif = $6;
-        
-        $$ = ifs;
-    }
-    | '[' expressions ']' body endIf {
-        expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $2, expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, cond, $4);
 
         ifs->endif = $5;
         
@@ -290,40 +248,15 @@ ifStatement:
     };
 
 loopStatement:
-    '.' '[' condition ']' body {
-        $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
-    }
-    | '.' '[' condition ']' body middleIfs {
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
-
-        ifs->elif = $6;
-        
-        $$ = ifs;
-    }
-    | '.' '[' condition ']' body middleIfs endIf {
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
-
-        ifs->elif = $6;
-        ifs->endif = $7;
-        
-        $$ = ifs;
-    }
-    | '.' '[' condition ']' body endIf {
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
-
-        ifs->endif = $6;
-        
-        $$ = ifs;
-    } 
-    | '.' '[' expressions ']' body {
+    '.' '[' oneorzero ']' body {
         expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
         $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
     }
-    | '.' '[' expressions ']' body middleIfs {
+    | '.' '[' oneorzero ']' body middleIfs {
         expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
 
@@ -331,9 +264,9 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' expressions ']' body middleIfs endIf {
+    | '.' '[' oneorzero ']' body middleIfs endIf {
         expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
 
@@ -342,14 +275,14 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' expressions ']' body endIf {
+    | '.' '[' oneorzero ']' body endIf {
         expr_t *expr = newExpr_Ival(0);
-        ifCondition_t *cond = newConditional(CONDITION_GE, $3, expr);
+        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
 
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
 
         ifs->endif = $6;
-        
+
         $$ = ifs;
     };
 
@@ -366,7 +299,7 @@ middleIfs:
     };
 
 middleIf:
-    '~' '[' condition ']' body {
+    '~' '[' oneorzero ']' body {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELIF, $3, $5);
        
         $$ = ifs;
@@ -378,24 +311,41 @@ endIf:
         $$ = ifs;
     };
 
+oneorzero:
+    condition {
+        $$ = $1;
+    }
+    | ID {
+        $$ = newExpr_ID($1);
+    }
+    | DIGIT {
+        $$ = newExpr_Ival($1);
+    }
+    | functionCall {
+        $$ = $1;
+    };
+
 condition:
-    expression '=' '=' expression {
+    expressions '=' '=' expressions {
         $$ = newConditional(CONDITION_EQ, $1, $4);
     }
-    | expression '!' '=' expression {
+    | expressions '!' '=' expressions {
         $$ = newConditional(CONDITION_NEQ, $1, $4);
     }
-    | expression '<' '=' expression {
+    | expressions '<' '=' expressions {
         $$ = newConditional(CONDITION_LEQ, $1, $4);
     }
-    | expression '>' '=' expression {
+    | expressions '>' '=' expressions {
         $$ = newConditional(CONDITION_GEQ, $1, $4);
     }
-    | expression '<' expression {
+    | expressions '<' expressions {
         $$ = newConditional(CONDITION_LE, $1, $3);
     }
-    | expression '>' expression {
+    | expressions '>' expressions {
         $$ = newConditional(CONDITION_GE, $1, $3);
+    }
+    | '(' condition ')' {
+        $$ = $2;
     };
 
 function:
@@ -435,6 +385,11 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
+    | ID '=' condition {
+        expr_t *idexpr = newExpr_ID($1);
+
+        $$ = newDeclaration(idexpr,$3);
+    }
     | ID '=' vector {
         expr_t *idexpr = newExpr_ID($1);
         $$ = newDeclaration(idexpr,$3);
@@ -446,6 +401,9 @@ declaration:
         $$ = newDeclaration($1,$3);
     }
     | indexedVector '=' vector {
+        $$ = newDeclaration($1,$3);
+    }
+    | indexedVector '=' condition {
         $$ = newDeclaration($1,$3);
     };
 

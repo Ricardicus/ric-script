@@ -222,14 +222,18 @@ expr_t *newExpr_VectorIndex(expr_t *id, expr_t *index) {
   return expr;
 }
 
-ifCondition_t *newConditional(int type, expr_t *left, expr_t *right) {
+expr_t *newConditional(int type, expr_t *left, expr_t *right) {
+  expr_t *e = ast_emalloc(sizeof(expr_t));
   ifCondition_t *cond = ast_emalloc(sizeof(ifCondition_t));
 
   cond->type = type;
   cond->left = left;
   cond->right = right;
 
-  return cond;
+  e->type = EXPR_TYPE_COND;
+  e->cond = cond;
+
+  return e;
 }
 
 declaration_t *newDeclaration(expr_t *id, expr_t *expr) {
@@ -399,7 +403,7 @@ expr_t *newFunCall(expr_t *id, void *args) {
   return e;
 }
 
-ifStmt_t *newIfStatement(int ifType, ifCondition_t *cond, void *body) {
+ifStmt_t *newIfStatement(int ifType, void *cond, void *body) {
   ifStmt_t *ifstmt = ast_emalloc(sizeof(ifStmt_t));
 
   ifstmt->ifType = ifType;
@@ -609,11 +613,6 @@ void free_expression_not_raw(expr_t *expr) {
   }
 }
 
-static void free_cond(ifCondition_t *cond) {
-  free_expression(cond->left);
-  free_expression(cond->right);
-}
-
 void free_ast(statement_t *stmt) {
   entity_eval_t *eval = (entity_eval_t *)stmt;
   void *next = NULL;
@@ -675,16 +674,16 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CONDITIONAL: {
     ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
     ifStmt_t *ifstmtWalk;
-    ifCondition_t *cond = ifstmt->cond;
+    expr_t *cond = ifstmt->cond;
 
-    free_cond(cond);
+    free_expression(cond);
     free_ast(ifstmt->body->content);
 
     // Walk through the elifs.
     ifstmtWalk = ifstmt->elif;
 
     while (ifstmtWalk != NULL) {
-      free_cond(ifstmtWalk->cond);
+      free_expression(ifstmtWalk->cond);
       free_ast(ifstmtWalk->body->content);
       ifstmtWalk = ifstmtWalk->elif;
     }

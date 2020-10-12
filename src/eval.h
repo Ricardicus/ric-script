@@ -14,6 +14,8 @@
 
 #define MAX_NBR_ARGUMENTS    10
 
+#define MAX_NBR_LOCALS       1000
+
 int evaluate_condition(ifCondition_t *cond,
   void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
@@ -80,6 +82,21 @@ typedef struct ctx_table_t {
   argsList_t *args;
   hashtable_t *argVals;
 } ctx_table_t;
+
+typedef struct local {
+  char *id;
+  heapval_t *hpv;
+} local_t;
+
+typedef struct locals_stack {
+  local_t stack[MAX_NBR_LOCALS];
+  hashtable_t *localDecs;
+  int sp;
+  int sb;
+} locals_stack_t;
+
+heapval_t *locals_lookup(locals_stack_t *stack, char *id);
+void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv);
 
 #endif
 

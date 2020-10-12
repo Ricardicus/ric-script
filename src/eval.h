@@ -81,6 +81,7 @@ typedef struct ctx_table_t {
   void *stmt;
   argsList_t *args;
   hashtable_t *argVals;
+  int depth;
 } ctx_table_t;
 
 typedef struct local {

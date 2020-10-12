@@ -1712,6 +1712,12 @@ void interpret_statements_(
         stmt = continueCtx.stmt;
         args = continueCtx.args;
         argVals = continueCtx.argVals;
+        *depth = continueCtx.depth;
+        if ( *depth == 0 ) {
+          // Set locals stack to zero
+          varLocals->sp = 0;
+          varLocals->sb = 0;
+        }
       }
       break;
       case JMP_CODE_INITIAL:
@@ -1822,7 +1828,6 @@ void interpret_statements_(
           hashtable_put(varDecs, idStr, hvp);
         } else {
           /* Placing variable declaration in local variable namespace */
-          printf("Pusing %s to locals\n", idStr);
           locals_push(varLocals, idStr, hvp);
         }
       }
@@ -2107,6 +2112,8 @@ void interpret_statements_(
           PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
           (*(uintptr_t*)ed) = (uintptr_t) next;
         }
+        /* Set the continue context depth */
+        continueCtx.depth = *depth;
       }
 
       evaluate_expression(ifstmt->cond, EXPRESSION_ARGS());
@@ -2200,12 +2207,12 @@ heapval_t *locals_lookup(locals_stack_t *stack, char *id) {
     local_t local = stack->stack[i];
     if ( strcmp(id, local.id) == 0 ) {
       /* Found it */
-      printf("Successfulyy looked up %s among locals\n", id);
+      //printf("Successfully looked up '%s' among locals\n", id);
       return local.hpv;
     }
     ++i;
   }
-  printf("Failed to find %s among locals\n", id);
+  //printf("Failed to find %s among locals\n", id);
   return NULL;
 }
 
@@ -2216,6 +2223,19 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
       MAX_NBR_LOCALS);
     exit(1);
   }
+  int i = stack->sb;
+  while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
+    local_t local = stack->stack[i];
+    if ( strcmp(id, local.id) == 0 ) {
+      /* Overloading this value */
+      //printf("Overloading %s in locals\n", id);
+      stack->stack[i].hpv = hpv;
+      return;
+    }
+    ++i;
+  }
+  /* Pushing new value */
+  //printf("Pusing %s to locals\n", id);
   stack->stack[stack->sp].hpv = hpv; 
   stack->stack[stack->sp].id = id;
   stack->sp++;

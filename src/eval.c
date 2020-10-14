@@ -1,4 +1,5 @@
 #include "eval.h"
+#include <stdarg.h>
 
 /* Namespace global */
 hashtable_t *funcDecs = NULL;
@@ -11,6 +12,17 @@ jmp_buf endingJmpBuf;
 jmp_buf continueJmpBuf;
 
 ctx_table_t continueCtx;
+
+#if 0
+static void debugPrint(char *format, ...) {
+  char buffer[100];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+  printf("-- DEBUG: %s", buffer);
+}
+#endif
 
 int evaluate_condition(ifCondition_t *cond,
   EXPRESSION_PARAMS())
@@ -439,12 +451,12 @@ Please report back to me.\n\
       if ( walk == NULL ) {
         functionDef_t *funcDef; // if it is a function pointer
 
-        /* Check among the locals if we have it defined there */
-        hv = locals_lookup(varLocals, expr->id.id);
+        /* Check among the global variables if we have it defined there */
+        hv = hashtable_get(varDecs, expr->id.id);
 
         if ( hv == NULL ) {
-          /* Check among the global variables if we have it defined there */
-          hv = hashtable_get(varDecs, expr->id.id);
+          /* Check among the locals if we have it defined there */
+          hv = locals_lookup(varLocals, expr->id.id);
         }
 
         if ( hv != NULL ) {
@@ -1712,12 +1724,6 @@ void interpret_statements_(
         stmt = continueCtx.stmt;
         args = continueCtx.args;
         argVals = continueCtx.argVals;
-        *depth = continueCtx.depth;
-        if ( *depth == 0 ) {
-          // Set locals stack to zero
-          varLocals->sp = 0;
-          varLocals->sb = 0;
-        }
       }
       break;
       case JMP_CODE_INITIAL:
@@ -1797,6 +1803,7 @@ void interpret_statements_(
       switch ( id->type ) {
       case EXPR_TYPE_ID: {
         int heapUpdated;
+        heapval_t *globalCheck = NULL;
         char *idStr = id->id.id;
 
         /* Evaluating the expression among global variables */
@@ -1822,8 +1829,10 @@ void interpret_statements_(
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        //printf("%s assign at depth %zu\n", idStr, *depth);
-        if ( *depth == 0 ) {
+        /* Check if the variable is in the global namespace */
+        globalCheck = hashtable_get(varDecs, idStr);
+
+        if ( globalCheck != NULL || *depth == 0 ) {
           /* Placing variable declaration in global variable namespace */
           hashtable_put(varDecs, idStr, hvp);
         } else {
@@ -1950,7 +1959,6 @@ void interpret_statements_(
       }
 
       // Mark and sweep the heap
-      (void)set_mark_value();
       mark_and_sweep(varDecs, varLocals, EXPRESSION_ARGS());
     }
     break;
@@ -2018,6 +2026,12 @@ void interpret_statements_(
       continueCtx.stmt = *st;
       continueCtx.args = args;
       continueCtx.argVals = argVals;
+      *depth = continueCtx.depth;
+      if ( *depth == 0 ) {
+        // Set locals stack to zero
+        varLocals->sp = 0;
+        varLocals->sb = 0;
+      }
       longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
     }
     break;
@@ -2027,6 +2041,12 @@ void interpret_statements_(
       continueCtx.stmt = *ed;
       continueCtx.args = args;
       continueCtx.argVals = argVals;
+      *depth = continueCtx.depth;
+      if ( *depth == 0 ) {
+        // Set locals stack to zero
+        varLocals->sp = 0;
+        varLocals->sb = 0;
+      }
       longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
     }
     break;
@@ -2132,10 +2152,10 @@ void interpret_statements_(
       /* Read ax for conditional */
       if ( *ax ) {
         int localsStack = varLocals->sp;
-        ++depth;
+        *depth = *depth + 1;
         interpret_statements_(ifstmt->body,
           PROVIDE_CONTEXT(), args, argVals);
-        --depth;
+        *depth = *depth - 1;
         varLocals->sp = localsStack;
       } else {
         // Walk through the elifs.
@@ -2207,12 +2227,11 @@ heapval_t *locals_lookup(locals_stack_t *stack, char *id) {
     local_t local = stack->stack[i];
     if ( strcmp(id, local.id) == 0 ) {
       /* Found it */
-      //printf("Successfully looked up '%s' among locals\n", id);
       return local.hpv;
     }
     ++i;
   }
-  //printf("Failed to find %s among locals\n", id);
+  /* id not among locals */
   return NULL;
 }
 
@@ -2228,15 +2247,13 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
     local_t local = stack->stack[i];
     if ( strcmp(id, local.id) == 0 ) {
       /* Overloading this value */
-      //printf("Overloading %s in locals\n", id);
       stack->stack[i].hpv = hpv;
       return;
     }
     ++i;
   }
   /* Pushing new value */
-  //printf("Pusing %s to locals\n", id);
-  stack->stack[stack->sp].hpv = hpv; 
+  stack->stack[stack->sp].hpv = hpv;
   stack->stack[stack->sp].id = id;
   stack->sp++;
 }

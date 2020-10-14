@@ -492,16 +492,16 @@ static const yytype_uint16 yyrline[] =
        0,    96,    96,   113,   118,   122,   125,   128,   131,   134,
      137,   140,   143,   146,   150,   152,   156,   160,   164,   169,
      172,   178,   184,   190,   196,   204,   207,   210,   213,   216,
-     219,   224,   227,   234,   242,   251,   257,   267,   278,   290,
-     297,   302,   309,   315,   318,   321,   324,   329,   332,   335,
-     338,   341,   344,   347,   352,   355,   360,   364,   368,   372,
-     378,   383,   388,   393,   397,   400,   403,   406,   411,   416,
-     423,   426,   431,   441,   451,   463,   468,   472,   477,   481,
-     486,   491,   497,   500,   504,   507,   513,   519,   524,   528,
-     531,   535,   540,   545,   550,   556,   562,   572,   582,   588,
-     594,   599,   602,   605,   609,   615,   640,   645,   648,   655,
-     662,   667,   672,   677,   681,   685,   689,   693,   697,   701,
-     705,   709,   713,   717,   721,   725,   729,   733,   737,   741
+     219,   224,   227,   234,   242,   251,   254,   261,   269,   278,
+     285,   290,   297,   303,   306,   309,   312,   317,   320,   323,
+     326,   329,   332,   335,   340,   343,   348,   352,   356,   360,
+     366,   371,   376,   381,   385,   388,   391,   394,   399,   404,
+     411,   414,   419,   429,   439,   451,   456,   460,   465,   469,
+     474,   479,   485,   488,   492,   495,   501,   507,   512,   516,
+     519,   523,   528,   533,   538,   544,   550,   560,   570,   576,
+     582,   587,   590,   593,   597,   603,   628,   633,   636,   643,
+     650,   655,   660,   665,   669,   673,   677,   681,   685,   689,
+     693,   697,   701,   705,   709,   713,   717,   721,   725,   729
 };
 #endif
 
@@ -1777,62 +1777,50 @@ yyreduce:
   case 35:
 #line 251 "gram.y"
     {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, (yyvsp[-2].data), expr);
-
-        (yyval.data) = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, (yyvsp[0].data));
+        (yyval.data) = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[-2].data), (yyvsp[0].data));
     }
-#line 1786 "y.tab.c"
+#line 1783 "y.tab.c"
     break;
 
   case 36:
-#line 257 "gram.y"
+#line 254 "gram.y"
     {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, (yyvsp[-3].data), expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, (yyvsp[-1].data));
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[-3].data), (yyvsp[-1].data));
 
         ifs->elif = (yyvsp[0].data);
         
         (yyval.data) = ifs;
     }
-#line 1801 "y.tab.c"
+#line 1795 "y.tab.c"
     break;
 
   case 37:
-#line 267 "gram.y"
+#line 261 "gram.y"
     {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, (yyvsp[-4].data), expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, (yyvsp[-2].data));
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[-4].data), (yyvsp[-2].data));
 
         ifs->elif = (yyvsp[-1].data);
         ifs->endif = (yyvsp[0].data);
         
         (yyval.data) = ifs;
     }
-#line 1817 "y.tab.c"
+#line 1808 "y.tab.c"
     break;
 
   case 38:
-#line 278 "gram.y"
+#line 269 "gram.y"
     {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, (yyvsp[-3].data), expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, (yyvsp[-1].data));
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[-3].data), (yyvsp[-1].data));
 
         ifs->endif = (yyvsp[0].data);
 
         (yyval.data) = ifs;
     }
-#line 1832 "y.tab.c"
+#line 1820 "y.tab.c"
     break;
 
   case 39:
-#line 290 "gram.y"
+#line 278 "gram.y"
     {
         ifStmt_t *ifs1 = (ifStmt_t *) (yyvsp[-1].data);
         ifStmt_t *ifs2 = (ifStmt_t *) (yyvsp[0].data);
@@ -1840,257 +1828,257 @@ yyreduce:
         ifs2->elif = ifs1;
         (yyval.data) = ifs2;
     }
-#line 1844 "y.tab.c"
+#line 1832 "y.tab.c"
     break;
 
   case 40:
-#line 297 "gram.y"
+#line 285 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 1852 "y.tab.c"
+#line 1840 "y.tab.c"
     break;
 
   case 41:
-#line 302 "gram.y"
+#line 290 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELIF, (yyvsp[-2].data), (yyvsp[0].data));
        
         (yyval.data) = ifs;
     }
-#line 1862 "y.tab.c"
+#line 1850 "y.tab.c"
     break;
 
   case 42:
-#line 309 "gram.y"
+#line 297 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELSE, NULL, (yyvsp[0].data));
         (yyval.data) = ifs;
     }
-#line 1871 "y.tab.c"
+#line 1859 "y.tab.c"
     break;
 
   case 43:
-#line 315 "gram.y"
+#line 303 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 1879 "y.tab.c"
+#line 1867 "y.tab.c"
     break;
 
   case 44:
-#line 318 "gram.y"
+#line 306 "gram.y"
     {
         (yyval.data) = newExpr_ID((yyvsp[0].id));
     }
-#line 1887 "y.tab.c"
+#line 1875 "y.tab.c"
     break;
 
   case 45:
-#line 321 "gram.y"
+#line 309 "gram.y"
     {
         (yyval.data) = newExpr_Ival((yyvsp[0].val_int));
     }
-#line 1895 "y.tab.c"
+#line 1883 "y.tab.c"
     break;
 
   case 46:
-#line 324 "gram.y"
+#line 312 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 1903 "y.tab.c"
+#line 1891 "y.tab.c"
     break;
 
   case 47:
-#line 329 "gram.y"
+#line 317 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_EQ, (yyvsp[-3].data), (yyvsp[0].data));
     }
-#line 1911 "y.tab.c"
+#line 1899 "y.tab.c"
     break;
 
   case 48:
-#line 332 "gram.y"
+#line 320 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_NEQ, (yyvsp[-3].data), (yyvsp[0].data));
     }
-#line 1919 "y.tab.c"
+#line 1907 "y.tab.c"
     break;
 
   case 49:
-#line 335 "gram.y"
+#line 323 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_LEQ, (yyvsp[-3].data), (yyvsp[0].data));
     }
-#line 1927 "y.tab.c"
+#line 1915 "y.tab.c"
     break;
 
   case 50:
-#line 338 "gram.y"
+#line 326 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_GEQ, (yyvsp[-3].data), (yyvsp[0].data));
     }
-#line 1935 "y.tab.c"
+#line 1923 "y.tab.c"
     break;
 
   case 51:
-#line 341 "gram.y"
+#line 329 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_LE, (yyvsp[-2].data), (yyvsp[0].data));
     }
-#line 1943 "y.tab.c"
+#line 1931 "y.tab.c"
     break;
 
   case 52:
-#line 344 "gram.y"
+#line 332 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_GE, (yyvsp[-2].data), (yyvsp[0].data));
     }
-#line 1951 "y.tab.c"
+#line 1939 "y.tab.c"
     break;
 
   case 53:
-#line 347 "gram.y"
+#line 335 "gram.y"
     {
         (yyval.data) = (yyvsp[-1].data);
     }
-#line 1959 "y.tab.c"
+#line 1947 "y.tab.c"
     break;
 
   case 54:
-#line 352 "gram.y"
+#line 340 "gram.y"
     {
         (yyval.data) = newFunc((yyvsp[-4].id),(yyvsp[-2].data),(yyvsp[0].data));
     }
-#line 1967 "y.tab.c"
+#line 1955 "y.tab.c"
     break;
 
   case 55:
-#line 355 "gram.y"
+#line 343 "gram.y"
     {
         (yyval.data) = newFunc((yyvsp[-3].id),NULL,(yyvsp[0].data));
     }
-#line 1975 "y.tab.c"
+#line 1963 "y.tab.c"
     break;
 
   case 56:
-#line 360 "gram.y"
+#line 348 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[-3].id));
         (yyval.data) = newFunCall(id,(yyvsp[-1].data));
     }
-#line 1984 "y.tab.c"
+#line 1972 "y.tab.c"
     break;
 
   case 57:
-#line 364 "gram.y"
+#line 352 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[-2].id));
         (yyval.data) = newFunCall(id,NULL);
     }
-#line 1993 "y.tab.c"
+#line 1981 "y.tab.c"
     break;
 
   case 58:
-#line 368 "gram.y"
+#line 356 "gram.y"
     {
         expr_t *id = (expr_t*)(yyvsp[-3].data);
         (yyval.data) = newFunCall(id,(yyvsp[-1].data));
     }
-#line 2002 "y.tab.c"
+#line 1990 "y.tab.c"
     break;
 
   case 59:
-#line 372 "gram.y"
+#line 360 "gram.y"
     {
         expr_t *id = (expr_t*)(yyvsp[-2].data);
         (yyval.data) = newFunCall(id,NULL);
     }
-#line 2011 "y.tab.c"
+#line 1999 "y.tab.c"
     break;
 
   case 60:
-#line 378 "gram.y"
+#line 366 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[-2].id));
 
         (yyval.data) = newDeclaration(idexpr,(yyvsp[0].data));
     }
-#line 2021 "y.tab.c"
+#line 2009 "y.tab.c"
     break;
 
   case 61:
-#line 383 "gram.y"
+#line 371 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[-2].id));
 
         (yyval.data) = newDeclaration(idexpr,(yyvsp[0].data));
     }
-#line 2031 "y.tab.c"
+#line 2019 "y.tab.c"
     break;
 
   case 62:
-#line 388 "gram.y"
+#line 376 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[-2].id));
 
         (yyval.data) = newDeclaration(idexpr,(yyvsp[0].data));
     }
-#line 2041 "y.tab.c"
+#line 2029 "y.tab.c"
     break;
 
   case 63:
-#line 393 "gram.y"
+#line 381 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[-2].id));
         (yyval.data) = newDeclaration(idexpr,(yyvsp[0].data));
     }
-#line 2050 "y.tab.c"
+#line 2038 "y.tab.c"
     break;
 
   case 64:
-#line 397 "gram.y"
+#line 385 "gram.y"
     {
         (yyval.data) = newDeclaration((yyvsp[-2].data),(yyvsp[0].data));
     }
-#line 2058 "y.tab.c"
+#line 2046 "y.tab.c"
     break;
 
   case 65:
-#line 400 "gram.y"
+#line 388 "gram.y"
     {
         (yyval.data) = newDeclaration((yyvsp[-2].data),(yyvsp[0].data));
     }
-#line 2066 "y.tab.c"
+#line 2054 "y.tab.c"
     break;
 
   case 66:
-#line 403 "gram.y"
+#line 391 "gram.y"
     {
         (yyval.data) = newDeclaration((yyvsp[-2].data),(yyvsp[0].data));
     }
-#line 2074 "y.tab.c"
+#line 2062 "y.tab.c"
     break;
 
   case 67:
-#line 406 "gram.y"
+#line 394 "gram.y"
     {
         (yyval.data) = newDeclaration((yyvsp[-2].data),(yyvsp[0].data));
     }
-#line 2082 "y.tab.c"
+#line 2070 "y.tab.c"
     break;
 
   case 68:
-#line 411 "gram.y"
+#line 399 "gram.y"
     {
       (yyval.data) = newExpr_Dictionary((yyvsp[-1].data));
     }
-#line 2090 "y.tab.c"
+#line 2078 "y.tab.c"
     break;
 
   case 69:
-#line 416 "gram.y"
+#line 404 "gram.y"
     {
       keyValList_t *left = (keyValList_t*)(yyvsp[-2].data);
       keyValList_t *right = (keyValList_t*)(yyvsp[0].data);
@@ -2098,27 +2086,27 @@ yyreduce:
       right->next = left;
       (yyval.data) = right;
     }
-#line 2102 "y.tab.c"
+#line 2090 "y.tab.c"
     break;
 
   case 70:
-#line 423 "gram.y"
+#line 411 "gram.y"
     {
       (yyval.data) = (yyvsp[0].data);
     }
-#line 2110 "y.tab.c"
+#line 2098 "y.tab.c"
     break;
 
   case 71:
-#line 426 "gram.y"
+#line 414 "gram.y"
     {
         (yyval.data) = NULL;
     }
-#line 2118 "y.tab.c"
+#line 2106 "y.tab.c"
     break;
 
   case 72:
-#line 431 "gram.y"
+#line 419 "gram.y"
     {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
@@ -2129,11 +2117,11 @@ yyreduce:
 
       (yyval.data) = keyVal;
     }
-#line 2133 "y.tab.c"
+#line 2121 "y.tab.c"
     break;
 
   case 73:
-#line 441 "gram.y"
+#line 429 "gram.y"
     {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
@@ -2144,11 +2132,11 @@ yyreduce:
 
       (yyval.data) = keyVal;
     }
-#line 2148 "y.tab.c"
+#line 2136 "y.tab.c"
     break;
 
   case 74:
-#line 451 "gram.y"
+#line 439 "gram.y"
     {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
@@ -2159,199 +2147,199 @@ yyreduce:
 
       (yyval.data) = keyVal;
     }
-#line 2163 "y.tab.c"
+#line 2151 "y.tab.c"
     break;
 
   case 75:
-#line 463 "gram.y"
+#line 451 "gram.y"
     {
         (yyval.data) = newBody((yyvsp[-1].data));
     }
-#line 2171 "y.tab.c"
+#line 2159 "y.tab.c"
     break;
 
   case 76:
-#line 468 "gram.y"
+#line 456 "gram.y"
     {
       argsList_t *args = (argsList_t*) (yyvsp[-1].data);
       (yyval.data) = newExpr_Vector(args);
     }
-#line 2180 "y.tab.c"
+#line 2168 "y.tab.c"
     break;
 
   case 77:
-#line 472 "gram.y"
+#line 460 "gram.y"
     {
       (yyval.data) = newExpr_Vector(NULL);
     }
-#line 2188 "y.tab.c"
+#line 2176 "y.tab.c"
     break;
 
   case 78:
-#line 477 "gram.y"
+#line 465 "gram.y"
     {
         expr_t *expr = (yyvsp[0].data);
         (yyval.data) = newArgument(expr, (yyvsp[-2].data));
     }
-#line 2197 "y.tab.c"
+#line 2185 "y.tab.c"
     break;
 
   case 79:
-#line 481 "gram.y"
+#line 469 "gram.y"
     {
         (yyval.data) = newArgument((yyvsp[0].data), NULL);
     }
-#line 2205 "y.tab.c"
+#line 2193 "y.tab.c"
     break;
 
   case 80:
-#line 486 "gram.y"
+#line 474 "gram.y"
     {
         /* A parameter list is an argument struct list with only ID expressions */
         expr_t *expr = newExpr_ID((yyvsp[0].id));
         (yyval.data) = newArgument(expr, (yyvsp[-2].data));
     }
-#line 2215 "y.tab.c"
+#line 2203 "y.tab.c"
     break;
 
   case 81:
-#line 491 "gram.y"
+#line 479 "gram.y"
     {
         expr_t *expr = newExpr_ID((yyvsp[0].id));
         (yyval.data) = newArgument(expr, NULL);
     }
-#line 2224 "y.tab.c"
+#line 2212 "y.tab.c"
     break;
 
   case 82:
-#line 497 "gram.y"
+#line 485 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 2232 "y.tab.c"
+#line 2220 "y.tab.c"
     break;
 
   case 83:
-#line 500 "gram.y"
+#line 488 "gram.y"
     {
         expr_t *neg = newExpr_Ival(-1);
         (yyval.data) = newExpr_OPMul(neg, (yyvsp[0].data));
     }
-#line 2241 "y.tab.c"
+#line 2229 "y.tab.c"
     break;
 
   case 84:
-#line 504 "gram.y"
+#line 492 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 2249 "y.tab.c"
+#line 2237 "y.tab.c"
     break;
 
   case 85:
-#line 507 "gram.y"
+#line 495 "gram.y"
     {
         expr_t *neg = newExpr_Ival(-1);
         (yyval.data) = newExpr_OPMul(neg, (yyvsp[0].data));
     }
-#line 2258 "y.tab.c"
+#line 2246 "y.tab.c"
     break;
 
   case 86:
-#line 513 "gram.y"
+#line 501 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[-3].id));
         expr_t *index = (yyvsp[-1].data);
 
         (yyval.data) = newExpr_VectorIndex(id, index);
     }
-#line 2269 "y.tab.c"
+#line 2257 "y.tab.c"
     break;
 
   case 87:
-#line 519 "gram.y"
+#line 507 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[-3].id));
         expr_t *index = newExpr_ID((yyvsp[-1].id));
         (yyval.data) = newExpr_VectorIndex(id, index);
     }
-#line 2279 "y.tab.c"
+#line 2267 "y.tab.c"
     break;
 
   case 88:
-#line 524 "gram.y"
+#line 512 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[-3].id));
         (yyval.data) = newExpr_VectorIndex(id, (yyvsp[-1].data));
     }
-#line 2288 "y.tab.c"
+#line 2276 "y.tab.c"
     break;
 
   case 89:
-#line 528 "gram.y"
+#line 516 "gram.y"
     {
       (yyval.data) = newExpr_VectorIndex((yyvsp[-3].data), (yyvsp[-1].data));
     }
-#line 2296 "y.tab.c"
+#line 2284 "y.tab.c"
     break;
 
   case 90:
-#line 531 "gram.y"
+#line 519 "gram.y"
     {
       expr_t *index = newExpr_ID((yyvsp[-1].id));
       (yyval.data) = newExpr_VectorIndex((yyvsp[-3].data), index);
     }
-#line 2305 "y.tab.c"
+#line 2293 "y.tab.c"
     break;
 
   case 91:
-#line 535 "gram.y"
+#line 523 "gram.y"
     {
       (yyval.data) = newExpr_VectorIndex((yyvsp[-3].data), (yyvsp[-1].data));
     }
-#line 2313 "y.tab.c"
+#line 2301 "y.tab.c"
     break;
 
   case 92:
-#line 540 "gram.y"
+#line 528 "gram.y"
     {
         (yyval.data) = newExpr_Ival(yyval.val_int);
     }
-#line 2321 "y.tab.c"
+#line 2309 "y.tab.c"
     break;
 
   case 93:
-#line 545 "gram.y"
+#line 533 "gram.y"
     {
         (yyval.data) = newExpr_Float(yyval.val_double);
     }
-#line 2329 "y.tab.c"
+#line 2317 "y.tab.c"
     break;
 
   case 94:
-#line 550 "gram.y"
+#line 538 "gram.y"
     {
         expr_t *e1 = (expr_t*)(yyvsp[-2].data);
         expr_t *e2 = (expr_t*)(yyvsp[0].data);
 
         (yyval.data) = newExpr_OPAdd(e1,e2);
     }
-#line 2340 "y.tab.c"
+#line 2328 "y.tab.c"
     break;
 
   case 95:
-#line 556 "gram.y"
+#line 544 "gram.y"
     {
         expr_t *e1 = (expr_t*)(yyvsp[-2].data);
         expr_t *e2 = newExpr_ID((yyvsp[0].id));
 
         (yyval.data) = newExpr_OPAdd(e1,e2);
     }
-#line 2351 "y.tab.c"
+#line 2339 "y.tab.c"
     break;
 
   case 96:
-#line 562 "gram.y"
+#line 550 "gram.y"
     {
         expr_t *e1 = (expr_t*)(yyvsp[-2].data);
         expr_t *d = (expr_t*)(yyvsp[0].data);
@@ -2362,11 +2350,11 @@ yyreduce:
 
         (yyval.data) = newExpr_OPAdd(e1,e2);
     }
-#line 2366 "y.tab.c"
+#line 2354 "y.tab.c"
     break;
 
   case 97:
-#line 572 "gram.y"
+#line 560 "gram.y"
     {
         expr_t *e1 = (expr_t*)(yyvsp[-2].data);
         expr_t *d = (expr_t*)(yyvsp[0].data);
@@ -2377,75 +2365,75 @@ yyreduce:
 
         (yyval.data) = newExpr_OPAdd(e1,e2);
     }
-#line 2381 "y.tab.c"
+#line 2369 "y.tab.c"
     break;
 
   case 98:
-#line 582 "gram.y"
+#line 570 "gram.y"
     {
         expr_t *e1 = (expr_t*)(yyvsp[-2].data);
         expr_t *e2 = (expr_t*)(yyvsp[0].data);
 
         (yyval.data) = newExpr_OPMul(e1,e2);
     }
-#line 2392 "y.tab.c"
+#line 2380 "y.tab.c"
     break;
 
   case 99:
-#line 588 "gram.y"
+#line 576 "gram.y"
     {
         expr_t *e1 = (expr_t*)(yyvsp[-2].data);
         expr_t *e2 = (expr_t*)(yyvsp[0].data);
 
         (yyval.data) = newExpr_OPMul(e1,e2);
     }
-#line 2403 "y.tab.c"
+#line 2391 "y.tab.c"
     break;
 
   case 100:
-#line 594 "gram.y"
+#line 582 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 2411 "y.tab.c"
+#line 2399 "y.tab.c"
     break;
 
   case 101:
-#line 599 "gram.y"
+#line 587 "gram.y"
     {
         (yyval.data) = (yyvsp[-1].data);
     }
-#line 2419 "y.tab.c"
+#line 2407 "y.tab.c"
     break;
 
   case 102:
-#line 602 "gram.y"
+#line 590 "gram.y"
     {
         (yyval.data) = (yyvsp[-1].data);
     }
-#line 2427 "y.tab.c"
+#line 2415 "y.tab.c"
     break;
 
   case 103:
-#line 605 "gram.y"
+#line 593 "gram.y"
     {
         /* Empty text */
         (yyval.data) = newExpr_Text("");
     }
-#line 2436 "y.tab.c"
+#line 2424 "y.tab.c"
     break;
 
   case 104:
-#line 609 "gram.y"
+#line 597 "gram.y"
     {
         /* Empty text */
         (yyval.data) = newExpr_Text("");
     }
-#line 2445 "y.tab.c"
+#line 2433 "y.tab.c"
     break;
 
   case 105:
-#line 615 "gram.y"
+#line 603 "gram.y"
     {
         char *textBuffer;
 
@@ -2471,27 +2459,27 @@ yyreduce:
 
         free(textBuffer);
     }
-#line 2475 "y.tab.c"
+#line 2463 "y.tab.c"
     break;
 
   case 106:
-#line 640 "gram.y"
+#line 628 "gram.y"
     {
         (yyval.data) = (yyvsp[0].data);
     }
-#line 2483 "y.tab.c"
+#line 2471 "y.tab.c"
     break;
 
   case 107:
-#line 645 "gram.y"
+#line 633 "gram.y"
     {
         (yyval.data) = newExpr_Text(yyval.id);
     }
-#line 2491 "y.tab.c"
+#line 2479 "y.tab.c"
     break;
 
   case 108:
-#line 648 "gram.y"
+#line 636 "gram.y"
     {
         char buffer[256];
         expr_t *e = (expr_t*)(yyvsp[0].data);
@@ -2499,11 +2487,11 @@ yyreduce:
         (yyval.data) = newExpr_Text(buffer);
         free((yyvsp[0].data));
     }
-#line 2503 "y.tab.c"
+#line 2491 "y.tab.c"
     break;
 
   case 109:
-#line 655 "gram.y"
+#line 643 "gram.y"
     {
         char buffer[256];
         expr_t *e = (expr_t*)(yyvsp[0].data);
@@ -2511,190 +2499,190 @@ yyreduce:
         (yyval.data) = newExpr_Text(buffer);
         free((yyvsp[0].data));
     }
-#line 2515 "y.tab.c"
+#line 2503 "y.tab.c"
     break;
 
   case 110:
-#line 662 "gram.y"
+#line 650 "gram.y"
     {
         (yyval.data) = newExpr_Text((yyvsp[0].id));
     }
-#line 2523 "y.tab.c"
+#line 2511 "y.tab.c"
     break;
 
   case 111:
-#line 667 "gram.y"
+#line 655 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2532 "y.tab.c"
+#line 2520 "y.tab.c"
     break;
 
   case 112:
-#line 672 "gram.y"
+#line 660 "gram.y"
     {
         (yyval.id)[0] = ' ';
         (yyval.id)[1] = 0;
     }
-#line 2541 "y.tab.c"
+#line 2529 "y.tab.c"
     break;
 
   case 113:
-#line 677 "gram.y"
+#line 665 "gram.y"
     {
         (yyval.id)[0] = '?';
         (yyval.id)[1] = 0;
     }
-#line 2550 "y.tab.c"
+#line 2538 "y.tab.c"
     break;
 
   case 114:
+#line 669 "gram.y"
+    {
+        (yyval.id)[0] = yyval.id[0];
+        (yyval.id)[1] = 0;
+    }
+#line 2547 "y.tab.c"
+    break;
+
+  case 115:
+#line 673 "gram.y"
+    {
+        (yyval.id)[0] = yyval.id[0];
+        (yyval.id)[1] = 0;
+    }
+#line 2556 "y.tab.c"
+    break;
+
+  case 116:
+#line 677 "gram.y"
+    {
+        (yyval.id)[0] = yyval.id[0];
+        (yyval.id)[1] = 0;
+    }
+#line 2565 "y.tab.c"
+    break;
+
+  case 117:
 #line 681 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2559 "y.tab.c"
+#line 2574 "y.tab.c"
     break;
 
-  case 115:
+  case 118:
 #line 685 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2568 "y.tab.c"
+#line 2583 "y.tab.c"
     break;
 
-  case 116:
+  case 119:
 #line 689 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2577 "y.tab.c"
+#line 2592 "y.tab.c"
     break;
 
-  case 117:
+  case 120:
 #line 693 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2586 "y.tab.c"
+#line 2601 "y.tab.c"
     break;
 
-  case 118:
+  case 121:
 #line 697 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2595 "y.tab.c"
+#line 2610 "y.tab.c"
     break;
 
-  case 119:
+  case 122:
 #line 701 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2604 "y.tab.c"
+#line 2619 "y.tab.c"
     break;
 
-  case 120:
+  case 123:
 #line 705 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2613 "y.tab.c"
+#line 2628 "y.tab.c"
     break;
 
-  case 121:
+  case 124:
 #line 709 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2622 "y.tab.c"
+#line 2637 "y.tab.c"
     break;
 
-  case 122:
+  case 125:
 #line 713 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2631 "y.tab.c"
+#line 2646 "y.tab.c"
     break;
 
-  case 123:
+  case 126:
 #line 717 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2640 "y.tab.c"
+#line 2655 "y.tab.c"
     break;
 
-  case 124:
+  case 127:
 #line 721 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2649 "y.tab.c"
+#line 2664 "y.tab.c"
     break;
 
-  case 125:
+  case 128:
 #line 725 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2658 "y.tab.c"
+#line 2673 "y.tab.c"
     break;
 
-  case 126:
+  case 129:
 #line 729 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
     }
-#line 2667 "y.tab.c"
-    break;
-
-  case 127:
-#line 733 "gram.y"
-    {
-        (yyval.id)[0] = yyval.id[0];
-        (yyval.id)[1] = 0;
-    }
-#line 2676 "y.tab.c"
-    break;
-
-  case 128:
-#line 737 "gram.y"
-    {
-        (yyval.id)[0] = yyval.id[0];
-        (yyval.id)[1] = 0;
-    }
-#line 2685 "y.tab.c"
-    break;
-
-  case 129:
-#line 741 "gram.y"
-    {
-        (yyval.id)[0] = yyval.id[0];
-        (yyval.id)[1] = 0;
-    }
-#line 2694 "y.tab.c"
+#line 2682 "y.tab.c"
     break;
 
 
-#line 2698 "y.tab.c"
+#line 2686 "y.tab.c"
 
       default: break;
     }
@@ -2926,7 +2914,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 746 "gram.y"
+#line 734 "gram.y"
 
 
 #include <stdlib.h>

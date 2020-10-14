@@ -5,9 +5,7 @@
 #include "garbage.h"
 #include "eval.h"
 
-static uint32_t markVal = 0;
-
-uint32_t set_mark_value()
+uint32_t generate_mark_value()
 {
   static int initial = 1;
   uint32_t r;
@@ -21,13 +19,13 @@ uint32_t set_mark_value()
 
   initial = 0;
 
-  markVal = r;
-  return markVal;
+  return r;
 }
 
 static void mark (
   hashtable_t *varDecs,
   locals_stack_t *varLocals,
+  uint32_t markVal,
   EXPRESSION_PARAMS()) {
   char *variableIDS[RIC_MAX_NBR_VARS];
   int argCount = 0;
@@ -43,7 +41,7 @@ static void mark (
 
       hv->mark = markVal;
       if ( hv->sv.type == DICTTYPE ) {
-        mark(hv->sv.dict->hash, NULL, EXPRESSION_ARGS());
+        mark(hv->sv.dict->hash, NULL, markVal, EXPRESSION_ARGS());
       }
 
       ++i;
@@ -69,13 +67,14 @@ static void mark (
     hv->mark = markVal;
 
     if ( hv->sv.type == DICTTYPE ) {
-      mark(hv->sv.dict->hash, NULL, EXPRESSION_ARGS());
+      mark(hv->sv.dict->hash, NULL, markVal, EXPRESSION_ARGS());
     }
     ++i;
   }
 }
 
 static void sweep (
+  uint32_t markVal,
   EXPRESSION_PARAMS()) {
   int i = 0;
   int32_t size = (*(heapval_t*)hb).sv.i;
@@ -114,11 +113,14 @@ void mark_and_sweep (
   hashtable_t *varDecs,
   void *locals,
   EXPRESSION_PARAMS()) {
+  uint32_t markVal;
+  /* Generate mark value */
+  markVal = generate_mark_value();
   /* Mark objects to keep */
   locals_stack_t *varLocals = locals;
-  mark(varDecs, varLocals, EXPRESSION_ARGS());
+  mark(varDecs, varLocals, markVal, EXPRESSION_ARGS());
   /* Sweep the rest */
-  sweep(EXPRESSION_ARGS());
+  sweep(markVal, EXPRESSION_ARGS());
 }
 
 void free_heap(void *hp, void *hbp) {

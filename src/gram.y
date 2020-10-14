@@ -249,26 +249,17 @@ ifStatement:
 
 loopStatement:
     '.' '[' logical ']' body {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
-
-        $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+        $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
     }
     | '.' '[' logical ']' body middleIfs {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
 
         ifs->elif = $6;
         
         $$ = ifs;
     }
     | '.' '[' logical ']' body middleIfs endIf {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
 
         ifs->elif = $6;
         ifs->endif = $7;
@@ -276,10 +267,7 @@ loopStatement:
         $$ = ifs;
     }
     | '.' '[' logical ']' body endIf {
-        expr_t *expr = newExpr_Ival(0);
-        expr_t *cond = newConditional(CONDITION_GE, $3, expr);
-
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, cond, $5);
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
 
         ifs->endif = $6;
 

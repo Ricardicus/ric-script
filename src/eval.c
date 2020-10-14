@@ -14,6 +14,7 @@ jmp_buf continueJmpBuf;
 ctx_table_t continueCtx;
 
 #if 0
+/* I define and use this function during debugging of the interpreter */
 static void debugPrint(char *format, ...) {
   char buffer[100];
   va_list args;

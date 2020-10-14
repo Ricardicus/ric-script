@@ -161,7 +161,7 @@ a = 0
   a = a + 1
   print( a )
   # Deciding on wether or not to continue the loop
-  [ a >= 2 ] {
+  ? [ a >= 2 ] {
     !@
   }
   @

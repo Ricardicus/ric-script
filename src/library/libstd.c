@@ -512,4 +512,32 @@ int ric_keys(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_is_defined(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int32_t result;
+  char *arg1 = NULL;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    arg1 = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  result = evaluate_id_valid(arg1, EXPRESSION_ARGS());
+
+  /* Pushing result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
 

@@ -1335,6 +1335,70 @@ Please report back to me.\n\
   }
 }
 
+/* Check if ID is valid */
+int evaluate_id_valid(
+  char *id,
+  EXPRESSION_PARAMS())
+{
+  heapval_t *hv = NULL;
+  /* Check if this ID is among the arguments */
+  argsList_t *walk = args;
+
+  if ( id == NULL )
+    return 0;
+
+  while ( walk != NULL ) {
+    expr_t *exp = walk->arg;
+    if ( exp->type == EXPR_TYPE_ID ) {
+      expr_t *expArg;
+
+      /* Check among the arguments if we have it defined there */
+      expArg = hashtable_get(argVals, id);
+
+      if ( expArg != NULL ) {
+        /* This was an argument, ID ok! */
+        return 1;
+      }
+    }
+
+    walk = walk->next;
+  }
+
+  if ( walk == NULL ) {
+    functionDef_t *funcDef; // if it is a function pointer
+
+    /* Check among the global variables if we have it defined there */
+    hv = hashtable_get(varDecs, id);
+
+    if ( hv == NULL ) {
+      /* Check among the locals if we have it defined there */
+      hv = locals_lookup(varLocals, id);
+    }
+
+    if ( hv != NULL ) {
+      return 1;
+    }
+
+    /* Check among the function declarations if we have it defined there */
+    funcDef = hashtable_get(funcDecs, id);
+    if ( funcDef != NULL ) {
+      // Pushing the function definition
+      return 1;
+    }
+
+    /* Check among the standard lib function declarations if we have it defined there */
+    libFunction_t *libFunc = look_up_lib(id);
+
+    if ( libFunc != NULL ) {
+      return 1;
+    }
+  }
+
+  /* Failed to find the id*/
+  return 0;
+}
+
+
 void call_func(
   functionCall_t *funcCall,
   EXPRESSION_PARAMS())
@@ -2145,7 +2209,7 @@ void interpret_statements_(
         *ax = (sv.i != 0);
         break;
         default:
-        fprintf(stderr, "Invalid conditional expression.\n");
+        fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
         exit(1);
         break;
       }

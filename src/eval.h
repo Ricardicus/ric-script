@@ -27,6 +27,12 @@ void evaluate_expression(
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
   hashtable_t *argVals);
+int evaluate_id_valid(
+  char *id,
+  void *stmt, void *next,
+  PROVIDE_CONTEXT_ARGS(),
+  argsList_t* args,
+  hashtable_t *argVals);
 
 void print_statements(statement_t *stmt);
 void print_statements_(void *stmt, int indent);

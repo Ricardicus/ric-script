@@ -3,7 +3,6 @@
 # Functions can be defined multiple times
 
 @ foo (a) {
-
   # Defining a function within a function
   # will actually make it globally available
 
@@ -18,9 +17,9 @@
     # If a function is defined again, it is
     # overwritten
     @ bar () {
-            print("not bar")
+      print("not bar")
     }
-	}
+  }
 }
 
 # Will print:
@@ -38,12 +37,12 @@ bar()
 # Overwriting a function (extreme example)
 @ hejsan () {
 
-	print("hejsan")
-	@ hejsan () {
-		print("tjenare")
-	}
+  print("hejsan")
+  @ hejsan () {
+    print("tjenare")
+  }
 
-	hejsan()
+  hejsan()
 }
 
 # Will print:

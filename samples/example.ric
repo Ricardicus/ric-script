@@ -57,7 +57,7 @@ print(b)
 b = 10.1 <= 10.0
 print(b)
 
-[ 1 ] {
+? [ 1 ] {
   
   # should print 1337
   a = 1337
@@ -65,7 +65,7 @@ print(b)
 
 }
 
-[ b ] {
+? [ b ] {
   
   # should not print 1337
   a = 1337
@@ -75,7 +75,7 @@ print(b)
 
 # Some if-else if- else logic
 p = 1337
-[ p < 1337 ] {
+? [ p < 1337 ] {
   print("Something went wrong.. Not supposed to be in this 'if' section.")
 } ~[p == 1338] {
  print("There is something wrong.. I am in an 'else-if' section..")
@@ -168,7 +168,7 @@ a = 0
 }
 
 @ calcGCD(a, b) {
-    [ b == 0 ] { 
+    ? [ b == 0 ] { 
       return a
     } ~ { 
       return calcGCD(b , (a % b) )

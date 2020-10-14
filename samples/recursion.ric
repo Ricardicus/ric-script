@@ -1,6 +1,6 @@
 # A function that will be recursive
 @ recursive(a) {
-  [ a == 0 ] {
+  ? [ a == 0 ] {
     print("I am done with the recursion now!")
   } ~ {
     print("-- a: " + a)

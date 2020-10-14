@@ -4,22 +4,22 @@
 
 @ foo (a) {
 
-	# Defining a function within a function
-	# will actually make it globally available
+  # Defining a function within a function
+  # will actually make it globally available
 
-	print("foo")
+  print("foo")
 
-	[ a ] {
-		# But only if the code is executed
-		@ bar () {
-			print("bar")
-		}
-	} ~ {
-		# If a function is defined again, it is
-		# overwritten
-                @ bar () {
-                        print("not bar")
-                }
+  ? [ a ] {
+    # But only if the code is executed
+    @ bar () {
+      print("bar")
+    }
+  } ~ {
+    # If a function is defined again, it is
+    # overwritten
+    @ bar () {
+            print("not bar")
+    }
 	}
 }
 

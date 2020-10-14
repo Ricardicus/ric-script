@@ -111,11 +111,11 @@ well as haven't implemented:
 #!/usr/bin/ric
 
 # Conditionals
-[ 1 == 1 ] {
+? [ 1 == 1 ] {
   print("True condition")
 }
 
-[ 1 == 0 ] {
+? [ 1 == 0 ] {
   # You shall not pass - Gandalf
 } ~ {
   print("Untrue condition")

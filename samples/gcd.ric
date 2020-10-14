@@ -1,14 +1,14 @@
 # A script showing how the GCD of two numbers can be determined
 
 @ calcGCD(a, b) {
-    [ b == 0 ] { 
+    ? [ b == 0 ] { 
       return a
     } ~ { 
       return calcGCD(b , (a % b) )
     }
 }
 
-[ len(args) < 4 ] {
+? [ len(args) < 4 ] {
 	print('usage: ' + args[0] + ' number1 number2')
 	exit(1)
 }

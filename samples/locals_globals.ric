@@ -1,12 +1,12 @@
 global = 1337
 
 print("Goin into scope 1 after defining a global")
-[ global == 1337 ] {
+? [ global == 1337 ] {
   local = "hello"
   print("Printing global: " + global)
   print("Printing local: " + local)
   print("Going into scope 2 after defining a local")
-  [ local == "hello" ] {
+  ? [ local == "hello" ] {
     newLocal = "hello again"
     print("Printing global: " + global)
     print("Printing old local: " + local) 
@@ -15,45 +15,45 @@ print("Goin into scope 1 after defining a global")
     print("Going out of scope 2 after defining a new local")
   }
 
-  [ isDefined("newLocal") ] {
+  ? [ isDefined("newLocal") ] {
     print("An error occured, newLocal still defined!")
     exit(1)
   }
 
-  [ isDefined("global") ] {
+  ? [ isDefined("global") ] {
     print("Global still defined in scope 1")
   } ~ {
     print("An error occured, global is no longer defined!")
     exit(1)
   }
 
-  [ isDefined("local") ] {
+  ? [ isDefined("local") ] {
     print("local still defined in scope 1")
   } ~ {
     print("An error occured, local is no longer defined!")
     exit(1)
   }
 
-  [ local == 1337 ] {
+  ? [ local == 1337 ] {
     print("Local has the value in scope 1 that it was assigned in scope 2, which is right")
   }
 
   print("Going out of scope 1")
 }
 
-[ isDefined("global") ] {
+? [ isDefined("global") ] {
   print("Global still defined in scope 0")
 } ~ {
   print("An error occured, global is no longer defined!")
   exit(1)
 }
 
-[ isDefined("newLocal") ] {
+? [ isDefined("newLocal") ] {
   print("An error occured, newLocal still defined in scope 0!")
   exit(1)
 }
 
-[ isDefined("local") ] {
+? [ isDefined("local") ] {
   print("An error occured, local still defined in scope 0!")
   exit(1)
 }

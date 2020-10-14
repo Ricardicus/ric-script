@@ -1,0 +1,27 @@
+# A script to demonstrate how one can list files using ric-script
+
+@ listFiles(folder, indent) {
+  indentation = ("--" * indent) + " "
+
+  files = ls(folder)
+  i = 0
+  . [ i < len(files) ] {
+    file = files[i]
+    # Printing indentation
+    printf(indentation)
+    ? [ isFile(file) ] {
+      printf(file)
+    } ~[ isDir(file) ] {
+      printf("d: " + file)
+      ? [ file != '.' ] {
+      ? [ file != '..'] {
+        listFiles(file, indent + 1)
+      }}
+    }
+    i = i + 1
+    @
+  }
+
+}
+
+listFiles('.')

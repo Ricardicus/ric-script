@@ -221,28 +221,28 @@ expression:
     };
 
 ifStatement:
-    '[' logical ']' body {
-        $$ = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
-    }
-    | '[' logical ']' body middleIfs {
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
+    '?' '[' logical ']' body {
+        $$ = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
+    } | 
+    '?' '[' logical ']' body middleIfs {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
 
-        ifs->elif = $5;
+        ifs->elif = $6;
         
         $$ = ifs;
-    }
-    | '[' logical ']' body middleIfs endIf {
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
+    } |
+    '?' '[' logical ']' body middleIfs endIf {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
 
-        ifs->elif = $5;
+        ifs->elif = $6;
+        ifs->endif = $7;
+        
+        $$ = ifs;
+    } |
+    '?' '[' logical ']' body endIf {
+        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
+
         ifs->endif = $6;
-        
-        $$ = ifs;
-    }
-    | '[' logical ']' body endIf {
-        ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $2, $4);
-
-        ifs->endif = $5;
         
         $$ = ifs;
     };

@@ -6,7 +6,7 @@ fileCheck = "test.txt"
 
 print("Checking if there is a file called: '" + fileCheck + "': ")
 
-[ isFile(fileCheck) ] {
+? [ isFile(fileCheck) ] {
   print("- Yes, there was such a file.")
 } ~ {
   print("- No, there was no such file.")

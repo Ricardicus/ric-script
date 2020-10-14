@@ -297,14 +297,15 @@ typedef struct heapval {
 // garbage collector algorithm (making a list of all active)
 #define RIC_MAX_NBR_VARS 4096
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc; size_t depth;
-#define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb; static void *st, *ed; static size_t sc; static size_t depth;
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc; int depth;
+#define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
+static void *st, *ed; static size_t sc; static int depth;
 #define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth
 #define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth
-#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc }
+#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc, *depth }
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
 int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
-void *hp, void *hb, void **st, void **ed, size_t *sc, size_t *depth
+void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth
 #define EXPRESSION_PARAMS() void *stmt, void *next, \
 PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals

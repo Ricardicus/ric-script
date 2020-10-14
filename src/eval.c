@@ -1,13 +1,29 @@
 #include "eval.h"
+#include <stdarg.h>
 
-/* Namespace (all global) */
+/* Namespace global */
 hashtable_t *funcDecs = NULL;
 hashtable_t *varDecs = NULL;
+
+/* Namespace local */
+locals_stack_t *varLocals;
 
 jmp_buf endingJmpBuf;
 jmp_buf continueJmpBuf;
 
 ctx_table_t continueCtx;
+
+#if 0
+/* I define and use this function during debugging of the interpreter */
+static void debugPrint(char *format, ...) {
+  char buffer[100];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+  printf("-- DEBUG: %s", buffer);
+}
+#endif
 
 int evaluate_condition(ifCondition_t *cond,
   EXPRESSION_PARAMS())
@@ -368,7 +384,7 @@ void evaluate_expression(
   {
     case EXPR_TYPE_ID:
     {
-      heapval_t *hv;
+      heapval_t *hv = NULL;
       int stop = 0;
 
       /* Check if this ID is among the arguments */
@@ -435,8 +451,15 @@ Please report back to me.\n\
 
       if ( walk == NULL ) {
         functionDef_t *funcDef; // if it is a function pointer
-        /* Check among the variables if we have it defined there */
+
+        /* Check among the global variables if we have it defined there */
         hv = hashtable_get(varDecs, expr->id.id);
+
+        if ( hv == NULL ) {
+          /* Check among the locals if we have it defined there */
+          hv = locals_lookup(varLocals, expr->id.id);
+        }
+
         if ( hv != NULL ) {
 
           switch ( hv->sv.type ) {
@@ -493,7 +516,6 @@ Please report back to me.\n\
         if ( stop ) {
           break;
         }
-
         /* Check among the function declarations if we have it defined there */
         funcDef = hashtable_get(funcDecs, expr->id.id);
         if ( funcDef != NULL ) {
@@ -1313,6 +1335,70 @@ Please report back to me.\n\
   }
 }
 
+/* Check if ID is valid */
+int evaluate_id_valid(
+  char *id,
+  EXPRESSION_PARAMS())
+{
+  heapval_t *hv = NULL;
+  /* Check if this ID is among the arguments */
+  argsList_t *walk = args;
+
+  if ( id == NULL )
+    return 0;
+
+  while ( walk != NULL ) {
+    expr_t *exp = walk->arg;
+    if ( exp->type == EXPR_TYPE_ID ) {
+      expr_t *expArg;
+
+      /* Check among the arguments if we have it defined there */
+      expArg = hashtable_get(argVals, id);
+
+      if ( expArg != NULL ) {
+        /* This was an argument, ID ok! */
+        return 1;
+      }
+    }
+
+    walk = walk->next;
+  }
+
+  if ( walk == NULL ) {
+    functionDef_t *funcDef; // if it is a function pointer
+
+    /* Check among the global variables if we have it defined there */
+    hv = hashtable_get(varDecs, id);
+
+    if ( hv == NULL ) {
+      /* Check among the locals if we have it defined there */
+      hv = locals_lookup(varLocals, id);
+    }
+
+    if ( hv != NULL ) {
+      return 1;
+    }
+
+    /* Check among the function declarations if we have it defined there */
+    funcDef = hashtable_get(funcDecs, id);
+    if ( funcDef != NULL ) {
+      // Pushing the function definition
+      return 1;
+    }
+
+    /* Check among the standard lib function declarations if we have it defined there */
+    libFunction_t *libFunc = look_up_lib(id);
+
+    if ( libFunc != NULL ) {
+      return 1;
+    }
+  }
+
+  /* Failed to find the id*/
+  return 0;
+}
+
+
 void call_func(
   functionCall_t *funcCall,
   EXPRESSION_PARAMS())
@@ -1345,7 +1431,7 @@ void call_func(
     break;
   }
   default:
-    fprintf(stderr, "error: invalid function call\n");
+    fprintf(stderr, "error: invalid function call (%d)\n", sv.type);
     exit(1);
     break;
   }
@@ -1546,11 +1632,17 @@ void call_func(
     spBefore = *(uintptr_t*)sp;
 
     /* Call the function */
-    if ( funcDecs ) {
-      /* Moving along, interpreting function*/
-      *depth = *depth + 1;
+    if ( funcDef ) {
+      /* Moving along, interpreting function */
+      int localsStackSp = varLocals->sp;
+      int localsStackSb = varLocals->sb;
+      int depthPrior = *depth;
+      varLocals->sb = varLocals->sp;
+      *depth = 1;
       interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
-      *depth = *depth - 1;
+      varLocals->sb = localsStackSb;
+      varLocals->sp = localsStackSp;
+      *depth = depthPrior;
     }
 
     if ( *(uintptr_t*)sp != spBefore ) {
@@ -1776,6 +1868,7 @@ void interpret_statements_(
       switch ( id->type ) {
       case EXPR_TYPE_ID: {
         int heapUpdated;
+        heapval_t *globalCheck = NULL;
         char *idStr = id->id.id;
 
         /* Evaluating the expression among global variables */
@@ -1801,9 +1894,16 @@ void interpret_statements_(
 
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-        //printf("%s assign at depth %zu\n", idStr, *depth);
-        /* Placing variable declaration in global variable namespace */
-        hashtable_put(varDecs, idStr, hvp);
+        /* Check if the variable is in the global namespace */
+        globalCheck = hashtable_get(varDecs, idStr);
+
+        if ( globalCheck != NULL || *depth == 0 ) {
+          /* Placing variable declaration in global variable namespace */
+          hashtable_put(varDecs, idStr, hvp);
+        } else {
+          /* Placing variable declaration in local variable namespace */
+          locals_push(varLocals, idStr, hvp);
+        }
       }
       break;
       case EXPR_TYPE_VECTOR_IDX: {
@@ -1924,8 +2024,7 @@ void interpret_statements_(
       }
 
       // Mark and sweep the heap
-      (void)set_mark_value();
-      mark_and_sweep(varDecs, EXPRESSION_ARGS());
+      mark_and_sweep(varDecs, varLocals, EXPRESSION_ARGS());
     }
     break;
     case LANG_ENTITY_SYSTEM:
@@ -1992,6 +2091,12 @@ void interpret_statements_(
       continueCtx.stmt = *st;
       continueCtx.args = args;
       continueCtx.argVals = argVals;
+      *depth = continueCtx.depth;
+      if ( *depth == 0 ) {
+        // Set locals stack to zero
+        varLocals->sp = 0;
+        varLocals->sb = 0;
+      }
       longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
     }
     break;
@@ -2001,6 +2106,12 @@ void interpret_statements_(
       continueCtx.stmt = *ed;
       continueCtx.args = args;
       continueCtx.argVals = argVals;
+      *depth = continueCtx.depth;
+      if ( *depth == 0 ) {
+        // Set locals stack to zero
+        varLocals->sp = 0;
+        varLocals->sb = 0;
+      }
       longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
     }
     break;
@@ -2066,8 +2177,6 @@ void interpret_statements_(
         }
         default:
         break;
-
-
       }
 
     }
@@ -2088,6 +2197,8 @@ void interpret_statements_(
           PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
           (*(uintptr_t*)ed) = (uintptr_t) next;
         }
+        /* Set the continue context depth */
+        continueCtx.depth = *depth;
       }
 
       evaluate_expression(ifstmt->cond, EXPRESSION_ARGS());
@@ -2098,17 +2209,19 @@ void interpret_statements_(
         *ax = (sv.i != 0);
         break;
         default:
-        fprintf(stderr, "Invalid conditional expression.\n");
+        fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
         exit(1);
         break;
       }
 
       /* Read ax for conditional */
       if ( *ax ) {
+        int localsStack = varLocals->sp;
         *depth = *depth + 1;
         interpret_statements_(ifstmt->body,
           PROVIDE_CONTEXT(), args, argVals);
         *depth = *depth - 1;
+        varLocals->sp = localsStack;
       } else {
         // Walk through the elifs.
         int stop = 0;
@@ -2130,10 +2243,12 @@ void interpret_statements_(
           }
 
           if ( *ax ) {
+            int localsStack = varLocals->sp;
             *depth = *depth + 1;
             interpret_statements_(ifstmtWalk->body,
               PROVIDE_CONTEXT(), args, argVals);
             *depth = *depth - 1;
+            varLocals->sp = localsStack;
             stop = 1;
             break;
           }
@@ -2144,9 +2259,11 @@ void interpret_statements_(
           // Print the else if it is not NULL
           if ( ifstmt->endif != NULL ) {
             ifstmtWalk = ifstmt->endif;
+            int localsStack = varLocals->sp;
             *depth = *depth + 1;
             interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args, argVals);
             *depth = *depth - 1;
+            varLocals->sp = localsStack;
           }
         }
 
@@ -2169,11 +2286,51 @@ void interpret_statements_(
   interpret_statements_(next, PROVIDE_CONTEXT(), args, argVals);
 }
 
+heapval_t *locals_lookup(locals_stack_t *stack, char *id) {
+  int i = stack->sb;
+  while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
+    local_t local = stack->stack[i];
+    if ( strcmp(id, local.id) == 0 ) {
+      /* Found it */
+      return local.hpv;
+    }
+    ++i;
+  }
+  /* id not among locals */
+  return NULL;
+}
+
+void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
+  if ( stack->sp >= MAX_NBR_LOCALS ) {
+    fprintf(stderr,
+      "You are defining over %d locals, what are you doin? I will not cooperate with you. Sorry.\n",
+      MAX_NBR_LOCALS);
+    exit(1);
+  }
+  int i = stack->sb;
+  while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
+    local_t local = stack->stack[i];
+    if ( strcmp(id, local.id) == 0 ) {
+      /* Overloading this value */
+      stack->stack[i].hpv = hpv;
+      return;
+    }
+    ++i;
+  }
+  /* Pushing new value */
+  stack->stack[stack->sp].hpv = hpv;
+  stack->stack[stack->sp].id = id;
+  stack->sp++;
+}
+
 void setup_namespaces() {
   funcDecs = hashtable_new(100, 0.8);
   assert(funcDecs != NULL);
   varDecs = hashtable_new(200, 0.8);
   assert(varDecs != NULL);
+  varLocals = ast_emalloc(sizeof(locals_stack_t));
+  varLocals->sp = 0;
+  varLocals->sb = 0;
 }
 
 void close_namespaces() {

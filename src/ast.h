@@ -52,6 +52,7 @@
 #define LANG_ENTITY_SYSTEM       14
 #define LANG_ENTITY_RETURN       15
 #define LANG_ENTITY_EXPR         16
+#define LANG_ENTITY_BODY_END     17
 
 #define LANG_CONDITIONAL_IF      BIT(1)
 #define LANG_CONDITIONAL_ELIF    BIT(2)

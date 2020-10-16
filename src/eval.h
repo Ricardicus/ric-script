@@ -88,6 +88,9 @@ typedef struct ctx_table_t {
   argsList_t *args;
   hashtable_t *argVals;
   int depth;
+  statement_t *bodyEnd;  // Where to go after end of body
+  statement_t *start;
+  statement_t *end;
 } ctx_table_t;
 
 typedef struct local {

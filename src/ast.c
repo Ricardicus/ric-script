@@ -264,6 +264,7 @@ statement_t *newStatement(int type, void *content) {
   case LANG_ENTITY_SYSTEM:
   case LANG_ENTITY_RETURN:
   case LANG_ENTITY_EXPR:
+  case LANG_ENTITY_BODY_END:
     stmt->content = content;
     break;
   default:
@@ -415,8 +416,23 @@ ifStmt_t *newIfStatement(int ifType, void *cond, void *body) {
   return ifstmt;
 }
 
-body_t *newBody(void *body) {
+body_t *newBody(void *bodyIn) {
+  statement_t *body = (statement_t*)bodyIn;
+  statement_t *walkPrev = NULL;
+  statement_t *walk = body;
   body_t *bdy = ast_emalloc(sizeof(body_t));
+  
+  while ( walk != NULL ) {
+    walkPrev = walk;
+    walk = walk->next;
+  }
+  /* Insert end of body at the end of body.. */
+  if ( body == NULL ) {
+    body = newStatement(LANG_ENTITY_BODY_END, NULL);
+  } else {
+    walkPrev->next = newStatement(LANG_ENTITY_BODY_END, NULL);
+  }
+
   bdy->entity = LANG_ENTITY_BODY;
   bdy->content = body;
 

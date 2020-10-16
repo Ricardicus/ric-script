@@ -1135,6 +1135,9 @@ Please report back to me.\n\
           ++i;
         }
 
+        if ( mult == 0 )
+          newStr[0] = 0;
+
         newStr[(mult * strLen) + 1] = 0;
 
         stv.type = TEXT;

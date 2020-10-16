@@ -10,7 +10,7 @@ locals_stack_t *varLocals;
 
 jmp_buf endingJmpBuf;
 
-#if 1
+#if 0
 /* I define and use this function during debugging of the interpreter */
 static void debugPrint(char *format, ...) {
   char buffer[100];
@@ -1282,16 +1282,7 @@ Please report back to me.\n\
       stackval_t sv;
       functionCall_t *func = (functionCall_t *) expr->func;
 
-         if ( next != NULL ) {
-          debugPrint("My next is of type: %d\n", ((statement_t*)next)->entity);
-          } else {
-            debugPrint("My next is null\n");
-          }
-
-      if ( ((statement_t*)next)->entity == 4 )
-        exit(1);
-
-      call_func(func, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      call_func(func, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
       /* Push value to the stack */
@@ -1441,8 +1432,6 @@ void call_func(
     exit(1);
     break;
   }
-
-  debugPrint("Calling func %s\n", funcID);
 
   /* Check among the arguments if we have it defined there */
   expArg = hashtable_get(argVals, funcID);
@@ -1766,12 +1755,10 @@ void interpret_statements_(
 {
   entity_eval_t *eval;
   void *next = NULL;
-  ctx_table_t ctx;
+  ctx_table_t *ctx = ast_emalloc(sizeof(ctx_table_t));
 
-  ctx.depth = *depth;
-  ctx.bodyEnd = NULL;
-  ctx.start = NULL;
-  ctx.end = NULL;
+  /* Initialize the context */
+  memset(ctx, 0, sizeof(ctx_table_t));
 
   while ( stmt != NULL ) {
     eval = (entity_eval_t*)stmt;
@@ -1816,32 +1803,33 @@ void interpret_statements_(
       }
       case LANG_ENTITY_BODY: {
         next = ((body_t*)stmt)->content;
-        ctx.depth++;
+        ctx->sp[ctx->depth] = varLocals->sp;
+        ctx->sb[ctx->depth] = varLocals->sb;
+        ctx->depth++;
+        ctx->start[ctx->depth] = ctx->start[ctx->depth-1]; 
+        ctx->end[ctx->depth] = ctx->end[ctx->depth-1]; 
+        ctx->ctxDepth[ctx->depth] = ctx->ctxDepth[ctx->depth-1];
+        stmt = next;
+        continue;
       }
       break;
       case LANG_ENTITY_BODY_END: {
-        next = ctx.bodyEnd;
-        ctx.depth--;
+        ctx->depth--;
+        next = ctx->bodyEnd[ctx->depth];
+        varLocals->sp = ctx->sp[ctx->depth];
+        varLocals->sb = ctx->sb[ctx->depth];
+        stmt = next;
+        continue;
       }
       break;
       case LANG_ENTITY_FIN: {
         /* Jump to VM shutdown */
-        debugPrint("LANG_ENTITY_FIN\n");
         longjmp(endingJmpBuf, 1);
       }
       break;
       default:
       break;
     }
-
-    if (next!=NULL) {
-      debugPrint("this is %d, next is (%d)\n", ((statement_t*)stmt)->entity, ((statement_t*)next)->entity );
-    } else {
-      debugPrint("this is %d, next is null\n", ((statement_t*)stmt)->entity);
-    }
-
-    if ( ((statement_t*)stmt)->entity == 4 )
-      exit(1);
 
     switch ( eval->entity ) {
       case LANG_ENTITY_DECL:
@@ -1884,7 +1872,7 @@ void interpret_statements_(
           /* Check if the variable is in the global namespace */
           globalCheck = hashtable_get(varDecs, idStr);
 
-          if ( globalCheck != NULL || *depth == 0 ) {
+          if ( globalCheck != NULL || ctx->depth == 0 ) {
             /* Placing variable declaration in global variable namespace */
             hashtable_put(varDecs, idStr, hvp);
           } else {
@@ -2038,8 +2026,6 @@ void interpret_statements_(
         expr_t *retVal = (expr_t*)((statement_t*)stmt)->content;
         stackval_t sv;
 
-        debugPrint("LANG_ENTITY_RETURN\n");
-
         evaluate_expression(retVal, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
         switch ( sv.type ) {
@@ -2065,6 +2051,7 @@ void interpret_statements_(
           break;
         }
         /* Returning now from this function */
+        free(ctx);
         return;
       }
       break;
@@ -2079,13 +2066,24 @@ void interpret_statements_(
       case LANG_ENTITY_CONTINUE:
       {
         /* Set PC to continue 'start' */
-        next = ctx.start;
+        ctx->depth--;
+        next = ctx->start[ctx->depth];
+        ctx->depth = ctx->ctxDepth[ctx->depth];
+        varLocals->sp = ctx->sp[ctx->depth];
+        varLocals->sb = ctx->sb[ctx->depth];
+        stmt = next;
+        continue;
       }
       break;
       case LANG_ENTITY_BREAK:
       {
         /* Set PC to break 'end' */
-        next = ctx.end;
+        ctx->depth = ctx->ctxDepth[ctx->depth];
+        next = ctx->end[ctx->depth];
+        varLocals->sp = ctx->sp[ctx->depth];
+        varLocals->sb = ctx->sb[ctx->depth];
+        stmt = next;
+        continue;
       }
       break;
       case LANG_ENTITY_FUNCCALL:
@@ -2124,13 +2122,8 @@ void interpret_statements_(
 
         switch ( e->type ) {
           case EXPR_TYPE_FUNCCALL: {
-
-            if ( next != NULL ) {
-            debugPrint("My next is of type: %d\n", ((statement_t*)next)->entity);
-            } else {
-              debugPrint("My next is null\n");
-            }
             functionCall_t *funcCall = e->func;
+
             call_func(
               funcCall,
               EXPRESSION_ARGS()
@@ -2148,7 +2141,6 @@ void interpret_statements_(
                 printf("\n");
                 break;
                 default:
-                debugPrint("result of func call: %d\n", sv.type);
                 break;
               }
             }
@@ -2169,9 +2161,12 @@ void interpret_statements_(
 
         if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
           /* Handle the continue '@' and break '!@' points' */
-          ctx.start = stmt;
-          ctx.end = next;
+          ctx->start[ctx->depth] = stmt;
+          ctx->end[ctx->depth] = next;
+          ctx->ctxDepth[ctx->depth] = ctx->depth;
         }
+
+        ctx->bodyEnd[ctx->depth] = next;
 
         evaluate_expression(ifstmt->cond, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
@@ -2188,7 +2183,6 @@ void interpret_statements_(
 
         /* Read ax for conditional */
         if ( *ax ) {
-          debugPrint("Next is if\n");
           next = ifstmt->body;
         } else {
           // Walk through the elifs.
@@ -2212,7 +2206,6 @@ void interpret_statements_(
 
             if ( *ax ) {
               ifStmt_t *elif = ifstmtWalk;
-              debugPrint("next is else if\n");
               next = elif->body;
               stop = 1;
               break;
@@ -2223,7 +2216,6 @@ void interpret_statements_(
           if ( ! stop ) {
             if ( ifstmt->endif != NULL ) {
               ifStmt_t *endif = ifstmt->endif;
-              debugPrint("next is endif\n");
               next = endif->body;
             }
           }
@@ -2239,6 +2231,7 @@ void interpret_statements_(
     stmt = next;
   }
 
+  free(ctx);
 }
 
 heapval_t *locals_lookup(locals_stack_t *stack, char *id) {

@@ -15,6 +15,7 @@
 #define MAX_NBR_ARGUMENTS    10
 
 #define MAX_NBR_LOCALS       1000
+#define MAX_BODY_LEVELS      30  // If you need more; I am sorry.
 
 int evaluate_condition(ifCondition_t *cond,
   void *stmt, void *next,
@@ -88,9 +89,12 @@ typedef struct ctx_table_t {
   argsList_t *args;
   hashtable_t *argVals;
   int depth;
-  statement_t *bodyEnd;  // Where to go after end of body
-  statement_t *start;
-  statement_t *end;
+  int sp[MAX_BODY_LEVELS];
+  int sb[MAX_BODY_LEVELS];
+  int ctxDepth[MAX_BODY_LEVELS];
+  statement_t *bodyEnd[MAX_BODY_LEVELS];  // Where to go after end of body
+  statement_t *start[MAX_BODY_LEVELS];
+  statement_t *end[MAX_BODY_LEVELS];
 } ctx_table_t;
 
 typedef struct local {

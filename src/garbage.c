@@ -101,7 +101,6 @@ static void sweep (
         }
         heap[i].toFree = false;
       }
-
       heap[i].occupied = false;
     }
 

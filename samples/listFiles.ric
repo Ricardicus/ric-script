@@ -1,3 +1,4 @@
+#!/usr/bin/ric
 # A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {

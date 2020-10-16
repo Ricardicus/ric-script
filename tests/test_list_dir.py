@@ -3,36 +3,43 @@ from settings import *
 
 def test_vector_print():
   output_lines = [
-"../samples/folder/a/b/b/b.txt",
-"../samples/folder/a/b/b.txt",
-"../samples/folder/a/b/a/b.txt",
-"../samples/folder/a/b/a/a.txt",
-"../samples/folder/a/b/c.txt",
-"../samples/folder/a/b/a.txt",
-"../samples/folder/a/a/b.txt",
-"../samples/folder/a/a/d.txt",
-"../samples/folder/a/a/c.txt",
-"../samples/folder/a/a/a.txt",
-"../samples/folder/a/c/a.txt",
-"../samples/folder/README.md",
-"../samples/func_ptr.ric",
-"../samples/forever_and_ever.ric",
-"../samples/ric_lib.ric",
-"../samples/args.ric",
-"../samples/recursion.ric",
-"../samples/locals_globals.ric",
-"../samples/demo.ric",
-"../samples/vector_print.ric",
-"../samples/example.ric",
-"../samples/listFiles.ric",
-"../samples/funccall_as_expr.ric",
-"../samples/function_within_function.ric",
-"../samples/load.ric",
-"../samples/foobar.ric",
-"../samples/gcd.ric",
-"../samples/load_nt.ric",
-"../samples/math.ric",
-"../samples/dictionary.ric",
+"load_nt.ric",
+"demo.ric",
+"forever_and_ever.ric",
+"gcd.ric",
+"dictionary.ric",
+"folder",
+" a",
+"  a",
+"   c.txt",
+"   b.txt",
+"   a.txt",
+"   d.txt",
+"  c",
+"   a.txt",
+"  b",
+"   a",
+"    b.txt",
+"    a.txt",
+"   c.txt",
+"   b.txt",
+"   a.txt",
+"   b",
+"    b.txt",
+" README.md",
+"ric_lib.ric",
+"funccall_as_expr.ric",
+"load.ric",
+"listFiles.ric",
+"func_ptr.ric",
+"args.ric",
+"example.ric",
+"recursion.ric",
+"function_within_function.ric",
+"locals_globals.ric",
+"vector_print.ric",
+"math.ric",
+"foobar.ric"
 ]
   if ( os.name == 'nt' ):
     # list directory only works on unix platforms
@@ -46,11 +53,5 @@ def test_vector_print():
   ric_result = os.popen(script).read().splitlines()
 
   assert len(output_lines) == len(ric_result)
-
-  # checking uniqueness
-  assert len(ric_result) == len(set(ric_result))
-
-  # checking that all paths are legit
-  for file in ric_result:
-    assert os.path.isfile(file)
+  assert len(set(output_lines)) == len(set(ric_result))
 

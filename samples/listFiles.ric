@@ -9,13 +9,16 @@
   i = 0
   . [ i < len(files) ] {
     file = files[i]
-    fullfile = indent + "/" + file
+    fullfile = folder + "/" + file
     ? [ isFile(fullfile) ] {
-      print(fullfile)
+      printf(" " * indent)
+      print(file)
     } ~ {
       ? [ file != '.' ] {
       ? [ file != '..'] {
-        listFiles(fullfile, fullfile)
+        printf(" " * indent)
+        print(file)
+        listFiles(fullfile, indent + 1)
       }}
     }
     i = i + 1
@@ -31,7 +34,7 @@
 
 ? [ isDir(args[2]) ] {
   # print folder structure
-  listFiles(args[2], args[2])
+  listFiles(args[2], 0)
 } ~ {
   # not a folder given
   printUsage()

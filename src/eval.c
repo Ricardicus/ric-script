@@ -9,9 +9,6 @@ hashtable_t *varDecs = NULL;
 locals_stack_t *varLocals;
 
 jmp_buf endingJmpBuf;
-jmp_buf continueJmpBuf;
-
-ctx_table_t continueCtx;
 
 #if 0
 /* I define and use this function during debugging of the interpreter */
@@ -1285,7 +1282,7 @@ Please report back to me.\n\
       stackval_t sv;
       functionCall_t *func = (functionCall_t *) expr->func;
 
-      call_func(func, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      call_func(func, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
       /* Push value to the stack */
@@ -1458,7 +1455,6 @@ void call_func(
   }
 
   if ( funcDef == NULL && libFunc == NULL ) {
-
     /* Looking up the function and calling it if it exists */
     funcDef = hashtable_get(funcDecs, funcID);
     /* Looking up the function among the library */
@@ -1521,7 +1517,6 @@ void call_func(
 
   if ( funcDef != NULL ) {
     uintptr_t spBefore;
-    int stackAllocSpEd = 0;
 
     /* Check that # parameters == # arguments */
     argsList_t *params = funcDef->params;
@@ -1619,16 +1614,6 @@ void call_func(
     sv_ret.type = INT32TYPE;
     sv_ret.i = 0;
 
-    if ( (*(uintptr_t*)st)  != (uintptr_t) stmt ) {
-
-      PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-      (*(uintptr_t*)st) = (uintptr_t) stmt;
-      PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-      (*(uintptr_t*)ed) = (uintptr_t) next;
-
-      stackAllocSpEd = 1;
-    }
-
     spBefore = *(uintptr_t*)sp;
 
     /* Call the function */
@@ -1636,26 +1621,16 @@ void call_func(
       /* Moving along, interpreting function */
       int localsStackSp = varLocals->sp;
       int localsStackSb = varLocals->sb;
-      int depthPrior = *depth;
       varLocals->sb = varLocals->sp;
-      *depth = 1;
+      *depth = 1;  // There is only one global scope
       interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
       varLocals->sb = localsStackSb;
       varLocals->sp = localsStackSp;
-      *depth = depthPrior;
     }
 
     if ( *(uintptr_t*)sp != spBefore ) {
-      /* No return statement found, pushing 0 on the stack */
+      /* Return statement found, pop return value */
       POP_VAL(&sv_ret, sp, sc);
-    }
-
-    if ( stackAllocSpEd ) {
-      /* Resetting original values */
-      POP_VAL(&sv, sp, sc);
-      (*(uintptr_t*)ed) = sv.p;
-      POP_VAL(&sv, sp, sc);
-      (*(uintptr_t*)st) = sv.p;
     }
 
     /* Push function return value to the stack */
@@ -1692,7 +1667,6 @@ void call_func(
 
     /* Free the argument value table */
     flush_arguments(newArgumentTable);
-
   } else {
     /* This is a library function */
     int libfunc_ret;
@@ -1779,216 +1753,100 @@ void interpret_statements_(
   hashtable_t *argVals
 )
 {
-  static int premier = 1;
   entity_eval_t *eval;
   void *next = NULL;
+  ctx_table_t *ctx = ast_emalloc(sizeof(ctx_table_t));
 
-  if ( premier ) {
-    switch ( setjmp(continueJmpBuf) ) {
-      case JMP_CODE_CONTINUE: {
-        stmt = continueCtx.stmt;
-        args = continueCtx.args;
-        argVals = continueCtx.argVals;
-      }
+  /* Initialize the context */
+  memset(ctx, 0, sizeof(ctx_table_t));
+
+  while ( stmt != NULL ) {
+    eval = (entity_eval_t*)stmt;
+
+    switch ( eval->entity ) {
+      case LANG_ENTITY_DECL:
+      case LANG_ENTITY_FUNCDECL:
+      case LANG_ENTITY_FUNCCALL:
+      case LANG_ENTITY_CONDITIONAL:
+      case LANG_ENTITY_SYSTEM:
+      case LANG_ENTITY_EXPR:
+        next = ((statement_t*)stmt)->next;
       break;
-      case JMP_CODE_INITIAL:
-      /* Fall through */
-      default:
-      /* It is OK, just continue */
+      case LANG_ENTITY_RETURN:
+        next = NULL;
       break;
-    }
-    premier = 0;
-  }
-
-  if ( stmt == NULL )
-    return;
-
-  eval = (entity_eval_t*)stmt;
-
-  switch ( eval->entity ) {
-    case LANG_ENTITY_DECL:
-    case LANG_ENTITY_FUNCDECL:
-    case LANG_ENTITY_FUNCCALL:
-    case LANG_ENTITY_CONDITIONAL:
-    case LANG_ENTITY_SYSTEM:
-    case LANG_ENTITY_EXPR:
-      next = ((statement_t*)stmt)->next;
-    break;
-    case LANG_ENTITY_RETURN:
-      next = NULL;
-    break;
-    case LANG_ENTITY_EMPTY_MATH:
-    case LANG_ENTITY_EMPTY_STR:
-    { 
-      stackval_t sv;
-      expr_t *e = ((statement_t*)stmt)->content;
-      evaluate_expression(e, EXPRESSION_ARGS());
-      POP_VAL(&sv, sp, sc);
-      switch ( sv.type ) {
-      case INT32TYPE:
-      printf("%" PRIi32 "\n", sv.i);
-      break;
-      case DOUBLETYPE:
-      printf("%lf\n", sv.d);
-      break;
-      case TEXT:
-      printf("%s\n", sv.t);
-      break;
-      default:
-      printf("%s.error: unknown type of value on the stack (%d)\n", 
-        __func__, sv.type);
-      break;
-      }
-
-      next = ((statement_t*)stmt)->next;
-      break;
-    }
-    case LANG_ENTITY_BODY: {
-      next = ((body_t*)stmt)->content;
-    }
-    break;
-    case LANG_ENTITY_FIN: {
-      /* Jump to VM shutdown */
-      longjmp(endingJmpBuf, 1);
-    }
-    break;
-    default:
-    break;
-  }
-
-  switch ( eval->entity ) {
-    case LANG_ENTITY_DECL:
-    {
-      stackval_t sv;
-      expr_t *id;
-      heapval_t *hvp = NULL;
-      declaration_t* decl = ((statement_t*)stmt)->content;
-      id = decl->id;
-
-      switch ( id->type ) {
-      case EXPR_TYPE_ID: {
-        int heapUpdated;
-        heapval_t *globalCheck = NULL;
-        char *idStr = id->id.id;
-
-        /* Evaluating the expression among global variables */
-        evaluate_expression(decl->val, EXPRESSION_ARGS());
-        POP_VAL(&sv, sp, sc);
-
-        /* Placing value on the heap */
-        if ( sv.type == TEXT ) {
-          /* Special case */
-          char *c = sv.t;
-          size_t len = strlen(c)+1;
-          char *newText = ast_emalloc(len);
-          snprintf(newText,len,"%s",c);
-          sv.t = newText;
-        } else if ( sv.type == VECTORTYPE ) {
-          expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
-          sv.vec = e->vec;
-          free(e);
-        } else if ( sv.type == DICTTYPE ) {
-          dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-          sv.dict = dict;
-        }
-
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-        /* Check if the variable is in the global namespace */
-        globalCheck = hashtable_get(varDecs, idStr);
-
-        if ( globalCheck != NULL || *depth == 0 ) {
-          /* Placing variable declaration in global variable namespace */
-          hashtable_put(varDecs, idStr, hvp);
-        } else {
-          /* Placing variable declaration in local variable namespace */
-          locals_push(varLocals, idStr, hvp);
-        }
-      }
-      break;
-      case EXPR_TYPE_VECTOR_IDX: {
-        vector_t *vec = NULL;
-        dictionary_t *dict = NULL;
-        int32_t arrayIndex;
-        argsList_t *walk;
-        int isDict = 0;
-        expr_t **expToSet = NULL;
-        expr_t *vecid = id->vecIdx->id;
-        expr_t *index = id->vecIdx->index;
-
+      case LANG_ENTITY_EMPTY_MATH:
+      case LANG_ENTITY_EMPTY_STR:
+      { 
         stackval_t sv;
-
-        evaluate_expression(vecid, EXPRESSION_ARGS());
+        expr_t *e = ((statement_t*)stmt)->content;
+        evaluate_expression(e, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
-
-        if ( sv.type != VECTORTYPE && sv.type != DICTTYPE ) {
-          fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
-          GENERAL_REPORT_ISSUE_MSG();
-          exit(1);
+        switch ( sv.type ) {
+        case INT32TYPE:
+        printf("%" PRIi32 "\n", sv.i);
+        break;
+        case DOUBLETYPE:
+        printf("%lf\n", sv.d);
+        break;
+        case TEXT:
+        printf("%s\n", sv.t);
+        break;
+        default:
+        printf("%s.error: unknown type of value on the stack (%d)\n", 
+          __func__, sv.type);
+        break;
         }
 
-        if ( sv.type == DICTTYPE ) {
-          isDict = 1;
-          dict = sv.dict;
-        } else {
-          isDict = 0;
-        }
+        next = ((statement_t*)stmt)->next;
+        break;
+      }
+      case LANG_ENTITY_BODY: {
+        next = ((body_t*)stmt)->content;
+        ctx->sp[ctx->depth] = varLocals->sp;
+        ctx->sb[ctx->depth] = varLocals->sb;
+        ctx->depth++;
+        ctx->start[ctx->depth] = ctx->start[ctx->depth-1]; 
+        ctx->end[ctx->depth] = ctx->end[ctx->depth-1]; 
+        ctx->ctxDepth[ctx->depth] = ctx->ctxDepth[ctx->depth-1];
+        stmt = next;
+        continue;
+      }
+      break;
+      case LANG_ENTITY_BODY_END: {
+        ctx->depth--;
+        next = ctx->bodyEnd[ctx->depth];
+        varLocals->sp = ctx->sp[ctx->depth];
+        varLocals->sb = ctx->sb[ctx->depth];
+        stmt = next;
+        continue;
+      }
+      break;
+      case LANG_ENTITY_FIN: {
+        /* Free context */
+        free(ctx);
+        /* Jump to VM shutdown */
+        longjmp(endingJmpBuf, 1);
+      }
+      break;
+      default:
+      break;
+    }
 
-        if ( isDict == 0 ) {
-          /* Assigning a vector */
-          vec = sv.vec;
+    switch ( eval->entity ) {
+      case LANG_ENTITY_DECL:
+      {
+        stackval_t sv;
+        expr_t *id;
+        heapval_t *hvp = NULL;
+        declaration_t* decl = ((statement_t*)stmt)->content;
+        id = decl->id;
 
-          evaluate_expression(index, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
-
-          if ( sv.type != INT32TYPE ) {
-            fprintf(stderr, "index error: Must provide an integer as index\n");
-            exit(1);
-          }
-
-          arrayIndex = sv.i;
-
-          /* check the limits */
-          if ( arrayIndex >= vec->length ) {
-            fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-              arrayIndex,
-              vec->length);
-            exit(1);
-          }
-
-          walk = vec->content;
-          while ( walk != NULL && arrayIndex >= 0 ) {
-            expToSet = &walk->arg;
-            walk = walk->next;
-            --arrayIndex;
-          }
-
-          if ( *expToSet == NULL ) {
-            fprintf(stderr, "Unexpected index error!\n");
-            GENERAL_REPORT_ISSUE_MSG();
-            exit(1);
-          }
-
-          /* Placing this expression into the array */
-          free_expression(*expToSet);
-          free(*expToSet);
-          *expToSet = decl->val;
-        } else {
-          /* Assigning a dictionary */
-          char *key = NULL;
-          heapval_t *hvp = NULL;
-          int dummy;
-
-          evaluate_expression(index, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
-
-          if ( sv.type != TEXT ) {
-            fprintf(stderr, "index error: Must provide a string as key\n");
-            exit(1);
-          }
-
-          key = ast_emalloc(strlen(sv.t)+2);
-          snprintf(key, strlen(sv.t)+1, "%s", sv.t);
+        switch ( id->type ) {
+        case EXPR_TYPE_ID: {
+          int heapUpdated;
+          heapval_t *globalCheck = NULL;
+          char *idStr = id->id.id;
 
           /* Evaluating the expression among global variables */
           evaluate_expression(decl->val, EXPRESSION_ARGS());
@@ -2011,279 +1869,371 @@ void interpret_statements_(
             sv.dict = dict;
           }
 
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
-          // Check if collision, if so, free key
-          hashtable_put(dict->hash, key, hvp);
+          /* Check if the variable is in the global namespace */
+          globalCheck = hashtable_get(varDecs, idStr);
+
+          if ( globalCheck != NULL || ctx->depth == 0 ) {
+            /* Placing variable declaration in global variable namespace */
+            hashtable_put(varDecs, idStr, hvp);
+          } else {
+            /* Placing variable declaration in local variable namespace */
+            locals_push(varLocals, idStr, hvp);
+          }
+        }
+        break;
+        case EXPR_TYPE_VECTOR_IDX: {
+          vector_t *vec = NULL;
+          dictionary_t *dict = NULL;
+          int32_t arrayIndex;
+          argsList_t *walk;
+          int isDict = 0;
+          expr_t **expToSet = NULL;
+          expr_t *vecid = id->vecIdx->id;
+          expr_t *index = id->vecIdx->index;
+
+          stackval_t sv;
+
+          evaluate_expression(vecid, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if ( sv.type != VECTORTYPE && sv.type != DICTTYPE ) {
+            fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
+            GENERAL_REPORT_ISSUE_MSG();
+            exit(1);
+          }
+
+          if ( sv.type == DICTTYPE ) {
+            isDict = 1;
+            dict = sv.dict;
+          } else {
+            isDict = 0;
+          }
+
+          if ( isDict == 0 ) {
+            /* Assigning a vector */
+            vec = sv.vec;
+
+            evaluate_expression(index, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            if ( sv.type != INT32TYPE ) {
+              fprintf(stderr, "index error: Must provide an integer as index\n");
+              exit(1);
+            }
+
+            arrayIndex = sv.i;
+
+            /* check the limits */
+            if ( arrayIndex >= vec->length ) {
+              fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                arrayIndex,
+                vec->length);
+              exit(1);
+            }
+
+            walk = vec->content;
+            while ( walk != NULL && arrayIndex >= 0 ) {
+              expToSet = &walk->arg;
+              walk = walk->next;
+              --arrayIndex;
+            }
+
+            if ( *expToSet == NULL ) {
+              fprintf(stderr, "Unexpected index error!\n");
+              GENERAL_REPORT_ISSUE_MSG();
+              exit(1);
+            }
+
+            /* Placing this expression into the array */
+            free_expression(*expToSet);
+            free(*expToSet);
+            *expToSet = decl->val;
+          } else {
+            /* Assigning a dictionary */
+            char *key = NULL;
+            heapval_t *hvp = NULL;
+            int dummy;
+
+            evaluate_expression(index, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            if ( sv.type != TEXT ) {
+              fprintf(stderr, "index error: Must provide a string as key\n");
+              exit(1);
+            }
+
+            key = ast_emalloc(strlen(sv.t)+2);
+            snprintf(key, strlen(sv.t)+1, "%s", sv.t);
+
+            /* Evaluating the expression among global variables */
+            evaluate_expression(decl->val, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            /* Placing value on the heap */
+            if ( sv.type == TEXT ) {
+              /* Special case */
+              char *c = sv.t;
+              size_t len = strlen(c)+1;
+              char *newText = ast_emalloc(len);
+              snprintf(newText,len,"%s",c);
+              sv.t = newText;
+            } else if ( sv.type == VECTORTYPE ) {
+              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              sv.vec = e->vec;
+              free(e);
+            } else if ( sv.type == DICTTYPE ) {
+              dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              sv.dict = dict;
+            }
+
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+            // Check if collision, if so, free key
+            hashtable_put(dict->hash, key, hvp);
+          }
+        }
+        break;
+        default:
+          GENERAL_REPORT_ISSUE_MSG();
+          break;
+        }
+
+        // Mark and sweep the heap
+        mark_and_sweep(varDecs, varLocals, EXPRESSION_ARGS());
+      }
+      break;
+      case LANG_ENTITY_SYSTEM:
+      {
+        expr_t *sys_var = (expr_t*)((statement_t*)stmt)->content;
+        stackval_t sv;
+
+        evaluate_expression(sys_var, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+        switch ( sv.type ) {
+        case TEXT:
+          /* Making the system call */
+          system(sv.t);
+          break;
+        default:
+          printf("%s.error: unknown type of system call on the stack (%d)\n", 
+            __func__, sv.type);
+          break;
         }
       }
       break;
-      default:
-        GENERAL_REPORT_ISSUE_MSG();
-        break;
-      }
+      case LANG_ENTITY_RETURN:
+      {
+        expr_t *retVal = (expr_t*)((statement_t*)stmt)->content;
+        stackval_t sv;
 
-      // Mark and sweep the heap
-      mark_and_sweep(varDecs, varLocals, EXPRESSION_ARGS());
-    }
-    break;
-    case LANG_ENTITY_SYSTEM:
-    {
-      expr_t *sys_var = (expr_t*)((statement_t*)stmt)->content;
-      stackval_t sv;
-
-      evaluate_expression(sys_var, EXPRESSION_ARGS());
-      POP_VAL(&sv, sp, sc);
-      switch ( sv.type ) {
-      case TEXT:
-        /* Making the system call */
-        system(sv.t);
-        break;
-      default:
-        printf("%s.error: unknown type of system call on the stack (%d)\n", 
-          __func__, sv.type);
-        break;
-      }
-    }
-    break;
-    case LANG_ENTITY_RETURN:
-    {
-      expr_t *retVal = (expr_t*)((statement_t*)stmt)->content;
-      stackval_t sv;
-
-      evaluate_expression(retVal, EXPRESSION_ARGS());
-      POP_VAL(&sv, sp, sc);
-      switch ( sv.type ) {
-      case TEXT:
-        /* Pushing the return value as a string */
-        PUSH_STRING(sv.t, sp, sc);
-        break;
-      case INT32TYPE:
-        /* Pushing the return value as an int */
-        PUSH_INT(sv.i, sp, sc);
-        break;
-      case VECTORTYPE:
-        /* Pushing the return value as a vector */
-        PUSH_VECTOR(sv.vec, sp, sc);
-        break;
-      case DOUBLETYPE:
-        /* Pushing the return value as a double */
-        PUSH_DOUBLE(sv.d, sp, sc);
-      break;
-      default:
-        printf("%s.error: unknown type of system call on the stack (%d)\n", 
-          __func__, sv.type);
-        break;
-      }
-    }
-    break;
-    case LANG_ENTITY_FUNCDECL:
-    {
-      functionDef_t *funcDef = ((statement_t*)stmt)->content;
-
-      /* Placing funciton declaration in global function namespace */
-      hashtable_put(funcDecs, funcDef->id.id, funcDef);
-    }
-    break;
-    case LANG_ENTITY_CONTINUE:
-    {
-      /* Set PC to continue 'st' */
-      continueCtx.stmt = *st;
-      continueCtx.args = args;
-      continueCtx.argVals = argVals;
-      *depth = continueCtx.depth;
-      if ( *depth == 0 ) {
-        // Set locals stack to zero
-        varLocals->sp = 0;
-        varLocals->sb = 0;
-      }
-      longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
-    }
-    break;
-    case LANG_ENTITY_BREAK:
-    {
-      /* Set PC to break 'end' */
-      continueCtx.stmt = *ed;
-      continueCtx.args = args;
-      continueCtx.argVals = argVals;
-      *depth = continueCtx.depth;
-      if ( *depth == 0 ) {
-        // Set locals stack to zero
-        varLocals->sp = 0;
-        varLocals->sb = 0;
-      }
-      longjmp(continueJmpBuf, JMP_CODE_CONTINUE);
-    }
-    break;
-    case LANG_ENTITY_FUNCCALL:
-    {
-      stackval_t sv;
-      size_t stackCount = *sc;
-      functionCall_t *funcCall = ((statement_t*)stmt)->content;
-      call_func(
-        funcCall,
-        EXPRESSION_ARGS()
-      );
-
-      /* Printing result of function call, if string or vector */
-      while ( *sc > stackCount ) {
+        evaluate_expression(retVal, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
-        switch (sv.type) {
-          case TEXT:
-          printf("%s\n", sv.t);
+        switch ( sv.type ) {
+        case TEXT:
+          /* Pushing the return value as a string */
+          PUSH_STRING(sv.t, sp, sc);
           break;
-          case VECTORTYPE:
-          print_vector(sv.vec, EXPRESSION_ARGS());
-          printf("\n");
+        case INT32TYPE:
+          /* Pushing the return value as an int */
+          PUSH_INT(sv.i, sp, sc);
           break;
+        case VECTORTYPE:
+          /* Pushing the return value as a vector */
+          PUSH_VECTOR(sv.vec, sp, sc);
+          break;
+        case DOUBLETYPE:
+          /* Pushing the return value as a double */
+          PUSH_DOUBLE(sv.d, sp, sc);
+        break;
+        default:
+          printf("%s.error: unknown type of system call on the stack (%d)\n", 
+            __func__, sv.type);
+          break;
+        }
+        /* Returning now from this function */
+        free(ctx);
+        return;
+      }
+      break;
+      case LANG_ENTITY_FUNCDECL:
+      {
+        functionDef_t *funcDef = ((statement_t*)stmt)->content;
+
+        /* Placing funciton declaration in global function namespace */
+        hashtable_put(funcDecs, funcDef->id.id, funcDef);
+      }
+      break;
+      case LANG_ENTITY_CONTINUE:
+      {
+        /* Set PC to continue 'start' */
+        ctx->depth--;
+        next = ctx->start[ctx->depth];
+        ctx->depth = ctx->ctxDepth[ctx->depth];
+        varLocals->sp = ctx->sp[ctx->depth];
+        varLocals->sb = ctx->sb[ctx->depth];
+        stmt = next;
+        continue;
+      }
+      break;
+      case LANG_ENTITY_BREAK:
+      {
+        /* Set PC to break 'end' */
+        ctx->depth = ctx->ctxDepth[ctx->depth];
+        next = ctx->end[ctx->depth];
+        varLocals->sp = ctx->sp[ctx->depth];
+        varLocals->sb = ctx->sb[ctx->depth];
+        stmt = next;
+        continue;
+      }
+      break;
+      case LANG_ENTITY_FUNCCALL:
+      {
+        stackval_t sv;
+        size_t stackCount = *sc;
+        functionCall_t *funcCall = ((statement_t*)stmt)->content;
+
+        call_func(
+          funcCall,
+          EXPRESSION_ARGS()
+        );
+
+        /* Printing result of function call, if string or vector */
+        while ( *sc > stackCount ) {
+          POP_VAL(&sv, sp, sc);
+          switch (sv.type) {
+            case TEXT:
+            printf("%s\n", sv.t);
+            break;
+            case VECTORTYPE:
+            print_vector(sv.vec, EXPRESSION_ARGS());
+            printf("\n");
+            break;
+            default:
+            break;
+          }
+        }
+      }
+      break;
+      case LANG_ENTITY_EXPR:
+      {
+        stackval_t sv;
+        size_t stackCount = *sc;
+        expr_t *e = ((statement_t*)stmt)->content;
+
+        switch ( e->type ) {
+          case EXPR_TYPE_FUNCCALL: {
+            functionCall_t *funcCall = e->func;
+
+            call_func(
+              funcCall,
+              EXPRESSION_ARGS()
+            );
+
+            /* Printing result of function call, if string or vector */
+            while ( *sc > stackCount ) {
+              POP_VAL(&sv, sp, sc);
+              switch (sv.type) {
+                case TEXT:
+                printf("%s\n", sv.t);
+                break;
+                case VECTORTYPE:
+                print_vector(sv.vec, EXPRESSION_ARGS());
+                printf("\n");
+                break;
+                default:
+                break;
+              }
+            }
+
+            break;
+          }
           default:
           break;
         }
+
       }
-    }
-    break;
-    case LANG_ENTITY_EXPR:
-    {
-      stackval_t sv;
-      size_t stackCount = *sc;
-      expr_t *e = ((statement_t*)stmt)->content;
+      break;
+      case LANG_ENTITY_CONDITIONAL:
+      {
+        ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
+        ifStmt_t *ifstmtWalk;
+        stackval_t sv;
 
-      switch ( e->type ) {
-        case EXPR_TYPE_FUNCCALL: {
+        if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
+          /* Handle the continue '@' and break '!@' points' */
+          ctx->start[ctx->depth] = stmt;
+          ctx->end[ctx->depth] = next;
+          ctx->ctxDepth[ctx->depth] = ctx->depth;
+        }
 
-          functionCall_t *funcCall = e->func;
-          call_func(
-            funcCall,
-            EXPRESSION_ARGS()
-          );
+        ctx->bodyEnd[ctx->depth] = next;
 
-          /* Printing result of function call, if string or vector */
-          while ( *sc > stackCount ) {
+        evaluate_expression(ifstmt->cond, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        switch ( sv.type ) {
+          case INT32TYPE:
+          *ax = (sv.i != 0);
+          break;
+          default:
+          fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
+          exit(1);
+          break;
+        }
+
+        /* Read ax for conditional */
+        if ( *ax ) {
+          next = ifstmt->body;
+        } else {
+          // Walk through the elifs.
+          int stop = 0;
+          ifstmtWalk = ifstmt->elif;
+
+          while ( ifstmtWalk != NULL ) {
+
+            evaluate_expression(ifstmtWalk->cond, EXPRESSION_ARGS());
             POP_VAL(&sv, sp, sc);
-            switch (sv.type) {
-              case TEXT:
-              printf("%s\n", sv.t);
-              break;
-              case VECTORTYPE:
-              print_vector(sv.vec, EXPRESSION_ARGS());
-              printf("\n");
+
+            switch ( sv.type ) {
+              case INT32TYPE:
+              *ax = (sv.i != 0);
               break;
               default:
+              fprintf(stderr, "Invalid conditional expression.\n");
+              exit(1);
               break;
+            }
+
+            if ( *ax ) {
+              ifStmt_t *elif = ifstmtWalk;
+              next = elif->body;
+              stop = 1;
+              break;
+            }
+            ifstmtWalk = ifstmtWalk->elif;
+          }
+
+          if ( ! stop ) {
+            if ( ifstmt->endif != NULL ) {
+              ifStmt_t *endif = ifstmt->endif;
+              next = endif->body;
             }
           }
 
-          break;
         }
-        default:
-        break;
-      }
 
+      }
+      break;
+      default:
+      break;
     }
-    break;
-    case LANG_ENTITY_CONDITIONAL:
-    {
-      ifStmt_t *ifstmt = ((statement_t*)stmt)->content;
-      ifStmt_t *ifstmtWalk;
-      stackval_t sv;
 
-      if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
-        /* Handle the continue '@' and break '!@' points' */
-        if ( (*(uintptr_t*)st) != (uintptr_t) stmt ) {
-          PUSH_POINTER((*(uintptr_t*)st), sp, sc);
-          (*(uintptr_t*)st) = (uintptr_t) stmt;
-        }
-        if ( (*(uintptr_t*)ed) != (uintptr_t) next ) {
-          PUSH_POINTER((*(uintptr_t*)ed), sp, sc);
-          (*(uintptr_t*)ed) = (uintptr_t) next;
-        }
-        /* Set the continue context depth */
-        continueCtx.depth = *depth;
-      }
-
-      evaluate_expression(ifstmt->cond, EXPRESSION_ARGS());
-      POP_VAL(&sv, sp, sc);
-
-      switch ( sv.type ) {
-        case INT32TYPE:
-        *ax = (sv.i != 0);
-        break;
-        default:
-        fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
-        exit(1);
-        break;
-      }
-
-      /* Read ax for conditional */
-      if ( *ax ) {
-        int localsStack = varLocals->sp;
-        *depth = *depth + 1;
-        interpret_statements_(ifstmt->body,
-          PROVIDE_CONTEXT(), args, argVals);
-        *depth = *depth - 1;
-        varLocals->sp = localsStack;
-      } else {
-        // Walk through the elifs.
-        int stop = 0;
-        ifstmtWalk = ifstmt->elif;
-
-        while ( ifstmtWalk != NULL ) {
-
-          evaluate_expression(ifstmtWalk->cond, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
-
-          switch ( sv.type ) {
-            case INT32TYPE:
-            *ax = (sv.i != 0);
-            break;
-            default:
-            fprintf(stderr, "Invalid conditional expression.\n");
-            exit(1);
-            break;
-          }
-
-          if ( *ax ) {
-            int localsStack = varLocals->sp;
-            *depth = *depth + 1;
-            interpret_statements_(ifstmtWalk->body,
-              PROVIDE_CONTEXT(), args, argVals);
-            *depth = *depth - 1;
-            varLocals->sp = localsStack;
-            stop = 1;
-            break;
-          }
-          ifstmtWalk = ifstmtWalk->elif;
-        }
-
-        if ( ! stop ) {
-          // Print the else if it is not NULL
-          if ( ifstmt->endif != NULL ) {
-            ifstmtWalk = ifstmt->endif;
-            int localsStack = varLocals->sp;
-            *depth = *depth + 1;
-            interpret_statements_(ifstmtWalk->body, PROVIDE_CONTEXT(), args, argVals);
-            *depth = *depth - 1;
-            varLocals->sp = localsStack;
-          }
-        }
-
-      }
-
-      if ( ifstmt->ifType & LANG_CONDITIONAL_CTX ) {
-        /* Handle the continue '@' and break '!@' points' */
-        POP_VAL(&sv, sp, sc);
-        (*(uintptr_t*)ed) = sv.p;
-        POP_VAL(&sv, sp, sc);
-        (*(uintptr_t*)st) = sv.p;
-      }
-
-    }
-    break;
-    default:
-    break;
+    stmt = next;
   }
 
-  interpret_statements_(next, PROVIDE_CONTEXT(), args, argVals);
+  free(ctx);
 }
 
 heapval_t *locals_lookup(locals_stack_t *stack, char *id) {

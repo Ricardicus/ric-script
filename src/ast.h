@@ -52,6 +52,7 @@
 #define LANG_ENTITY_SYSTEM       14
 #define LANG_ENTITY_RETURN       15
 #define LANG_ENTITY_EXPR         16
+#define LANG_ENTITY_BODY_END     17
 
 #define LANG_CONDITIONAL_IF      BIT(1)
 #define LANG_CONDITIONAL_ELIF    BIT(2)
@@ -292,7 +293,7 @@ typedef struct heapval {
 // Number of elements on the stack of this interpreter (arbitrary number?)
 #define RIC_STACKSIZE 1024
 // Number of elements on the heap of this interpreter (arbitrary number?)
-#define RIC_HEAPSIZE  4096
+#define RIC_HEAPSIZE  10000
 // maximum number of variables in the langauge, need to be known by current
 // garbage collector algorithm (making a list of all active)
 #define RIC_MAX_NBR_VARS 4096
@@ -507,7 +508,7 @@ while ( i < size ) {\
 	++i;\
 }\
 if ( i == size ) {\
-	fprintf(stderr, "Error: Heap full\n");\
+	fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
 	exit(1);\
 } } while (0);
 

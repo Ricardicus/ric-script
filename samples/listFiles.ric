@@ -1,27 +1,40 @@
 # A script to demonstrate how one can list files using ric-script
 
-@ listFiles(folder, indent) {
-  indentation = ("--" * indent) + " "
+@ printUsage() {
+  print("usage: " + args[0] + " " + args[1] + " directory")
+}
 
+@ listFiles(folder, indent) {
   files = ls(folder)
   i = 0
   . [ i < len(files) ] {
     file = files[i]
-    # Printing indentation
-    printf(indentation)
-    ? [ isFile(file) ] {
-      printf(file)
-    } ~[ isDir(file) ] {
-      printf("d: " + file)
+    fullfile = indent + "/" + file
+    ? [ isFile(fullfile) ] {
+      print(fullfile)
+    } ~ {
       ? [ file != '.' ] {
       ? [ file != '..'] {
-        listFiles(file, indent + 1)
+        listFiles(fullfile, fullfile)
       }}
     }
     i = i + 1
     @
   }
-
 }
 
-listFiles('.')
+# argument checking
+? [ len(args) < 3 ] {
+  printUsage()
+  exit(1)
+}
+
+? [ isDir(args[2]) ] {
+  # print folder structure
+  listFiles(args[2], args[2])
+} ~ {
+  # not a folder given
+  printUsage()
+  exit(1)
+}
+

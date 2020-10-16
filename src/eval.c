@@ -1823,6 +1823,8 @@ void interpret_statements_(
       }
       break;
       case LANG_ENTITY_FIN: {
+        /* Free context */
+        free(ctx);
         /* Jump to VM shutdown */
         longjmp(endingJmpBuf, 1);
       }

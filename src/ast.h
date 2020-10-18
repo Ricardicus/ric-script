@@ -293,7 +293,7 @@ typedef struct heapval {
 // Number of elements on the stack of this interpreter (arbitrary number?)
 #define RIC_STACKSIZE 1024
 // Number of elements on the heap of this interpreter (arbitrary number?)
-#define RIC_HEAPSIZE  10000
+#define RIC_HEAPSIZE  4096
 // maximum number of variables in the langauge, need to be known by current
 // garbage collector algorithm (making a list of all active)
 #define RIC_MAX_NBR_VARS 4096

@@ -2920,6 +2920,10 @@ static int isAFloat(char *arg) {
 
 static int typeOfArgument(char *arg)
 {
+  if ( strlen(arg) == 1 && arg[0] == '.' ) {
+    return TEXT;
+  }
+
   if ( isAFloat(arg) ) {
     return DOUBLETYPE;
   }

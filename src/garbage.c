@@ -77,11 +77,11 @@ static void sweep (
   uint32_t markVal,
   EXPRESSION_PARAMS()) {
   int i = 0;
-  int32_t size = (*(heapval_t*)hb).sv.i;
-  heapval_t *heap = (heapval_t*)hb;
+  int32_t size = (*(heapval_t*)hp).sv.i;
+  heapval_t *heap = (heapval_t*)hp;
 
   /* Sweep the heap values that haven't got the mark */
-  i = 0;
+  i = 1;
   while ( i < size - 1 ) {
     if ( heap[i].occupied && 
         heap[i].mark != markVal) {

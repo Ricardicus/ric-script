@@ -37,6 +37,7 @@ def test_vector_print():
 "recursion.ric",
 "function_within_function.ric",
 "locals_globals.ric",
+"string_manipulations.ric",
 "vector_print.ric",
 "math.ric",
 "foobar.ric"

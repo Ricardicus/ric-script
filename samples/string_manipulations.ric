@@ -1,0 +1,19 @@
+#!/usr/bin/ric
+# String indexing and altering
+# Some basic assigning and indexing
+
+s = "hejsan"
+print(s[0])
+print(s[1])
+print(s[2])
+s[3] = "hej"
+print(s)
+s[0] = "-"
+print(s)
+s[1] = "-"
+print(s)
+
+d = "tja"
+s[0] = d
+print(s)
+

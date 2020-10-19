@@ -541,8 +541,8 @@ Please report back to me.\n\
     case EXPR_TYPE_VECTOR_IDX:
     {
       int32_t arrayIndex = 0;
-      vector_t *vec;
-      dictionary_t *dict;
+      vector_t *vec = NULL;
+      dictionary_t *dict = NULL;
       argsList_t *walk;
       char *text;
       int typeOfVal = 0;
@@ -2000,7 +2000,6 @@ void interpret_statements_(
               size_t additionLen;
               size_t diff;
               size_t q = 0;
-              char *start;
               char *newAddition = NULL;
 
               evaluate_expression(index, EXPRESSION_ARGS());
@@ -2033,7 +2032,6 @@ void interpret_statements_(
               diff = origLen - arrayIndex;
 
               additionLen = ( diff < additionLen ? diff : additionLen );
-              start = text + arrayIndex;
               q = 0;
               while ( q < additionLen ) {
                 text[arrayIndex + q] = newAddition[q];

@@ -12,11 +12,6 @@
 #define JMP_CODE_CONTINUE    1
 #define JMP_CODE_TEARDOWN    2
 
-#define MAX_NBR_ARGUMENTS    10
-
-#define MAX_NBR_LOCALS       1000
-#define MAX_BODY_LEVELS      30  // If you need more; I am sorry.
-
 int evaluate_condition(ifCondition_t *cond,
   void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
@@ -96,18 +91,6 @@ typedef struct ctx_table_t {
   statement_t *start[MAX_BODY_LEVELS];
   statement_t *end[MAX_BODY_LEVELS];
 } ctx_table_t;
-
-typedef struct local {
-  char *id;
-  heapval_t *hpv;
-} local_t;
-
-typedef struct locals_stack {
-  local_t stack[MAX_NBR_LOCALS];
-  hashtable_t *localDecs;
-  int sp;
-  int sb;
-} locals_stack_t;
 
 heapval_t *locals_lookup(locals_stack_t *stack, char *id);
 void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv);

@@ -5,9 +5,6 @@
 hashtable_t *funcDecs = NULL;
 hashtable_t *varDecs = NULL;
 
-/* Namespace local */
-locals_stack_t *varLocals;
-
 jmp_buf endingJmpBuf;
 
 #if 0
@@ -2054,7 +2051,7 @@ void interpret_statements_(
         }
 
         // Mark and sweep the heap
-        mark_and_sweep(varDecs, varLocals, EXPRESSION_ARGS());
+        mark_and_sweep(varDecs, EXPRESSION_ARGS());
       }
       break;
       case LANG_ENTITY_SYSTEM:
@@ -2327,13 +2324,15 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
 }
 
 void setup_namespaces() {
-  funcDecs = hashtable_new(100, 0.8);
-  assert(funcDecs != NULL);
-  varDecs = hashtable_new(200, 0.8);
-  assert(varDecs != NULL);
-  varLocals = ast_emalloc(sizeof(locals_stack_t));
-  varLocals->sp = 0;
-  varLocals->sb = 0;
+  static int globalNamespaceSetup = 0;
+
+  if ( globalNamespaceSetup == 0 ) {
+    funcDecs = hashtable_new(100, 0.8);
+    assert(funcDecs != NULL);
+    varDecs = hashtable_new(200, 0.8);
+    assert(varDecs != NULL);
+    globalNamespaceSetup = 1;
+  }
 }
 
 void close_namespaces() {
@@ -2792,8 +2791,13 @@ void interpret_statements(
   // Setup heap
   SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
 
-  // Setup namespaces
+  // Setup global namespaces
   setup_namespaces();
+
+  // Setup locals 
+  varLocals = ast_emalloc(sizeof(locals_stack_t));
+  varLocals->sp = 0;
+  varLocals->sb = 0;
 
   // arguments to environment variables
   arguments_to_variables(argc, argv, hp);
@@ -2814,6 +2818,9 @@ void interpret_statements(
   } else {
     // Close namespaces
     close_namespaces();
+
+    // free locals
+    free(varLocals);
 
     // free heap
     free_heap(hp, hb);
@@ -2844,8 +2851,13 @@ void interpret_statements_interactive(
     // Setup heap
     SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
 
-    // Setup namespaces
+    // Setup global namespaces
     setup_namespaces();
+
+    // Setup locals 
+    varLocals = ast_emalloc(sizeof(locals_stack_t));
+    varLocals->sp = 0;
+    varLocals->sb = 0;
 
     // arguments to environment variables
     arguments_to_variables(argc, argv, hp);
@@ -2901,6 +2913,9 @@ void interpret_statements_interactive(
       // Close namespaces
       close_namespaces();
 
+      // free locals
+      free(varLocals);
+
       // free heap
       free_heap(hp, hb);
 
@@ -2919,6 +2934,9 @@ void interpret_statements_interactive(
     // Close namespaces
     close_namespaces();
 
+    // free locals
+    free(varLocals);
+
     // free heap
     free_heap(hp, hb);
 
@@ -2927,8 +2945,6 @@ void interpret_statements_interactive(
 
     // Free memory associated with the AST
     free_ast(stmt);
-
-    firstCall = 1;
   }
 }
 

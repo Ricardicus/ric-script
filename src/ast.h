@@ -69,6 +69,20 @@
 #define DICTIONARY_STANDARD_SIZE 1024
 #define DICTIONARY_STANDARD_LOAD 0.8
 
+// Max number of input arguments
+#define MAX_NBR_ARGUMENTS    10
+// Max number of locals that can be defined at the same time
+#define MAX_NBR_LOCALS       1000
+// Maximum body depth
+#define MAX_BODY_LEVELS      30  // If you need more; I am sorry.
+// Number of elements on the stack of this interpreter (arbitrary number?)
+#define RIC_STACKSIZE        1024
+// Number of elements on the heap of this interpreter (arbitrary number?)
+#define RIC_HEAPSIZE         4096
+// maximum number of variables in the langauge, need to be known by current
+// garbage collector algorithm (making a list of all active)
+#define RIC_MAX_NBR_VARS     4096
+
 #define GENERAL_ERROR_ISSUE_URL  "https://github.com/Ricardicus/ric-script"
 #define GENERAL_REPORT_ISSUE_MSG() do {\
         fprintf(stderr, "Please include the script and file an error report to me here:\n");\
@@ -290,23 +304,27 @@ typedef struct heapval {
   uint32_t mark;
 } heapval_t;
 
-// Number of elements on the stack of this interpreter (arbitrary number?)
-#define RIC_STACKSIZE 1024
-// Number of elements on the heap of this interpreter (arbitrary number?)
-#define RIC_HEAPSIZE  4096
-// maximum number of variables in the langauge, need to be known by current
-// garbage collector algorithm (making a list of all active)
-#define RIC_MAX_NBR_VARS 4096
+typedef struct local {
+  char *id;
+  heapval_t *hpv;
+} local_t;
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc; int depth;
+typedef struct locals_stack {
+  local_t stack[MAX_NBR_LOCALS];
+  hashtable_t *localDecs;
+  int sp;
+  int sb;
+} locals_stack_t;
+
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc; int depth; locals_stack_t *varLocals;
 #define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
-static void *st, *ed; static size_t sc; static int depth;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth
-#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc, *depth }
+static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals
+#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc, *depth, varLocals }
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
 int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
-void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth
+void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth, locals_stack_t *varLocals
 #define EXPRESSION_PARAMS() void *stmt, void *next, \
 PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals

@@ -10,7 +10,6 @@
 
 void mark_and_sweep(
   hashtable_t *varDecs,
-  void *varLocals,
   EXPRESSION_PARAMS());
 
 void free_heap(void *hp, void *hbp);

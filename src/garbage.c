@@ -24,7 +24,6 @@ uint32_t generate_mark_value()
 
 static void mark (
   hashtable_t *varDecs,
-  locals_stack_t *varLocals,
   uint32_t markVal,
   EXPRESSION_PARAMS()) {
   char *variableIDS[RIC_MAX_NBR_VARS];
@@ -41,7 +40,7 @@ static void mark (
 
       hv->mark = markVal;
       if ( hv->sv.type == DICTTYPE ) {
-        mark(hv->sv.dict->hash, NULL, markVal, EXPRESSION_ARGS());
+        mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
       }
 
       ++i;
@@ -67,7 +66,7 @@ static void mark (
     hv->mark = markVal;
 
     if ( hv->sv.type == DICTTYPE ) {
-      mark(hv->sv.dict->hash, NULL, markVal, EXPRESSION_ARGS());
+      mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
     }
     ++i;
   }
@@ -110,14 +109,12 @@ static void sweep (
 
 void mark_and_sweep (
   hashtable_t *varDecs,
-  void *locals,
   EXPRESSION_PARAMS()) {
   uint32_t markVal;
   /* Generate mark value */
   markVal = generate_mark_value();
   /* Mark objects to keep */
-  locals_stack_t *varLocals = locals;
-  mark(varDecs, varLocals, markVal, EXPRESSION_ARGS());
+  mark(varDecs, markVal, EXPRESSION_ARGS());
   /* Sweep the rest */
   sweep(markVal, EXPRESSION_ARGS());
 }

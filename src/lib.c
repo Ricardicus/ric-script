@@ -17,6 +17,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("contains", 2, ric_contains),
   DECLARE_LIB_FUNCTION("keys", 1, ric_keys),
   DECLARE_LIB_FUNCTION("isDefined", 1, ric_is_defined),
+  DECLARE_LIB_FUNCTION("help", 0, ric_help),
   // libstring
   DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
   DECLARE_LIB_FUNCTION("split", 2, ric_split),
@@ -58,6 +59,10 @@ void initialize_ric_lib() {
     hashtable_put(libCallbacks, func->libFuncName, func);
     ++i;
   }
+}
+
+size_t ric_lib_calls() {
+  return sizeof(ric_library) / sizeof(libFunction_t);
 }
 
 libFunction_t* look_up_lib(char *id) {

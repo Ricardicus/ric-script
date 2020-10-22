@@ -1684,7 +1684,7 @@ void call_func(
       exit(1);
     }
 
-    if ( libFunc->nbrArgs != (int)argsWalk->length ) {
+    if ( argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length ) {
       fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
         funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
       exit(1);

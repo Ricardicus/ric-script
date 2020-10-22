@@ -541,3 +541,24 @@ int ric_is_defined(LIBRARY_PARAMS())
   return 0;
 }
 
+extern libFunction_t ric_library[];
+
+int ric_help(LIBRARY_PARAMS())
+{
+  int32_t result = 0;
+  int walk = 0;
+
+  printf("These are the functions I know:\nfunction-name ( number-of-arguments)\n");
+
+  /* Output what this interpreter can do */
+  while ( walk < ric_lib_calls() ) {
+    printf("- %s ( %d )\n", ric_library[walk].libFuncName, ric_library[walk].nbrArgs);
+    ++walk;
+  }
+
+  /* Pushing result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+

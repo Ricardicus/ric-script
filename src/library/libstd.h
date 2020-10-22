@@ -22,6 +22,7 @@ int ric_len(LIBRARY_PARAMS());
 int ric_contains(LIBRARY_PARAMS());
 int ric_keys(LIBRARY_PARAMS());
 int ric_is_defined(LIBRARY_PARAMS());
+int ric_help(LIBRARY_PARAMS());
 
 #endif
 

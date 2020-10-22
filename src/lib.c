@@ -26,6 +26,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("fileClose", 1, ric_close_file),
   DECLARE_LIB_FUNCTION("fileWrite", 2, ric_write_file),
   DECLARE_LIB_FUNCTION("fileReadLines", 1, ric_read_lines_file),
+  DECLARE_LIB_FUNCTION("input", 1, ric_read_input),
   // libmath
   DECLARE_LIB_FUNCTION("pow", 2, ric_power),
   DECLARE_LIB_FUNCTION("log", 1, ric_log),

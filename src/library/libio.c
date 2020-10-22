@@ -201,3 +201,67 @@ int ric_read_lines_file(LIBRARY_PARAMS())
 
   return 0;
 }
+
+int ric_read_input(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  char *t = NULL;
+  char *inputText = NULL;
+  char *buffer = NULL;
+  char *c = NULL;
+  heapval_t *hpv;
+  int dummy;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    inputText = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  buffer = calloc(MAX_LINE_LENGTH, 1);
+  if ( buffer == NULL ) {
+    fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+    exit(1);
+  }
+
+  printf("%s", inputText);
+
+  if ( fgets(buffer, MAX_LINE_LENGTH, stdin) != NULL ) {
+    /* Take the remaining part also */
+    c = strchr(buffer, '\r');
+    if ( c != NULL ) {
+      *c = 0;
+    }
+    c = strchr(buffer, '\n');
+    if ( c != NULL ) {
+      *c = 0;
+    }
+
+    t = calloc(strlen(buffer)+1, 1);
+    if ( t == NULL ) {
+      fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    snprintf(t, strlen(buffer)+1, "%s", buffer);
+  }
+
+  free(buffer);
+
+  stv.type = TEXT;
+  stv.t = t;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+

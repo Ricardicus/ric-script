@@ -20,7 +20,7 @@ int ric_open_file(LIBRARY_PARAMS())
     break;
   }
 
-  fp = fopen(filename, "w+");
+  fp = fopen(filename, "r+");
 
   if ( fp == NULL ) {
     // Failed to open such a file
@@ -34,7 +34,6 @@ int ric_open_file(LIBRARY_PARAMS())
 
   return 0;
 }
-
 
 int ric_close_file(LIBRARY_PARAMS())
 {
@@ -145,3 +144,60 @@ int ric_write_file(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_read_lines_file(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  expr_t *vec = NULL;
+  argsList_t *vecContent = NULL;
+  FILE *fp = NULL;
+  char *buffer = NULL;
+  heapval_t *hpv;
+  int dummy;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case POINTERTYPE:
+    fp = (FILE*)stv.p;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  buffer = calloc(MAX_LINE_LENGTH, 1);
+  if ( buffer == NULL ) {
+    fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+    exit(1);
+  }
+
+  while ( fgets(buffer, MAX_LINE_LENGTH, fp) != NULL ) {
+    /* Take the remaining part also */
+    expr_t *e;
+    argsList_t *a;
+    e = newExpr_Text(buffer);
+    a = newArgument(e, vecContent);
+    vecContent = a;
+    memset(buffer, 0, MAX_LINE_LENGTH);
+  }
+
+  /* Reset file pointer */
+  fseek(fp, 0, SEEK_SET);
+
+  free(buffer);
+
+  vec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
+
+  return 0;
+}

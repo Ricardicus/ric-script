@@ -41,8 +41,24 @@ def test_file_exist():
 
 def test_output():
 
+  output_lines = [
+"Hello!",
+"Checking if there is a file called: 'test.txt': ",
+"- Yes, there was such a file.",
+"Opening a file: test.txt",
+"File has been opened",
+"Closing the file",
+"5",
+"'1336' as a string + 1 is: '1337'",
+"The length of this text before the column including the space behind and the column itself is: 95",
+"I will exit with exit code: 2"
+]
+
   lib_script = callSample('ric_lib.ric')
 
-  ric_result = os.popen(lib_script).read()
+  ric_result = os.popen(lib_script).read().splitlines()
 
-  assert "The length of this text before the column including the space behind and the column itself is: 95" in ric_result
+  assert len(ric_result) == len(output_lines)
+
+  for line in ric_result:
+    assert line in output_lines

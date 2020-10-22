@@ -24,8 +24,13 @@ fileWrite(fp, content)
 
 print("Closing the file")
 
-fileClose( fp )
+fileClose(fp)
 
+fp = fileOpen(fileCheck)
+
+print(len(fileReadLines(fp)))
+
+fileClose(fp)
 
 # String functions
 string_int = "1336"

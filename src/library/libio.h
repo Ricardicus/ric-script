@@ -12,9 +12,12 @@
 #include "hashtable.h"
 #include "ast.h"
 
+#define MAX_LINE_LENGTH 1024
+
 int ric_open_file(LIBRARY_PARAMS());
 int ric_close_file(LIBRARY_PARAMS());
 int ric_write_file(LIBRARY_PARAMS());
+int ric_read_lines_file(LIBRARY_PARAMS());
 
 #endif
 

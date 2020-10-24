@@ -741,6 +741,7 @@ Please report back to me.\n\
 
           newText = ast_emalloc(len+1);
           newText[0] = text[arrayIndex];
+          newText[1] = 0;
           sv.type = TEXT;
           sv.t = newText;
 

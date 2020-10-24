@@ -1,6 +1,7 @@
 #include "libos.h"
 #include <windows.h>
 #include <synchapi.h>
+#include <ftw.h>
 
 int ric_sleep(LIBRARY_PARAMS())
 {

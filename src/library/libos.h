@@ -17,6 +17,8 @@ int ric_is_directory(LIBRARY_PARAMS());
 int ric_is_file(LIBRARY_PARAMS());
 int ric_ls(LIBRARY_PARAMS());
 int ric_cd(LIBRARY_PARAMS());
+int ric_rm(LIBRARY_PARAMS());
+int ric_mkdir(LIBRARY_PARAMS());
 
 #endif
 

@@ -20,7 +20,14 @@ int ric_open_file(LIBRARY_PARAMS())
     break;
   }
 
-  fp = fopen(filename, "r+");
+  /* Check if file exist, if it doesn't create it */
+  fp = fopen(filename, "r");
+  if ( fp == NULL ) {
+    fp = fopen(filename, "w");
+  } else {
+    fclose(fp);
+    fp = fopen(filename, "r+");
+  }
 
   if ( fp == NULL ) {
     // Failed to open such a file

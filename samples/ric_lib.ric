@@ -32,6 +32,25 @@ print(len(fileReadLines(fp)))
 
 fileClose(fp)
 
+# Creating some folders and removing them
+mkdir("a")
+cd("a")
+fp = fileOpen("a.txt")
+fileWrite(fp, "hejsan")
+fileClose(fp)
+mkdir("b")
+cd("b")
+fp = fileOpen("b.txt")
+fileWrite(fp, "hejsan")
+fileClose(fp)
+cd("..")
+cd("..")
+print(ls("a"))
+cd("a")
+print(ls("b"))
+cd("..")
+print(rm("a"))
+
 # String functions
 string_int = "1336"
 stringed = parseInt(string_int) + 1

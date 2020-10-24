@@ -63,5 +63,5 @@ def test_output():
 
   assert len(ric_result) == len(output_lines)
 
-  for line in ric_result:
-    assert line in output_lines
+  assert len(set(ric_result)) == len(set(output_lines))
+

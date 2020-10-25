@@ -1953,8 +1953,8 @@ void interpret_statements_(
             break;
             case VECTORTYPE: {
               /* Assigning a vector */
+              expr_t *newExp = NULL;
               vec = sv.vec;
-
               evaluate_expression(index, EXPRESSION_ARGS());
               POP_VAL(&sv, sp, sc);
 
@@ -1989,7 +1989,41 @@ void interpret_statements_(
               /* Placing this expression into the array */
               free_expression(*expToSet);
               free(*expToSet);
-              *expToSet = decl->val;
+
+              evaluate_expression(decl->val, EXPRESSION_ARGS());
+              POP_VAL(&sv, sp, sc);
+
+              switch (sv.type) {
+              case INT32TYPE:
+                newExp = newExpr_Ival(sv.i);
+                break;
+              case DOUBLETYPE:
+                newExp = newExpr_Float(sv.d);
+                break;
+              case TEXT:
+                newExp = newExpr_Text(sv.t);
+                break;
+              case POINTERTYPE:
+                newExp = newExpr_Pointer(sv.p);
+                break;
+              case FUNCPTRTYPE:
+                newExp = newExpr_FuncPtr(sv.func);
+                break;
+              case LIBFUNCPTRTYPE:
+                newExp = newExpr_LibFuncPtr(sv.libfunc);
+                break;
+              case VECTORTYPE: {
+                newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+                break;
+              }
+              default:
+                printf("%s.error: unknown type of value on the stack (%d)\n", 
+                  __func__, sv.type);
+                GENERAL_REPORT_ISSUE_MSG();
+                break;
+              }
+
+              *expToSet = newExp;
             }
             break;
             case TEXT: {

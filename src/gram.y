@@ -445,6 +445,16 @@ dictionary_key_val:
       keyVal->next = NULL;
 
       $$ = keyVal;
+    }
+    | stringContents ':' vector {
+      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
+
+      keyVal->entity = EXPR_TYPE_DICT;
+      keyVal->key = $1;
+      keyVal->val = $3;
+      keyVal->next = NULL;
+
+      $$ = keyVal;
     };
 
 body:
@@ -498,29 +508,13 @@ mathContent:
     };
 
 indexedVector:
-    ID '[' mathContentDigit ']' {
+    ID '[' expressions ']' {
         expr_t *id = newExpr_ID($1);
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
     }
-    | ID '[' ID ']' {
-        expr_t *id = newExpr_ID($1);
-        expr_t *index = newExpr_ID($3);
-        $$ = newExpr_VectorIndex(id, index);
-    }
-    | ID '[' stringContents ']' {
-        expr_t *id = newExpr_ID($1);
-        $$ = newExpr_VectorIndex(id, $3);
-    }
-    | indexedVector '[' mathContentDigit ']' {
-      $$ = newExpr_VectorIndex($1, $3);
-    }
-    | indexedVector '[' ID ']' {
-      expr_t *index = newExpr_ID($3);
-      $$ = newExpr_VectorIndex($1, index);
-    }
-    | indexedVector '[' stringContents ']' {
+    | indexedVector '[' expressions ']' {
       $$ = newExpr_VectorIndex($1, $3);
     };
 

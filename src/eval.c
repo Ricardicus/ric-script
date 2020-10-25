@@ -2173,34 +2173,6 @@ void interpret_statements_(
         continue;
       }
       break;
-      case LANG_ENTITY_FUNCCALL:
-      {
-        stackval_t sv;
-        size_t stackCount = *sc;
-        functionCall_t *funcCall = ((statement_t*)stmt)->content;
-
-        call_func(
-          funcCall,
-          EXPRESSION_ARGS()
-        );
-
-        /* Printing result of function call, if string or vector */
-        while ( *sc > stackCount ) {
-          POP_VAL(&sv, sp, sc);
-          switch (sv.type) {
-            case TEXT:
-            printf("%s\n", sv.t);
-            break;
-            case VECTORTYPE:
-            print_vector(sv.vec, EXPRESSION_ARGS());
-            printf("\n");
-            break;
-            default:
-            break;
-          }
-        }
-      }
-      break;
       case LANG_ENTITY_EXPR:
       {
         stackval_t sv;
@@ -2226,6 +2198,13 @@ void interpret_statements_(
                 case VECTORTYPE:
                 print_vector(sv.vec, EXPRESSION_ARGS());
                 printf("\n");
+                break;
+                case INT32TYPE:
+                if ( *interactive ) {
+                  printf("%" PRIi32 "\n", sv.i);
+                } else {
+                  printf("interactive: %d\n", *interactive);
+                }
                 break;
                 default:
                 break;
@@ -2844,6 +2823,9 @@ void interpret_statements(
   st = stmt;
   ed = NULL;
 
+  /* Set interactive state to 0 */
+  interactive = 0;
+
   /* Set starting depth */
   depth = 0;
 
@@ -2906,6 +2888,9 @@ void interpret_statements_interactive(
 
     /* Set starting depth */
     depth = 0;
+
+    /* Set interactive state to 1 */
+    interactive = 1;
 
     /* Flag that setup has been done already */
     firstCall = 0;

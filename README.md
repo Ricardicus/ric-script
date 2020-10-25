@@ -256,7 +256,7 @@ stack = {"head" : 0, "data" : []}
 operators = ["+", "*", "-", "/"]
 numberChars = ['0','1','2','3','4','5','6','7','8','9']
 
-@ isNumber(num) {
+@ isNumber(num) {
   isNr = 1
   i = 0
   . [ i < len(num) ] {
@@ -270,7 +270,7 @@ numberChars = ['0','1','2','3','4','5','6','7','8','9']
   return isNr
 }
 
-@ pop() {
+@ pop() {
   head = stack["head"]
   ? [ head == 0 ] {
     print("Too few arguments on the stack. Goodbye!")
@@ -308,6 +308,8 @@ numberChars = ['0','1','2','3','4','5','6','7','8','9']
   }
 }
 
+print("RPN Calculator (quit by typing 'q'):")
+
 run = 1
 . [ run ] {
   in = input(">> ")
@@ -317,8 +319,10 @@ run = 1
     ? [ isNumber(expr[i]) ] {
       push( parseInt(expr[i]) )
     } ~[ contains(operators, expr[i]) ] {
-        s = eval(expr[i])
-        push(s)
+      s = eval(expr[i])
+      push(s)
+    } ~[ contains(expr[i], "q") ] {
+      run = 0
     } ~ {
       print("Sorry, I don't understad this: " + expr[i])
     }

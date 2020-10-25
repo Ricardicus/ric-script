@@ -600,15 +600,18 @@ stringEditions:
         expr_t *e1 = (expr_t*)$1;
         expr_t *e2 = (expr_t*)$2;
 
-        textBuffer = ast_emalloc(e1->textLen+e2->textLen+1);
+        size_t textlen_e1 = strlen(e1->text);
+        size_t textlen_e2 = strlen(e2->text);
 
-        snprintf(textBuffer, e1->textLen+e2->textLen+1,
+        textBuffer = ast_emalloc(textlen_e1+textlen_e2+1);
+
+        snprintf(textBuffer, textlen_e1+textlen_e2+1,
             "%s%s",
             e1->text,
             e2->text
         );
 
-        textBuffer[e1->textLen + e2->textLen] = 0;
+        textBuffer[textlen_e1+textlen_e2] = 0;
 
         free(e1->text);
         free(e2->text);

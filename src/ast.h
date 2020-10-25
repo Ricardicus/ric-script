@@ -152,29 +152,25 @@ typedef struct dictionary {
 } dictionary_t;
 
 typedef struct expr_s {
-	int      type;
-	ID_t     id;
+	int type;
 
 	union {
-		double   fval;
-		int32_t  ival;
-		uint32_t uval;
-	};	
-	char     *text;
-	size_t   textLen;
-
-	union {
-		addOP_t add;
-		subOP_t sub;
-		mulOP_t mul;
-		divOP_t div;
-		modOP_t mod;
+    ID_t          id;
+    char          *text;
+    double        fval;
+    int32_t       ival;
+    uint32_t      uval;
+		addOP_t       add;
+		subOP_t       sub;
+		mulOP_t       mul;
+		divOP_t       div;
+		modOP_t       mod;
     ifCondition_t *cond;
-    void *func;
-    uintptr_t p;
-    vector_t *vec;
+    void          *func;
+    uintptr_t     p;
+    vector_t      *vec;
     vectorIndex_t *vecIdx;
-    dictionary_t *dict;
+    dictionary_t  *dict;
 	};
 } expr_t;
 

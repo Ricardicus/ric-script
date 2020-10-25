@@ -96,7 +96,6 @@ expr_t *newExpr_Text(char *text) {
 
   expr->type = EXPR_TYPE_TEXT;
   expr->text = (char *)ast_emalloc(textLen + 1);
-  expr->textLen = textLen;
 
   memcpy(expr->text, text, textLen);
   expr->text[textLen] = 0;

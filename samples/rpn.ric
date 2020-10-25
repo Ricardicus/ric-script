@@ -71,7 +71,9 @@ run = 1
     i = i + 1
     @
   }
-  print(stack["data"][ stack["head"] - 1 ])
+  ? [ stack["head"] > 0 ] {
+    print(stack["data"][ stack["head"] - 1 ])
+  }
   stack["head"] = 0
   @
 }

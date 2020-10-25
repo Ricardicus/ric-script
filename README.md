@@ -247,11 +247,12 @@ foo
 bar
 ```
 
-# syntax snapshot: RPN calulator
+# syntax snapshot: RPN calculator
 
 A calulator in reverse Polish notation can be implemented like this in ric-script:
 
 ```
+#!/usr/bin/ric
 stack = {"head" : 0, "data" : []}
 operators = ["+", "*", "-", "/"]
 numberChars = ['0','1','2','3','4','5','6','7','8','9']

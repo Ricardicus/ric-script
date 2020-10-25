@@ -92,7 +92,7 @@ int ric_split(LIBRARY_PARAMS())
     offset += strlen(buffer+offset) + strlen(arg2);
   }
 
-  if ( offset != 0 || (strstr(buffer, arg2) == NULL)) {
+  if ( offset != 0 || (strstr(buffer, arg2) == NULL) ) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;

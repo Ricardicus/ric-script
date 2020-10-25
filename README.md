@@ -339,6 +339,16 @@ run = 1
 }
 ```
 
+Example of using this calculator:
+
+```
+$ ./ric samples/rpn.ric                    
+RPN Calculator (quit by typing 'q'):
+>> 2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -
+30
+>> q
+```
+
 
 ## Loading external scripts
 

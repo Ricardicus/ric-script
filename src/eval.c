@@ -2202,8 +2202,6 @@ void interpret_statements_(
                 case INT32TYPE:
                 if ( *interactive ) {
                   printf("%" PRIi32 "\n", sv.i);
-                } else {
-                  printf("interactive: %d\n", *interactive);
                 }
                 break;
                 default:

@@ -1,0 +1,17 @@
+#!/usr/bin/ric
+#
+# Ramanujans formula for the number 3
+# it should be infinite recursion, but
+# I set a limit at 100.
+#
+# outputs: 3.000000
+#
+
+@ ram_three (count, limit) {
+  ? [ count == limit ] {
+    return 1.0
+  }
+  return sqrt(1 + count * ram_three(count + 1, limit))
+}
+
+print(ram_three(2, 100))

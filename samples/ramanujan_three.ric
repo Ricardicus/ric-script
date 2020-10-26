@@ -9,9 +9,9 @@
 
 @ ram_three (count, limit) {
   ? [ count == limit ] {
-    return 1.0
+    -> 1.0
   }
-  return sqrt(1 + count * ram_three(count + 1, limit))
+  -> sqrt(1 + count * ram_three(count + 1, limit))
 }
 
 print(ram_three(2, 100))

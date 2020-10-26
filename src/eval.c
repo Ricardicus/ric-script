@@ -2211,7 +2211,33 @@ void interpret_statements_(
 
             break;
           }
-          default:
+          default: {
+
+            if ( *interactive ) {
+              /* Compute */
+              evaluate_expression(e, EXPRESSION_ARGS());
+
+              /* Printing result of computation */
+              while ( *sc > stackCount ) {
+                POP_VAL(&sv, sp, sc);
+                switch (sv.type) {
+                  case TEXT:
+                  printf("%s\n", sv.t);
+                  break;
+                  case VECTORTYPE:
+                  print_vector(sv.vec, EXPRESSION_ARGS());
+                  printf("\n");
+                  break;
+                  case INT32TYPE:
+                  printf("%" PRIi32 "\n", sv.i);
+                  break;
+                  default:
+                  break;
+                }
+              }
+            }
+
+          }
           break;
         }
 

@@ -36,6 +36,7 @@ def test_vector_print():
 "example.ric",
 "recursion.ric",
 "rpn.ric",
+"ramanujan_three.ric",
 "function_within_function.ric",
 "locals_globals.ric",
 "string_manipulations.ric",

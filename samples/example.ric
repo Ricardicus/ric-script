@@ -169,9 +169,9 @@ a = 0
 
 @ calcGCD(a, b) {
     ? [ b == 0 ] { 
-      return a
+      -> a
     } ~ { 
-      return calcGCD(b , (a % b) )
+      -> calcGCD(b , (a % b) )
     }
 }
 

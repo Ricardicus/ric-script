@@ -269,7 +269,7 @@ numberChars = ['0','1','2','3','4','5','6','7','8','9']
       isNr = 0
     }
   }
-  return isNr
+  -> isNr
 }
 
 @ pop() {
@@ -281,7 +281,7 @@ numberChars = ['0','1','2','3','4','5','6','7','8','9']
   head = head - 1
   val = stack["data"][head]
   stack["head"] = head
-  return val
+  -> val
 }
 
 @ push (val) {
@@ -296,17 +296,17 @@ numberChars = ['0','1','2','3','4','5','6','7','8','9']
 
 @ eval (op) {
   ? [ op == '+' ] {
-    return pop() + pop()
+    -> pop() + pop()
   } ~[ op == '-' ] {
     tmp = pop()
-    return pop() - tmp
+    -> pop() - tmp
   } ~[ op == '*' ] {
-    return pop() * pop()
+    -> pop() * pop()
   } ~[ op == '/' ] {
     tmp = pop()
-    return pop() / tmp
+    -> pop() / tmp
   } ~ {
-    return 0
+    -> 0
   }
 }
 

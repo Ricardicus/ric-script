@@ -234,12 +234,12 @@ h[1]: hoppsan
 ====================
 hej
 hejsan
-{'elit' : 1337, 'hello' : world}
+{'elit' : 1337, 'hello' : 'world'}
 world
 1337
-{'elit' : 1337, 'hello' : world, 'new field' : 1337}
+{'elit' : 1337, 'hello' : 'world', 'new field' : 1337}
 1337
-{'dict' : {'hello' : world}, 'elit' : 1337, 'hello' : world, 'new field' : 1337}
+{'dict' : {'hello' : 'world'}, 'elit' : 1337, 'hello' : 'world', 'new field' : 1337}
 world
 foo
 bar

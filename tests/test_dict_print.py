@@ -3,7 +3,7 @@ from settings import *
 
 def test_dict_print():
   output_lines = [
-"{'a' : b, '1337' : 1337, 'c' : d}",
+"{'a' : 'b', '1337' : 1337, 'c' : 'd'}",
 "b",
 "d",
 "1337",

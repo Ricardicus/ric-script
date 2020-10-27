@@ -2581,7 +2581,7 @@ int print_dictionary(dictionary_t *dict,
         }
         break;
         case TEXT: {
-          printf("%s", sv.t);
+          printf("'%s'", sv.t);
         }
         break;
         case POINTERTYPE: {
@@ -2590,12 +2590,12 @@ int print_dictionary(dictionary_t *dict,
         break;
         case FUNCPTRTYPE: {
           functionDef_t *funcDec = sv.func;
-          printf("<FuncPointer: %s>", funcDec->id.id);
+          printf("<FuncPointer: '%s'>", funcDec->id.id);
         }
         break;
         case LIBFUNCPTRTYPE: {
           libFunction_t *libFunc = sv.libfunc;
-          printf("<LibFuncPointer: %s>", libFunc->libFuncName);
+          printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
         }
         break;
         case VECTORTYPE: {

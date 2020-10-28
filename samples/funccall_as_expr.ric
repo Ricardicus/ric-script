@@ -1,5 +1,5 @@
 @ foobar () {
-  return 1337
+  -> 1337
   print("will not be reached")
 }
 

@@ -192,3 +192,21 @@ void print_table_as_chars(hashtable_t * hashtable)
 		i++;
 	}
 }
+
+void hashtable_print_table_keys(hashtable_t * hashtable)
+{
+	int i = 0;
+	int size = hashtable->size;
+	struct key_val_pair * ptr;
+
+	while (i<size) {
+		if (hashtable->table[i] != NULL) {
+			ptr = hashtable->table[i];
+			while (ptr!=NULL) {
+				printf("key: %s\n",ptr->key);
+				ptr=ptr->next;
+			}
+		}
+		i++;
+	}
+}

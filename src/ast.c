@@ -46,24 +46,26 @@ expr_t *newExpr_Vector(argsList_t *args) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
 
-  /* Reverse the args list order */
-  argsList_t *prev = NULL;
-  argsList_t *current = args;
-  argsList_t *next;
-  while (current != NULL) {
-    next = current->next;
-    current->next = prev;
-    prev = current;
-    current = next;
-  }
+  if ( args != NULL ) {
+    /* Reverse the args list order */
+    argsList_t *prev = NULL;
+    argsList_t *current = args;
+    argsList_t *next;
+    while (current != NULL) {
+      next = current->next;
+      current->next = prev;
+      prev = current;
+      current = next;
+    }
 
-  args = prev;
+    args = prev;
 
-  walk = args;
-  /* Counting the vectors length */
-  while (walk != NULL) {
-    length++;
-    walk = walk->next;
+    walk = args;
+    /* Counting the vectors length */
+    while (walk != NULL) {
+      length++;
+      walk = walk->next;
+    }
   }
 
   vec->length = length;
@@ -94,7 +96,6 @@ expr_t *newExpr_Text(char *text) {
 
   expr->type = EXPR_TYPE_TEXT;
   expr->text = (char *)ast_emalloc(textLen + 1);
-  expr->textLen = textLen;
 
   memcpy(expr->text, text, textLen);
   expr->text[textLen] = 0;
@@ -727,6 +728,10 @@ void free_ast(statement_t *stmt) {
 argsList_t* copy_argsList(argsList_t *args) {
   argsList_t *new = NULL;
   argsList_t *walk = args;
+
+  if ( args == NULL ) {
+    return NULL;
+  }
 
   while ( walk != NULL ) {
     new = newArgument(walk->arg, new);

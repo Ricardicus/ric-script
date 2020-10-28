@@ -92,7 +92,7 @@ int ric_split(LIBRARY_PARAMS())
     offset += strlen(buffer+offset) + strlen(arg2);
   }
 
-  if ( offset != 0 ) {
+  if ( offset != 0 || (strstr(buffer, arg2) == NULL) ) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
@@ -112,6 +112,34 @@ int ric_split(LIBRARY_PARAMS())
 
   /* Pushing the parsed value */
   PUSH_VECTOR(stv.vec, sp, sc);
+
+  return 0;
+}
+
+int ric_char_code(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  char *string = NULL;
+  int result = 0;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    string = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  result = (int)string[0];
+  
+  /* Pushing the parsed value */
+  PUSH_INT(result, sp, sc);
 
   return 0;
 }

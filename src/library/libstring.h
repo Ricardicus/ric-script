@@ -14,6 +14,7 @@
 #include "ast.h"
 
 int ric_atoi(LIBRARY_PARAMS());
+int ric_char_code(LIBRARY_PARAMS());
 int ric_split(LIBRARY_PARAMS());
 
 #endif

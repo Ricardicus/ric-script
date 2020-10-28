@@ -264,20 +264,16 @@ int ric_append(LIBRARY_PARAMS())
   }
 
   addition = newArgument(entry, NULL);
-
   walk = vec->content;
   if ( walk == NULL ) {
     // Special case
     vec->content = addition;
   } else {
-
     while ( walk->next != NULL ) {
       walk = walk->next;
     }
-
     walk->next = addition;
   }
-
   // Increase vector size
   vec->length++;
 

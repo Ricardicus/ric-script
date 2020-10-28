@@ -44,6 +44,7 @@ int hashtable_hash(hashtable_t*,const char*);
 void hashtable_put(hashtable_t*,char*,void*);
 void print_table_as_chars(hashtable_t*);
 void for_each_pair(hashtable_t * hash, void (*callback)(void*,void*) );
+void hashtable_print_table_keys(hashtable_t * hashtable);
 
 #endif
 

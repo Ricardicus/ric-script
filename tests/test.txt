@@ -1,0 +1,5 @@
+Hello world!
+New line right?
+This is a slash: \
+New line?
+Have a good day!

@@ -445,6 +445,16 @@ dictionary_key_val:
       keyVal->next = NULL;
 
       $$ = keyVal;
+    }
+    | stringContents ':' vector {
+      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
+
+      keyVal->entity = EXPR_TYPE_DICT;
+      keyVal->key = $1;
+      keyVal->val = $3;
+      keyVal->next = NULL;
+
+      $$ = keyVal;
     };
 
 body:
@@ -498,29 +508,13 @@ mathContent:
     };
 
 indexedVector:
-    ID '[' mathContentDigit ']' {
+    ID '[' expressions ']' {
         expr_t *id = newExpr_ID($1);
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
     }
-    | ID '[' ID ']' {
-        expr_t *id = newExpr_ID($1);
-        expr_t *index = newExpr_ID($3);
-        $$ = newExpr_VectorIndex(id, index);
-    }
-    | ID '[' stringContents ']' {
-        expr_t *id = newExpr_ID($1);
-        $$ = newExpr_VectorIndex(id, $3);
-    }
-    | indexedVector '[' mathContentDigit ']' {
-      $$ = newExpr_VectorIndex($1, $3);
-    }
-    | indexedVector '[' ID ']' {
-      expr_t *index = newExpr_ID($3);
-      $$ = newExpr_VectorIndex($1, index);
-    }
-    | indexedVector '[' stringContents ']' {
+    | indexedVector '[' expressions ']' {
       $$ = newExpr_VectorIndex($1, $3);
     };
 
@@ -606,15 +600,18 @@ stringEditions:
         expr_t *e1 = (expr_t*)$1;
         expr_t *e2 = (expr_t*)$2;
 
-        textBuffer = ast_emalloc(e1->textLen+e2->textLen+1);
+        size_t textlen_e1 = strlen(e1->text);
+        size_t textlen_e2 = strlen(e2->text);
 
-        snprintf(textBuffer, e1->textLen+e2->textLen+1,
+        textBuffer = ast_emalloc(textlen_e1+textlen_e2+1);
+
+        snprintf(textBuffer, textlen_e1+textlen_e2+1,
             "%s%s",
             e1->text,
             e2->text
         );
 
-        textBuffer[e1->textLen + e2->textLen] = 0;
+        textBuffer[textlen_e1+textlen_e2] = 0;
 
         free(e1->text);
         free(e2->text);
@@ -723,6 +720,10 @@ otherChar:
         $$[1] = 0;
     }
     | ']' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '*' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

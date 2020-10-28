@@ -1953,8 +1953,8 @@ void interpret_statements_(
             break;
             case VECTORTYPE: {
               /* Assigning a vector */
+              expr_t *newExp = NULL;
               vec = sv.vec;
-
               evaluate_expression(index, EXPRESSION_ARGS());
               POP_VAL(&sv, sp, sc);
 
@@ -1989,7 +1989,41 @@ void interpret_statements_(
               /* Placing this expression into the array */
               free_expression(*expToSet);
               free(*expToSet);
-              *expToSet = decl->val;
+
+              evaluate_expression(decl->val, EXPRESSION_ARGS());
+              POP_VAL(&sv, sp, sc);
+
+              switch (sv.type) {
+              case INT32TYPE:
+                newExp = newExpr_Ival(sv.i);
+                break;
+              case DOUBLETYPE:
+                newExp = newExpr_Float(sv.d);
+                break;
+              case TEXT:
+                newExp = newExpr_Text(sv.t);
+                break;
+              case POINTERTYPE:
+                newExp = newExpr_Pointer(sv.p);
+                break;
+              case FUNCPTRTYPE:
+                newExp = newExpr_FuncPtr(sv.func);
+                break;
+              case LIBFUNCPTRTYPE:
+                newExp = newExpr_LibFuncPtr(sv.libfunc);
+                break;
+              case VECTORTYPE: {
+                newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+                break;
+              }
+              default:
+                printf("%s.error: unknown type of value on the stack (%d)\n", 
+                  __func__, sv.type);
+                GENERAL_REPORT_ISSUE_MSG();
+                break;
+              }
+
+              *expToSet = newExp;
             }
             break;
             case TEXT: {
@@ -2139,34 +2173,6 @@ void interpret_statements_(
         continue;
       }
       break;
-      case LANG_ENTITY_FUNCCALL:
-      {
-        stackval_t sv;
-        size_t stackCount = *sc;
-        functionCall_t *funcCall = ((statement_t*)stmt)->content;
-
-        call_func(
-          funcCall,
-          EXPRESSION_ARGS()
-        );
-
-        /* Printing result of function call, if string or vector */
-        while ( *sc > stackCount ) {
-          POP_VAL(&sv, sp, sc);
-          switch (sv.type) {
-            case TEXT:
-            printf("%s\n", sv.t);
-            break;
-            case VECTORTYPE:
-            print_vector(sv.vec, EXPRESSION_ARGS());
-            printf("\n");
-            break;
-            default:
-            break;
-          }
-        }
-      }
-      break;
       case LANG_ENTITY_EXPR:
       {
         stackval_t sv;
@@ -2193,6 +2199,11 @@ void interpret_statements_(
                 print_vector(sv.vec, EXPRESSION_ARGS());
                 printf("\n");
                 break;
+                case INT32TYPE:
+                if ( *interactive ) {
+                  printf("%" PRIi32 "\n", sv.i);
+                }
+                break;
                 default:
                 break;
               }
@@ -2200,7 +2211,33 @@ void interpret_statements_(
 
             break;
           }
-          default:
+          default: {
+
+            if ( *interactive ) {
+              /* Compute */
+              evaluate_expression(e, EXPRESSION_ARGS());
+
+              /* Printing result of computation */
+              while ( *sc > stackCount ) {
+                POP_VAL(&sv, sp, sc);
+                switch (sv.type) {
+                  case TEXT:
+                  printf("%s\n", sv.t);
+                  break;
+                  case VECTORTYPE:
+                  print_vector(sv.vec, EXPRESSION_ARGS());
+                  printf("\n");
+                  break;
+                  case INT32TYPE:
+                  printf("%" PRIi32 "\n", sv.i);
+                  break;
+                  default:
+                  break;
+                }
+              }
+            }
+
+          }
           break;
         }
 
@@ -2517,22 +2554,68 @@ int print_dictionary(dictionary_t *dict,
   keyCountTotal = keyCount;
 
   if ( keyCountTotal > 0 ) {
-    printf("<Dictionary, keys: [");
+    printf("{");
     keyCount = 0;
     i = 0;
     while ( i < size ) {
+      heapval_t *hpv;
+      stackval_t sv;
       ptr = hash->table[i];
-      while (ptr != NULL) {
-        printf("%s%s", (keyCount > 0 ? ", ": ""), ptr->key);
-        keyCount++;
-        ptr = ptr->next;
+
+      if ( ptr == NULL ) {
+        ++i;
+        continue;
       }
+
+      printf("%s'%s' : ", (keyCount > 0 ? ", " : ""), ptr->key);
+      hpv = ptr->data;
+      sv = hpv->sv;
+
+      switch ( sv.type ) {
+        case INT32TYPE: {
+          printf("%" PRIi32 "", sv.i);
+        }
+        break;
+        case DOUBLETYPE: {
+          printf("%lf", sv.d);
+        }
+        break;
+        case TEXT: {
+          printf("'%s'", sv.t);
+        }
+        break;
+        case POINTERTYPE: {
+          printf("<Pointer: %" PRIxPTR ">", sv.p);
+        }
+        break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          printf("<FuncPointer: '%s'>", funcDec->id.id);
+        }
+        break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
+        }
+        break;
+        case VECTORTYPE: {
+          print_vector(sv.vec, EXPRESSION_ARGS());
+        }
+        break;
+        case DICTTYPE: {
+          print_dictionary(sv.dict, EXPRESSION_ARGS());
+        }
+        break;
+        default:
+        break;
+      }
+
+      keyCount++;
       i++;
     }
-
-    printf("]>");
+    printf("}");
   } else {
-    printf("<Dictionary, no keys in it>");
+    printf("{}");
   }
 
   return 0;
@@ -2810,6 +2893,9 @@ void interpret_statements(
   st = stmt;
   ed = NULL;
 
+  /* Set interactive state to 0 */
+  interactive = 0;
+
   /* Set starting depth */
   depth = 0;
 
@@ -2872,6 +2958,9 @@ void interpret_statements_interactive(
 
     /* Set starting depth */
     depth = 0;
+
+    /* Set interactive state to 1 */
+    interactive = 1;
 
     /* Flag that setup has been done already */
     firstCall = 0;

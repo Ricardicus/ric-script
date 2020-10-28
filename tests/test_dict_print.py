@@ -3,15 +3,15 @@ from settings import *
 
 def test_dict_print():
   output_lines = [
-"<Dictionary, keys: [a, 1337, c]>",
+"{'a' : 'b', '1337' : 1337, 'c' : 'd'}",
 "b",
 "d",
 "1337",
 "f",
 "hej",
-"<Dictionary, no keys in it>",
-"<Dictionary, keys: [a, b]>",
-"<Dictionary, keys: [a]>",
+"{}",
+"{'a' : 1, 'b' : 2}",
+"{'a' : {'a' : 1, 'b' : 2}}",
 "e",
 "foobar",
 "1",

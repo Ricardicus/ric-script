@@ -152,29 +152,25 @@ typedef struct dictionary {
 } dictionary_t;
 
 typedef struct expr_s {
-	int      type;
-	ID_t     id;
+	int type;
 
 	union {
-		double   fval;
-		int32_t  ival;
-		uint32_t uval;
-	};	
-	char     *text;
-	size_t   textLen;
-
-	union {
-		addOP_t add;
-		subOP_t sub;
-		mulOP_t mul;
-		divOP_t div;
-		modOP_t mod;
+    ID_t          id;
+    char          *text;
+    double        fval;
+    int32_t       ival;
+    uint32_t      uval;
+		addOP_t       add;
+		subOP_t       sub;
+		mulOP_t       mul;
+		divOP_t       div;
+		modOP_t       mod;
     ifCondition_t *cond;
-    void *func;
-    uintptr_t p;
-    vector_t *vec;
+    void          *func;
+    uintptr_t     p;
+    vector_t      *vec;
     vectorIndex_t *vecIdx;
-    dictionary_t *dict;
+    dictionary_t  *dict;
 	};
 } expr_t;
 
@@ -316,15 +312,18 @@ typedef struct locals_stack {
   int sb;
 } locals_stack_t;
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; size_t sc; int depth; locals_stack_t *varLocals;
+#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; \
+size_t sc; int depth; locals_stack_t *varLocals; int interactive;
 #define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
-static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals
-#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st, *(void**)ed, *sc, *depth, varLocals }
+static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals; static int interactive;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive
+#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st,\
+*(void**)ed, *sc, *depth, varLocals, *interactive }
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
 int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
-void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth, locals_stack_t *varLocals
+void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth, locals_stack_t *varLocals, \
+int *interactive
 #define EXPRESSION_PARAMS() void *stmt, void *next, \
 PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals

@@ -62,6 +62,7 @@ app.post('/interpret', function(req, res) {
     io.emit("terminal-refresh", {message: "new script launched"});
   }
 
+  args.unshift('script.ric')
   args.unshift('-i');
 
   console.log(args)

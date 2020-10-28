@@ -97,6 +97,7 @@ well as haven't implemented:
 - [x] Dictionary expressions
 - [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_) (**implemented only function loading**)
 - [x] Local scope for variables (distinction between global and local)
+- [ ] Classes
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, like the one Python has

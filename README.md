@@ -100,7 +100,7 @@ well as haven't implemented:
 - [ ] Classes
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
-- [ ] Better interactive mode, support for multi-lines (language is indifferent to line breaks, so as of today everything can be fit into a singel line).
+- [ ] Better interactive mode, support for multi-lines (today only single lines, but language is thankfully indifferent to line breaks).
 - [ ] Socket interface
 - [ ] Threading interface
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))

@@ -104,6 +104,177 @@ well as haven't implemented:
 - [ ] Threading interface
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
+# syntax snapshot: RPN calculator
+
+A calulator in reverse Polish notation can be implemented like this in ric-script:
+
+```
+#!/usr/bin/ric
+# RPN calculator implementation in ric-script
+stack = {"head" : 0, "data" : []}
+operators = ["+", "*", "-", "/"]
+numberChars = ['0','1','2','3','4','5','6','7','8','9']
+
+@ isNumber(num) {
+  isNr = 1
+  i = 0
+  . [ i < len(num) ] {
+    ? [ contains( numberChars, num[i] ) ] {
+      i = i + 1
+      @
+    } ~ {
+      isNr = 0
+    }
+  }
+  -> isNr
+}
+
+@ pop() {
+  head = stack["head"]
+  ? [ head == 0 ] {
+    print("Too few arguments on the stack. Goodbye!")
+    exit(2)
+  }
+  head = head - 1
+  val = stack["data"][head]
+  stack["head"] = head
+  -> val
+}
+
+@ push (val) {
+  head = stack["head"]
+  ? [ head >= len(stack["data"]) ] {
+    append(stack["data"], val)
+  } ~ {
+    stack["data"][head] = val
+  }
+  stack["head"] = head + 1
+}
+
+@ eval (op) {
+  ? [ op == '+' ] {
+    -> pop() + pop()
+  } ~[ op == '-' ] {
+    tmp = pop()
+    -> pop() - tmp
+  } ~[ op == '*' ] {
+    -> pop() * pop()
+  } ~[ op == '/' ] {
+    tmp = pop()
+    -> pop() / tmp
+  } ~ {
+    -> 0
+  }
+}
+
+print("RPN Calculator (quit by typing 'q'):")
+
+run = 1
+. [ run ] {
+  in = input(">> ")
+  expr = split(in, " ")
+  i = 0
+  . [ i < len(expr) ] {
+    ? [ isNumber(expr[i]) ] {
+      push( parseInt(expr[i]) )
+    } ~[ contains(operators, expr[i]) ] {
+      s = eval(expr[i])
+      push(s)
+    } ~[ contains(expr[i], "q") ] {
+      run = 0
+    } ~ {
+      print("Sorry, I don't understad this: " + expr[i])
+    }
+    i = i + 1
+    @
+  }
+  ? [ stack["head"] > 0 ] {
+    print(stack["data"][ stack["head"] - 1 ])
+  }
+  stack["head"] = 0
+  @
+}
+```
+
+Example of using this calculator:
+
+```
+$ ./ric samples/rpn.ric                    
+RPN Calculator (quit by typing 'q'):
+>> 2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -
+30
+>> q
+```
+
+# syntax snapshot: Ramanujan 3 formula
+
+```
+#!/usr/bin/ric
+#
+# Ramanujans formula for the number 3
+# it should be infinite recursion, but
+# I set a limit at 100.
+#
+# outputs: 3.000000
+#
+
+@ ram_three (count, limit) {
+  ? [ count == limit ] {
+    -> 1.0
+  }
+  -> sqrt(1 + count * ram_three(count + 1, limit))
+}
+
+print(ram_three(2, 100))
+```
+
+# syntax snapshot: File listing
+
+```
+#!/usr/bin/ric
+# A script to demonstrate how one can list files using ric-script
+
+@ printUsage() {
+  print("usage: " + args[0] + " " + args[1] + " directory")
+}
+
+@ listFiles(folder, indent) {
+  files = ls(folder)
+  i = 0
+  . [ i < len(files) ] {
+    file = files[i]
+    fullfile = folder + "/" + file
+    ? [ isFile(fullfile) ] {
+      printf(" " * indent)
+      print(file)
+    } ~ {
+      ? [ file != '.' ] {
+      ? [ file != '..'] {
+        printf(" " * indent)
+        print(file)
+        listFiles(fullfile, indent + 1)
+      }}
+    }
+    i = i + 1
+    @
+  }
+}
+
+# argument checking
+? [ len(args) < 3 ] {
+  printUsage()
+  exit(1)
+}
+
+? [ isDir(args[2]) ] {
+  # print folder structure
+  listFiles(args[2], 0)
+} ~ {
+  # not a folder given
+  printUsage()
+  exit(1)
+}
+```
 
 # Walkthrough of the language syntax
 
@@ -246,109 +417,6 @@ bar
 foo
 bar
 ```
-
-# syntax snapshot: RPN calculator
-
-A calulator in reverse Polish notation can be implemented like this in ric-script:
-
-```
-#!/usr/bin/ric
-# RPN calculator implementation in ric-script
-stack = {"head" : 0, "data" : []}
-operators = ["+", "*", "-", "/"]
-numberChars = ['0','1','2','3','4','5','6','7','8','9']
-
-@ isNumber(num) {
-  isNr = 1
-  i = 0
-  . [ i < len(num) ] {
-    ? [ contains( numberChars, num[i] ) ] {
-      i = i + 1
-      @
-    } ~ {
-      isNr = 0
-    }
-  }
-  -> isNr
-}
-
-@ pop() {
-  head = stack["head"]
-  ? [ head == 0 ] {
-    print("Too few arguments on the stack. Goodbye!")
-    exit(2)
-  }
-  head = head - 1
-  val = stack["data"][head]
-  stack["head"] = head
-  -> val
-}
-
-@ push (val) {
-  head = stack["head"]
-  ? [ head >= len(stack["data"]) ] {
-    append(stack["data"], val)
-  } ~ {
-    stack["data"][head] = val
-  }
-  stack["head"] = head + 1
-}
-
-@ eval (op) {
-  ? [ op == '+' ] {
-    -> pop() + pop()
-  } ~[ op == '-' ] {
-    tmp = pop()
-    -> pop() - tmp
-  } ~[ op == '*' ] {
-    -> pop() * pop()
-  } ~[ op == '/' ] {
-    tmp = pop()
-    -> pop() / tmp
-  } ~ {
-    -> 0
-  }
-}
-
-print("RPN Calculator (quit by typing 'q'):")
-
-run = 1
-. [ run ] {
-  in = input(">> ")
-  expr = split(in, " ")
-  i = 0
-  . [ i < len(expr) ] {
-    ? [ isNumber(expr[i]) ] {
-      push( parseInt(expr[i]) )
-    } ~[ contains(operators, expr[i]) ] {
-      s = eval(expr[i])
-      push(s)
-    } ~[ contains(expr[i], "q") ] {
-      run = 0
-    } ~ {
-      print("Sorry, I don't understad this: " + expr[i])
-    }
-    i = i + 1
-    @
-  }
-  ? [ stack["head"] > 0 ] {
-    print(stack["data"][ stack["head"] - 1 ])
-  }
-  stack["head"] = 0
-  @
-}
-```
-
-Example of using this calculator:
-
-```
-$ ./ric samples/rpn.ric                    
-RPN Calculator (quit by typing 'q'):
->> 2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -
-30
->> q
-```
-
 
 ## Loading external scripts
 

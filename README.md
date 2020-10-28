@@ -384,7 +384,7 @@ l[0]()
 l[1]()
 ```
 
-## Output:
+Outputs:
 
 ```
 $ ./ric samples/demo.ric

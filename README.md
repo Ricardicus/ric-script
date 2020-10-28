@@ -105,7 +105,7 @@ well as haven't implemented:
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
 
-# Snapshot of the language syntax
+# Walkthrough of the language syntax
 
 ```
 #!/usr/bin/ric

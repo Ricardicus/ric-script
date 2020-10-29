@@ -644,6 +644,11 @@ stringEdition:
         $$ = newExpr_Text(buffer);
         free($1);
     }
+    | RETURN {
+        char buffer[10];
+        snprintf(buffer, sizeof(buffer), "%s", "->");
+        $$ = newExpr_Text(buffer);
+    }
     | otherChar {
         $$ = newExpr_Text($1);
     };

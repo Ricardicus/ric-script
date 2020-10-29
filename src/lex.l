@@ -32,6 +32,16 @@ RETURN_AS_IS     [\"\'+<>:?\-/()\.{}\*%\[\]~!=,@$\\]
 	return DIGIT;
 }
 {FLOAT_VAL} {
+	if ( double_citation || simple_citation ) {
+		memset(yylval.id,0,sizeof(yylval.id));
+		memcpy(
+			yylval.id, yytext,
+			sizeof(yylval.id) > strlen(yytext) ?
+			strlen(yytext) : sizeof(yylval.id)
+		);
+		/* I am being lazy, I just want to send a string, not ID, but it will work the same */
+		return ID;
+	}
 	yylval.val_double = atof(yytext);
 	return DOUBLE;
 }

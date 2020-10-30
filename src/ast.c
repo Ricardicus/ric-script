@@ -266,6 +266,7 @@ statement_t *newStatement(int type, void *content) {
   case LANG_ENTITY_RETURN:
   case LANG_ENTITY_EXPR:
   case LANG_ENTITY_BODY_END:
+  case LANG_ENTITY_CLASSDECL:
     stmt->content = content;
     break;
   default:
@@ -275,6 +276,19 @@ statement_t *newStatement(int type, void *content) {
     break;
   }
   return stmt;
+}
+
+class_t* newClass(char *id, statement_t *inits) {
+  class_t *class = ast_emalloc(sizeof(class_t));
+  class->id = id;
+  class->init = inits;
+  class->funcDefs = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  class->funcDefs->key_also = 1;
+  class->varMembers = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  class->varMembers->key_also = 1;
+  return class;
 }
 
 expr_t* newExpr_Copy(expr_t *expr) {

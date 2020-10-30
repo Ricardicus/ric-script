@@ -2,6 +2,7 @@
 #include <stdarg.h>
 
 /* Namespace global */
+hashtable_t *classDecs = NULL;
 hashtable_t *funcDecs = NULL;
 hashtable_t *varDecs = NULL;
 
@@ -1778,6 +1779,7 @@ void interpret_statements_(
       case LANG_ENTITY_CONDITIONAL:
       case LANG_ENTITY_SYSTEM:
       case LANG_ENTITY_EXPR:
+      case LANG_ENTITY_CLASSDECL:
         next = ((statement_t*)stmt)->next;
       break;
       case LANG_ENTITY_RETURN:

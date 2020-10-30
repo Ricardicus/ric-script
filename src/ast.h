@@ -53,6 +53,7 @@
 #define LANG_ENTITY_RETURN       15
 #define LANG_ENTITY_EXPR         16
 #define LANG_ENTITY_BODY_END     17
+#define LANG_ENTITY_CLASSDECL    18
 
 #define LANG_CONDITIONAL_IF      BIT(1)
 #define LANG_CONDITIONAL_ELIF    BIT(2)
@@ -200,6 +201,14 @@ typedef struct statement_s {
 	struct statement_s *next;
 } statement_t;
 
+typedef struct class_t {
+  int entity;
+  char *id;
+  statement_t *init;
+  hashtable_t *funcDefs;
+  hashtable_t *varMembers;
+} class_t;
+
 typedef struct body_s {
 	int entity;
 	struct statement_s *content;
@@ -260,6 +269,7 @@ ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
 body_t*         newBody(void *body);
+class_t*        newClass(char *id, statement_t *inits);
 
 argsList_t*     copy_argsList(argsList_t *args);
 

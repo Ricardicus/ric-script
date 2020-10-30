@@ -72,6 +72,8 @@ statement_t *root = NULL;
 %type<data> parameters_list
 %type<data> body
 %type<data> function
+%type<data> class
+%type<data> classInit
 %type<data> functionCall
 %type<data> mathContent
 %type<data> vector
@@ -145,6 +147,9 @@ statement:
     }
     | systemStatement {
         $$ = newStatement(LANG_ENTITY_SYSTEM, $1);
+    }
+    | class {
+        $$ = newStatement(LANG_ENTITY_CLASSDECL, $1);
     };
 
 systemStatement: '$' ID {
@@ -335,6 +340,27 @@ condition:
     | '(' condition ')' {
         $$ = $2;
     };
+
+class: ':' ':' classInit  {
+    $$ = $3;
+};
+
+classInit: ID ':' ':' '{' statements '}' {
+    /* Only declarations allowed */
+    statement_t *walk = $5;
+    while ( walk != NULL ) {
+        if (
+            walk->entity != LANG_ENTITY_DECL &&
+            walk->entity != LANG_ENTITY_FUNCDECL
+        ) {
+            fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+            fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
+            exit(1);
+        }
+        walk = walk->next;
+    }
+    $$ = newClass($1, $5);
+}
 
 function:
     '@' ID '(' parameters_list ')' body {

@@ -348,6 +348,8 @@ class: ':' ':' classInit  {
 classInit: ID ':' ':' '{' statements '}' {
     /* Only declarations allowed */
     statement_t *walk = $5;
+    char *classId = ast_emalloc(strlen($1)+2);
+    memset(classId, 0, strlen($1)+1);
     while ( walk != NULL ) {
         if (
             walk->entity != LANG_ENTITY_DECL &&
@@ -359,7 +361,8 @@ classInit: ID ':' ':' '{' statements '}' {
         }
         walk = walk->next;
     }
-    $$ = newClass($1, $5);
+    snprintf(classId, strlen($1)+2, "%s", classId);
+    $$ = newClass(classId, $5);
 }
 
 function:

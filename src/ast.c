@@ -688,6 +688,15 @@ void free_ast(statement_t *stmt) {
     free_expression(((statement_t *)stmt)->content);
     break;
   }
+  case LANG_ENTITY_CLASSDECL: {
+    class_t *class = ((statement_t *)stmt)->content;
+
+    free(class->id);
+    hashtable_free(class->funcDefs);
+    hashtable_free(class->varMembers);
+    free_ast(class->init);
+    break;
+  }
   case LANG_ENTITY_FUNCDECL: {
     functionDef_t *funcDef = ((statement_t *)stmt)->content;
     argsList_t *args = funcDef->params;

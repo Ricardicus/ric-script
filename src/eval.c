@@ -2149,7 +2149,7 @@ void interpret_statements_(
         class_t *newClass = ((statement_t*)stmt)->content;
 
         /* Placing funciton declaration in global function namespace */
-        hashtable_put(classDecl, newClass->id, newClass);
+        hashtable_put(classDecs, newClass->id, newClass);
       }
       break;
       case LANG_ENTITY_FUNCDECL:
@@ -2379,8 +2379,8 @@ void setup_namespaces() {
     assert(funcDecs != NULL);
     varDecs = hashtable_new(200, 0.8);
     assert(varDecs != NULL);
-    classDecl = hashtable_new(200, 0.8);
-    assert(varDecs != NULL);
+    classDecs = hashtable_new(200, 0.8);
+    assert(classDecs != NULL);
 
     globalNamespaceSetup = 1;
   }
@@ -2500,7 +2500,6 @@ void print_expr(expr_t *expr)
 
 void initClass(class_t *cls, EXPRESSION_PARAMS()) {
   statement_t *initWalk = cls->init;
-  functionDef_t *constructor = NULL;
 
   /* Sanity check */
   if ( cls->funcDefs == NULL || cls->varMembers ) {
@@ -2514,7 +2513,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
       functionDef_t *funcDef = initWalk->content;
 
       /* Placing funciton declaration in global function namespace */
-      hashtable_put(cls->funcDecs, funcDef->id.id, funcDef);
+      hashtable_put(cls->funcDefs, funcDef->id.id, funcDef);
     }
     break;
     case LANG_ENTITY_DECL: {
@@ -2527,7 +2526,6 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
       switch ( id->type ) {
       case EXPR_TYPE_ID: {
         int heapUpdated;
-        heapval_t *globalCheck = NULL;
         char *idStr = id->id.id;
 
         /* Evaluating the expression among global variables */
@@ -3176,6 +3174,9 @@ void interpret_statements(
   /* Set interactive state to 0 */
   interactive = 0;
 
+  /* Set class context to NULL */
+  classCtx = NULL;
+
   /* Set starting depth */
   depth = 0;
 
@@ -3235,6 +3236,9 @@ void interpret_statements_interactive(
     /* Set starting point and end point */
     st = stmt;
     ed = NULL;
+
+    /* Set class context to NULL */
+    classCtx = NULL;
 
     /* Set starting depth */
     depth = 0;

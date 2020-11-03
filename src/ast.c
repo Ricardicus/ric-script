@@ -305,8 +305,8 @@ class_t* newClass(char *id, statement_t *inits) {
   class_t *class = ast_emalloc(sizeof(class_t));
   class->id = id;
   class->init = inits;
-  cls->funcDefs = NULL;
-  cls->varMembers = NULL;
+  class->funcDefs = NULL;
+  class->varMembers = NULL;
   return class;
 }
 

@@ -35,6 +35,7 @@
 #define EXPR_TYPE_VECTOR_IDX  17
 #define EXPR_TYPE_LIBFUNCPTR  18
 #define EXPR_TYPE_DICT        19
+#define EXPR_TYPE_CLASSPTR    20
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -172,6 +173,7 @@ typedef struct expr_s {
     vector_t      *vec;
     vectorIndex_t *vecIdx;
     dictionary_t  *dict;
+    class_t       *classObj;
 	};
 } expr_t;
 
@@ -258,6 +260,7 @@ expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 expr_t* newExpr_Cond(ifCondition_t *cond);
 expr_t* newExpr_Vector(argsList_t *args);
+expr_t* newExpr_ClassPtr(class_t *class);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
 
@@ -286,7 +289,8 @@ typedef enum stackvaltypes {
   FUNCPTRTYPE,
   LIBFUNCPTRTYPE,
   VECTORTYPE,
-  DICTTYPE
+  DICTTYPE,
+  CLASSTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -300,6 +304,7 @@ typedef struct stackval {
     vector_t *vec;
     libFunction_t *libfunc;
     dictionary_t *dict;
+    class_t *classObj;
 	};
 } stackval_t;
 

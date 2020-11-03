@@ -13,6 +13,29 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
+expr_t* newExpr_ClassPtr(class_t *class) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  class_t *cls = ast_emalloc(sizeof(class_t));
+
+  cls->id = strdup(class->id);
+  if ( cls->id == NULL ) {
+    fprintf(stderr,
+            "%s %s error: Failed to build AST, malloc failed\n",
+            __FILE__, __func__);
+    exit(EXIT_FAILURE);
+  }
+
+  cls->init = class->init;
+  cls->funcDefs = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  cls->varMembers = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+
+  expr->type = EXPR_TYPE_CLASSPTR;
+  expr->classObj = cls;
+  return expr;
+}
+
 expr_t *newExpr_Cond(ifCondition_t *cond) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
@@ -282,12 +305,8 @@ class_t* newClass(char *id, statement_t *inits) {
   class_t *class = ast_emalloc(sizeof(class_t));
   class->id = id;
   class->init = inits;
-  class->funcDefs = hashtable_new(
-    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
-  class->funcDefs->key_also = 1;
-  class->varMembers = hashtable_new(
-    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
-  class->varMembers->key_also = 1;
+  cls->funcDefs = NULL;
+  cls->varMembers = NULL;
   return class;
 }
 
@@ -690,10 +709,7 @@ void free_ast(statement_t *stmt) {
   }
   case LANG_ENTITY_CLASSDECL: {
     class_t *class = ((statement_t *)stmt)->content;
-
     free(class->id);
-    hashtable_free(class->funcDefs);
-    hashtable_free(class->varMembers);
     free_ast(class->init);
     break;
   }

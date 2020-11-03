@@ -73,6 +73,8 @@ void call_func(
   argsList_t *args,
   hashtable_t *argVals);
 
+void initClass(class_t *cls, EXPRESSION_PARAMS());
+
 hashtable_t *new_argstable();
 hashtable_t* hashtable_heapvals_copy(
   hashtable_t *hash, EXPRESSION_PARAMS());

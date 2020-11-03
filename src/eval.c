@@ -2144,6 +2144,14 @@ void interpret_statements_(
         return;
       }
       break;
+      case LANG_ENTITY_CLASSDECL:
+      {
+        class_t *newClass = ((statement_t*)stmt)->content;
+
+        /* Placing funciton declaration in global function namespace */
+        hashtable_put(classDecl, newClass->id, newClass);
+      }
+      break;
       case LANG_ENTITY_FUNCDECL:
       {
         functionDef_t *funcDef = ((statement_t*)stmt)->content;
@@ -2371,6 +2379,9 @@ void setup_namespaces() {
     assert(funcDecs != NULL);
     varDecs = hashtable_new(200, 0.8);
     assert(varDecs != NULL);
+    classDecl = hashtable_new(200, 0.8);
+    assert(varDecs != NULL);
+
     globalNamespaceSetup = 1;
   }
 }
@@ -2417,6 +2428,9 @@ void print_expr(expr_t *expr)
       printf(", index: ");
       print_expr(vecIdx->index);
     }
+    break;
+    case EXPR_TYPE_CLASSPTR:
+    printf("Class Object <'%s'>", expr->classObj->id);
     break;
     case EXPR_TYPE_OPADD:
     printf("ADD(");
@@ -2482,6 +2496,270 @@ void print_expr(expr_t *expr)
     break;
   }
 
+}
+
+void initClass(class_t *cls, EXPRESSION_PARAMS()) {
+  statement_t *initWalk = cls->init;
+  functionDef_t *constructor = NULL;
+
+  /* Sanity check */
+  if ( cls->funcDefs == NULL || cls->varMembers ) {
+    return;
+  }
+
+  /* Go through the initializer list and populate the members */
+  while ( initWalk != NULL ) {
+    switch ( initWalk->entity ) {
+    case LANG_ENTITY_FUNCDECL: {
+      functionDef_t *funcDef = initWalk->content;
+
+      /* Placing funciton declaration in global function namespace */
+      hashtable_put(cls->funcDecs, funcDef->id.id, funcDef);
+    }
+    break;
+    case LANG_ENTITY_DECL: {
+      stackval_t sv;
+      expr_t *id;
+      heapval_t *hvp = NULL;
+      declaration_t* decl = initWalk->content;
+      id = decl->id;
+
+      switch ( id->type ) {
+      case EXPR_TYPE_ID: {
+        int heapUpdated;
+        heapval_t *globalCheck = NULL;
+        char *idStr = id->id.id;
+
+        /* Evaluating the expression among global variables */
+        evaluate_expression(decl->val, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        /* Placing value on the heap */
+        if ( sv.type == TEXT ) {
+          /* Special case */
+          char *c = sv.t;
+          size_t len = strlen(c)+1;
+          char *newText = ast_emalloc(len);
+          snprintf(newText,len,"%s",c);
+          sv.t = newText;
+        } else if ( sv.type == VECTORTYPE ) {
+          expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+          sv.vec = e->vec;
+          free(e);
+        } else if ( sv.type == DICTTYPE ) {
+          dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          sv.dict = dict;
+        }
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        /* Placing variable declaration in class variable member namespace */
+        hashtable_put(cls->varMembers, idStr, hvp);
+      }
+      break;
+      case EXPR_TYPE_VECTOR_IDX: {
+        vector_t *vec = NULL;
+        dictionary_t *dict = NULL;
+        int32_t arrayIndex;
+        argsList_t *walk;
+        expr_t **expToSet = NULL;
+        expr_t *vecid = id->vecIdx->id;
+        expr_t *index = id->vecIdx->index;
+
+        stackval_t sv;
+
+        evaluate_expression(vecid, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        switch ( sv.type ) {
+          case DICTTYPE: {
+            dict = sv.dict;
+            /* Assigning a dictionary */
+            char *key = NULL;
+            heapval_t *hvp = NULL;
+            int dummy;
+
+            evaluate_expression(index, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            if ( sv.type != TEXT ) {
+              fprintf(stderr, "index error: Must provide a string as key\n");
+              exit(1);
+            }
+
+            key = ast_emalloc(strlen(sv.t)+2);
+            snprintf(key, strlen(sv.t)+1, "%s", sv.t);
+
+            /* Evaluating the expression among global variables */
+            evaluate_expression(decl->val, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            /* Placing value on the heap */
+            if ( sv.type == TEXT ) {
+              /* Special case */
+              char *c = sv.t;
+              size_t len = strlen(c)+1;
+              char *newText = ast_emalloc(len);
+              snprintf(newText,len,"%s",c);
+              sv.t = newText;
+            } else if ( sv.type == VECTORTYPE ) {
+              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              sv.vec = e->vec;
+              free(e);
+            } else if ( sv.type == DICTTYPE ) {
+              dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              sv.dict = dict;
+            }
+
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+            // Check if collision, if so, free key
+            hashtable_put(dict->hash, key, hvp);
+          }
+          break;
+          case VECTORTYPE: {
+            /* Assigning a vector */
+            expr_t *newExp = NULL;
+            vec = sv.vec;
+            evaluate_expression(index, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            if ( sv.type != INT32TYPE ) {
+              fprintf(stderr, "index error: Must provide an integer as index\n");
+              exit(1);
+            }
+
+            arrayIndex = sv.i;
+
+            /* check the limits */
+            if ( arrayIndex >= vec->length ) {
+              fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                arrayIndex,
+                vec->length);
+              exit(1);
+            }
+
+            walk = vec->content;
+            while ( walk != NULL && arrayIndex >= 0 ) {
+              expToSet = &walk->arg;
+              walk = walk->next;
+              --arrayIndex;
+            }
+
+            if ( *expToSet == NULL ) {
+              fprintf(stderr, "Unexpected index error!\n");
+              GENERAL_REPORT_ISSUE_MSG();
+              exit(1);
+            }
+
+            /* Placing this expression into the array */
+            free_expression(*expToSet);
+            free(*expToSet);
+
+            evaluate_expression(decl->val, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            switch (sv.type) {
+            case INT32TYPE:
+              newExp = newExpr_Ival(sv.i);
+              break;
+            case DOUBLETYPE:
+              newExp = newExpr_Float(sv.d);
+              break;
+            case TEXT:
+              newExp = newExpr_Text(sv.t);
+              break;
+            case POINTERTYPE:
+              newExp = newExpr_Pointer(sv.p);
+              break;
+            case FUNCPTRTYPE:
+              newExp = newExpr_FuncPtr(sv.func);
+              break;
+            case LIBFUNCPTRTYPE:
+              newExp = newExpr_LibFuncPtr(sv.libfunc);
+              break;
+            case VECTORTYPE: {
+              newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+              break;
+            }
+            default:
+              printf("%s.error: unknown type of value on the stack (%d)\n", 
+                __func__, sv.type);
+              GENERAL_REPORT_ISSUE_MSG();
+              break;
+            }
+
+            *expToSet = newExp;
+          }
+          break;
+          case TEXT: {
+            char *text = sv.t;
+            size_t origLen = strlen(text);
+            size_t additionLen;
+            size_t diff;
+            size_t q = 0;
+            char *newAddition = NULL;
+
+            evaluate_expression(index, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            if ( sv.type != INT32TYPE ) {
+              fprintf(stderr, "index error: Must provide an integer as index\n");
+              exit(1);
+            }
+
+            arrayIndex = sv.i;
+
+            if ( arrayIndex >= strlen(text) ) {
+              fprintf(stderr, "index error: index out of bounds\n");
+              exit(1);
+            }
+
+            /* Evaluating the expression among global variables */
+            evaluate_expression(decl->val, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            if ( sv.type != TEXT ) {
+              fprintf(stderr, "string index error: Can only assign text to text.\n");
+              exit(1);
+            }
+
+            newAddition = sv.t;
+            additionLen = strlen(newAddition);
+
+            diff = origLen - arrayIndex;
+
+            additionLen = ( diff < additionLen ? diff : additionLen );
+            q = 0;
+            while ( q < additionLen ) {
+              text[arrayIndex + q] = newAddition[q];
+              q++;
+            }
+          }
+          break;
+          default: {
+            fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
+            GENERAL_REPORT_ISSUE_MSG();
+            exit(1);
+            break;
+          }
+        }
+      }
+      break;
+      default:
+        GENERAL_REPORT_ISSUE_MSG();
+        break;
+      }
+    }
+    break;
+    default:
+    break;
+    }
+
+    initWalk = initWalk->next;
+  }
+
+  /* Call the constructor, if defined */
 }
 
 void print_condition(ifCondition_t *cond)

@@ -74,6 +74,7 @@ statement_t *root = NULL;
 %type<data> function
 %type<data> class
 %type<data> classInit
+%type<data> classFunctionCall
 %type<data> functionCall
 %type<data> mathContent
 %type<data> vector
@@ -215,6 +216,9 @@ expression:
     | functionCall {
       $$ = $1;
     }
+    | classFunctionCall {
+      $$ = $1;
+    }
     | stringContent {
       $$ = $1;
     }
@@ -316,6 +320,9 @@ logical:
     }
     | functionCall {
         $$ = $1;
+    }
+    | classFunctionCall {
+        $$ = $1;
     };
 
 condition:
@@ -372,6 +379,15 @@ function:
     '@' ID '(' ')' body {
         $$ = newFunc($2,NULL,$5);
     };
+
+classFunctionCall:
+    ID ':' ':' ID '(' arguments_list ')' {
+        $$ = NULL;
+    }
+    | ID ':' ':' ID '(' ')' {
+        $$ = NULL;
+    };
+
 
 functionCall:
     ID '(' arguments_list ')' {

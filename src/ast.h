@@ -208,7 +208,8 @@ typedef struct statement_s {
 typedef struct class_t {
   int entity;
   char *id;
-  statement_t *init;
+  int initialized;
+  statement_t *defines;
   hashtable_t *funcDefs;
   hashtable_t *varMembers;
 } class_t;

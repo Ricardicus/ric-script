@@ -88,8 +88,13 @@ int ric_print(LIBRARY_PARAMS())
     case DOUBLETYPE:
     printf("%lf\n", stv.d);
     break;
-    case CLASSTYPE:
-    printf("<Class: '%s'>\n", stv.classObj->id);
+    case CLASSTYPE: {
+      if ( ! stv.classObj->initialized ) {
+        printf("<Class: '%s'>\n", stv.classObj->id);
+      } else {
+        printf("<Class object: '%s'>\n", stv.classObj->id);
+      }
+    }
     break;
     case POINTERTYPE:
     printf("<%" PRIuPTR ">\n", stv.p);
@@ -180,7 +185,13 @@ int ric_printf(LIBRARY_PARAMS())
     printf("%d", stv.i);
     break;
     case CLASSTYPE:
-    printf("<Class: '%s'>", stv.classObj->id);
+    {
+      if ( ! stv.classObj->initialized ) {
+        printf("<Class: '%s'>", stv.classObj->id);
+      } else {
+        printf("<Class object: '%s'>", stv.classObj->id);
+      }
+    }
     break;
     case DOUBLETYPE:
     printf("%lf", stv.d);

@@ -1,0 +1,12 @@
+:: hej :: {
+@ hej () {
+  print("hello")
+}
+}
+
+print(hej)
+
+s = hej()
+print("hej")
+print(s)
+

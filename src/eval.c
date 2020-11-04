@@ -405,6 +405,9 @@ void evaluate_expression(
             case EXPR_TYPE_VECTOR:
               PUSH_VECTOR(expArg->vec, sp, sc);
               break;
+            case EXPR_TYPE_CLASSPTR:
+              PUSH_CLASSREF(expArg->classObj, sp, sc);
+              break;
             case EXPR_TYPE_FVAL:
               PUSH_DOUBLE(expArg->fval, sp, sc);
               break;
@@ -479,6 +482,9 @@ Please report back to me.\n\
             break;
           case DICTTYPE:
             PUSH_DICTIONARY(hv->sv.dict, sp, sc);
+            break;
+          case CLASSTYPE:
+            PUSH_CLASSREF(hv->sv.classObj, sp, sc);
             break;
           case TEXT: {
             PUSH_STRING(hv->sv.t, sp, sc);
@@ -641,6 +647,10 @@ Please report back to me.\n\
               PUSH_DICTIONARY(sv.dict, sp, sc);
               break;
             }
+            case CLASSTYPE: {
+              PUSH_CLASSREF(sv.classObj, sp, sc);
+              break;
+            }
             default:
               fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
               exit(1);
@@ -719,6 +729,10 @@ Please report back to me.\n\
             }
             case DICTTYPE: {
               PUSH_DICTIONARY(sv.dict, sp, sc);
+              break;
+            }
+            case CLASSTYPE: {
+              PUSH_CLASSREF(sv.classObj, sp, sc);
               break;
             }
             default:
@@ -1338,6 +1352,10 @@ Please report back to me.\n\
           PUSH_DICTIONARY(sv.dict, sp, sc);
           break;
         }
+        case CLASSTYPE: {
+          PUSH_CLASSREF(sv.classObj, sp, sc);
+          break;
+        }
         default:
           fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
           exit(1);
@@ -1425,6 +1443,7 @@ void call_func(
   stackval_t sv;
   stackval_t sv_ret;
   expr_t *expArg;
+  int stop = 0;
   class_t *classRef = NULL;
   libFunction_t *libFunc = NULL;
   char *funcID = NULL;
@@ -1439,6 +1458,7 @@ void call_func(
     break;
   case CLASSTYPE:
     classRef = sv.classObj;
+    funcID = sv.classObj->id;
     break;
   case FUNCPTRTYPE: {
     functionDef_t *func = sv.func;
@@ -1457,127 +1477,291 @@ void call_func(
   }
 
   /* Check if this is a class construction call */
-  (void)classRef; // Todo
-
-  /* Check among the arguments if we have it defined there */
-  expArg = hashtable_get(argVals, funcID);
-
-  /* The argument might be a function! Evaluate and see ... */
-  if ( expArg != NULL ) {
-    /* This was an argument! */
-    switch ( expArg->type ) {
-    case EXPR_TYPE_FUNCPTR:
-      funcDef = expArg->func;
-      break;
-    case EXPR_TYPE_LIBFUNCPTR:
-      libFunc = expArg->func;
-      break;
-    default:
-      fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
-      exit(1);
-      break;
+  classRef = hashtable_get(classDecs, funcID);
+  if ( classRef != NULL ) {
+    functionDef_t *constructor = NULL;
+    class_t *class = NULL;
+    /* Create a new instance, place it on the heap */
+    expr_t *classObj = newExpr_ClassPtr(classRef);
+    class = classObj->classObj;
+    free(classObj);  // expression container not needed
+    /* Run the initializer */
+    initClass(class, EXPRESSION_ARGS());
+    /* Find the constructor hook and run it if so */
+    constructor = hashtable_get(class->funcDefs, funcID);
+    if ( constructor != NULL ) {
+      classCtx = class;
+      /* Moving along, interpreting function */
+      int localsStackSp = varLocals->sp;
+      int localsStackSb = varLocals->sb;
+      varLocals->sb = varLocals->sp;
+      *depth = 1;  // There is only one global scope
+      interpret_statements_(constructor->body, PROVIDE_CONTEXT(), NULL, NULL);
+      varLocals->sb = localsStackSb;
+      varLocals->sp = localsStackSp;
     }
-
+    PUSH_CLASSREF(class, sp, sc);
+    stop = 1;
   }
 
-  if ( funcDef == NULL && libFunc == NULL ) {
-    /* Looking up the function and calling it if it exists */
-    funcDef = hashtable_get(funcDecs, funcID);
-    /* Looking up the function among the library */
-    libFunc = look_up_lib(funcID);
+  if ( ! stop ) {
+    /* Check among the arguments if we have it defined there */
+    expArg = hashtable_get(argVals, funcID);
 
-    /* Check lookup status */
-    if ( funcDef == NULL && libFunc == NULL ) {
-      heapval_t *hv;
-      /* Check if this is a function pointer call (lowest priority) */
-      hv = hashtable_get(varDecs, funcID);
-
-      if ( hv == NULL ) {
-        // Check among the arguments 
-
-        /* Check among the arguments if we have it defined there */
-        expArg = hashtable_get(argVals, funcID);
-
-        if ( expArg == NULL ) {
-          fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
-          exit(1);
-        }
-
-        /* The argument might be a function! Evaluate and see ... */
-        if ( expArg != NULL ) {
-          /* This was an argument! */
-          switch ( expArg->type ) {
-          case EXPR_TYPE_FUNCCALL:
-            funcDef = expArg->func;
-            break;
-          case EXPR_TYPE_LIBFUNCPTR:
-            libFunc = expArg->func;
-            break;
-          default:
-            fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
-            exit(1);
-            break;
-          }
-
-        }
-
-      } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
-        fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
+    /* The argument might be a function! Evaluate and see ... */
+    if ( expArg != NULL && classRef == NULL ) {
+      /* This was an argument! */
+      switch ( expArg->type ) {
+      case EXPR_TYPE_FUNCPTR:
+        funcDef = expArg->func;
+        break;
+      case EXPR_TYPE_LIBFUNCPTR:
+        libFunc = expArg->func;
+        break;
+      default:
+        fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
         exit(1);
-      } else {
-        switch (hv->sv.type) {
-        case FUNCPTRTYPE:
-          funcDef = hv->sv.func;
-          break;
-        case LIBFUNCPTRTYPE:
-          libFunc = hv->sv.libfunc;
-          break;
-          default:
-          // This is just not supposed to be possible, look above.
-          break;
-        }
+        break;
       }
 
     }
-  }
 
-  if ( funcDef != NULL ) {
-    uintptr_t spBefore;
+    if ( funcDef == NULL && libFunc == NULL && classRef == NULL ) {
+      /* Looking up the function and calling it if it exists */
+      funcDef = hashtable_get(funcDecs, funcID);
+      /* Looking up the function among the library */
+      libFunc = look_up_lib(funcID);
 
-    /* Check that # parameters == # arguments */
-    argsList_t *params = funcDef->params;
+      /* Check lookup status */
+      if ( funcDef == NULL && libFunc == NULL ) {
+        heapval_t *hv;
+        /* Check if this is a function pointer call (lowest priority) */
+        hv = hashtable_get(varDecs, funcID);
 
-    if ( params == NULL && argsWalk != NULL ) {
-      fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
-        funcID, argsWalk->length );
-      exit(1);
+        if ( hv == NULL ) {
+          // Check among the arguments 
+
+          /* Check among the arguments if we have it defined there */
+          expArg = hashtable_get(argVals, funcID);
+
+          if ( expArg == NULL ) {
+            fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
+            exit(1);
+          }
+
+          /* The argument might be a function! Evaluate and see ... */
+          if ( expArg != NULL ) {
+            /* This was an argument! */
+            switch ( expArg->type ) {
+            case EXPR_TYPE_FUNCCALL:
+              funcDef = expArg->func;
+              break;
+            case EXPR_TYPE_LIBFUNCPTR:
+              libFunc = expArg->func;
+              break;
+            default:
+              fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
+              exit(1);
+              break;
+            }
+
+          }
+
+        } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
+          fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
+          exit(1);
+        } else {
+          switch (hv->sv.type) {
+          case FUNCPTRTYPE:
+            funcDef = hv->sv.func;
+            break;
+          case LIBFUNCPTRTYPE:
+            libFunc = hv->sv.libfunc;
+            break;
+            default:
+            // This is just not supposed to be possible, look above.
+            break;
+          }
+        }
+
+      }
     }
 
-    if ( params != NULL && argsWalk == NULL ) {
-      fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
-        funcID, params->length );
-      exit(1);
-    }
+    if ( funcDef != NULL ) {
+      uintptr_t spBefore;
 
-    if ( params != NULL && argsWalk != NULL )  {
-      /* Verifying function definition parameters and function call arguments */
-      if ( params->length != argsWalk->length ) {
-        /* print error message */
-        fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
-          funcID, params->length, argsWalk->length);
+      /* Check that # parameters == # arguments */
+      argsList_t *params = funcDef->params;
+
+      if ( params == NULL && argsWalk != NULL ) {
+        fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+          funcID, argsWalk->length );
+        exit(1);
+      }
+
+      if ( params != NULL && argsWalk == NULL ) {
+        fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+          funcID, params->length );
+        exit(1);
+      }
+
+      if ( params != NULL && argsWalk != NULL )  {
+        /* Verifying function definition parameters and function call arguments */
+        if ( params->length != argsWalk->length ) {
+          /* print error message */
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+            funcID, params->length, argsWalk->length);
+          exit(1);
+        }
+
+        /* Populate arguments */
+        while ( argsWalk != NULL && params != NULL ) {
+          stackval_t sv;
+          expr_t *newArg = NULL;
+
+          if ( params->arg->type != EXPR_TYPE_ID ) {
+            /* This is not supposed to happen */
+            printf("Error: parameter in function definition '%s' was invalid\n",
+              funcID);
+          }
+
+          /* Evaluate expression */
+          evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
+          
+          /* Fetch the evaluated expression to the arguments table */
+          POP_VAL(&sv, sp, sc);
+
+          switch (sv.type) {
+            case INT32TYPE: {
+              newArg = newExpr_Ival(sv.i);
+              break;
+            }
+            case DOUBLETYPE: {
+              newArg = newExpr_Float(sv.d);
+              break;
+            }
+            case TEXT: {
+              newArg = newExpr_Text(sv.t);
+              break;
+            }
+            case POINTERTYPE: {
+              newArg = newExpr_Pointer(sv.p);
+              break;
+            }
+            case VECTORTYPE: {
+              newArg = newExpr_Vector(sv.vec->content);
+              break;
+            }
+            case FUNCPTRTYPE: {
+              newArg = newExpr_FuncPtr(sv.func);
+              break;
+            }
+            case LIBFUNCPTRTYPE: {
+              newArg = newExpr_LibFuncPtr(sv.libfunc);
+              break;
+            }
+            case DICTTYPE: {
+              expr_t *e = ast_emalloc(sizeof(expr_t));
+              e->type = EXPR_TYPE_DICT;
+              e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              newArg = e;
+              break;
+            }
+            default:
+              fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+              exit(1);
+              break;
+          }
+
+          /* Adding expression to argument table */
+          hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+
+          params = params->next;
+          argsWalk = argsWalk->next;
+        }
+
+      }
+
+      /* Default return type: a zero */
+      sv_ret.type = INT32TYPE;
+      sv_ret.i = 0;
+
+      spBefore = *(uintptr_t*)sp;
+
+      /* Call the function */
+      if ( funcDef ) {
+        /* Moving along, interpreting function */
+        int localsStackSp = varLocals->sp;
+        int localsStackSb = varLocals->sb;
+        varLocals->sb = varLocals->sp;
+        *depth = 1;  // There is only one global scope
+        interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+        varLocals->sb = localsStackSb;
+        varLocals->sp = localsStackSp;
+      }
+
+      if ( *(uintptr_t*)sp != spBefore ) {
+        /* Return statement found, pop return value */
+        POP_VAL(&sv_ret, sp, sc);
+      }
+
+      /* Push function return value to the stack */
+      switch (sv_ret.type) {
+        case INT32TYPE: {
+          PUSH_INT(sv_ret.i, sp, sc);
+          break;
+        }
+        case DOUBLETYPE: {
+          PUSH_DOUBLE(sv_ret.d, sp, sc);
+          break;
+        }
+        case TEXT: {
+          PUSH_STRING(sv_ret.t, sp, sc);
+          break;
+        }
+        case POINTERTYPE: {
+          PUSH_POINTER(sv_ret.p, sp, sc);
+          break;
+        }
+        case VECTORTYPE: {
+          PUSH_VECTOR(sv_ret.vec, sp, sc);
+          break;
+        }
+        case DICTTYPE: {
+          PUSH_DICTIONARY(sv_ret.dict, sp, sc);
+          break;
+        }
+        case CLASSTYPE: {
+          PUSH_CLASSREF(sv_ret.classObj, sp, sc);
+          break;
+        }
+        default:
+          fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+          exit(1);
+          break;
+      }
+
+      /* Free the argument value table */
+      flush_arguments(newArgumentTable);
+    } else {
+      /* This is a library function */
+      int libfunc_ret;
+
+      if ( libFunc->nbrArgs > 0 && argsWalk == NULL ) {
+        fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+          funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+        exit(1);
+      }
+
+      if ( argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length ) {
+        fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+          funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
         exit(1);
       }
 
       /* Populate arguments */
-      while ( argsWalk != NULL && params != NULL ) {
+      while ( argsWalk != NULL ) {
         stackval_t sv;
-        expr_t *newArg = NULL;
-
-        if ( params->arg->type != EXPR_TYPE_ID ) {
-          /* This is not supposed to happen */
-          printf("Error: parameter in function definition '%s' was invalid\n",
-            funcID);
-        }
 
         /* Evaluate expression */
         evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
@@ -1586,187 +1770,58 @@ void call_func(
         POP_VAL(&sv, sp, sc);
 
         switch (sv.type) {
-          case INT32TYPE: {
-            newArg = newExpr_Ival(sv.i);
+          case INT32TYPE: 
+          {
+            PUSH_INT(sv.i, sp, sc);
             break;
           }
-          case DOUBLETYPE: {
-            newArg = newExpr_Float(sv.d);
+          case DOUBLETYPE:
+          {
+            PUSH_DOUBLE(sv.d, sp, sc);
             break;
           }
-          case TEXT: {
-            newArg = newExpr_Text(sv.t);
+          case TEXT:
+          {
+            PUSH_STRING(sv.t, sp, sc);
             break;
           }
           case POINTERTYPE: {
-            newArg = newExpr_Pointer(sv.p);
+            PUSH_POINTER(sv.p, sp, sc);
             break;
           }
           case VECTORTYPE: {
-            newArg = newExpr_Vector(sv.vec->content);
-            break;
-          }
-          case FUNCPTRTYPE: {
-            newArg = newExpr_FuncPtr(sv.func);
-            break;
-          }
-          case LIBFUNCPTRTYPE: {
-            newArg = newExpr_LibFuncPtr(sv.libfunc);
+            PUSH_VECTOR(sv.vec, sp, sc);
             break;
           }
           case DICTTYPE: {
-            expr_t *e = ast_emalloc(sizeof(expr_t));
-            e->type = EXPR_TYPE_DICT;
-            e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-            newArg = e;
+            PUSH_DICTIONARY(sv.dict, sp, sc);
+            break;
+          }
+          case CLASSTYPE: {
+            PUSH_CLASSREF(sv.classObj, sp, sc);
             break;
           }
           default:
-            fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+          {
+            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
             exit(1);
             break;
+          }
         }
 
-        /* Adding expression to argument table */
-        hashtable_put(newArgumentTable, params->arg->id.id, newArg);
-
-        params = params->next;
         argsWalk = argsWalk->next;
       }
 
-    }
+      libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS() );
 
-    /* Default return type: a zero */
-    sv_ret.type = INT32TYPE;
-    sv_ret.i = 0;
+      /* Free the argument value table */
+      flush_arguments(newArgumentTable);
 
-    spBefore = *(uintptr_t*)sp;
-
-    /* Call the function */
-    if ( funcDef ) {
-      /* Moving along, interpreting function */
-      int localsStackSp = varLocals->sp;
-      int localsStackSb = varLocals->sb;
-      varLocals->sb = varLocals->sp;
-      *depth = 1;  // There is only one global scope
-      interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
-      varLocals->sb = localsStackSb;
-      varLocals->sp = localsStackSp;
-    }
-
-    if ( *(uintptr_t*)sp != spBefore ) {
-      /* Return statement found, pop return value */
-      POP_VAL(&sv_ret, sp, sc);
-    }
-
-    /* Push function return value to the stack */
-    switch (sv_ret.type) {
-      case INT32TYPE: {
-        PUSH_INT(sv_ret.i, sp, sc);
-        break;
+      if ( libfunc_ret != 0 ) {
+        fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
+          funcID, libfunc_ret);
+        exit(libfunc_ret);
       }
-      case DOUBLETYPE: {
-        PUSH_DOUBLE(sv_ret.d, sp, sc);
-        break;
-      }
-      case TEXT: {
-        PUSH_STRING(sv_ret.t, sp, sc);
-        break;
-      }
-      case POINTERTYPE: {
-        PUSH_POINTER(sv_ret.p, sp, sc);
-        break;
-      }
-      case VECTORTYPE: {
-        PUSH_VECTOR(sv_ret.vec, sp, sc);
-        break;
-      }
-      case DICTTYPE: {
-        PUSH_DICTIONARY(sv_ret.dict, sp, sc);
-        break;
-      }
-      default:
-        fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-        exit(1);
-        break;
-    }
-
-    /* Free the argument value table */
-    flush_arguments(newArgumentTable);
-  } else {
-    /* This is a library function */
-    int libfunc_ret;
-
-    if ( libFunc->nbrArgs > 0 && argsWalk == NULL ) {
-      fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
-        funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
-      exit(1);
-    }
-
-    if ( argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length ) {
-      fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
-        funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
-      exit(1);
-    }
-
-    /* Populate arguments */
-    while ( argsWalk != NULL ) {
-      stackval_t sv;
-
-      /* Evaluate expression */
-      evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
-      
-      /* Fetch the evaluated expression to the arguments table */
-      POP_VAL(&sv, sp, sc);
-
-      switch (sv.type) {
-        case INT32TYPE: 
-        {
-          PUSH_INT(sv.i, sp, sc);
-          break;
-        }
-        case DOUBLETYPE:
-        {
-          PUSH_DOUBLE(sv.d, sp, sc);
-          break;
-        }
-        case TEXT:
-        {
-          PUSH_STRING(sv.t, sp, sc);
-          break;
-        }
-        case POINTERTYPE: {
-          PUSH_POINTER(sv.p, sp, sc);
-          break;
-        }
-        case VECTORTYPE: {
-          PUSH_VECTOR(sv.vec, sp, sc);
-          break;
-        }
-        case DICTTYPE: {
-          PUSH_DICTIONARY(sv.dict, sp, sc);
-          break;
-        }
-        default:
-        {
-          fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-          exit(1);
-          break;
-        }
-      }
-
-      argsWalk = argsWalk->next;
-    }
-
-    libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS() );
-
-    /* Free the argument value table */
-    flush_arguments(newArgumentTable);
-
-    if ( libfunc_ret != 0 ) {
-      fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
-        funcID, libfunc_ret);
-      exit(libfunc_ret);
     }
   }
 
@@ -2516,11 +2571,10 @@ void print_expr(expr_t *expr)
 }
 
 void initClass(class_t *cls, EXPRESSION_PARAMS()) {
-  statement_t *initWalk = cls->init;
-  functionDef_t *constructor = NULL;
+  statement_t *initWalk = cls->defines;
 
   /* Sanity check */
-  if ( cls->funcDefs == NULL || cls->varMembers ) {
+  if ( cls->funcDefs == NULL || cls->varMembers == NULL ) {
     return;
   }
 
@@ -2774,21 +2828,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
 
     initWalk = initWalk->next;
   }
-
-  /* Call the constructor, if defined */
-  constructor = hashtable_get(cls->varMembers, cls->id);
-  if ( constructor != NULL ) {
-    class_t *tmp = classCtx;
-    functionCall_t constructorCall;
-    constructorCall.id = newExpr_ID(constructor->id.id);
-    constructorCall.args = NULL;
-
-    classCtx = cls;
-    call_func(&constructorCall, EXPRESSION_ARGS());
-    classCtx = tmp;
-    free_expression(constructorCall.id);
-    free(constructorCall.id);
-  }
+  cls->initialized = 1;
 }
 
 void print_condition(ifCondition_t *cond)
@@ -3033,6 +3073,7 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_EMPTY_STR:
     case LANG_ENTITY_SYSTEM:
     case LANG_ENTITY_EXPR:
+    case LANG_ENTITY_CLASSDECL:
     case LANG_ENTITY_RETURN:
       printf("[0x%lx] ", (uintptr_t)stmt);
       print_indents(indent);
@@ -3054,6 +3095,15 @@ void print_statements_(void *stmt, int indent)
       printf("Expr(");
       print_expr(((statement_t*)stmt)->content);
       printf(");\n");
+    }
+    break;
+    case LANG_ENTITY_CLASSDECL:
+    {
+      class_t *class = ((statement_t*)stmt)->content;
+      printf("Class('%s')\n", class->id);
+      printf("CLASS DEFINES START\n");
+      print_statements_(class->defines, indent+1);
+      printf("CLASS DEFINES END\n");
     }
     break;
     case LANG_ENTITY_DECL:

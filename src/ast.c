@@ -25,7 +25,7 @@ expr_t* newExpr_ClassPtr(class_t *class) {
     exit(EXIT_FAILURE);
   }
 
-  cls->init = class->init;
+  cls->defines = class->defines;
   cls->funcDefs = hashtable_new(
     DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   cls->varMembers = hashtable_new(
@@ -301,12 +301,13 @@ statement_t *newStatement(int type, void *content) {
   return stmt;
 }
 
-class_t* newClass(char *id, statement_t *inits) {
+class_t* newClass(char *id, statement_t *defines) {
   class_t *class = ast_emalloc(sizeof(class_t));
   class->id = id;
-  class->init = inits;
+  class->defines = defines;
   class->funcDefs = NULL;
   class->varMembers = NULL;
+  class->initialized = 0;
   return class;
 }
 
@@ -710,7 +711,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CLASSDECL: {
     class_t *class = ((statement_t *)stmt)->content;
     free(class->id);
-    free_ast(class->init);
+    free_ast(class->defines);
     break;
   }
   case LANG_ENTITY_FUNCDECL: {

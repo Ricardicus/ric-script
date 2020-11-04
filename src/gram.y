@@ -366,9 +366,22 @@ classInit: ID ':' ':' '{' statements '}' {
             fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
             exit(1);
         }
+
+        if ( walk->entity == LANG_ENTITY_FUNCDECL ) {
+            functionDef_t *funcDef = walk->content;
+
+          /* Sanity check, constructor may not use arguments */
+          if ( strcmp(funcDef->id.id, $1) == 0 ) {
+            if ( funcDef->params != NULL ) {
+                fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+                fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
+                exit(1);
+            }
+          }
+        }
         walk = walk->next;
     }
-    snprintf(classId, strlen($1)+2, "%s", classId);
+    snprintf(classId, strlen($1)+2, "%s", $1);
     $$ = newClass(classId, $5);
 }
 

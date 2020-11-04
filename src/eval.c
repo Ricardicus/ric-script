@@ -445,6 +445,7 @@ Please report back to me.\n\
       }
 
       if ( walk == NULL ) {
+        class_t *classDef; // if it is a class construction reference
         functionDef_t *funcDef; // if it is a function pointer
 
         /* Check among the global variables if we have it defined there */
@@ -493,12 +494,21 @@ Please report back to me.\n\
         if ( stop ) {
           break;
         }
-        /* Check among the function declarations if we have it defined there */
-        funcDef = hashtable_get(funcDecs, expr->id.id);
-        if ( funcDef != NULL ) {
-          // Pushing the function definition
-          PUSH_FUNCPTR(funcDef, sp, sc);
+        /* Check among the class declaration if we have this id defined there */
+        classDef = hashtable_get(classDecs, expr->id.id);
+        if ( classDef != NULL ) {
+          PUSH_CLASSREF(classDef, sp, sc);
           stop = 1;
+        }
+
+        if ( !stop ) {
+          /* Check among the function declarations if we have it defined there */
+          funcDef = hashtable_get(funcDecs, expr->id.id);
+          if ( funcDef != NULL ) {
+            // Pushing the function definition
+            PUSH_FUNCPTR(funcDef, sp, sc);
+            stop = 1;
+          }
         }
 
         if ( !stop ) {
@@ -1415,8 +1425,9 @@ void call_func(
   stackval_t sv;
   stackval_t sv_ret;
   expr_t *expArg;
+  class_t *classRef = NULL;
   libFunction_t *libFunc = NULL;
-  char *funcID;
+  char *funcID = NULL;
 
   /* Evaluate id */
   evaluate_expression(funcCall->id, EXPRESSION_ARGS());
@@ -1425,6 +1436,9 @@ void call_func(
   switch ( sv.type ) {
   case TEXT:
     funcID = sv.t;
+    break;
+  case CLASSTYPE:
+    classRef = sv.classObj;
     break;
   case FUNCPTRTYPE: {
     functionDef_t *func = sv.func;
@@ -1441,6 +1455,9 @@ void call_func(
     exit(1);
     break;
   }
+
+  /* Check if this is a class construction call */
+  (void)classRef; // Todo
 
   /* Check among the arguments if we have it defined there */
   expArg = hashtable_get(argVals, funcID);
@@ -2500,6 +2517,7 @@ void print_expr(expr_t *expr)
 
 void initClass(class_t *cls, EXPRESSION_PARAMS()) {
   statement_t *initWalk = cls->init;
+  functionDef_t *constructor = NULL;
 
   /* Sanity check */
   if ( cls->funcDefs == NULL || cls->varMembers ) {
@@ -2758,6 +2776,19 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
   }
 
   /* Call the constructor, if defined */
+  constructor = hashtable_get(cls->varMembers, cls->id);
+  if ( constructor != NULL ) {
+    class_t *tmp = classCtx;
+    functionCall_t constructorCall;
+    constructorCall.id = newExpr_ID(constructor->id.id);
+    constructorCall.args = NULL;
+
+    classCtx = cls;
+    call_func(&constructorCall, EXPRESSION_ARGS());
+    classCtx = tmp;
+    free_expression(constructorCall.id);
+    free(constructorCall.id);
+  }
 }
 
 void print_condition(ifCondition_t *cond)

@@ -507,6 +507,22 @@ stackval.dict = a;\
 *sc = *sc + 1;\
 } while (0)
 
+#define PUSH_CLASSREF(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = CLASSTYPE;\
+stackval.classObj = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+
 #define POP_VAL(a, sp, sc) do {\
 if ( *sc == 0 ) {\
 	fprintf(stderr, "Error: Intepreter stack corruption\n\

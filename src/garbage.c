@@ -41,6 +41,8 @@ static void mark (
       hv->mark = markVal;
       if ( hv->sv.type == DICTTYPE ) {
         mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
+      } else if ( hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized ) {
+        mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
       }
 
       ++i;

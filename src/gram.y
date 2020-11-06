@@ -395,10 +395,16 @@ function:
 
 classFunctionCall:
     ID ':' ':' ID '(' arguments_list ')' {
-        $$ = NULL;
+        expr_t *classID = newExpr_ID($1);
+        expr_t *funcID = newExpr_ID($4);
+
+        $$ = newClassFunCall(classID, funcID, $6);
     }
     | ID ':' ':' ID '(' ')' {
-        $$ = NULL;
+        expr_t *classID = newExpr_ID($1);
+        expr_t *funcID = newExpr_ID($4);
+
+        $$ = newClassFunCall(classID, funcID, NULL);
     };
 
 

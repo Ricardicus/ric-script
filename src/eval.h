@@ -67,7 +67,7 @@ void flush_heapval(void *key, void *val);
 void arguments_to_variables(int argc, char* argv[], void *hp);
 
 void call_func(
-  functionCall_t *funcCall,
+  functionCallContainer_t *funcCall,
   void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t *args,

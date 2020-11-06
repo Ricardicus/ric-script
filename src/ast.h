@@ -16,26 +16,27 @@
 #define BIT(x) ((1)<<((x)-1))
 #endif
 
-#define EXPR_TYPE_ID          1
-#define EXPR_TYPE_FVAL        2
-#define EXPR_TYPE_IVAL        3
-#define EXPR_TYPE_UVAL        4
-#define EXPR_TYPE_TEXT        5
-#define EXPR_TYPE_EMPTY       6
-#define EXPR_TYPE_OPADD       7
-#define EXPR_TYPE_OPSUB       8
-#define EXPR_TYPE_OPDIV       9
-#define EXPR_TYPE_OPMOD       10
-#define EXPR_TYPE_OPMUL       11
-#define EXPR_TYPE_COND        12
-#define EXPR_TYPE_FUNCCALL    13
-#define EXPR_TYPE_POINTER     14
-#define EXPR_TYPE_FUNCPTR     15
-#define EXPR_TYPE_VECTOR      16
-#define EXPR_TYPE_VECTOR_IDX  17
-#define EXPR_TYPE_LIBFUNCPTR  18
-#define EXPR_TYPE_DICT        19
-#define EXPR_TYPE_CLASSPTR    20
+#define EXPR_TYPE_ID             1
+#define EXPR_TYPE_FVAL           2
+#define EXPR_TYPE_IVAL           3
+#define EXPR_TYPE_UVAL           4
+#define EXPR_TYPE_TEXT           5
+#define EXPR_TYPE_EMPTY          6
+#define EXPR_TYPE_OPADD          7
+#define EXPR_TYPE_OPSUB          8
+#define EXPR_TYPE_OPDIV          9
+#define EXPR_TYPE_OPMOD          10
+#define EXPR_TYPE_OPMUL          11
+#define EXPR_TYPE_COND           12
+#define EXPR_TYPE_FUNCCALL       13
+#define EXPR_TYPE_POINTER        14
+#define EXPR_TYPE_FUNCPTR        15
+#define EXPR_TYPE_VECTOR         16
+#define EXPR_TYPE_VECTOR_IDX     17
+#define EXPR_TYPE_LIBFUNCPTR     18
+#define EXPR_TYPE_DICT           19
+#define EXPR_TYPE_CLASSPTR       20
+#define EXPR_TYPE_CLASSFUNCCALL  21
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -60,6 +61,9 @@
 #define LANG_CONDITIONAL_ELIF    BIT(2)
 #define LANG_CONDITIONAL_ELSE    BIT(3)
 #define LANG_CONDITIONAL_CTX     BIT(4)
+
+#define FUNC_CALL_TYPE_GLOBAL         0
+#define FUNC_CALL_TYPE_CLASS          1
 
 #define CONDITION_EQ             0
 #define CONDITION_NEQ            1
@@ -226,11 +230,25 @@ typedef struct functionDef {
 	statement_t *body;
 } functionDef_t;
 
-typedef struct functionCall {
+typedef struct functionCall_t {
 	int entity;
 	expr_t *id;
 	argsList_t *args;
 } functionCall_t;
+
+typedef struct classFunctionCall {
+  expr_t *classID;
+  expr_t *funcID;
+  argsList_t *args;
+} classFunctionCall_t;
+
+typedef struct functionCallContainer {
+  int type;
+  union {
+    functionCall_t *globalCall;
+    classFunctionCall_t *classCall;
+  };
+} functionCallContainer_t;
 
 typedef struct ifStmt {
 	int ifType;
@@ -274,6 +292,7 @@ argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
+expr_t*         newClassFunCall(expr_t *classID, expr_t *funcID, void *args);
 body_t*         newBody(void *body);
 class_t*        newClass(char *id, statement_t *inits);
 

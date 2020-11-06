@@ -425,6 +425,20 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
   return func;
 }
 
+expr_t* newClassFunCall(expr_t *classID, expr_t *funcID, void *args) {
+  expr_t *e = ast_emalloc(sizeof(expr_t));
+  classFunctionCall_t *func = ast_emalloc(sizeof(classFunctionCall_t));
+
+  func->args = args;
+  func->classID = classID;
+  func->funcID = funcID;
+
+  e->type = EXPR_TYPE_CLASSFUNCCALL;
+  e->func = func;
+
+  return e;
+}
+
 expr_t *newFunCall(expr_t *id, void *args) {
   expr_t *e = ast_emalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));

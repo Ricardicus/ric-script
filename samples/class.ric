@@ -1,6 +1,16 @@
 :: hej :: {
+a = 1337
 @ hej () {
   print("hello")
+  print("my member 'a' has value: " + a)
+  a = a + 1
+  print("Now 'a' is: " + a)
+}
+@ setA(newA) {
+  a = newA
+}
+@ getA() {
+  -> a
 }
 }
 

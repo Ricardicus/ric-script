@@ -1475,7 +1475,7 @@ void call_func(
   functionDef_t *funcDef = NULL;
   functionCall_t *funcCall = NULL;
   classFunctionCall_t *classCall = NULL;
-  argsList_t *argsWalk = funcCall->args;
+  argsList_t *argsWalk = NULL;
   hashtable_t *newArgumentTable = new_argstable();
   stackval_t sv;
   stackval_t sv_ret;
@@ -1488,6 +1488,7 @@ void call_func(
   if ( func->type == FUNC_CALL_TYPE_GLOBAL ) {
     /* Calling a global function */
     funcCall = func->globalCall;
+    argsWalk = funcCall->args;
 
     /* Evaluate id */
     evaluate_expression(funcCall->id, EXPRESSION_ARGS());

@@ -36,6 +36,7 @@ def test_vector_print():
 "example.ric",
 "recursion.ric",
 "rpn.ric",
+"class.ric",
 "ramanujan_three.ric",
 "function_within_function.ric",
 "locals_globals.ric",
@@ -57,4 +58,7 @@ def test_vector_print():
 
   assert len(output_lines) == len(ric_result)
   assert len(set(output_lines)) == len(set(ric_result))
+  for n in output_lines:
+    assert(n in ric_result)
+
 

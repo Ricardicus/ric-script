@@ -2,6 +2,7 @@
 # RPN calculator implementation in ric-script
 :: RPN :: {
   stack = {"head" : 0, "data" : []}
+  operators = ["+", "*", "-", "/"]
 
   @ pop() {
     head = stack["head"]
@@ -37,7 +38,8 @@
       tmp = pop()
       -> pop() / tmp
     } ~ {
-      -> 0
+      print("Error: operator '" + op + "' is not supported")
+      exit(1)
     }
   }
 
@@ -45,6 +47,10 @@
     ? [ stack["head"] > 0 ] {
       print(stack["data"][ stack["head"] - 1 ])
     }
+  }
+
+  @ getOperators() {
+    -> operators
   }
 
   @ reset () {
@@ -69,8 +75,8 @@
 
 print("RPN Calculator (quit by typing 'q'):")
 
-operators = ["+", "*", "-", "/"]
-calculator = RPN()
+calc = RPN()
+operators = calc::getOperators()
 run = 1
 . [ run ] {
   in = input(">> ")
@@ -78,10 +84,10 @@ run = 1
   i = 0
   . [ i < len(expr) ] {
     ? [ isNumber(expr[i]) ] {
-      calculator::push( parseInt(expr[i]) )
+      calc::push( parseInt(expr[i]) )
     } ~[ contains(operators, expr[i]) ] {
-      s = calculator::eval(expr[i])
-      calculator::push(s)
+      s = calc::eval(expr[i])
+      calc::push(s)
     } ~[ contains(expr[i], "q") ] {
       run = 0
     } ~ {
@@ -90,7 +96,7 @@ run = 1
     i = i + 1
     @
   }
-  calculator::printResult()
-  calculator::reset()
+  calc::printResult()
+  calc::reset()
   @
 }

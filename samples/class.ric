@@ -24,3 +24,5 @@ print(s)
 s::setA(100)
 f = s::getA()
 print(f)
+
+print(s::getA())

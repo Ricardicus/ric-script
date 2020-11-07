@@ -41,3 +41,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/locals_globals.ric
     - name: Run valgrind on listFiles.ric
       run: valgrind --leak-check=full ./ric samples/listFiles.ric samples
+    - name: Run valgrind on class.ric
+      run: valgrind --leak-check=full ./ric samples/class.ric

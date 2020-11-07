@@ -238,7 +238,7 @@ typedef struct functionCall_t {
 
 typedef struct classFunctionCall {
   expr_t *classID;
-  expr_t *funcID;
+  char   *funcID;
   argsList_t *args;
 } classFunctionCall_t;
 
@@ -292,9 +292,9 @@ argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
-expr_t*         newClassFunCall(expr_t *classID, expr_t *funcID, void *args);
+expr_t*         newClassFunCall(expr_t *classID, char *funcID, void *args);
 body_t*         newBody(void *body);
-class_t*        newClass(char *id, statement_t *inits);
+class_t*        newClass(char *id, body_t *body);
 
 argsList_t*     copy_argsList(argsList_t *args);
 

@@ -1391,7 +1391,7 @@ Please report back to me.\n\
       functionCallContainer_t func;
 
       func.type = FUNC_CALL_TYPE_CLASS;
-      func.globalCall = (functionCall_t *) expr->func;
+      func.classCall = (classFunctionCall_t *) expr->func;
 
       call_func(&func, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
@@ -1748,40 +1748,7 @@ void call_func(
         }
 
         /* Push function return value to the stack */
-        switch (sv_ret.type) {
-          case INT32TYPE: {
-            PUSH_INT(sv_ret.i, sp, sc);
-            break;
-          }
-          case DOUBLETYPE: {
-            PUSH_DOUBLE(sv_ret.d, sp, sc);
-            break;
-          }
-          case TEXT: {
-            PUSH_STRING(sv_ret.t, sp, sc);
-            break;
-          }
-          case POINTERTYPE: {
-            PUSH_POINTER(sv_ret.p, sp, sc);
-            break;
-          }
-          case VECTORTYPE: {
-            PUSH_VECTOR(sv_ret.vec, sp, sc);
-            break;
-          }
-          case DICTTYPE: {
-            PUSH_DICTIONARY(sv_ret.dict, sp, sc);
-            break;
-          }
-          case CLASSTYPE: {
-            PUSH_CLASSREF(sv_ret.classObj, sp, sc);
-            break;
-          }
-          default:
-            fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-            exit(1);
-            break;
-        }
+        push_stackval(&sv_ret, sp, sc);
 
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
@@ -1811,45 +1778,7 @@ void call_func(
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
 
-          switch (sv.type) {
-            case INT32TYPE: 
-            {
-              PUSH_INT(sv.i, sp, sc);
-              break;
-            }
-            case DOUBLETYPE:
-            {
-              PUSH_DOUBLE(sv.d, sp, sc);
-              break;
-            }
-            case TEXT:
-            {
-              PUSH_STRING(sv.t, sp, sc);
-              break;
-            }
-            case POINTERTYPE: {
-              PUSH_POINTER(sv.p, sp, sc);
-              break;
-            }
-            case VECTORTYPE: {
-              PUSH_VECTOR(sv.vec, sp, sc);
-              break;
-            }
-            case DICTTYPE: {
-              PUSH_DICTIONARY(sv.dict, sp, sc);
-              break;
-            }
-            case CLASSTYPE: {
-              PUSH_CLASSREF(sv.classObj, sp, sc);
-              break;
-            }
-            default:
-            {
-              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-              exit(1);
-              break;
-            }
-          }
+          push_stackval(&sv, sp, sc);
 
           argsWalk = argsWalk->next;
         }
@@ -1869,20 +1798,167 @@ void call_func(
   } else if ( func->type == FUNC_CALL_TYPE_CLASS ) {
     /* Calling a class function */
     classCall = func->classCall;
+    argsWalk = classCall->args;
+    class_t *classObj = NULL;
+    functionDef_t *funcDef = NULL;
+    stackval_t sv_ret;
+    uintptr_t spBefore;
+    char *funcID = NULL;
 
     /* Evaluate class id */
     evaluate_expression(classCall->classID, EXPRESSION_ARGS());
     POP_VAL(&sv, sp, sc);
 
     switch ( sv.type ) {
-    case TEXT:
-      funcID = sv.t;
+    case CLASSTYPE:
+      classObj = sv.classObj;
       break;
     default:
-      fprintf(stderr, "error: invalid function call (%d)\n", sv.type);
+      fprintf(stderr, "error: invalid class function call, ID must point to a class object.\n");
       exit(1);
       break;
     }
+
+    if ( !classObj->initialized ) {
+      fprintf(stderr, "error: invalid class function call, ID must point to an initialized class object.\n");
+      exit(1);
+    }
+
+    /* Evaluate class func id */
+    funcID = classCall->funcID;
+
+    /* Find the class function */
+    funcDef = hashtable_get(classObj->funcDefs, funcID);
+
+    if ( funcDef == NULL ) {
+      fprintf(stderr, "error: cannot find function '%s' in class '%s'.\n", 
+        funcID, classObj->id);
+      exit(1);
+    }
+
+    /* Default return type: a zero */
+    sv_ret.type = INT32TYPE;
+    sv_ret.i = 0;
+
+    spBefore = *(uintptr_t*)sp;
+
+    /* Call the function */
+    if ( funcDef ) {
+      /* Check that # parameters == # arguments */
+      argsList_t *params = funcDef->params;
+      int localsStackSp;
+      int localsStackSb;
+
+      if ( params == NULL && argsWalk != NULL ) {
+        fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+          funcID, argsWalk->length );
+        exit(1);
+      }
+
+      if ( params != NULL && argsWalk == NULL ) {
+        fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+          funcID, params->length );
+        exit(1);
+      }
+
+      if ( params != NULL && argsWalk != NULL )  {
+        /* Verifying function definition parameters and function call arguments */
+        if ( params->length != argsWalk->length ) {
+          /* print error message */
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+            funcID, params->length, argsWalk->length);
+          exit(1);
+        }
+
+        /* Populate arguments */
+        while ( argsWalk != NULL && params != NULL ) {
+          stackval_t sv;
+          expr_t *newArg = NULL;
+
+          if ( params->arg->type != EXPR_TYPE_ID ) {
+            /* This is not supposed to happen */
+            printf("Error: parameter in function definition '%s' was invalid\n",
+              funcID);
+          }
+
+          /* Evaluate expression */
+          evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
+          
+          /* Fetch the evaluated expression to the arguments table */
+          POP_VAL(&sv, sp, sc);
+
+          switch (sv.type) {
+            case INT32TYPE: {
+              newArg = newExpr_Ival(sv.i);
+              break;
+            }
+            case DOUBLETYPE: {
+              newArg = newExpr_Float(sv.d);
+              break;
+            }
+            case TEXT: {
+              newArg = newExpr_Text(sv.t);
+              break;
+            }
+            case POINTERTYPE: {
+              newArg = newExpr_Pointer(sv.p);
+              break;
+            }
+            case VECTORTYPE: {
+              newArg = newExpr_Vector(sv.vec->content);
+              break;
+            }
+            case FUNCPTRTYPE: {
+              newArg = newExpr_FuncPtr(sv.func);
+              break;
+            }
+            case LIBFUNCPTRTYPE: {
+              newArg = newExpr_LibFuncPtr(sv.libfunc);
+              break;
+            }
+            case DICTTYPE: {
+              expr_t *e = ast_emalloc(sizeof(expr_t));
+              e->type = EXPR_TYPE_DICT;
+              e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              newArg = e;
+              break;
+            }
+            default:
+              fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+              exit(1);
+              break;
+          }
+
+          /* Adding expression to argument table */
+          hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+
+          params = params->next;
+          argsWalk = argsWalk->next;
+        }
+
+      }
+
+      /* Moving along, interpreting function */
+      localsStackSp = varLocals->sp;
+      localsStackSb = varLocals->sb;
+      varLocals->sb = varLocals->sp;
+      *depth = 1;  // There is only one global scope
+      classCtx = classObj;  // Set class context
+      interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
+      varLocals->sb = localsStackSb;
+      varLocals->sp = localsStackSp;
+    }
+
+    if ( *(uintptr_t*)sp != spBefore ) {
+      /* Return statement found, pop return value */
+      POP_VAL(&sv_ret, sp, sc);
+    }
+    
+    /* Push function return value to the stack */
+    push_stackval(&sv_ret, sp, sc);
+
+    /* Free the argument value table */
+    flush_arguments(newArgumentTable);
 
   }
 }
@@ -2341,6 +2417,40 @@ void interpret_statements_(
 
             func.type = FUNC_CALL_TYPE_GLOBAL;
             func.globalCall = e->func;
+
+            call_func(
+              &func,
+              EXPRESSION_ARGS()
+            );
+
+            /* Printing result of function call, if string or vector */
+            while ( *sc > stackCount ) {
+              POP_VAL(&sv, sp, sc);
+              switch (sv.type) {
+                case TEXT:
+                printf("%s\n", sv.t);
+                break;
+                case VECTORTYPE:
+                print_vector(sv.vec, EXPRESSION_ARGS());
+                printf("\n");
+                break;
+                case INT32TYPE:
+                if ( *interactive ) {
+                  printf("%" PRIi32 "\n", sv.i);
+                }
+                break;
+                default:
+                break;
+              }
+            }
+
+            break;
+          }
+          case EXPR_TYPE_CLASSFUNCCALL: {
+            functionCallContainer_t func;
+
+            func.type = FUNC_CALL_TYPE_CLASS;
+            func.classCall = e->func;
 
             call_func(
               &func,

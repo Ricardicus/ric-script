@@ -352,15 +352,18 @@ class: ':' ':' classInit  {
     $$ = $3;
 };
 
-classInit: ID ':' ':' '{' statements '}' {
+classInit: ID ':' ':' body {
     /* Only declarations allowed */
-    statement_t *walk = $5;
+    body_t *bod = $4;
+    statement_t *walk = bod->content;
     char *classId = ast_emalloc(strlen($1)+2);
     memset(classId, 0, strlen($1)+1);
     while ( walk != NULL ) {
         if (
             walk->entity != LANG_ENTITY_DECL &&
-            walk->entity != LANG_ENTITY_FUNCDECL
+            walk->entity != LANG_ENTITY_FUNCDECL &&
+            walk->entity != LANG_ENTITY_BODY &&
+            walk->entity != LANG_ENTITY_BODY_END
         ) {
             fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
             fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
@@ -370,19 +373,19 @@ classInit: ID ':' ':' '{' statements '}' {
         if ( walk->entity == LANG_ENTITY_FUNCDECL ) {
             functionDef_t *funcDef = walk->content;
 
-          /* Sanity check, constructor may not use arguments */
-          if ( strcmp(funcDef->id.id, $1) == 0 ) {
-            if ( funcDef->params != NULL ) {
-                fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
-                fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
-                exit(1);
+            /* Sanity check, constructor may not use arguments */
+            if ( strcmp(funcDef->id.id, $1) == 0 ) {
+                if ( funcDef->params != NULL ) {
+                    fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+                    fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
+                    exit(1);
+                }
             }
-          }
         }
         walk = walk->next;
     }
     snprintf(classId, strlen($1)+2, "%s", $1);
-    $$ = newClass(classId, $5);
+    $$ = newClass(classId, bod);
 }
 
 function:
@@ -394,17 +397,11 @@ function:
     };
 
 classFunctionCall:
-    ID ':' ':' ID '(' arguments_list ')' {
-        expr_t *classID = newExpr_ID($1);
-        expr_t *funcID = newExpr_ID($4);
-
-        $$ = newClassFunCall(classID, funcID, $6);
+    expression ':' ':' ID '(' arguments_list ')' {
+        $$ = newClassFunCall($1, $4, $6);
     }
-    | ID ':' ':' ID '(' ')' {
-        expr_t *classID = newExpr_ID($1);
-        expr_t *funcID = newExpr_ID($4);
-
-        $$ = newClassFunCall(classID, funcID, NULL);
+    | expression ':' ':' ID '(' ')' {
+        $$ = newClassFunCall($1, $4, NULL);
     };
 
 

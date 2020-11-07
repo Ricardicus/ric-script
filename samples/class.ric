@@ -7,6 +7,7 @@ a = 1337
   print("Now 'a' is: " + a)
 }
 @ setA(newA) {
+  print("Wanting to set 'a' to: " + newA)
   a = newA
 }
 @ getA() {
@@ -20,3 +21,6 @@ s = hej()
 print("hej")
 print(s)
 
+s::setA(100)
+f = s::getA()
+print(f)

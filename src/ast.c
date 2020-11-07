@@ -301,10 +301,10 @@ statement_t *newStatement(int type, void *content) {
   return stmt;
 }
 
-class_t* newClass(char *id, statement_t *defines) {
+class_t* newClass(char *id, body_t *body) {
   class_t *class = ast_emalloc(sizeof(class_t));
   class->id = id;
-  class->defines = defines;
+  class->defines = body->content;
   class->funcDefs = NULL;
   class->varMembers = NULL;
   class->initialized = 0;
@@ -425,13 +425,15 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
   return func;
 }
 
-expr_t* newClassFunCall(expr_t *classID, expr_t *funcID, void *args) {
+expr_t* newClassFunCall(expr_t *classID, char *funcID, void *args) {
   expr_t *e = ast_emalloc(sizeof(expr_t));
   classFunctionCall_t *func = ast_emalloc(sizeof(classFunctionCall_t));
+  char *newTxt = ast_emalloc(strlen(funcID)+2);
+  snprintf(newTxt, strlen(funcID)+2, "%s", funcID);
 
   func->args = args;
   func->classID = classID;
-  func->funcID = funcID;
+  func->funcID = newTxt;
 
   e->type = EXPR_TYPE_CLASSFUNCCALL;
   e->func = func;

@@ -1544,6 +1544,7 @@ void call_func(
       }
       PUSH_CLASSREF(class, sp, sc);
       stop = 1;
+      flush_arguments(newArgumentTable);
     }
 
     if ( ! stop ) {
@@ -1959,7 +1960,6 @@ void call_func(
 
     /* Free the argument value table */
     flush_arguments(newArgumentTable);
-
   }
 }
 
@@ -2057,6 +2057,7 @@ void interpret_statements_(
         stackval_t sv;
         expr_t *id;
         heapval_t *hvp = NULL;
+        int globVarDecUpdated = 1;
         declaration_t* decl = ((statement_t*)stmt)->content;
         id = decl->id;
 
@@ -2098,6 +2099,7 @@ void interpret_statements_(
               /* Placing variable declaration in class member namespace */
               hashtable_put(classCtx->varMembers, idStr, hvp);
               stop = 1;
+              globVarDecUpdated = 0;
             }
           }
 
@@ -2310,7 +2312,9 @@ void interpret_statements_(
         }
 
         // Mark and sweep the heap
-        mark_and_sweep(varDecs, EXPRESSION_ARGS());
+        if ( globVarDecUpdated ) {
+          mark_and_sweep(varDecs, EXPRESSION_ARGS());
+        }
       }
       break;
       case LANG_ENTITY_SYSTEM:
@@ -2831,7 +2835,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
         vector_t *vec = NULL;
         dictionary_t *dict = NULL;
         int32_t arrayIndex;
-        argsList_t *walk;
+        argsList_t *walk = NULL;
         expr_t **expToSet = NULL;
         expr_t *vecid = id->vecIdx->id;
         expr_t *index = id->vecIdx->index;

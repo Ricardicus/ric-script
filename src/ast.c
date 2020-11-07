@@ -17,14 +17,7 @@ expr_t* newExpr_ClassPtr(class_t *class) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   class_t *cls = ast_emalloc(sizeof(class_t));
 
-  cls->id = strdup(class->id);
-  if ( cls->id == NULL ) {
-    fprintf(stderr,
-            "%s %s error: Failed to build AST, malloc failed\n",
-            __FILE__, __func__);
-    exit(EXIT_FAILURE);
-  }
-
+  cls->id = class->id;
   cls->defines = class->defines;
   cls->funcDefs = hashtable_new(
     DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
@@ -308,6 +301,7 @@ class_t* newClass(char *id, body_t *body) {
   class->funcDefs = NULL;
   class->varMembers = NULL;
   class->initialized = 0;
+  free(body);
   return class;
 }
 
@@ -499,6 +493,17 @@ void free_expression(expr_t *expr) {
     free(expr->id.id);
     break;
   }
+  case EXPR_TYPE_CLASSPTR: {
+    free(expr->classObj);
+  }
+  break;
+  case EXPR_TYPE_CLASSFUNCCALL: {
+    classFunctionCall_t *cls = expr->func;
+    free_expression(cls->classID);
+    free(cls->funcID);
+    free(cls);
+  }
+  break;
   case EXPR_TYPE_FVAL:
   case EXPR_TYPE_IVAL:
   case EXPR_TYPE_UVAL:
@@ -695,6 +700,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CONTINUE:
   case LANG_ENTITY_BREAK:
   case LANG_ENTITY_SYSTEM:
+  case LANG_ENTITY_CLASSDECL:
   case LANG_ENTITY_FIN:
     next = ((statement_t *)stmt)->next;
     break;

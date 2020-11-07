@@ -36,6 +36,7 @@ def test_vector_print():
 "example.ric",
 "recursion.ric",
 "rpn.ric",
+"rpn_classes.ric",
 "class.ric",
 "ramanujan_three.ric",
 "function_within_function.ric",

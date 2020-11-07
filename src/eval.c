@@ -2194,7 +2194,6 @@ void interpret_statements_(
         stackval_t sv;
         expr_t *id;
         heapval_t *hvp = NULL;
-        int globVarDecUpdated = 1;
         declaration_t* decl = ((statement_t*)stmt)->content;
         id = decl->id;
 
@@ -2236,7 +2235,6 @@ void interpret_statements_(
               /* Placing variable declaration in class member namespace */
               hashtable_put(classCtx->varMembers, idStr, hvp);
               stop = 1;
-              globVarDecUpdated = 0;
             }
           }
 
@@ -2449,9 +2447,7 @@ void interpret_statements_(
         }
 
         // Mark and sweep the heap
-        if ( globVarDecUpdated ) {
-       //   mark_and_sweep(varDecs, EXPRESSION_ARGS());
-        }
+        mark_and_sweep(varDecs, EXPRESSION_ARGS());
       }
       break;
       case LANG_ENTITY_SYSTEM:

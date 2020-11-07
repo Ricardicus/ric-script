@@ -533,6 +533,7 @@ Please report back to me.\n\
 
       /* Check if it is among the class context members */
       if ( classCtx != NULL ) {
+        functionDef_t *classFunc = NULL;
         hv = hashtable_get(classCtx->varMembers, expr->id.id);
 
         if ( hv != NULL ) {
@@ -540,9 +541,16 @@ Please report back to me.\n\
           stop = 1;
         }
 
+        classFunc = hashtable_get(classCtx->funcDefs, expr->id.id);
+        if ( classFunc != NULL ) {
+          // Pushing the function definition
+          PUSH_FUNCPTR(classFunc, sp, sc);
+          stop = 1;
+        }
+
       }
 
-      if ( walk == NULL ) {
+      if ( !stop && walk == NULL ) {
         class_t *classDef; // if it is a class construction reference
         functionDef_t *funcDef; // if it is a function pointer
 
@@ -1547,6 +1555,135 @@ void call_func(
       flush_arguments(newArgumentTable);
     }
 
+    if ( !stop && classCtx != NULL ) {
+      /* Check if this is a function member call */
+      functionDef_t *classFunc = hashtable_get(classCtx->funcDefs, funcID);
+      /* Call the function */
+      if ( classFunc ) {
+        uintptr_t spBefore;
+        /* Check that # parameters == # arguments */
+        argsList_t *params = classFunc->params;
+        int localsStackSp;
+        int localsStackSb;
+
+        /* Default return type: a zero */
+        sv_ret.type = INT32TYPE;
+        sv_ret.i = 0;
+
+        spBefore = *(uintptr_t*)sp;
+
+        if ( params == NULL && argsWalk != NULL ) {
+          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+            funcID, argsWalk->length );
+          exit(1);
+        }
+
+        if ( params != NULL && argsWalk == NULL ) {
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+            funcID, params->length );
+          exit(1);
+        }
+
+        if ( params != NULL && argsWalk != NULL )  {
+          /* Verifying function definition parameters and function call arguments */
+          if ( params->length != argsWalk->length ) {
+            /* print error message */
+            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+              funcID, params->length, argsWalk->length);
+            exit(1);
+          }
+
+          /* Populate arguments */
+          while ( argsWalk != NULL && params != NULL ) {
+            stackval_t sv;
+            expr_t *newArg = NULL;
+
+            if ( params->arg->type != EXPR_TYPE_ID ) {
+              /* This is not supposed to happen */
+              printf("Error: parameter in function definition '%s' was invalid\n",
+                funcID);
+            }
+
+            /* Evaluate expression */
+            evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
+            
+            /* Fetch the evaluated expression to the arguments table */
+            POP_VAL(&sv, sp, sc);
+
+            switch (sv.type) {
+              case INT32TYPE: {
+                newArg = newExpr_Ival(sv.i);
+                break;
+              }
+              case DOUBLETYPE: {
+                newArg = newExpr_Float(sv.d);
+                break;
+              }
+              case TEXT: {
+                newArg = newExpr_Text(sv.t);
+                break;
+              }
+              case POINTERTYPE: {
+                newArg = newExpr_Pointer(sv.p);
+                break;
+              }
+              case VECTORTYPE: {
+                newArg = newExpr_Vector(sv.vec->content);
+                break;
+              }
+              case FUNCPTRTYPE: {
+                newArg = newExpr_FuncPtr(sv.func);
+                break;
+              }
+              case LIBFUNCPTRTYPE: {
+                newArg = newExpr_LibFuncPtr(sv.libfunc);
+                break;
+              }
+              case DICTTYPE: {
+                expr_t *e = ast_emalloc(sizeof(expr_t));
+                e->type = EXPR_TYPE_DICT;
+                e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+                newArg = e;
+                break;
+              }
+              default:
+                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+                exit(1);
+                break;
+            }
+
+            /* Adding expression to argument table */
+            hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+
+            params = params->next;
+            argsWalk = argsWalk->next;
+          }
+
+        }
+
+        /* Moving along, interpreting function */
+        localsStackSp = varLocals->sp;
+        localsStackSb = varLocals->sb;
+        varLocals->sb = varLocals->sp;
+        *depth = 1;  // There is only one global scope
+        interpret_statements_(classFunc->body, PROVIDE_CONTEXT(), classFunc->params, newArgumentTable);
+        varLocals->sb = localsStackSb;
+        varLocals->sp = localsStackSp;
+        if ( *(uintptr_t*)sp != spBefore ) {
+          /* Return statement found, pop return value */
+          POP_VAL(&sv_ret, sp, sc);
+        }
+        
+        /* Push function return value to the stack */
+        push_stackval(&sv_ret, sp, sc);
+
+        /* Free the argument value table */
+        flush_arguments(newArgumentTable);
+
+        stop = 1;
+      }
+    }
+
     if ( ! stop ) {
       /* Check among the arguments if we have it defined there */
       expArg = hashtable_get(argVals, funcID);
@@ -2313,7 +2450,7 @@ void interpret_statements_(
 
         // Mark and sweep the heap
         if ( globVarDecUpdated ) {
-          mark_and_sweep(varDecs, EXPRESSION_ARGS());
+       //   mark_and_sweep(varDecs, EXPRESSION_ARGS());
         }
       }
       break;
@@ -2766,6 +2903,9 @@ void print_expr(expr_t *expr)
       print_args(vec->content);
       printf(")");
     }
+    break;
+    case EXPR_TYPE_DICT:
+    printf("<Dictionary>");
     break;
     case EXPR_TYPE_EMPTY:
     default:

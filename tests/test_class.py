@@ -10,6 +10,7 @@ def test_class_print():
 "hej",
 "<Class object: 'hej'>",
 "Wanting to set 'a' to: 100",
+"100",
 "100"
 ]
 

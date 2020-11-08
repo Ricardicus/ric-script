@@ -311,8 +311,6 @@ expr_t* newExpr_Copy(expr_t *expr) {
   if ( expr == NULL )
     return NULL;
 
-  newExp = ast_emalloc(sizeof(expr_t));
-
   switch (expr->type) {
   case EXPR_TYPE_ID: {
     newExp = newExpr_ID(expr->id.id);

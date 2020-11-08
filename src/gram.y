@@ -72,6 +72,9 @@ statement_t *root = NULL;
 %type<data> parameters_list
 %type<data> body
 %type<data> function
+%type<data> class
+%type<data> classInit
+%type<data> classFunctionCall
 %type<data> functionCall
 %type<data> mathContent
 %type<data> vector
@@ -145,6 +148,9 @@ statement:
     }
     | systemStatement {
         $$ = newStatement(LANG_ENTITY_SYSTEM, $1);
+    }
+    | class {
+        $$ = newStatement(LANG_ENTITY_CLASSDECL, $1);
     };
 
 systemStatement: '$' ID {
@@ -208,6 +214,9 @@ expression:
       $$ = $1;
     }
     | functionCall {
+      $$ = $1;
+    }
+    | classFunctionCall {
       $$ = $1;
     }
     | stringContent {
@@ -311,6 +320,9 @@ logical:
     }
     | functionCall {
         $$ = $1;
+    }
+    | classFunctionCall {
+        $$ = $1;
     };
 
 condition:
@@ -336,6 +348,46 @@ condition:
         $$ = $2;
     };
 
+class: ':' ':' classInit  {
+    $$ = $3;
+};
+
+classInit: ID ':' ':' body {
+    /* Only declarations allowed */
+    body_t *bod = $4;
+    statement_t *walk = bod->content;
+    char *classId = ast_emalloc(strlen($1)+2);
+    memset(classId, 0, strlen($1)+1);
+    while ( walk != NULL ) {
+        if (
+            walk->entity != LANG_ENTITY_DECL &&
+            walk->entity != LANG_ENTITY_FUNCDECL &&
+            walk->entity != LANG_ENTITY_BODY &&
+            walk->entity != LANG_ENTITY_BODY_END
+        ) {
+            fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+            fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
+            exit(1);
+        }
+
+        if ( walk->entity == LANG_ENTITY_FUNCDECL ) {
+            functionDef_t *funcDef = walk->content;
+
+            /* Sanity check, constructor may not use arguments */
+            if ( strcmp(funcDef->id.id, $1) == 0 ) {
+                if ( funcDef->params != NULL ) {
+                    fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+                    fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
+                    exit(1);
+                }
+            }
+        }
+        walk = walk->next;
+    }
+    snprintf(classId, strlen($1)+2, "%s", $1);
+    $$ = newClass(classId, bod);
+}
+
 function:
     '@' ID '(' parameters_list ')' body {
         $$ = newFunc($2,$4,$6);
@@ -343,6 +395,15 @@ function:
     '@' ID '(' ')' body {
         $$ = newFunc($2,NULL,$5);
     };
+
+classFunctionCall:
+    expression ':' ':' ID '(' arguments_list ')' {
+        $$ = newClassFunCall($1, $4, $6);
+    }
+    | expression ':' ':' ID '(' ')' {
+        $$ = newClassFunCall($1, $4, NULL);
+    };
+
 
 functionCall:
     ID '(' arguments_list ')' {

@@ -67,11 +67,13 @@ void flush_heapval(void *key, void *val);
 void arguments_to_variables(int argc, char* argv[], void *hp);
 
 void call_func(
-  functionCall_t *funcCall,
+  functionCallContainer_t *funcCall,
   void *stmt, void *next,
   PROVIDE_CONTEXT_ARGS(),
   argsList_t *args,
   hashtable_t *argVals);
+
+void initClass(class_t *cls, EXPRESSION_PARAMS());
 
 hashtable_t *new_argstable();
 hashtable_t* hashtable_heapvals_copy(

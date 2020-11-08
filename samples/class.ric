@@ -1,0 +1,28 @@
+:: hej :: {
+a = 1337
+@ hej () {
+  print("hello")
+  print("my member 'a' has value: " + a)
+  a = a + 1
+  print("Now 'a' is: " + a)
+}
+@ setA(newA) {
+  print("Wanting to set 'a' to: " + newA)
+  a = newA
+}
+@ getA() {
+  -> a
+}
+}
+
+print(hej)
+
+s = hej()
+print("hej")
+print(s)
+
+s::setA(100)
+f = s::getA()
+print(f)
+
+print(s::getA())

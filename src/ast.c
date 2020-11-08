@@ -13,6 +13,22 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
+expr_t* newExpr_ClassPtr(class_t *class) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  class_t *cls = ast_emalloc(sizeof(class_t));
+
+  cls->id = class->id;
+  cls->defines = class->defines;
+  cls->funcDefs = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  cls->varMembers = hashtable_new(
+    DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+
+  expr->type = EXPR_TYPE_CLASSPTR;
+  expr->classObj = cls;
+  return expr;
+}
+
 expr_t *newExpr_Cond(ifCondition_t *cond) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
@@ -266,6 +282,7 @@ statement_t *newStatement(int type, void *content) {
   case LANG_ENTITY_RETURN:
   case LANG_ENTITY_EXPR:
   case LANG_ENTITY_BODY_END:
+  case LANG_ENTITY_CLASSDECL:
     stmt->content = content;
     break;
   default:
@@ -277,13 +294,22 @@ statement_t *newStatement(int type, void *content) {
   return stmt;
 }
 
+class_t* newClass(char *id, body_t *body) {
+  class_t *class = ast_emalloc(sizeof(class_t));
+  class->id = id;
+  class->defines = body->content;
+  class->funcDefs = NULL;
+  class->varMembers = NULL;
+  class->initialized = 0;
+  free(body);
+  return class;
+}
+
 expr_t* newExpr_Copy(expr_t *expr) {
   expr_t *newExp = NULL;
 
   if ( expr == NULL )
     return NULL;
-
-  newExp = ast_emalloc(sizeof(expr_t));
 
   switch (expr->type) {
   case EXPR_TYPE_ID: {
@@ -391,6 +417,22 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
   return func;
 }
 
+expr_t* newClassFunCall(expr_t *classID, char *funcID, void *args) {
+  expr_t *e = ast_emalloc(sizeof(expr_t));
+  classFunctionCall_t *func = ast_emalloc(sizeof(classFunctionCall_t));
+  char *newTxt = ast_emalloc(strlen(funcID)+2);
+  snprintf(newTxt, strlen(funcID)+2, "%s", funcID);
+
+  func->args = args;
+  func->classID = classID;
+  func->funcID = newTxt;
+
+  e->type = EXPR_TYPE_CLASSFUNCCALL;
+  e->func = func;
+
+  return e;
+}
+
 expr_t *newFunCall(expr_t *id, void *args) {
   expr_t *e = ast_emalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
@@ -449,6 +491,17 @@ void free_expression(expr_t *expr) {
     free(expr->id.id);
     break;
   }
+  case EXPR_TYPE_CLASSPTR: {
+    free(expr->classObj);
+  }
+  break;
+  case EXPR_TYPE_CLASSFUNCCALL: {
+    classFunctionCall_t *cls = expr->func;
+    free_expression(cls->classID);
+    free(cls->funcID);
+    free(cls);
+  }
+  break;
   case EXPR_TYPE_FVAL:
   case EXPR_TYPE_IVAL:
   case EXPR_TYPE_UVAL:
@@ -645,6 +698,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CONTINUE:
   case LANG_ENTITY_BREAK:
   case LANG_ENTITY_SYSTEM:
+  case LANG_ENTITY_CLASSDECL:
   case LANG_ENTITY_FIN:
     next = ((statement_t *)stmt)->next;
     break;
@@ -672,6 +726,12 @@ void free_ast(statement_t *stmt) {
   } break;
   case LANG_ENTITY_EMPTY_STR: {
     free_expression(((statement_t *)stmt)->content);
+    break;
+  }
+  case LANG_ENTITY_CLASSDECL: {
+    class_t *class = ((statement_t *)stmt)->content;
+    free(class->id);
+    free_ast(class->defines);
     break;
   }
   case LANG_ENTITY_FUNCDECL: {

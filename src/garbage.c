@@ -41,6 +41,8 @@ static void mark (
       hv->mark = markVal;
       if ( hv->sv.type == DICTTYPE ) {
         mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
+      } else if ( hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized ) {
+        mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
       }
 
       ++i;
@@ -67,6 +69,8 @@ static void mark (
 
     if ( hv->sv.type == DICTTYPE ) {
       mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
+    } else if ( hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized ) {
+      mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
     }
     ++i;
   }
@@ -97,6 +101,12 @@ static void sweep (
         } else if ( heap[i].sv.type == DICTTYPE ) {
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(heap[i].sv.dict);
+        } else if ( heap[i].sv.type == CLASSTYPE ) {
+          if ( ((heapval_t*) hp)[i].sv.classObj->initialized ) {
+            hashtable_free(((heapval_t*) hp)[i].sv.classObj->varMembers);
+            hashtable_free(((heapval_t*) hp)[i].sv.classObj->funcDefs);
+          }
+          free(((heapval_t*) hp)[i].sv.classObj);
         }
         heap[i].toFree = false;
       }
@@ -136,6 +146,30 @@ void free_heap(void *hp, void *hbp) {
         } else if ( ((heapval_t*) hp)[i].sv.type == DICTTYPE ) {
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(((heapval_t*) hp)[i].sv.dict);
+        } else if ( ((heapval_t*) hp)[i].sv.type == CLASSTYPE ) {
+          /* References to initialized classes are unique */
+          if ( ((heapval_t*) hp)[i].sv.classObj != NULL ) {
+            /* Clear this one, only once, set all the other references to NULL*/
+            void *unique_ref = ((heapval_t*) hp)[i].sv.classObj;
+            int q;
+
+            /* Clear this reference, once and for all */
+            if ( ((heapval_t*) hp)[i].sv.classObj->initialized ) {
+              hashtable_free(((heapval_t*) hp)[i].sv.classObj->varMembers);
+              hashtable_free(((heapval_t*) hp)[i].sv.classObj->funcDefs);
+            }
+            free(((heapval_t*) hp)[i].sv.classObj);
+
+            /* Purge the rest */
+            q = i;
+            while ( q < size ) {
+              if ( ((heapval_t*) hp)[q].toFree && ((heapval_t*) hp)[q].sv.type == CLASSTYPE 
+                && ((heapval_t*) hp)[q].sv.classObj == unique_ref ) {
+                ((heapval_t*) hp)[q].sv.classObj = NULL;  // Purged
+              }
+              ++q;
+            }
+          }
         }
     }
     ++i;

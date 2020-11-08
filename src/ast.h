@@ -16,25 +16,27 @@
 #define BIT(x) ((1)<<((x)-1))
 #endif
 
-#define EXPR_TYPE_ID          1
-#define EXPR_TYPE_FVAL        2
-#define EXPR_TYPE_IVAL        3
-#define EXPR_TYPE_UVAL        4
-#define EXPR_TYPE_TEXT        5
-#define EXPR_TYPE_EMPTY       6
-#define EXPR_TYPE_OPADD       7
-#define EXPR_TYPE_OPSUB       8
-#define EXPR_TYPE_OPDIV       9
-#define EXPR_TYPE_OPMOD       10
-#define EXPR_TYPE_OPMUL       11
-#define EXPR_TYPE_COND        12
-#define EXPR_TYPE_FUNCCALL    13
-#define EXPR_TYPE_POINTER     14
-#define EXPR_TYPE_FUNCPTR     15
-#define EXPR_TYPE_VECTOR      16
-#define EXPR_TYPE_VECTOR_IDX  17
-#define EXPR_TYPE_LIBFUNCPTR  18
-#define EXPR_TYPE_DICT        19
+#define EXPR_TYPE_ID             1
+#define EXPR_TYPE_FVAL           2
+#define EXPR_TYPE_IVAL           3
+#define EXPR_TYPE_UVAL           4
+#define EXPR_TYPE_TEXT           5
+#define EXPR_TYPE_EMPTY          6
+#define EXPR_TYPE_OPADD          7
+#define EXPR_TYPE_OPSUB          8
+#define EXPR_TYPE_OPDIV          9
+#define EXPR_TYPE_OPMOD          10
+#define EXPR_TYPE_OPMUL          11
+#define EXPR_TYPE_COND           12
+#define EXPR_TYPE_FUNCCALL       13
+#define EXPR_TYPE_POINTER        14
+#define EXPR_TYPE_FUNCPTR        15
+#define EXPR_TYPE_VECTOR         16
+#define EXPR_TYPE_VECTOR_IDX     17
+#define EXPR_TYPE_LIBFUNCPTR     18
+#define EXPR_TYPE_DICT           19
+#define EXPR_TYPE_CLASSPTR       20
+#define EXPR_TYPE_CLASSFUNCCALL  21
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -53,11 +55,15 @@
 #define LANG_ENTITY_RETURN       15
 #define LANG_ENTITY_EXPR         16
 #define LANG_ENTITY_BODY_END     17
+#define LANG_ENTITY_CLASSDECL    18
 
 #define LANG_CONDITIONAL_IF      BIT(1)
 #define LANG_CONDITIONAL_ELIF    BIT(2)
 #define LANG_CONDITIONAL_ELSE    BIT(3)
 #define LANG_CONDITIONAL_CTX     BIT(4)
+
+#define FUNC_CALL_TYPE_GLOBAL         0
+#define FUNC_CALL_TYPE_CLASS          1
 
 #define CONDITION_EQ             0
 #define CONDITION_NEQ            1
@@ -134,6 +140,8 @@ struct libFunction;
 typedef struct libFunction libFunction_t;
 struct keyValList;
 typedef struct keyValList keyValList_t;
+struct class_t;
+typedef struct class_t class_t;
 
 typedef struct vector_t {
   int32_t length;
@@ -171,6 +179,7 @@ typedef struct expr_s {
     vector_t      *vec;
     vectorIndex_t *vecIdx;
     dictionary_t  *dict;
+    class_t       *classObj;
 	};
 } expr_t;
 
@@ -200,6 +209,15 @@ typedef struct statement_s {
 	struct statement_s *next;
 } statement_t;
 
+typedef struct class_t {
+  int entity;
+  char *id;
+  int initialized;
+  statement_t *defines;
+  hashtable_t *funcDefs;
+  hashtable_t *varMembers;
+} class_t;
+
 typedef struct body_s {
 	int entity;
 	struct statement_s *content;
@@ -212,11 +230,25 @@ typedef struct functionDef {
 	statement_t *body;
 } functionDef_t;
 
-typedef struct functionCall {
+typedef struct functionCall_t {
 	int entity;
 	expr_t *id;
 	argsList_t *args;
 } functionCall_t;
+
+typedef struct classFunctionCall {
+  expr_t *classID;
+  char   *funcID;
+  argsList_t *args;
+} classFunctionCall_t;
+
+typedef struct functionCallContainer {
+  int type;
+  union {
+    functionCall_t *globalCall;
+    classFunctionCall_t *classCall;
+  };
+} functionCallContainer_t;
 
 typedef struct ifStmt {
 	int ifType;
@@ -249,6 +281,7 @@ expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 expr_t* newExpr_Cond(ifCondition_t *cond);
 expr_t* newExpr_Vector(argsList_t *args);
+expr_t* newExpr_ClassPtr(class_t *class);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
 
@@ -259,7 +292,9 @@ argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
+expr_t*         newClassFunCall(expr_t *classID, char *funcID, void *args);
 body_t*         newBody(void *body);
+class_t*        newClass(char *id, body_t *body);
 
 argsList_t*     copy_argsList(argsList_t *args);
 
@@ -276,7 +311,8 @@ typedef enum stackvaltypes {
   FUNCPTRTYPE,
   LIBFUNCPTRTYPE,
   VECTORTYPE,
-  DICTTYPE
+  DICTTYPE,
+  CLASSTYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -290,6 +326,7 @@ typedef struct stackval {
     vector_t *vec;
     libFunction_t *libfunc;
     dictionary_t *dict;
+    class_t *classObj;
 	};
 } stackval_t;
 
@@ -313,17 +350,18 @@ typedef struct locals_stack {
 } locals_stack_t;
 
 #define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; \
-size_t sc; int depth; locals_stack_t *varLocals; int interactive;
+size_t sc; int depth; locals_stack_t *varLocals; int interactive; class_t *classCtx;
 #define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
-static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals; static int interactive;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive
+static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals; static int interactive; \
+static class_t *classCtx;
+#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive, classCtx
+#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, classCtx
 #define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st,\
-*(void**)ed, *sc, *depth, varLocals, *interactive }
+*(void**)ed, *sc, *depth, varLocals, *interactive, classCtx }
 #define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
 int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
 void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth, locals_stack_t *varLocals, \
-int *interactive
+int *interactive, class_t *classCtx
 #define EXPRESSION_PARAMS() void *stmt, void *next, \
 PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals
@@ -489,6 +527,22 @@ stackval.dict = a;\
 *sc = *sc + 1;\
 } while (0)
 
+#define PUSH_CLASSREF(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = CLASSTYPE;\
+stackval.classObj = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+
 #define POP_VAL(a, sp, sc) do {\
 if ( *sc == 0 ) {\
 	fprintf(stderr, "Error: Intepreter stack corruption\n\
@@ -510,7 +564,8 @@ if ( upd != NULL ) {\
   *(int*)upd = 1;\
 }\
 hv.sv = *a;\
-if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || hv.sv.type == DICTTYPE ) {\
+if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || \
+     hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ) {\
 	hv.toFree = true;\
 } else {\
   hv.toFree = false;\

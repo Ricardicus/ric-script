@@ -20,5 +20,9 @@ print("hello")
   print("Foobar foobar")
 }
 
-
+;; foobarclass ;; {
+  @ foobarclass () { print("Foobar class got constructed") }
+  @ foo () { print("foo") }
+  @ bar () { print("bar") }
+}
  

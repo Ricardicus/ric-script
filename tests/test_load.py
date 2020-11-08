@@ -7,7 +7,10 @@ def test_load():
 "bar",
 "Foobar foobar",
 "foobar",
-"yes, loading works!"
+"yes, loading works!",
+"Foobar class got constructed",
+"foo",
+"bar"
 ]
 
   if os.name == 'nt':

@@ -4,3 +4,7 @@ foo()
 bar()
 foobarfoobar()
 foobar("yes, loading works!")
+fbc = foobarclass()
+fbc::foo()
+fbc::bar()
+

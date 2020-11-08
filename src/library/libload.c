@@ -55,7 +55,7 @@ int ric_load(LIBRARY_PARAMS())
   walk = root;
   walkPrev = NULL;
   while ( walk != NULL ) {
-    if ( walk->entity == LANG_ENTITY_FUNCDECL ) {
+    if ( walk->entity == LANG_ENTITY_FUNCDECL || walk->entity == LANG_ENTITY_CLASSDECL ) {
       /* Extract this statement from the new ast */
       if ( importedFuncDecs == NULL ) {
         importedFuncDecs = malloc(sizeof(statement_t));

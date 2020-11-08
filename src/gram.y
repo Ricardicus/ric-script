@@ -73,7 +73,6 @@ statement_t *root = NULL;
 %type<data> body
 %type<data> function
 %type<data> class
-%type<data> classInit
 %type<data> classFunctionCall
 %type<data> functionCall
 %type<data> mathContent
@@ -348,16 +347,12 @@ condition:
         $$ = $2;
     };
 
-class: ':' ':' classInit  {
-    $$ = $3;
-};
-
-classInit: ID ':' ':' body {
+class: ';' ';' ID ';' ';' body {
     /* Only declarations allowed */
-    body_t *bod = $4;
+    body_t *bod = $6;
     statement_t *walk = bod->content;
-    char *classId = ast_emalloc(strlen($1)+2);
-    memset(classId, 0, strlen($1)+1);
+    char *classId = ast_emalloc(strlen($3)+2);
+    memset(classId, 0, strlen($3)+1);
     while ( walk != NULL ) {
         if (
             walk->entity != LANG_ENTITY_DECL &&
@@ -365,7 +360,7 @@ classInit: ID ':' ':' body {
             walk->entity != LANG_ENTITY_BODY &&
             walk->entity != LANG_ENTITY_BODY_END
         ) {
-            fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+            fprintf(stderr, "Syntax error, class '%s':\r\n", $3);
             fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
             exit(1);
         }
@@ -374,9 +369,9 @@ classInit: ID ':' ':' body {
             functionDef_t *funcDef = walk->content;
 
             /* Sanity check, constructor may not use arguments */
-            if ( strcmp(funcDef->id.id, $1) == 0 ) {
+            if ( strcmp(funcDef->id.id, $3) == 0 ) {
                 if ( funcDef->params != NULL ) {
-                    fprintf(stderr, "Syntax error, class '%s':\r\n", $1);
+                    fprintf(stderr, "Syntax error, class '%s':\r\n", $3);
                     fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
                     exit(1);
                 }
@@ -384,7 +379,7 @@ classInit: ID ':' ':' body {
         }
         walk = walk->next;
     }
-    snprintf(classId, strlen($1)+2, "%s", $1);
+    snprintf(classId, strlen($3)+2, "%s", $3);
     $$ = newClass(classId, bod);
 }
 
@@ -750,6 +745,10 @@ otherChar:
         $$[1] = 0;
     }
     | ':' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | ';' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

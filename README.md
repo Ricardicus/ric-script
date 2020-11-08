@@ -215,7 +215,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
 ```
 #!/usr/bin/ric
 # RPN calculator implementation in ric-script
-:: RPN :: {
+;; RPN ;; {
   stack = {"head" : 0, "data" : []}
   operators = ["+", "*", "-", "/"]
 

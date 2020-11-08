@@ -1,4 +1,4 @@
-:: hej :: {
+;; hej ;; {
 a = 1337
 @ hej () {
   print("hello")

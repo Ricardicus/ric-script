@@ -568,7 +568,7 @@ updated from the outside
 
 ## Loading external scripts
 
-Use **load** to import function definitions from other ric-scripts:
+Use **load** to import function and class definitions from other ric-scripts:
 ```
 load("another-script.ric")
 # Now all functions in 'another-script.ric' is usable here

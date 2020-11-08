@@ -502,6 +502,29 @@ d["bar"]()
 l = [foo, bar]
 l[0]()
 l[1]()
+
+# Ric-script classes
+
+;; myClass ;; {
+  myMem = "not updated"
+  @ myClass () {
+    print("I get constructed!")
+    print("my memory is: " + myMem)
+  }
+
+  @ set(a) {
+    myMem = a
+  }
+
+  @ get() {
+    -> myMem
+  }
+}
+
+c = myClass()
+print(c::get())
+c::set("updated from the outside")
+print(c::get())
 ```
 
 Outputs:
@@ -537,6 +560,10 @@ foo
 bar
 foo
 bar
+I get constructed!
+my memory is: not updated
+not updated
+updated from the outside
 ```
 
 ## Loading external scripts

@@ -147,11 +147,29 @@ void free_heap(void *hp, void *hbp) {
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(((heapval_t*) hp)[i].sv.dict);
         } else if ( ((heapval_t*) hp)[i].sv.type == CLASSTYPE ) {
-          if ( ((heapval_t*) hp)[i].sv.classObj->initialized ) {
-            hashtable_free(((heapval_t*) hp)[i].sv.classObj->varMembers);
-            hashtable_free(((heapval_t*) hp)[i].sv.classObj->funcDefs);
+          /* References to initialized classes are unique */
+          if ( ((heapval_t*) hp)[i].sv.classObj != NULL ) {
+            /* Clear this one, only once, set all the other references to NULL*/
+            void *unique_ref = ((heapval_t*) hp)[i].sv.classObj;
+            int q;
+
+            /* Clear this reference, once and for all */
+            if ( ((heapval_t*) hp)[i].sv.classObj->initialized ) {
+              hashtable_free(((heapval_t*) hp)[i].sv.classObj->varMembers);
+              hashtable_free(((heapval_t*) hp)[i].sv.classObj->funcDefs);
+            }
+            free(((heapval_t*) hp)[i].sv.classObj);
+
+            /* Purge the rest */
+            q = i;
+            while ( q < size ) {
+              if ( ((heapval_t*) hp)[q].toFree && ((heapval_t*) hp)[q].sv.type == CLASSTYPE 
+                && ((heapval_t*) hp)[q].sv.classObj == unique_ref ) {
+                ((heapval_t*) hp)[q].sv.classObj = NULL;  // Purged
+              }
+              ++q;
+            }
           }
-          free(((heapval_t*) hp)[i].sv.classObj);
         }
     }
     ++i;

@@ -242,15 +242,14 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
   }
 
   @ eval (op) {
+    tmp = pop()
     ? [ op == '+' ] {
-      -> pop() + pop()
+      -> tmp + pop()
     } ~[ op == '-' ] {
-      tmp = pop()
       -> pop() - tmp
     } ~[ op == '*' ] {
-      -> pop() * pop()
+      -> tmp * pop()
     } ~[ op == '/' ] {
-      tmp = pop()
       -> pop() / tmp
     } ~ {
       print("Error: operator '" + op + "' is not supported")

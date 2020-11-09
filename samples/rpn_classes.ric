@@ -1,6 +1,6 @@
 #!/usr/bin/ric
 # RPN calculator implementation in ric-script
-:: RPN :: {
+;; RPN ;; {
   stack = {"head" : 0, "data" : []}
   operators = ["+", "*", "-", "/"]
 
@@ -27,15 +27,14 @@
   }
 
   @ eval (op) {
+    tmp = pop()
     ? [ op == '+' ] {
-      -> pop() + pop()
+      -> tmp + pop()
     } ~[ op == '-' ] {
-      tmp = pop()
       -> pop() - tmp
     } ~[ op == '*' ] {
-      -> pop() * pop()
+      -> tmp * pop()
     } ~[ op == '/' ] {
-      tmp = pop()
       -> pop() / tmp
     } ~ {
       print("Error: operator '" + op + "' is not supported")

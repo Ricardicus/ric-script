@@ -1,5 +1,8 @@
 # Building the interpreter
 
+# Adding flags for the parser to be more verbose
+add_global_arguments('-DYYERROR_VERBOSE', language: 'c')
+
 # Fetching the library sources
 subdir('library')
 

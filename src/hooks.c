@@ -3,6 +3,7 @@
 static MainParserFunc parser = NULL;
 static statement_t *mainProgramRoot = NULL;
 static statement_t **root = NULL;
+char *ParsedFile = NULL;
 
 void setParser( MainParserFunc func )
 {

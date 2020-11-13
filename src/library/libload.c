@@ -5,6 +5,7 @@
 * of other ric scripts into the one executing
 */
 extern FILE *yyin;
+extern char *ParsedFile;
 int ric_load(LIBRARY_PARAMS())
 {
   statement_t *root = NULL;
@@ -28,6 +29,8 @@ int ric_load(LIBRARY_PARAMS())
   }
 
   loadFile = stv.t;
+
+  ParsedFile = loadFile;
 
   fp = fopen(loadFile, "r");
 

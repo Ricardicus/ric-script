@@ -98,7 +98,7 @@ well as haven't implemented:
 - [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_) (**implemented only function loading**)
 - [x] Local scope for variables (distinction between global and local)
 - [x] Classes
-- [ ] Better error reporting (always include line number)
+- [x] Better error reporting (always include at least line number)
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).
@@ -106,11 +106,14 @@ well as haven't implemented:
 - [ ] Threading interface
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
+I will be using **javascript syntax highlighting** for the examples provided below. 
+So for the sake of making it look pretty.
+
 # syntax snapshot: RPN calculator
 
 A calulator in reverse Polish notation can be implemented like this in ric-script:
 
-```
+```javascript
 #!/usr/bin/ric
 # RPN calculator implementation in ric-script
 stack = {"head" : 0, "data" : []}
@@ -212,7 +215,7 @@ RPN Calculator (quit by typing 'q'):
 
 A calulator in reverse Polish notation can be implemented like this in ric-script using the syntax for classes:
 
-```
+```javascript
 #!/usr/bin/ric
 # RPN calculator implementation in ric-script
 ;; RPN ;; {
@@ -242,15 +245,14 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
   }
 
   @ eval (op) {
+    tmp = pop()
     ? [ op == '+' ] {
-      -> pop() + pop()
+      -> tmp + pop()
     } ~[ op == '-' ] {
-      tmp = pop()
       -> pop() - tmp
     } ~[ op == '*' ] {
-      -> pop() * pop()
+      -> tmp * pop()
     } ~[ op == '/' ] {
-      tmp = pop()
       -> pop() / tmp
     } ~ {
       print("Error: operator '" + op + "' is not supported")
@@ -329,8 +331,12 @@ RPN Calculator (quit by typing 'q'):
 
 # syntax snapshot: Ramanujan 3 formula
 
-```
+Since I use JavaScript syntax highlighting here on GitHub, I have **added /\*\*/** just before the original
+ric-script comment symbol **#**.
+
+```javascript
 #!/usr/bin/ric
+/*
 #
 # Ramanujans formula for the number 3
 # it should be infinite recursion, but
@@ -338,6 +344,7 @@ RPN Calculator (quit by typing 'q'):
 #
 # outputs: 3.000000
 #
+*/
 
 @ ram_three (count, limit) {
   ? [ count == limit ] {
@@ -351,9 +358,12 @@ print(ram_three(2, 100))
 
 # syntax snapshot: File listing
 
-```
+Since I use JavaScript syntax highlighting here on GitHub, I have **added //** just before the original
+ric-script comment symbol **#** so it looks alright.
+
+```javascript
 #!/usr/bin/ric
-# A script to demonstrate how one can list files using ric-script
+//# A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {
   print("usage: " + args[0] + " " + args[1] + " directory")
@@ -381,7 +391,7 @@ print(ram_three(2, 100))
   }
 }
 
-# argument checking
+//# argument checking
 ? [ len(args) < 3 ] {
   printUsage()
   exit(1)
@@ -399,10 +409,13 @@ print(ram_three(2, 100))
 
 # Walkthrough of the language syntax
 
-```
+Since I use JavaScript syntax highlighting here on GitHub, I have **added //** just before the original
+ric-script comment symbol **#** so it looks alright.
+
+```javascript
 #!/usr/bin/ric
 
-# Conditionals
+//# Conditionals
 ? [ 1 == 1 ] {
   print("True condition")
 }
@@ -413,8 +426,8 @@ print(ram_three(2, 100))
   print("Untrue condition")
 }
 
-# Placing a dot in front of a condition
-# makes it a return spot, operator '@' returns there.
+//# Placing a dot in front of a condition
+//# makes it a return spot, operator '@' returns there.
 a = 1338
 
 . [ a == 1337 ] {
@@ -427,7 +440,7 @@ a = 1338
   @
 }
 
-# Lists
+//# Lists
 h = [ "hej", "hopp" ]
 print("len(h): " + len(h))
 
@@ -453,45 +466,47 @@ i = 0
 
 print("====================")
 
-# Function definitions and pointers
+//# Function definitions and pointers
 
-# Defining a function
+//# Defining a function
 @ hej (a, b) {
+  /*
   # Calling a with b as argument.
   # a should be a function pointer (dynamically type)
   # otherwise execution stops (no exception handling)
   # with error message
+  */
   a(b)
 }
 
-# Defining a function
+//# Defining a function
 @ willprint (a) {
   print(a)
 }
 
-# Calling out 'hej' function with our 'willprint' function as first argument
+//# Calling out 'hej' function with our 'willprint' function as first argument
 hej(willprint, "hej")
-# Calling out 'hej' function with standard library 'print' function as first argument
+//# Calling out 'hej' function with standard library 'print' function as first argument
 hej(print, "hejsan")
 
-# Dictionary expressions
+//# Dictionary expressions
 
 s = {"hello": "world", "elit": 1337}
 print(s)
 print(s["hello"])
 print(s["elit"])
 
-# extending with more fields
+//# extending with more fields
 s["new field"] = 1337
 print(s)
 print(s["new field"])
 
-# extending with another dictionary
+//# extending with another dictionary
 s["dict"] = {"hello": "world"}
 print(s)
 print(s["dict"]["hello"])
 
-# Calling a function pointer in a list and a dictionary
+//# Calling a function pointer in a list and a dictionary
 @ foo () { print("foo") }
 @ bar () { print("bar") }
 
@@ -503,7 +518,7 @@ l = [foo, bar]
 l[0]()
 l[1]()
 
-# Ric-script classes
+//# Ric-script classes
 
 ;; myClass ;; {
   myMem = "not updated"

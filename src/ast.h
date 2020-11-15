@@ -205,6 +205,8 @@ typedef struct keyValList {
 
 typedef struct statement_s {
 	int entity;
+  int line;
+  char file[25];
 	void *content;
 	struct statement_s *next;
 } statement_t;

@@ -5,6 +5,7 @@
 #include <string.h>
 
 extern FILE *yyin;
+extern char *ParsedFile;
 
 void usage(char *argv0, int ret)
 {
@@ -56,6 +57,7 @@ int main(int argc, char *argv[]) {
       } else {
         if ( fp == NULL ) {
           /* Attempt to open the file */
+          ParsedFile = argv[i];
           fp = fopen(argv[i], "r");
           if ( fp != NULL ) {
             yyin = fp;

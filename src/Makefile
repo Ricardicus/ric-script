@@ -41,6 +41,8 @@ RIC_SOURCES = \
 
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
+DEFINES = YYERROR_VERBOSE
+
 LIBS = m
 
 CFLAGS = Wall \
@@ -64,11 +66,11 @@ all: ric
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR)) \
-$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
+$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS) $(addprefix -D, $(DEFINES))
 
 ric: lex yacc $(RIC_OBJS) $(RULES)
 	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
-$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS)
+$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS) $(addprefix -D, $(DEFINES))
 
 lex: $(FLEXSPEC)
 ifeq (, $(shell which flex))

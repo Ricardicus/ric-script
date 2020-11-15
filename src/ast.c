@@ -2,6 +2,9 @@
 #include "eval.h"
 #include "hashtable.h"
 
+extern int yylinenor;
+extern char *ParsedFile;
+
 void *ast_emalloc(size_t size) {
   char *p = (char *)malloc(size);
   if (p == NULL) {
@@ -267,6 +270,13 @@ statement_t *newStatement(int type, void *content) {
   statement_t *stmt = ast_emalloc(sizeof(statement_t));
   stmt->entity = type;
   stmt->next = NULL;
+  stmt->line = yylinenor;
+
+  stmt->file[0] = 0;
+  if ( ParsedFile != NULL ) {
+    snprintf(stmt->file,
+      sizeof(stmt->file), "%s", ParsedFile);
+  }
 
   switch (type) {
   case LANG_ENTITY_DECL:

@@ -8,6 +8,7 @@
 #include "hooks.h"
 
 extern int yylinenor;
+extern char *ParsedFile;
 
 void *e_malloc(size_t size)
 {
@@ -22,9 +23,10 @@ void *e_malloc(size_t size)
 void yyerror(const char *s)
 {
     fprintf(stderr,
-        "%s at line: %d\n",
-        s,
-        yylinenor);
+        "%s:%d: %s\n",
+        ParsedFile,
+        yylinenor,
+        s);
 }
 
 int yylex(void);
@@ -815,6 +817,8 @@ void initParser() {
 
 void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func) {
     char lineBuffer[256];
+
+    ParsedFile = "stdin";
 
     memset(lineBuffer, 0, sizeof(lineBuffer));
 

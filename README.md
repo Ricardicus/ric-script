@@ -3,6 +3,8 @@
 ![Style linter](https://github.com/Ricardicus/ric-script/workflows/Style%20linter/badge.svg)
 ![Memory leakage detection](https://github.com/Ricardicus/ric-script/workflows/Memory%20leakage%20detection/badge.svg)
 
+![RicScript logo](images/icon.png)
+
 # Work in progress
 
 I am developing my first programming language!

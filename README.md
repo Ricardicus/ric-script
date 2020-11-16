@@ -1,9 +1,9 @@
+![RicScript logo](images/icon.png)
+
 ![Building and testing](https://github.com/Ricardicus/ric-script/workflows/Building%20and%20testing/badge.svg)
 ![Building docker image](https://github.com/Ricardicus/ric-script/workflows/Building%20docker%20image/badge.svg)
 ![Style linter](https://github.com/Ricardicus/ric-script/workflows/Style%20linter/badge.svg)
 ![Memory leakage detection](https://github.com/Ricardicus/ric-script/workflows/Memory%20leakage%20detection/badge.svg)
-
-![RicScript logo](images/icon.png)
 
 # Work in progress
 

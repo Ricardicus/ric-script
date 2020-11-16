@@ -1,4 +1,6 @@
-![RicScript logo](images/icon.png)
+<p align="center">
+<img src="https://github.com/Ricardicus/ric-script/blob/master/images/icon.png?raw=true" />
+</p>
 
 ![Building and testing](https://github.com/Ricardicus/ric-script/workflows/Building%20and%20testing/badge.svg)
 ![Building docker image](https://github.com/Ricardicus/ric-script/workflows/Building%20docker%20image/badge.svg)

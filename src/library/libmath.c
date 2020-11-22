@@ -396,7 +396,6 @@ int ric_random_uniform_int(LIBRARY_PARAMS())
 
 int ric_random_uniform(LIBRARY_PARAMS())
 {
-  stackval_t stv;
   double result = 0;
 
   result = (rand() / (double) RAND_MAX);

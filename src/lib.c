@@ -40,6 +40,8 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("abs", 1, ric_abs),
   DECLARE_LIB_FUNCTION("floor", 1, ric_floor),
   DECLARE_LIB_FUNCTION("ceil", 1, ric_ceil),
+  DECLARE_LIB_FUNCTION("randomInt", 2, ric_random_uniform_int),
+  DECLARE_LIB_FUNCTION("random", 0, ric_random_uniform),
   // libload
   DECLARE_LIB_FUNCTION("load", 1, ric_load),
   // libos

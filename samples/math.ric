@@ -35,7 +35,35 @@ print(abs(1337))
 print(floor(1337.1))
 print(ceil(1337.1))
 
+# Testing random numbers
+i = 0
+. [ i < 100 ] {
 
+  s = randomInt(10, 100)
+  ? [ s > 100 ] {
+    print("Error random!")
+  }
+  ? [ s < 10 ] {
+    print("Error random!")
+  }
 
+  i = i + 1
+  @
+}
+
+i = 0
+. [ i < 100 ] {
+
+  s = random()
+  ? [ s < 0 ] {
+    print("Error random!")
+  }
+  ? [ s > 1 ] {
+    print("Error random!")
+  }
+
+  i = i + 1
+  @
+}
 
 

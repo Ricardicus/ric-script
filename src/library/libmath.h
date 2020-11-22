@@ -24,6 +24,8 @@ int ric_exp(LIBRARY_PARAMS());
 int ric_abs(LIBRARY_PARAMS());
 int ric_floor(LIBRARY_PARAMS());
 int ric_ceil(LIBRARY_PARAMS());
+int ric_random_uniform(LIBRARY_PARAMS());
+int ric_random_uniform_int(LIBRARY_PARAMS());
 
 #endif
 

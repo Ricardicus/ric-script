@@ -342,3 +342,67 @@ int ric_ceil(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_random_uniform_int(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int32_t arg1 = 0;
+  int32_t arg2 = 0;
+  int32_t result = 0;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    arg1 = stv.i;
+    break;
+    case DOUBLETYPE:
+    arg1 = (int) stv.d;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  // Pop arg2
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    arg2 = stv.i;
+    break;
+    case DOUBLETYPE:
+    arg2 = (int32_t) stv.d;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  result = (int32_t) ((rand() / (double)RAND_MAX) * (arg2-arg1)) + arg1;
+
+  /* Pushing result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
+
+int ric_random_uniform(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  double result = 0;
+
+  result = (rand() / (double) RAND_MAX);
+
+  /* Pushing result */
+  PUSH_DOUBLE(result, sp, sc);
+
+  return 0;
+}

@@ -45,3 +45,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/class.ric
     - name: Run valgrind on rpn_classes.ric
       run: printf "2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -\nq" | valgrind ./ric samples/rpn_classes.ric
+    - name: Run valgrind on time_of_day.ric
+      run: valgrind --leak-check=full ./ric samples/time_of_day.ric

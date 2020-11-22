@@ -85,6 +85,21 @@ int ric_print(LIBRARY_PARAMS())
     case INT32TYPE:
     printf("%d\n", stv.i);
     break;
+    case TIMETYPE: {
+      struct tm *info;
+      if ( stv.time < 0 ) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + stv.time;
+        info = localtime( &result );
+      } else {
+        info = localtime( &stv.time );
+      }
+      printf("%s\n", asctime(info));
+      break;
+    }
     case DOUBLETYPE:
     printf("%lf\n", stv.d);
     break;
@@ -193,6 +208,21 @@ int ric_printf(LIBRARY_PARAMS())
       }
     }
     break;
+    case TIMETYPE: {
+      struct tm *info;
+      if ( stv.time < 0 ) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + stv.time;
+        info = localtime( &result );
+      } else {
+        info = localtime( &stv.time );
+      }
+      printf("%s", asctime(info));
+      break;
+    }
     case DOUBLETYPE:
     printf("%lf", stv.d);
     break;

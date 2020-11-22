@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "hashtable.h"
 
@@ -37,6 +38,7 @@
 #define EXPR_TYPE_DICT           19
 #define EXPR_TYPE_CLASSPTR       20
 #define EXPR_TYPE_CLASSFUNCCALL  21
+#define EXPR_TYPE_TIME           22
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -168,11 +170,11 @@ typedef struct expr_s {
     double        fval;
     int32_t       ival;
     uint32_t      uval;
-		addOP_t       add;
-		subOP_t       sub;
-		mulOP_t       mul;
-		divOP_t       div;
-		modOP_t       mod;
+    addOP_t       add;
+    subOP_t       sub;
+    mulOP_t       mul;
+    divOP_t       div;
+    modOP_t       mod;
     ifCondition_t *cond;
     void          *func;
     uintptr_t     p;
@@ -180,6 +182,7 @@ typedef struct expr_s {
     vectorIndex_t *vecIdx;
     dictionary_t  *dict;
     class_t       *classObj;
+    time_t        time;
 	};
 } expr_t;
 
@@ -268,6 +271,7 @@ void* ast_emalloc(size_t size);
 
 expr_t* newExpr_Text(char *text);
 expr_t* newExpr_Ival(int val);
+expr_t* newExpr_Time(time_t time);
 expr_t* newExpr_Uval(unsigned val);
 expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
@@ -306,29 +310,31 @@ void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt,
 void free_expression(expr_t *expr);
 
 typedef enum stackvaltypes {
-	INT32TYPE = 1,
-	DOUBLETYPE,
-	TEXT,
-	POINTERTYPE,
+  INT32TYPE = 1,
+  DOUBLETYPE,
+  TEXT,
+  POINTERTYPE,
   FUNCPTRTYPE,
   LIBFUNCPTRTYPE,
   VECTORTYPE,
   DICTTYPE,
-  CLASSTYPE
+  CLASSTYPE,
+  TIMETYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
 	stackvaltypes_t type;
 	union {
-		double d;
-		int32_t i;
-		char *t;
-		uintptr_t p;
+    double d;
+    int32_t i;
+    char *t;
+    uintptr_t p;
     functionDef_t *func;
     vector_t *vec;
     libFunction_t *libfunc;
     dictionary_t *dict;
     class_t *classObj;
+    time_t time;
 	};
 } stackval_t;
 
@@ -508,6 +514,22 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = LIBFUNCPTRTYPE;\
 stackval.libfunc = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+
+#define PUSH_TIME(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = TIMETYPE;\
+stackval.time = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

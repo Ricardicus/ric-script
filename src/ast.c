@@ -16,6 +16,13 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
+expr_t* newExpr_Time(time_t time) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr->type = EXPR_TYPE_TIME;
+  expr->time = time;
+  return expr;
+}
+
 expr_t* newExpr_ClassPtr(class_t *class) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   class_t *cls = ast_emalloc(sizeof(class_t));

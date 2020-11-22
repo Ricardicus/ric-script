@@ -5,7 +5,8 @@ library_source_list = [
   'libmath.c',
   'libstd.c',
   'libstring.c',
-  'libload.c'
+  'libload.c',
+  'libtime.c'
 ]
 
 target_os = target_machine.system()

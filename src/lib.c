@@ -44,6 +44,22 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("random", 0, ric_random_uniform),
   // libload
   DECLARE_LIB_FUNCTION("load", 1, ric_load),
+  // libtime
+  DECLARE_LIB_FUNCTION("now", 0, ric_new_time),
+  DECLARE_LIB_FUNCTION("timeSeconds", 1, ric_time_seconds),
+  DECLARE_LIB_FUNCTION("timeMinutes", 1, ric_time_minutes),
+  DECLARE_LIB_FUNCTION("timeHours", 1, ric_time_hours),
+  DECLARE_LIB_FUNCTION("timeDays", 1, ric_time_days),
+  DECLARE_LIB_FUNCTION("timeWeeks", 1, ric_time_weeks),
+  DECLARE_LIB_FUNCTION("timeMonths", 1, ric_time_months),
+  DECLARE_LIB_FUNCTION("timeYears", 1, ric_time_years),
+  DECLARE_LIB_FUNCTION("timeSecond", 1, ric_time_second),
+  DECLARE_LIB_FUNCTION("timeMinute", 1, ric_time_minute),
+  DECLARE_LIB_FUNCTION("timeHour", 1, ric_time_hour),
+  DECLARE_LIB_FUNCTION("timeDay", 1, ric_time_day),
+  DECLARE_LIB_FUNCTION("timeWeek", 1, ric_time_week),
+  DECLARE_LIB_FUNCTION("timeMonth", 1, ric_time_month),
+  DECLARE_LIB_FUNCTION("timeYear", 1, ric_time_year),
   // libos
   DECLARE_LIB_FUNCTION("sleep", 1, ric_sleep),
   DECLARE_LIB_FUNCTION("isDir", 1, ric_is_directory),

@@ -60,6 +60,10 @@ void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
       PUSH_CLASSREF(sv.classObj, sp, sc);
       break;
     }
+    case TIMETYPE: {
+      PUSH_TIME(sv.time, sp, sc);
+      break;
+    }
     default:
       fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
@@ -93,6 +97,9 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
       break;
     case CLASSTYPE:
       PUSH_CLASSREF(hv->sv.classObj, sp, sc);
+      break;
+    case TIMETYPE:
+      PUSH_TIME(hv->sv.time, sp, sc);
       break;
     case TEXT: {
       PUSH_STRING(hv->sv.t, sp, sc);
@@ -408,6 +415,9 @@ expr_t*  copy_vector(
     case TEXT:
       newExp = newExpr_Text(sv.t);
       break;
+    case TIMETYPE:
+      newExp = newExpr_Time(sv.time);
+      break;
     case POINTERTYPE:
       newExp = newExpr_Pointer(sv.p);
       break;
@@ -501,6 +511,9 @@ void evaluate_expression(
             case EXPR_TYPE_LIBFUNCPTR:
               PUSH_LIBFUNCPTR(expArg->func, sp, sc);
               break;
+            case EXPR_TYPE_TIME:
+              PUSH_TIME(expArg->time, sp, sc);
+              break;
             case EXPR_TYPE_DICT:
               PUSH_DICTIONARY(expArg->dict, sp, sc);
               break;
@@ -510,9 +523,7 @@ void evaluate_expression(
               break;
             }
             default:
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Invalid usage of identifier '%s'\n", 
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, expr->id.id);
+              fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expr->id.id);
               exit(1);
               break;
             }
@@ -520,11 +531,9 @@ void evaluate_expression(
             stop = 1;
           }
         } else {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: unknown, this is crazy. The interpreter is broken or something.\n\
+          fprintf(stderr, "error: unknown, this is crazy. The interpreter is broken or something.\n\
 Please report back to me.\n\
-- %s\n", ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
-          GENERAL_ERROR_ISSUE_URL);
+- %s\n", GENERAL_ERROR_ISSUE_URL);
           exit(1);
         }
 
@@ -599,10 +608,7 @@ Please report back to me.\n\
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
             stop = 1;
           } else {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Failed to find ID: '%s'\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
-              expr->id.id);
+            fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
             exit(1);
           }
         }
@@ -648,9 +654,7 @@ Please report back to me.\n\
         POP_VAL(&sv, sp, sc);
 
         if ( sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: '%s' is a datatype the does not support indexing.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, id->id.id);
+          fprintf(stderr, "index error: '%s' is a datatype the does not support indexing.\n", id->id.id);
           exit(1);
         }
 
@@ -663,9 +667,7 @@ Please report back to me.\n\
           text = sv.t;
         }
       } else {
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-        fprintf(stderr, "error %s:%d: Invalid indexing\n",
-          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        fprintf(stderr, "error: Invalid indexing\n");
         exit(1);
       }
 
@@ -679,9 +681,7 @@ Please report back to me.\n\
           POP_VAL(&sv, sp, sc);
 
           if ( sv.type != TEXT ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Must provide an string as index for dictionaries\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+            fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
             exit(1);
           }
 
@@ -690,9 +690,7 @@ Please report back to me.\n\
           /* find heapval */
           hpv = hashtable_get(dict->hash, key);
           if ( hpv == NULL ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: key '%s' not present in dictionary\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, key);
+            fprintf(stderr, "error: key '%s' not present in dictionary\n", key);
             exit(1);
           }
 
@@ -736,10 +734,12 @@ Please report back to me.\n\
               PUSH_CLASSREF(sv.classObj, sp, sc);
               break;
             }
+            case TIMETYPE: {
+              PUSH_TIME(sv.time, sp, sc);
+              break;
+            }
             default:
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Unknown stackval_t type: %d\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
               exit(1);
               break;
           }
@@ -752,9 +752,7 @@ Please report back to me.\n\
           POP_VAL(&sv, sp, sc);
 
           if ( sv.type != INT32TYPE ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Must provide an integer as index\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+            fprintf(stderr, "index error: Must provide an integer as index\n");
             exit(1);
           }
 
@@ -762,9 +760,7 @@ Please report back to me.\n\
 
           /* check the limits */
           if ( arrayIndex >= vec->length ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
+            fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
               arrayIndex,
               vec->length);
             exit(1);
@@ -778,9 +774,7 @@ Please report back to me.\n\
           }
 
           if ( exp == NULL ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Unexpected index error!\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+            fprintf(stderr, "Unexpected index error!\n");
             fprintf(stderr, "Please include the script and file an error report to me here:\n    %s\n\
     This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERROR_ISSUE_URL);
             exit(1);
@@ -828,10 +822,12 @@ Please report back to me.\n\
               PUSH_CLASSREF(sv.classObj, sp, sc);
               break;
             }
+            case TIMETYPE: {
+              PUSH_TIME(sv.time, sp, sc);
+              break;
+            }
             default:
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Unknown stackval_t type: %d\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
               exit(1);
               break;
           }
@@ -848,18 +844,14 @@ Please report back to me.\n\
           POP_VAL(&sv, sp, sc);
 
           if ( sv.type != INT32TYPE ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Must provide an integer as index (%d)\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+            fprintf(stderr, "index error: Must provide an integer as index (%d)\n", sv.type);
             exit(1);
           }
 
           arrayIndex = sv.i;
 
           if ( arrayIndex > strlen(text) ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: index out of bounds\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+            fprintf(stderr, "index error: out of bounds\n");
             exit(1);
           }
 
@@ -884,6 +876,9 @@ Please report back to me.\n\
     break;
     case EXPR_TYPE_UVAL:
     PUSH_INT(expr->uval, sp, sc);
+    break;
+    case EXPR_TYPE_TIME:
+    PUSH_TIME(expr->time, sp, sc);
     break;
     case EXPR_TYPE_TEXT: {
       PUSH_STRING(expr->text, sp, sc);
@@ -912,10 +907,10 @@ Please report back to me.\n\
         }
         case TEXT:
         case VECTORTYPE:
-        case POINTERTYPE: 
+        case POINTERTYPE:
+        case TIMETYPE:
           break;
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
@@ -933,6 +928,7 @@ Please report back to me.\n\
         case TEXT:
         case VECTORTYPE:
         case POINTERTYPE: 
+        case TIMETYPE:
           break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
@@ -948,6 +944,8 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 + *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 + *r1, sp, sc);
+      } else if ( svLeft.type == TIMETYPE && svRight.type == TIMETYPE ) {
+        PUSH_DOUBLE(svLeft.time + svRight.time, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
         size_t len = strlen(svLeft.t) + strlen(svRight.t);
         stackval_t sv;
@@ -1145,16 +1143,14 @@ Please report back to me.\n\
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Cannot substract strings.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Cannot substract strings..\n");
           exit(1);
           break;
         }
+        case TIMETYPE:
+        break;
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -1169,16 +1165,14 @@ Please report back to me.\n\
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Cannot substract strings.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Cannot substract strings..\n");
           exit(1);
           break;
         }
+        case TIMETYPE:
+        break;
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -1191,6 +1185,8 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 - *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 - *r1, sp, sc);
+      } else if ( svLeft.type == TIMETYPE && svRight.type == TIMETYPE ) {
+        PUSH_TIME(svLeft.time - svRight.time, sp, sc);
       }
 
       break;
@@ -1235,24 +1231,18 @@ Please report back to me.\n\
           *f1 = svRight.d;
 
           if ( leftStr != NULL ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Cannot multiply string with float\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+            fprintf(stderr, "error: Cannot multiply string with float\n");
             exit(1);
           }
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Cannot multiply strings..\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Cannot multiply strings..\n");
           exit(1);
           break;
         }
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -1310,23 +1300,17 @@ Please report back to me.\n\
           break;
         }
         case DOUBLETYPE: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Invalid expression, cannot calculate modulus on floating point.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on floating point.\n");
           exit(1);
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Invalid expression, cannot calculate modulus on string.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
           exit(1);
           break;
         }
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -1337,23 +1321,17 @@ Please report back to me.\n\
           break;
         }
         case DOUBLETYPE: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Invalid expression, cannot calculate modulus on floating point.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on floating point.\n");
           exit(1);
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Invalid expression, cannot calculate modulus on string.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
           exit(1);
           break;
         }
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -1386,16 +1364,12 @@ Please report back to me.\n\
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Not implemented string additions yet..\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Not implemented string additions yet..\n");
           exit(1);
           break;
         }
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svLeft.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -1410,16 +1384,12 @@ Please report back to me.\n\
           break;
         }
         case TEXT: {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Not implemented string additions yet..\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "error: Not implemented string additions yet..\n");
           exit(1);
           break;
         }
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected stackval_t type: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, svRight.type);
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -1585,9 +1555,7 @@ void call_func(
       break;
     }
     default:
-    if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-      fprintf(stderr, "error %s:%d: invalid function call (%d)\n",
-        ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+      fprintf(stderr, "error: invalid function call (%d)\n", sv.type);
       exit(1);
       break;
     }
@@ -1639,16 +1607,14 @@ void call_func(
         spBefore = *(uintptr_t*)sp;
 
         if ( params == NULL && argsWalk != NULL ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: function '%s' expected 0 arguments, got: %u\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, argsWalk->length );
+          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+            funcID, argsWalk->length );
           exit(1);
         }
 
         if ( params != NULL && argsWalk == NULL ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: function '%s' expected %u arguments, got: 0\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, params->length );
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+            funcID, params->length );
           exit(1);
         }
 
@@ -1656,9 +1622,8 @@ void call_func(
           /* Verifying function definition parameters and function call arguments */
           if ( params->length != argsWalk->length ) {
             /* print error message */
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: function '%s' expected %u arguments, got: %u\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, params->length, argsWalk->length);
+            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+              funcID, params->length, argsWalk->length);
             exit(1);
           }
 
@@ -1669,8 +1634,8 @@ void call_func(
 
             if ( params->arg->type != EXPR_TYPE_ID ) {
               /* This is not supposed to happen */
-              printf("error %s:%d: parameter in function definition '%s' was invalid\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID);
+              printf("Error: parameter in function definition '%s' was invalid\n",
+                funcID);
             }
 
             /* Evaluate expression */
@@ -1704,6 +1669,10 @@ void call_func(
                 newArg = newExpr_FuncPtr(sv.func);
                 break;
               }
+              case TIMETYPE: {
+                newArg = newExpr_Time(sv.time);
+                break;
+              }
               case LIBFUNCPTRTYPE: {
                 newArg = newExpr_LibFuncPtr(sv.libfunc);
                 break;
@@ -1716,9 +1685,7 @@ void call_func(
                 break;
               }
               default:
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: sorry but argument datatype cannot be passed to a function, type: %d\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
                 exit(1);
                 break;
             }
@@ -1770,9 +1737,7 @@ void call_func(
           libFunc = expArg->func;
           break;
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Invalid usage of identifier '%s'\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, expArg->id.id);
+          fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
           exit(1);
           break;
         }
@@ -1798,9 +1763,7 @@ void call_func(
             expArg = hashtable_get(argVals, funcID);
 
             if ( expArg == NULL ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Function call undefined: '%s'.\r\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID);
+              fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
               exit(1);
             }
 
@@ -1815,9 +1778,7 @@ void call_func(
                 libFunc = expArg->func;
                 break;
               default:
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: Invalid usage of identifier '%s'\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, expArg->id.id);
+                fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
                 exit(1);
                 break;
               }
@@ -1825,9 +1786,7 @@ void call_func(
             }
 
           } else if ( hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE ) {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: Function call undefined: '%s'.\r\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID);
+            fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
             exit(1);
           } else {
             switch (hv->sv.type) {
@@ -1853,16 +1812,14 @@ void call_func(
         argsList_t *params = funcDef->params;
 
         if ( params == NULL && argsWalk != NULL ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: function '%s' expected 0 arguments, got: %u\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, argsWalk->length );
+          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+            funcID, argsWalk->length );
           exit(1);
         }
 
         if ( params != NULL && argsWalk == NULL ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: function '%s' expected %u arguments, got: 0\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, params->length );
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+            funcID, params->length );
           exit(1);
         }
 
@@ -1870,9 +1827,8 @@ void call_func(
           /* Verifying function definition parameters and function call arguments */
           if ( params->length != argsWalk->length ) {
             /* print error message */
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: function '%s' expected %u arguments, got: %u\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, params->length, argsWalk->length);
+            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+              funcID, params->length, argsWalk->length);
             exit(1);
           }
 
@@ -1883,8 +1839,8 @@ void call_func(
 
             if ( params->arg->type != EXPR_TYPE_ID ) {
               /* This is not supposed to happen */
-              printf("error %s:%d: parameter in function definition '%s' was invalid\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID);
+              printf("Error: parameter in function definition '%s' was invalid\n",
+                funcID);
             }
 
             /* Evaluate expression */
@@ -1904,6 +1860,10 @@ void call_func(
               }
               case TEXT: {
                 newArg = newExpr_Text(sv.t);
+                break;
+              }
+              case TIMETYPE: {
+                newArg = newExpr_Time(sv.time);
                 break;
               }
               case POINTERTYPE: {
@@ -1930,9 +1890,7 @@ void call_func(
                 break;
               }
               default:
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: sorry but argument datatype cannot be passed to a function, type: %d\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
                 exit(1);
                 break;
             }
@@ -1979,17 +1937,14 @@ void call_func(
         int libfunc_ret;
 
         if ( libFunc->nbrArgs > 0 && argsWalk == NULL ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: library function '%s' need %d agument%s, %d provided.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+          fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+            funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
           exit(1);
         }
 
         if ( argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: library function '%s' need %d agument%s, %d provided.\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID,
-            libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
+          fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n",
+            funcID, libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
           exit(1);
         }
 
@@ -2014,9 +1969,8 @@ void call_func(
         flush_arguments(newArgumentTable);
 
         if ( libfunc_ret != 0 ) {
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: error during execution of library function '%s', error code: %d\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, libfunc_ret);
+          fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
+            funcID, libfunc_ret);
           exit(libfunc_ret);
         }
       }
@@ -2040,17 +1994,13 @@ void call_func(
       classObj = sv.classObj;
       break;
     default:
-    if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-      fprintf(stderr, "error %s:%d: invalid class function call, ID must point to a class object.\n",
-        ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+      fprintf(stderr, "error: invalid class function call, ID must point to a class object.\n");
       exit(1);
       break;
     }
 
     if ( !classObj->initialized ) {
-      if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-      fprintf(stderr, "error %s:%d: invalid class function call, ID must point to an initialized class object.\n",
-        ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+      fprintf(stderr, "error: invalid class function call, ID must point to an initialized class object.\n");
       exit(1);
     }
 
@@ -2061,9 +2011,8 @@ void call_func(
     funcDef = hashtable_get(classObj->funcDefs, funcID);
 
     if ( funcDef == NULL ) {
-      if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-      fprintf(stderr, "error %s:%d: cannot find function '%s' in class '%s'.\n", 
-        ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, classObj->id);
+      fprintf(stderr, "error: cannot find function '%s' in class '%s'.\n", 
+        funcID, classObj->id);
       exit(1);
     }
 
@@ -2081,16 +2030,14 @@ void call_func(
       int localsStackSb;
 
       if ( params == NULL && argsWalk != NULL ) {
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-        fprintf(stderr, "error %s:%d: function '%s' expected 0 arguments, got: %u\n",
-          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, argsWalk->length );
+        fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
+          funcID, argsWalk->length );
         exit(1);
       }
 
       if ( params != NULL && argsWalk == NULL ) {
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-        fprintf(stderr, "error %s:%d: function '%s' expected %u arguments, got: 0\n",
-          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, params->length );
+        fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n",
+          funcID, params->length );
         exit(1);
       }
 
@@ -2098,9 +2045,8 @@ void call_func(
         /* Verifying function definition parameters and function call arguments */
         if ( params->length != argsWalk->length ) {
           /* print error message */
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: function '%s' expected %u arguments, got: %u\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID, params->length, argsWalk->length);
+          fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n",
+            funcID, params->length, argsWalk->length);
           exit(1);
         }
 
@@ -2111,8 +2057,8 @@ void call_func(
 
           if ( params->arg->type != EXPR_TYPE_ID ) {
             /* This is not supposed to happen */
-            printf("error %s:%d: parameter in function definition '%s' was invalid\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, funcID);
+            printf("Error: parameter in function definition '%s' was invalid\n",
+              funcID);
           }
 
           /* Evaluate expression */
@@ -2132,6 +2078,10 @@ void call_func(
             }
             case TEXT: {
               newArg = newExpr_Text(sv.t);
+              break;
+            }
+            case TIMETYPE: {
+              newArg = newExpr_Time(sv.time);
               break;
             }
             case POINTERTYPE: {
@@ -2157,13 +2107,10 @@ void call_func(
               newArg = e;
               break;
             }
-            default: {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: sorry but argument datatype cannot be passed to a function, type: %d\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+            default:
+              fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
               exit(1);
-            }
-            break;
+              break;
           }
 
           /* Adding expression to argument table */
@@ -2229,32 +2176,6 @@ void interpret_statements_(
       case LANG_ENTITY_RETURN:
         next = NULL;
       break;
-      case LANG_ENTITY_EMPTY_MATH:
-      case LANG_ENTITY_EMPTY_STR:
-      { 
-        stackval_t sv;
-        expr_t *e = ((statement_t*)stmt)->content;
-        evaluate_expression(e, EXPRESSION_ARGS());
-        POP_VAL(&sv, sp, sc);
-        switch ( sv.type ) {
-        case INT32TYPE:
-        printf("%" PRIi32 "\n", sv.i);
-        break;
-        case DOUBLETYPE:
-        printf("%lf\n", sv.d);
-        break;
-        case TEXT:
-        printf("%s\n", sv.t);
-        break;
-        default:
-        printf("%s.error: unknown type of value on the stack (%d)\n", 
-          __func__, sv.type);
-        break;
-        }
-
-        next = ((statement_t*)stmt)->next;
-        break;
-      }
       case LANG_ENTITY_BODY: {
         next = ((body_t*)stmt)->content;
         ctx->sp[ctx->depth] = varLocals->sp;
@@ -2377,9 +2298,7 @@ void interpret_statements_(
               POP_VAL(&sv, sp, sc);
 
               if ( sv.type != TEXT ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: Must provide a string as key\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+                fprintf(stderr, "index error: Must provide a string as key\n");
                 exit(1);
               }
 
@@ -2421,9 +2340,7 @@ void interpret_statements_(
               POP_VAL(&sv, sp, sc);
 
               if ( sv.type != INT32TYPE ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: Must provide an integer as index\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+                fprintf(stderr, "index error: Must provide an integer as index\n");
                 exit(1);
               }
 
@@ -2431,9 +2348,7 @@ void interpret_statements_(
 
               /* check the limits */
               if ( arrayIndex >= vec->length ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
+                fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
                   arrayIndex,
                   vec->length);
                 exit(1);
@@ -2447,9 +2362,7 @@ void interpret_statements_(
               }
 
               if ( *expToSet == NULL ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: Unexpected index error!\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+                fprintf(stderr, "Unexpected index error!\n");
                 GENERAL_REPORT_ISSUE_MSG();
                 exit(1);
               }
@@ -2470,6 +2383,9 @@ void interpret_statements_(
                 break;
               case TEXT:
                 newExp = newExpr_Text(sv.t);
+                break;
+              case TIMETYPE:
+                newExp = newExpr_Time(sv.time);
                 break;
               case POINTERTYPE:
                 newExp = newExpr_Pointer(sv.p);
@@ -2506,18 +2422,14 @@ void interpret_statements_(
               POP_VAL(&sv, sp, sc);
 
               if ( sv.type != INT32TYPE ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: Must provide an integer as index\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+                fprintf(stderr, "index error: Must provide an integer as index\n");
                 exit(1);
               }
 
               arrayIndex = sv.i;
 
               if ( arrayIndex >= strlen(text) ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "error %s:%d: index out of bounds\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+                fprintf(stderr, "index error: index out of bounds\n");
                 exit(1);
               }
 
@@ -2526,9 +2438,7 @@ void interpret_statements_(
               POP_VAL(&sv, sp, sc);
 
               if ( sv.type != TEXT ) {
-                if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-                fprintf(stderr, "index %s.%d: Can only assign text to text.\n",
-                  ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+                fprintf(stderr, "string index error: Can only assign text to text.\n");
                 exit(1);
               }
 
@@ -2546,9 +2456,7 @@ void interpret_statements_(
             }
             break;
             default: {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: '%s' is not an indexable object.\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, id->id.id);
+              fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
               GENERAL_REPORT_ISSUE_MSG();
               exit(1);
               break;
@@ -2599,6 +2507,10 @@ void interpret_statements_(
         case INT32TYPE:
           /* Pushing the return value as an int */
           PUSH_INT(sv.i, sp, sc);
+          break;
+        case TIMETYPE:
+          /* Pushing the return value as an int */
+          PUSH_TIME(sv.time, sp, sc);
           break;
         case VECTORTYPE:
           /* Pushing the return value as a vector */
@@ -2682,6 +2594,21 @@ void interpret_statements_(
                 case TEXT:
                 printf("%s\n", sv.t);
                 break;
+                case TIMETYPE: {
+                  struct tm *timeInfo;
+                  if ( sv.time < 0 ) {
+                    /* Relative time to now */
+                    time_t nowTime;
+                    time_t result;
+                    time(&nowTime);
+                    result = nowTime + sv.time;
+                    timeInfo = localtime( &result );
+                  } else {
+                    timeInfo = localtime( &sv.time );
+                  }
+                  printf("%s", asctime(timeInfo));
+                  break;
+                }
                 case VECTORTYPE:
                 print_vector(sv.vec, EXPRESSION_ARGS());
                 printf("\n");
@@ -2716,6 +2643,21 @@ void interpret_statements_(
                 case TEXT:
                 printf("%s\n", sv.t);
                 break;
+                case TIMETYPE: {
+                  struct tm *timeInfo;
+                  if ( sv.time < 0 ) {
+                    /* Relative time to now */
+                    time_t nowTime;
+                    time_t result;
+                    time(&nowTime);
+                    result = nowTime + sv.time;
+                    timeInfo = localtime( &result );
+                  } else {
+                    timeInfo = localtime( &sv.time );
+                  }
+                  printf("%s", asctime(timeInfo));
+                  break;
+                }
                 case VECTORTYPE:
                 print_vector(sv.vec, EXPRESSION_ARGS());
                 printf("\n");
@@ -2745,6 +2687,21 @@ void interpret_statements_(
                   case TEXT:
                   printf("%s\n", sv.t);
                   break;
+                  case TIMETYPE: {
+                    struct tm *timeInfo;
+                    if ( sv.time < 0 ) {
+                      /* Relative time to now */
+                      time_t nowTime;
+                      time_t result;
+                      time(&nowTime);
+                      result = nowTime + sv.time;
+                      timeInfo = localtime( &result );
+                    } else {
+                      timeInfo = localtime( &sv.time );
+                    }
+                    printf("%s", asctime(timeInfo));
+                    break;
+                  }
                   case VECTORTYPE:
                   print_vector(sv.vec, EXPRESSION_ARGS());
                   printf("\n");
@@ -2787,9 +2744,7 @@ void interpret_statements_(
           *ax = (sv.i != 0);
           break;
           default:
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Invalid conditional expression (%d)\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+          fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
           exit(1);
           break;
         }
@@ -2812,9 +2767,7 @@ void interpret_statements_(
               *ax = (sv.i != 0);
               break;
               default:
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Invalid conditional expression.\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "Invalid conditional expression.\n");
               exit(1);
               break;
             }
@@ -2926,6 +2879,9 @@ void print_expr(expr_t *expr)
     break;
     case EXPR_TYPE_FVAL:
     printf("%lf", expr->fval);
+    break;
+    case EXPR_TYPE_TIME:
+    printf("TIME");
     break;
     case EXPR_TYPE_IVAL:
     printf("%d", expr->ival);
@@ -3112,9 +3068,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             POP_VAL(&sv, sp, sc);
 
             if ( sv.type != TEXT ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Must provide a string as key\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "index error: Must provide a string as key\n");
               exit(1);
             }
 
@@ -3156,9 +3110,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             POP_VAL(&sv, sp, sc);
 
             if ( sv.type != INT32TYPE ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Must provide an integer as index\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "index error: Must provide an integer as index\n");
               exit(1);
             }
 
@@ -3166,9 +3118,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
 
             /* check the limits */
             if ( arrayIndex >= vec->length ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
+              fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
                 arrayIndex,
                 vec->length);
               exit(1);
@@ -3182,9 +3132,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             }
 
             if ( *expToSet == NULL ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Unexpected index error!\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "Unexpected index error!\n");
               GENERAL_REPORT_ISSUE_MSG();
               exit(1);
             }
@@ -3205,6 +3153,9 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
               break;
             case TEXT:
               newExp = newExpr_Text(sv.t);
+              break;
+            case TIMETYPE:
+              newExp = newExpr_Time(sv.time);
               break;
             case POINTERTYPE:
               newExp = newExpr_Pointer(sv.p);
@@ -3241,18 +3192,14 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             POP_VAL(&sv, sp, sc);
 
             if ( sv.type != INT32TYPE ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Must provide an integer as index\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "index error: Must provide an integer as index\n");
               exit(1);
             }
 
             arrayIndex = sv.i;
 
             if ( arrayIndex >= strlen(text) ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: index out of bounds\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "index error: index out of bounds\n");
               exit(1);
             }
 
@@ -3261,9 +3208,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             POP_VAL(&sv, sp, sc);
 
             if ( sv.type != TEXT ) {
-              if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-              fprintf(stderr, "error %s:%d: Can only assign text to text.\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              fprintf(stderr, "string index error: Can only assign text to text.\n");
               exit(1);
             }
 
@@ -3281,10 +3226,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
           }
           break;
           default: {
-            if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-            fprintf(stderr, "error %s:%d: '%s' is not an indexable object.\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
-              id->id.id);
+            fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
             GENERAL_REPORT_ISSUE_MSG();
             exit(1);
             break;
@@ -3468,6 +3410,20 @@ int print_vector(
     case TEXT:
       printf("'%s'", sv.t);
       break;
+    case TIMETYPE: {
+      struct tm *info;
+      if ( sv.time < 0 ) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + sv.time;
+        info = localtime( &result );
+      } else {
+        info = localtime( &sv.time );
+      }
+      printf("%s", asctime(info));
+    }
     case POINTERTYPE:
       printf("<%" PRIuPTR ">", sv.p);
       break;
@@ -3599,8 +3555,7 @@ void print_statements_(void *stmt, int indent)
         break;
       }
       default:
-        fprintf(stderr, "error %s:%d: Unexpected expression in declaration statment\n",
-          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        fprintf(stderr, "Unexpected expression in declaration statment\n");
         GENERAL_REPORT_ISSUE_MSG();
         break;
       }
@@ -4008,7 +3963,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
       break;
     }
     default:
-      fprintf(stderr, "error: There was something strange with the provided argument..\r\n");
+      fprintf(stderr, "There was something strange with the provided argument..\r\n");
       GENERAL_REPORT_ISSUE_MSG();
     break;
     }
@@ -4068,9 +4023,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-        fprintf(stderr, "error %s:%d: Invalid dictionary expression, keys must be given as strings.\r\n",
-          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        fprintf(stderr, "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
         exit(1);
         break;
       }
@@ -4084,6 +4037,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       case INT32TYPE:
       case LIBFUNCPTRTYPE:
       case FUNCPTRTYPE:
+      case TIMETYPE:
         ALLOC_HEAP(&sv, hp, &hvp, &dummy);
         break;
       case VECTORTYPE: {
@@ -4128,9 +4082,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         break;
       }
       default:
-        if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-        fprintf(stderr, "error %s:%d: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n",
-          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
         exit(1);
         break;
       }
@@ -4167,6 +4119,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case INT32TYPE:
         case LIBFUNCPTRTYPE:
         case FUNCPTRTYPE:
+        case TIMETYPE:
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           break;
         case VECTORTYPE: {
@@ -4211,9 +4164,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         default:
-          if ( classCtx != NULL ) { fprintf(stderr, "%s: in function '%s'\r\n", ((statement_t*)stmt)->file, classCtx->id); }
-          fprintf(stderr, "error %s:%d: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+          fprintf(stderr, "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
           exit(1);
           break;
         }

@@ -37,7 +37,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libstd \
 	$(LIB_DIR)/libstring \
 	$(LIB_DIR)/libload \
-	$(LIB_DIR)/libos
+	$(LIB_DIR)/libos \
+	$(LIB_DIR)/libtime
 
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 

@@ -9,6 +9,7 @@ def test_vector_print():
 "gcd.ric",
 "dictionary.ric",
 "folder",
+"time_of_day.ric",
 " a",
 "  a",
 "   c.txt",

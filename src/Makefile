@@ -38,8 +38,15 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libstring \
 	$(LIB_DIR)/libload \
 	$(LIB_DIR)/libos \
-	$(LIB_DIR)/libtime \
-	$(LIB_DIR)/libxattr
+	$(LIB_DIR)/libtime
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+  RIC_SOURCES += $(LIB_DIR)/libxattr_linux
+endif
+ifeq ($(UNAME_S),Darwin)
+  RIC_SOURCES += $(LIB_DIR)/libxattr_darwin
+endif
 
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 

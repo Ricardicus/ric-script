@@ -14,6 +14,10 @@ def test_vector_print():
 "[]"
 ]
 
+  if (os.name == 'nt'):
+    # Xattr is not supported on Windows
+    return
+
   lib_script = callSample('xattr.ric')
 
   ric_result = os.popen(lib_script).read().splitlines()

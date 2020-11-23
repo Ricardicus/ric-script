@@ -306,12 +306,46 @@ int ric_time_day(LIBRARY_PARAMS()) {
   return 0;
 }
 
+/*
+*
+* Instead of relying on strftime for ISO 8601, I found
+* this big brain energy function off the internet:
+* https://stackoverflow.com/questions/42568215/iso-8601-week-number-in-c
+*
+*/
+
+static int tm_YearWeek(const struct tm *tmptr, int32_t *week) {
+  // work with local copy
+  struct tm tm = *tmptr;
+  // fully populate the yday and wday fields.
+  if (mktime(&tm) == -1) {
+    return 1;
+  }
+
+  // Find day-of-the-week: 0 to 6.
+  // Week starts on Monday per ISO 8601
+  // 0 <= DayOfTheWeek <= 6, Monday, Tuesday ... Sunday
+  int DayOfTheWeek = (tm.tm_wday + (7 - 1)) % 7;
+
+  // Offset the month day to the Monday of the week.
+  tm.tm_mday -= DayOfTheWeek;
+  // Offset the month day to the mid-week (Thursday) of the week, 3 days later.
+  tm.tm_mday += 3;
+  // Re-evaluate tm_year and tm_yday  (local time)
+  if (mktime(&tm) == -1) {
+    return 1;
+  }
+
+  // Convert yday to week of the year, stating with 1.
+  *week = tm.tm_yday / 7 + 1;
+  return 0;
+}
+
 int ric_time_week(LIBRARY_PARAMS()) {
   time_t arg1;
   stackval_t stv;
   int32_t result = 0;
   struct tm *info;
-  char textBuf[5];
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -330,10 +364,7 @@ int ric_time_week(LIBRARY_PARAMS()) {
 
   info = localtime(&arg1);
 
-  // Gonna let strftime do this for me, %V is for the ISO 8601 week number.
-  memset(textBuf, 0, sizeof(textBuf));
-  strftime(textBuf, sizeof(textBuf), "%V", info);
-  result = atoi(textBuf);
+  tm_YearWeek(info, &result);
 
   PUSH_INT(result, sp, sc);
   return 0;

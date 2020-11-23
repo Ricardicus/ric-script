@@ -1,0 +1,32 @@
+file = "requirements.txt"
+s = xattrList(file)
+print("xattr's of '" + file + "':")
+print(s)
+
+print("Setting some xattributes")
+
+xattrSet(file, "owner", "Rickard")
+xattrSet(file, "who is best", "Rickard of course")
+
+print("xattr's of '" + file + "' and values:")
+s = xattrList(file)
+i = 0
+. [ i < len(s) ] {
+  val = xattrGet(file, s[i])
+  print("    - '" + s[i] + "': '" + "'" + val + "'")
+  i = i + 1
+  @
+}
+
+print("Removing xattributes I just set")
+s = xattrList(file)
+i = 0
+. [ i < len(s) ] {
+  xattrRm(file, s[i])
+  i = i + 1
+  @
+}
+
+s = xattrList(file)
+print("xattr's of '" + file + "':")
+print(s)

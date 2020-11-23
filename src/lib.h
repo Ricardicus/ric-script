@@ -16,6 +16,10 @@
 #include "libos.h"
 #include "libtime.h"
 
+#ifndef NO_XATTR
+#include "libxattr.h"
+#endif
+
 #define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
 
 void initialize_ric_lib();

@@ -2,6 +2,11 @@ import os
 from settings import *
 
 def test_vector_print():
+
+  if (os.name == 'nt'):
+    # Xattr is not supported on Windows
+    return
+
   output_lines = [
 "load_nt.ric",
 "demo.ric",
@@ -10,6 +15,7 @@ def test_vector_print():
 "dictionary.ric",
 "folder",
 "time_of_day.ric",
+"xattr.ric",
 " a",
 "  a",
 "   c.txt",

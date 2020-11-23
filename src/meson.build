@@ -26,6 +26,9 @@ else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
 	mathlib = cc.find_library('m', required: true)
 	deps = [mathlib]
+  # Silence some warnings
+
+  add_global_arguments(['-Wno-unused-parameter', '-Wno-unused-function'], language: 'c')
 endif
 
 interpreter = executable('ric',

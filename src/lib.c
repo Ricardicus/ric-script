@@ -8,6 +8,13 @@ hashtable_t *libCallbacks = NULL;
 
 /* The ric library */
 libFunction_t ric_library[] = {
+#ifndef NO_XATTR
+  // libxattr
+  DECLARE_LIB_FUNCTION("xattrList", 1, ric_list_xattr),
+  DECLARE_LIB_FUNCTION("xattrGet", 2, ric_get_xattr),
+  DECLARE_LIB_FUNCTION("xattrSet", 3, ric_set_xattr),
+  DECLARE_LIB_FUNCTION("xattrRm", 2, ric_remove_xattr),
+#endif
   // libstd
   DECLARE_LIB_FUNCTION("exit", 1, ric_exit),
   DECLARE_LIB_FUNCTION("print", 1, ric_print),

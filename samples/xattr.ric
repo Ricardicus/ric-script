@@ -13,7 +13,7 @@ s = xattrList(file)
 i = 0
 . [ i < len(s) ] {
   val = xattrGet(file, s[i])
-  print("    - '" + s[i] + "': '" + "'" + val + "'")
+  print("    - '" + s[i] + "': '" + val + "'")
   i = i + 1
   @
 }

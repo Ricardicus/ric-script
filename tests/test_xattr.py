@@ -7,8 +7,8 @@ def test_vector_print():
 "[]",
 "Setting some xattributes",
 "xattr's of 'requirements.txt' and values:",
-"    - 'user.owner': ''Rickard'",
-"    - 'user.master': ''Rickard of course'",
+"    - 'user.owner': 'Rickard'",
+"    - 'user.master': 'Rickard of course'",
 "Removing xattributes I just set",
 "xattr's of 'requirements.txt':",
 "[]"
@@ -24,6 +24,7 @@ def test_vector_print():
 
   assert len(output_lines) == len(ric_result)
 
-  for i in range(0,len(ric_result)):
-    assert output_lines[i] == ric_result[i]
+  assert len(set(output_lines)) == len(set(ric_result))
+  for n in output_lines:
+    assert(n in ric_result)
 

@@ -331,6 +331,7 @@ int ric_time_week(LIBRARY_PARAMS()) {
   info = localtime(&arg1);
 
   // Gonna let strftime do this for me, %V is for the ISO 8601 week number.
+  memset(textBuf, 0, sizeof(textBuf));
   strftime(textBuf, sizeof(textBuf), "%V", info);
   result = atoi(textBuf);
 

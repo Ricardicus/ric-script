@@ -1,4 +1,5 @@
 #include "libxattr.h"
+#include <errno.h>
 
 int ric_list_xattr(LIBRARY_PARAMS()) {
   stackval_t stv;
@@ -116,6 +117,20 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
   }
  
   result = setxattr(arg1, arg2, arg3, strlen(arg3), 0);
+
+  if (result < 0) {
+    int status = errno;
+    switch ( status ) {
+    case EDQUOT: printf("EDQUOT\n"); break;
+    case EEXIST: printf("EEXIST\n"); break;
+    case ENODATA: printf("ENODATA\n"); break;
+    case ENOSPC: printf("ENOSPC\n"); break;
+    case ENOTSUP: printf("ENOTSUP\n"); break;
+    case EPERM: printf("EPERM\n"); break;
+    case ERANGE: printf("ERANGE\n"); break;
+    default: break;
+    }
+  }
 
   /* Pushing result */
   PUSH_INT(result, sp, sc);

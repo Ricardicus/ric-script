@@ -411,6 +411,60 @@ ric-script comment symbol **#** so it looks alright.
 }
 ```
 
+# Syntax snapshot: Extended file attributes
+
+On BSD systems (such as Linux and macOS) I have added support for listing, setting, getting and removing
+extended file attributes in the file system. Not supported in Windows. 
+
+```javascript
+file = "requirements.txt"
+s = xattrList(file)
+print("xattr's of '" + file + "':")
+print(s)
+
+print("Setting some xattributes")
+
+xattrSet(file, "user.owner", "Rickard")
+xattrSet(file, "user.master", "Rickard of course")
+
+print("xattr's of '" + file + "' and values:")
+s = xattrList(file)
+i = 0
+. [ i < len(s) ] {
+  val = xattrGet(file, s[i])
+  print("    - '" + s[i] + "': '" + val + "'")
+  i = i + 1
+  @
+}
+
+print("Removing xattributes I just set")
+s = xattrList(file)
+i = 0
+. [ i < len(s) ] {
+  xattrRm(file, s[i])
+  i = i + 1
+  @
+}
+
+s = xattrList(file)
+print("xattr's of '" + file + "':")
+print(s)
+```
+
+outputs:
+
+```
+xattr's of 'requirements.txt':
+[]
+Setting some xattributes
+xattr's of 'requirements.txt' and values:
+    - 'user.owner': 'Rickard'
+    - 'user.master': 'Rickard of course'
+Removing xattributes I just set
+xattr's of 'requirements.txt':
+[]
+```
+
 # Walkthrough of the language syntax
 
 Since I use JavaScript syntax highlighting here on GitHub, I have **added //** just before the original

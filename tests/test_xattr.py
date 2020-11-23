@@ -7,8 +7,8 @@ def test_vector_print():
 "[]",
 "Setting some xattributes",
 "xattr's of 'requirements.txt' and values:",
-"    - 'owner': ''Rickard'",
-"    - 'who is best': ''Rickard of course'",
+"    - 'user.owner': ''Rickard'",
+"    - 'user.master': ''Rickard of course'",
 "Removing xattributes I just set",
 "xattr's of 'requirements.txt':",
 "[]"

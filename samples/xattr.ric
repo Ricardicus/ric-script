@@ -5,8 +5,8 @@ print(s)
 
 print("Setting some xattributes")
 
-xattrSet(file, "owner", "Rickard")
-xattrSet(file, "who is best", "Rickard of course")
+xattrSet(file, "user.owner", "Rickard")
+xattrSet(file, "user.master", "Rickard of course")
 
 print("xattr's of '" + file + "' and values:")
 s = xattrList(file)

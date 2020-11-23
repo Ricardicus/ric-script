@@ -129,7 +129,6 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
   stackval_t stv;
   heapval_t *hpv;
   int dummy;
-  int32_t result = 0;
   char *resultValue = NULL;
   size_t valueMaxLen = 256;
 
@@ -170,7 +169,7 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
       exit(1);
   }
 
-  result = getxattr(arg1, arg2, resultValue, valueMaxLen, 0, 0);
+  (void)getxattr(arg1, arg2, resultValue, valueMaxLen, 0, 0);
 
   stv.type = TEXT;
   stv.t = resultValue;

@@ -311,6 +311,7 @@ int ric_time_week(LIBRARY_PARAMS()) {
   stackval_t stv;
   int32_t result = 0;
   struct tm *info;
+  char textBuf[5];
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -329,7 +330,9 @@ int ric_time_week(LIBRARY_PARAMS()) {
 
   info = localtime(&arg1);
 
-  result = (int) ((info->tm_yday / 365.0) * 52.1428571) + 1;
+  // Gonna let strftime do this for me, %V is for the ISO 8601 week number.
+  strftime(textBuf, sizeof(textBuf), "%V", info);
+  result = atoi(textBuf);
 
   PUSH_INT(result, sp, sc);
   return 0;

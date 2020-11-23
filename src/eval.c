@@ -1360,7 +1360,7 @@ Please report back to me.\n\
           break;
         }
         case DOUBLETYPE: {
-          *f0 = svLeft.i;
+          *f0 = svLeft.d;
           break;
         }
         case TEXT: {
@@ -1380,7 +1380,7 @@ Please report back to me.\n\
           break;
         }
         case DOUBLETYPE: {
-          *f1 = svRight.i;
+          *f1 = svRight.d;
           break;
         }
         case TEXT: {
@@ -2618,6 +2618,11 @@ void interpret_statements_(
                   printf("%" PRIi32 "\n", sv.i);
                 }
                 break;
+                case DOUBLETYPE:
+                if ( *interactive ) {
+                  printf("%lf\n", sv.d);
+                }
+                break;
                 default:
                 break;
               }
@@ -2667,6 +2672,11 @@ void interpret_statements_(
                   printf("%" PRIi32 "\n", sv.i);
                 }
                 break;
+                case DOUBLETYPE:
+                if ( *interactive ) {
+                  printf("%lf\n", sv.d);
+                }
+                break;
                 default:
                 break;
               }
@@ -2708,6 +2718,9 @@ void interpret_statements_(
                   break;
                   case INT32TYPE:
                   printf("%" PRIi32 "\n", sv.i);
+                  break;
+                  case DOUBLETYPE:
+                  printf("%lf\n", sv.d);
                   break;
                   default:
                   break;

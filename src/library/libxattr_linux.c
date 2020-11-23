@@ -33,7 +33,7 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
     exit(1);
   }
 
-  ret = listxattr(arg1, buffer, bufferSize, 0);
+  ret = listxattr(arg1, buffer, bufferSize);
 
   if ( ret >= 0 ) {
     offset = 0;
@@ -115,7 +115,7 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
     break;
   }
  
-  result = setxattr(arg1, arg2, arg3, strlen(arg3), 0, 0);
+  result = setxattr(arg1, arg2, arg3, strlen(arg3), 0);
 
   /* Pushing result */
   PUSH_INT(result, sp, sc);
@@ -169,7 +169,7 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
       exit(1);
   }
 
-  (void)getxattr(arg1, arg2, resultValue, valueMaxLen, 0, 0);
+  (void)getxattr(arg1, arg2, resultValue, valueMaxLen);
 
   stv.type = TEXT;
   stv.t = resultValue;
@@ -217,7 +217,7 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
     break;
   }
 
-  result = removexattr(arg1, arg2, 0);
+  result = removexattr(arg1, arg2);
 
   /* Pushing result */
   PUSH_INT(result, sp, sc);

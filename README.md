@@ -112,7 +112,7 @@ well as haven't implemented:
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
 I will be using **javascript syntax highlighting** for the examples provided below, for the sake of making it look pretty
-Therefore, I have to add an additional '//' etc. before comments, since it does not do well with m (and Pythons) '#' symbol. 
+Therefore, I have to add an additional '//' etc. before comments, since it does not do well with the '#' comment symbol. 
 
 # syntax snapshot: RPN calculator
 

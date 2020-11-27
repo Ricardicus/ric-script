@@ -1,5 +1,8 @@
-#include "libos.h"
 #include <windows.h>
+#include <string.h>
+#include <pcre.h>
+
+#include "libos.h"
 
 int ric_sleep(LIBRARY_PARAMS())
 {
@@ -246,6 +249,156 @@ int ric_mkdir(LIBRARY_PARAMS())
 
   /* Pushing result */
   PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
+static int file_recursion_max_depth(char *pattern) {
+  /* 
+  * On windows, the match we be of two in a row '\\', not the most
+  * beautiful, but the important thing is that it works if you are
+  * informed on what to do! :)
+  */
+  int ret = 1;
+  char *walker = pattern;
+  int justFoundBackslash = 0;
+  int dot = 0;
+
+  while ( *walker ) {
+    if ( *walker == '\\' ) {
+      if ( justFoundBackslash ) {
+        if ( !dot )
+          ret++; // Descend an additional level
+        dot = 0;
+      }
+      justFoundBackslash = 1;
+    } else {
+      justFoundBackslash = 0;
+    }
+    if ( *walker == '.' )
+      dot = 1;
+    ++walker;
+  }
+
+  return ret;
+}
+
+void DirectoryWalkAndMatch(const char *sDir,
+  pcre *re, argsList_t **vecContent, int level, int maxDepth)
+{
+  WIN32_FIND_DATA fdFile;
+  HANDLE hFind = NULL;
+  char sPath[2048];
+  int ovector[30];
+  int rc;
+
+  if ( level > maxDepth )
+    return;
+
+  snprintf(sPath, sizeof(sPath), "%s\\*.*", sDir);
+
+  if ( (hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE ) {
+    return;
+  }
+
+  do {
+    if (strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0) {
+      snprintf(sPath, sizeof(sPath), "%s\\%s", sDir, fdFile.cFileName);
+      if (fdFile.dwFileAttributes &FILE_ATTRIBUTE_DIRECTORY) {
+        DirectoryWalkAndMatch(sPath, re, vecContent, level + 1, maxDepth);
+      } else {
+        /* Execute regular expression matching */
+        rc = pcre_exec(
+          re, NULL, sPath, strlen(sPath),
+          0, 0, ovector, sizeof(ovector) / sizeof(*ovector)
+        );
+
+        if ( rc >= 0 ) {
+          /* We had a match! */
+          expr_t *e;
+          argsList_t *a;
+          e = newExpr_Text(sPath);
+          a = newArgument(e, *vecContent);
+          *vecContent = a;
+        }
+      }
+    }
+  } while (FindNextFile(hFind, &fdFile));
+
+  FindClose(hFind);
+}
+
+int ric_find_files(LIBRARY_PARAMS()) {
+  /* Walks through the file system in search for a file, matching a regular expression */
+  stackval_t stv;
+  pcre *re;
+  heapval_t *hpv;
+  int dummy;
+  int32_t result;
+  char *pcre_error = NULL;
+  int pcre_erroffset;
+  char *pattern = NULL;
+  int rc;
+  int maxDepth = 1;
+  expr_t *vec;
+  argsList_t *vecContent = NULL;
+  char *rootDir = ".";
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    pattern = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  re = pcre_compile(
+    pattern,
+    0,
+    &pcre_error,
+    &pcre_erroffset,
+    NULL);
+
+  if (re == NULL) {
+    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n", LIBRARY_FUNC_NAME(), pattern);
+    fprintf(stderr, "       compilation failed at offset %d: %s\r\n", pcre_erroffset, pcre_error);
+
+    vec = newExpr_Vector(NULL);
+
+    stv.type = VECTORTYPE;
+    stv.vec = vec->vec;
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    free(vec);
+
+    /* Pushing the parsed value */
+    PUSH_VECTOR(stv.vec, sp, sc);
+
+    return 0;
+  }
+
+  /* Get indentation level (how deep we should go) */
+  maxDepth = file_recursion_max_depth(pattern);
+
+  /* Walk through the file system and match */
+  DirectoryWalkAndMatch(rootDir, re, &vecContent, 1, maxDepth);
+  pcre_free(re);
+
+  vec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
 
   return 0;
 }

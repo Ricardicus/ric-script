@@ -285,3 +285,7 @@ int ric_mkdir(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_find_files(LIBRARY_PARAMS()) {
+  return 0;
+}
+

@@ -73,6 +73,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("ls", 1, ric_ls),
   DECLARE_LIB_FUNCTION("rm", 1, ric_rm),
   DECLARE_LIB_FUNCTION("mkdir", 1, ric_mkdir),
+  DECLARE_LIB_FUNCTION("find", 1, ric_find_files),
   DECLARE_LIB_FUNCTION("cd", 1, ric_cd)
 };
 

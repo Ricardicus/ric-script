@@ -8,6 +8,7 @@ target_os = target_machine.system()
 cc = meson.get_compiler('c')
 
 ric_c_args = []
+ric_links = []
 
 # Getting external projects
 subdir('external')
@@ -31,7 +32,7 @@ if ( target_os == 'windows' )
   ric_c_args += ['-DYY_NO_UNISTD_H']
 
   # Regexp
-  links += [pcre_lib]
+  ric_links += [pcre_lib]
   includes += [pcre_inc]
 else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
@@ -46,6 +47,8 @@ interpreter = executable('ric',
   sources: [sources],
   dependencies: deps,
   c_args: [ric_c_args],
-  include_directories: [includes]
+  link_with: [ric_links],
+  include_directories: [includes],
+  install: true
 )
 

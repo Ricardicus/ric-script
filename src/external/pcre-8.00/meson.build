@@ -26,16 +26,20 @@ pcre_inc = include_directories('.')
 # Adding flags for the parser to be more verbose
 pcre_args = ['-DNEWLINE=-1','-DLINK_SIZE=2','-DMAX_NAME_SIZE=32',
   '-DMAX_NAME_COUNT=10000', '-DMATCH_LIMIT=10000000','-DMATCH_LIMIT_RECURSION=10000000',
-  '-DPOSIX_MALLOC_THRESHOLD=10']
+  '-DPOSIX_MALLOC_THRESHOLD=10','-D_WIN32']
 
-pcre_lib = library('pcre',
+pcre_lib = shared_library('pcre',
 	sources : pcre_sources, 
 	c_args : [pcre_args],
 	link_with: [],
-	include_directories : [pcre_inc])
+	include_directories : [pcre_inc],
+  install: true)
 
-pcre_demo = executable('demo',
+ric_links += [pcre_lib]
+
+pcre_demo = executable('pcre_demo',
 	sources: 'pcredemo.c',
 	link_with: pcre_lib,
+  install: true,
 	include_directories : [pcre_inc])
 

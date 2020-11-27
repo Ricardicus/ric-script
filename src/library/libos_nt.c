@@ -304,23 +304,23 @@ void DirectoryWalkAndMatch(const char *sDir,
   do {
     if (strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0) {
       snprintf(sPath, sizeof(sPath), "%s\\%s", sDir, fdFile.cFileName);
+
+      /* Execute regular expression matching */
+      rc = pcre_exec(
+        re, NULL, sPath, strlen(sPath),
+        0, 0, ovector, sizeof(ovector) / sizeof(*ovector)
+      );
+
+      if ( rc >= 0 ) {
+        /* We had a match! */
+        expr_t *e;
+        argsList_t *a;
+        e = newExpr_Text(sPath);
+        a = newArgument(e, *vecContent);
+        *vecContent = a;
+      }
       if (fdFile.dwFileAttributes &FILE_ATTRIBUTE_DIRECTORY) {
         DirectoryWalkAndMatch(sPath, re, vecContent, level + 1, maxDepth);
-      } else {
-        /* Execute regular expression matching */
-        rc = pcre_exec(
-          re, NULL, sPath, strlen(sPath),
-          0, 0, ovector, sizeof(ovector) / sizeof(*ovector)
-        );
-
-        if ( rc >= 0 ) {
-          /* We had a match! */
-          expr_t *e;
-          argsList_t *a;
-          e = newExpr_Text(sPath);
-          a = newArgument(e, *vecContent);
-          *vecContent = a;
-        }
       }
     }
   } while (FindNextFile(hFind, &fdFile));
@@ -334,7 +334,6 @@ int ric_find_files(LIBRARY_PARAMS()) {
   pcre *re;
   heapval_t *hpv;
   int dummy;
-  int32_t result;
   char *pcre_error = NULL;
   int pcre_erroffset;
   char *pattern = NULL;

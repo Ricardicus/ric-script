@@ -1,8 +1,10 @@
-#include "libos.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <regex.h>
+
+#include "libos.h"
 
 int ric_sleep(LIBRARY_PARAMS())
 {
@@ -285,7 +287,137 @@ int ric_mkdir(LIBRARY_PARAMS())
   return 0;
 }
 
+static int file_recursion_max_depth(char *pattern) {
+  /* 
+  * On windows, the match we be of two in a row '\\', not the most
+  * beautiful, but the important thing is that it works if you are
+  * informed on what to do! :)
+  */
+  int ret = 1;
+  char *walker = pattern;
+  int justFoundSlash = 0;
+  int dot = 0;
+
+  while ( *walker ) {
+    if ( *walker == '/' ) {
+      if ( justFoundSlash ) {
+        if ( !dot )
+          ret++; // Descend an additional level
+        dot = 0;
+      }
+      justFoundSlash = 1;
+    } else {
+      justFoundSlash = 0;
+    }
+    if ( *walker == '.' )
+      dot = 1;
+    ++walker;
+  }
+
+  return ret;
+}
+
+void DirectoryWalkAndMatch(const char *name,
+  regex_t *re, argsList_t **vecContent, int level, int maxDepth)
+{
+  char path[1024];
+  DIR *dir;
+  int rc;
+  struct dirent *entry;
+
+  if ( level > maxDepth )
+    return;
+
+  if (!(dir = opendir(name)))
+    return;
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+      continue;
+    snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+
+    /* Execute regular expression matching */
+    rc = regexec(re, path, 0, NULL, 0);
+
+    if ( rc == 0 ) {
+      /* We had a match! */
+      expr_t *e;
+      argsList_t *a;
+      e = newExpr_Text(path);
+      a = newArgument(e, *vecContent);
+      *vecContent = a;
+    } 
+
+    if (entry->d_type == DT_DIR) {
+      DirectoryWalkAndMatch(path, re, vecContent, level + 1, maxDepth);
+    }
+  }
+  closedir(dir);
+}
+
 int ric_find_files(LIBRARY_PARAMS()) {
+  /* Walks through the file system in search for a file, matching a regular expression */
+  stackval_t stv;
+  regex_t re;
+  heapval_t *hpv;
+  int dummy;
+  char *pattern = NULL;
+  int rc;
+  int maxDepth = 1;
+  expr_t *vec;
+  argsList_t *vecContent = NULL;
+  char *rootDir = ".";
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    pattern = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  rc = regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB);
+  if ( rc != 0 ) {
+    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n", LIBRARY_FUNC_NAME(), pattern);
+
+    vec = newExpr_Vector(NULL);
+
+    stv.type = VECTORTYPE;
+    stv.vec = vec->vec;
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    free(vec);
+
+    /* Pushing the parsed value */
+    PUSH_VECTOR(stv.vec, sp, sc);
+
+    return 0;
+  }
+
+  /* Get indentation level (how deep we should go) */
+  maxDepth = file_recursion_max_depth(pattern);
+
+  /* Walk through the file system and match */
+  DirectoryWalkAndMatch(rootDir, &re, &vecContent, 1, maxDepth);
+  regfree(&re);
+
+  vec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
+
   return 0;
 }
+
 

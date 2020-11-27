@@ -13,6 +13,7 @@ if cpplint_program.found()
       '--linelength=130',
       '--exclude=' + join_paths(meson.current_source_dir(), 'src', 'y.tab.*'),
       '--exclude=' + join_paths(meson.current_source_dir(), 'src', 'lex.yy.c'),
+      '--exclude=' + join_paths(meson.current_source_dir(), 'src', 'external'),
       '--filter=-build/include_subdir,-build/header_guard,-legal/copyright,'+
       '-build/include_what_you_use,-readability/casting,-build/include_subdir,'+
       '-build/include_order,-readability/multiline_string',

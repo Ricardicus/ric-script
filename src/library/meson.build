@@ -14,7 +14,7 @@ target_os = target_machine.system()
 # Handling windows NT vs. unix POSIX differences
 if ( target_os == 'windows' )
   library_source_list += ['libos_nt.c']
-  add_global_arguments('-DNO_XATTR', language: 'c')
+  ric_c_args += ['-DNO_XATTR'] 
 else
   library_source_list += ['libos.c']
 endif

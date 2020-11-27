@@ -1,0 +1,35 @@
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler:  
+Build flags: 
+Id flags:  
+
+The output was:
+1
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:42 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "Debug\".
+  Creating directory "Debug\CompilerIdC.tlog\".
+InitializeBuildStatus:
+  Creating "Debug\CompilerIdC.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /nologo /W0 /WX- /diagnostics:classic /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue CMakeCCompilerId.c
+  CMakeCCompilerId.c
+C:\prg\VS2017\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(423,5): error MSB6003: The specified task executable "CL.exe" could not be run. The process cannot access the file 'C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\Debug\CompilerIdC.tlog' because it is being used by another process. [C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj]
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj" (default targets) -- FAILED.
+
+Build FAILED.
+
+"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj" (default target) (1) ->
+(ClCompile target) -> 
+  C:\prg\VS2017\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(423,5): error MSB6003: The specified task executable "CL.exe" could not be run. The process cannot access the file 'C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\Debug\CompilerIdC.tlog' because it is being used by another process. [C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj]
+
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:00.83
+
+

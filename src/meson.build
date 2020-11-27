@@ -3,12 +3,17 @@
 # Adding flags for the parser to be more verbose
 add_global_arguments('-DYYERROR_VERBOSE', language: 'c')
 
-# Fetching the library sources
-subdir('library')
-
 target_os = target_machine.system()
 
 cc = meson.get_compiler('c')
+
+ric_c_args = []
+
+# Getting external projects
+subdir('external')
+
+# Fetching the library sources
+subdir('library')
 
 includes = [include_directories('.'), library_inc]
 
@@ -19,21 +24,28 @@ sources = ['main.c','hashtable.c','lib.c', 'garbage.c',
 
 deps = []
 
+links = []
+
 if ( target_os == 'windows' )
 	# Make lex not use unistd
-	add_global_arguments('-DYY_NO_UNISTD_H', language : 'c')
+  ric_c_args += ['-DYY_NO_UNISTD_H']
+
+  # Regexp
+  links += [pcre_lib]
+  includes += [pcre_inc]
 else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
 	mathlib = cc.find_library('m', required: true)
 	deps = [mathlib]
-  # Silence some warnings
 
-  add_global_arguments(['-Wno-unused-parameter', '-Wno-unused-function'], language: 'c')
+  # Silence some warnings
+  ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function']
 endif
 
 interpreter = executable('ric',
   sources: [sources],
   dependencies: deps,
+  c_args: [ric_c_args],
   include_directories: [includes]
 )
 

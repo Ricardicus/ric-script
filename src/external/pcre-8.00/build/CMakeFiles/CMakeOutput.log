@@ -1,0 +1,381 @@
+The system is: Windows - 10.0.18362 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler:  
+Build flags: 
+Id flags:  
+
+The output was:
+0
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:43 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "Debug\".
+  Creating directory "Debug\CompilerIdC.tlog\".
+InitializeBuildStatus:
+  Creating "Debug\CompilerIdC.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /nologo /W0 /WX- /diagnostics:classic /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue CMakeCCompilerId.c
+  CMakeCCompilerId.c
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdC.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCCompilerId.obj
+  CompilerIdC.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\.\CompilerIdC.exe
+PostBuildEvent:
+  for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+  :VCEnd
+  CMAKE_C_COMPILER=C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\cl.exe
+FinalizeBuildStatus:
+  Deleting file "Debug\CompilerIdC.tlog\unsuccessfulbuild".
+  Touching "Debug\CompilerIdC.tlog\CompilerIdC.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdC\CompilerIdC.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.77
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+
+The C compiler identification is MSVC, found in "C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/3.12.18081601-MSVC_2/CompilerIdC/CompilerIdC.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler:  
+Build flags: 
+Id flags:  
+
+The output was:
+0
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:44 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdCXX\CompilerIdCXX.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "Debug\".
+  Creating directory "Debug\CompilerIdCXX.tlog\".
+InitializeBuildStatus:
+  Creating "Debug\CompilerIdCXX.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /nologo /W0 /WX- /diagnostics:classic /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue CMakeCXXCompilerId.cpp
+  CMakeCXXCompilerId.cpp
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdCXX.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCXXCompilerId.obj
+  CompilerIdCXX.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdCXX\.\CompilerIdCXX.exe
+PostBuildEvent:
+  for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+  :VCEnd
+  CMAKE_CXX_COMPILER=C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\cl.exe
+FinalizeBuildStatus:
+  Deleting file "Debug\CompilerIdCXX.tlog\unsuccessfulbuild".
+  Touching "Debug\CompilerIdCXX.tlog\CompilerIdCXX.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\3.12.18081601-MSVC_2\CompilerIdCXX\CompilerIdCXX.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.72
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+
+The CXX compiler identification is MSVC, found in "C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/3.12.18081601-MSVC_2/CompilerIdCXX/CompilerIdCXX.exe"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/prg/VS2017/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_87039.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:45 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_87039.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_87039.dir\Debug\".
+  Creating directory "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_87039.dir\Debug\cmTC_87039.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_87039.dir\Debug\cmTC_87039.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_87039.dir\Debug\\" /Fd"cmTC_87039.dir\Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\testCCompiler.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_87039.dir\Debug\\" /Fd"cmTC_87039.dir\Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\testCCompiler.c"
+  testCCompiler.c
+  
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_87039.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_87039.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_87039.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_87039.dir\Debug\testCCompiler.obj
+  cmTC_87039.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_87039.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_87039.dir\Debug\cmTC_87039.tlog\unsuccessfulbuild".
+  Touching "cmTC_87039.dir\Debug\cmTC_87039.tlog\cmTC_87039.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_87039.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.04
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/prg/VS2017/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_768f0.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:46 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_768f0.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_768f0.dir\Debug\".
+  Creating directory "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_768f0.dir\Debug\cmTC_768f0.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_768f0.dir\Debug\cmTC_768f0.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_768f0.dir\Debug\\" /Fd"cmTC_768f0.dir\Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue "C:\prg\VS2017\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.12\Modules\CMakeCCompilerABI.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_768f0.dir\Debug\\" /Fd"cmTC_768f0.dir\Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue "C:\prg\VS2017\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.12\Modules\CMakeCCompilerABI.c"
+  CMakeCCompilerABI.c
+  
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_768f0.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_768f0.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_768f0.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_768f0.dir\Debug\CMakeCCompilerABI.obj
+  cmTC_768f0.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_768f0.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_768f0.dir\Debug\cmTC_768f0.tlog\unsuccessfulbuild".
+  Touching "cmTC_768f0.dir\Debug\cmTC_768f0.tlog\cmTC_768f0.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_768f0.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.76
+
+
+
+
+Detecting C [] compiler features compiled with the following output:
+Change Dir: C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/prg/VS2017/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_7323f.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:47 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_7323f.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_7323f.dir\Debug\".
+  Creating directory "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_7323f.dir\Debug\cmTC_7323f.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_7323f.dir\Debug\cmTC_7323f.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7323f.dir\Debug\\" /Fd"cmTC_7323f.dir\Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\feature_tests.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7323f.dir\Debug\\" /Fd"cmTC_7323f.dir\Debug\vc141.pdb" /Gd /TC /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\feature_tests.c"
+  feature_tests.c
+  
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_7323f.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_7323f.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_7323f.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_7323f.dir\Debug\feature_tests.obj
+  cmTC_7323f.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_7323f.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_7323f.dir\Debug\cmTC_7323f.tlog\unsuccessfulbuild".
+  Touching "cmTC_7323f.dir\Debug\cmTC_7323f.tlog\cmTC_7323f.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_7323f.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.71
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_variadic_macros
+Determining if the CXX compiler works passed with the following output:
+Change Dir: C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/prg/VS2017/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_27897.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:48 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_27897.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_27897.dir\Debug\".
+  Creating directory "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_27897.dir\Debug\cmTC_27897.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_27897.dir\Debug\cmTC_27897.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_27897.dir\Debug\\" /Fd"cmTC_27897.dir\Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_27897.dir\Debug\\" /Fd"cmTC_27897.dir\Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
+  testCXXCompiler.cxx
+  
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_27897.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_27897.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_27897.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_27897.dir\Debug\testCXXCompiler.obj
+  cmTC_27897.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_27897.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_27897.dir\Debug\cmTC_27897.tlog\unsuccessfulbuild".
+  Touching "cmTC_27897.dir\Debug\cmTC_27897.tlog\cmTC_27897.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_27897.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.75
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/prg/VS2017/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_2499e.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:49 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_2499e.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_2499e.dir\Debug\".
+  Creating directory "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_2499e.dir\Debug\cmTC_2499e.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_2499e.dir\Debug\cmTC_2499e.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_2499e.dir\Debug\\" /Fd"cmTC_2499e.dir\Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue "C:\prg\VS2017\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.12\Modules\CMakeCXXCompilerABI.cpp"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_2499e.dir\Debug\\" /Fd"cmTC_2499e.dir\Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue "C:\prg\VS2017\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.12\Modules\CMakeCXXCompilerABI.cpp"
+  CMakeCXXCompilerABI.cpp
+  
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_2499e.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_2499e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_2499e.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_2499e.dir\Debug\CMakeCXXCompilerABI.obj
+  cmTC_2499e.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_2499e.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_2499e.dir\Debug\cmTC_2499e.tlog\unsuccessfulbuild".
+  Touching "cmTC_2499e.dir\Debug\cmTC_2499e.tlog\cmTC_2499e.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_2499e.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.89
+
+
+
+
+Detecting CXX [] compiler features compiled with the following output:
+Change Dir: C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/prg/VS2017/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_ecb79.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Microsoft (R) Build Engine version 15.9.21+g9802d43bc3 for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 11/27/2020 8:46:50 PM.
+Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_ecb79.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_ecb79.dir\Debug\".
+  Creating directory "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_ecb79.dir\Debug\cmTC_ecb79.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_ecb79.dir\Debug\cmTC_ecb79.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_ecb79.dir\Debug\\" /Fd"cmTC_ecb79.dir\Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\feature_tests.cxx"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_ecb79.dir\Debug\\" /Fd"cmTC_ecb79.dir\Debug\vc141.pdb" /Gd /TP /analyze- /FC /errorReport:queue "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\feature_tests.cxx"
+  feature_tests.cxx
+  
+Link:
+  C:\prg\VS2017\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_ecb79.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_ecb79.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/riha/Downloads/pcre-8.00/pcre-8.00/build/CMakeFiles/CMakeTmp/Debug/cmTC_ecb79.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_ecb79.dir\Debug\feature_tests.obj
+  cmTC_ecb79.vcxproj -> C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\Debug\cmTC_ecb79.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_ecb79.dir\Debug\cmTC_ecb79.tlog\unsuccessfulbuild".
+  Touching "cmTC_ecb79.dir\Debug\cmTC_ecb79.tlog\cmTC_ecb79.lastbuildstate".
+Done Building Project "C:\Users\riha\Downloads\pcre-8.00\pcre-8.00\build\CMakeFiles\CMakeTmp\cmTC_ecb79.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.88
+
+
+    Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:1cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:1cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:1cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:1cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:1cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:1cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:1cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates

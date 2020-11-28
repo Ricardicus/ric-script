@@ -196,6 +196,7 @@ int ric_printf(LIBRARY_PARAMS())
 #ifdef _WIN32
           printf("%c", *c);
 #endif
+          break;
           }
         } else {
           printf("%c", *c);

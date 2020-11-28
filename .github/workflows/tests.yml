@@ -20,7 +20,6 @@ jobs:
       run: mkdir install && meson builddir --prefix $(pwd)/install && cd builddir && ninja && ninja install
     - id: running-pytest
       run: cd tests; pytest
-    }
 
   build-and-test-windows:
 

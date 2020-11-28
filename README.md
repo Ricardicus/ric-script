@@ -45,11 +45,14 @@ For windows only meson works:
 python3 -m venv venv
 venv\Source\activate
 pip install -r requirements.txt
-meson builddir
+mkdir install
+meson builddir --prefix %cd%\install
 cd builddir
 ninja
+# Ignore the warnings...
+ninja install
 # Now you have built the program!
-# Ignore the warnings.....
+# You find it under ..\install\bin\ric.exe
 ```
 
 # Docker

@@ -63,11 +63,17 @@ int ric_print(LIBRARY_PARAMS())
           printf("\\");
           break;
           case 't':
+#ifdef _WIN32
+          printf("\\t");
+#else
           // print a tab
           printf("\t");
+#endif
           break;
           default:
-          // Ignoring this backslashed one, since I don't understand it..
+#ifdef _WIN32
+          printf("%c", *c);
+#endif
           break;
           }
         } else {
@@ -179,12 +185,17 @@ int ric_printf(LIBRARY_PARAMS())
           printf("\\");
           break;
           case 't':
+#ifdef _WIN32
+          printf("\\t");
+#else
           // print a tab
           printf("\t");
+#endif
           break;
           default:
-          // Ignoring this backslashed one, since I don't understand it..
-          break;
+#ifdef _WIN32
+          printf("%c", *c);
+#endif
           }
         } else {
           printf("%c", *c);

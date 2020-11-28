@@ -17,7 +17,7 @@ jobs:
     - id: install-python-deps
       run: pip3 install -r requirements.txt
     - id: build-meson
-      run: meson builddir; cd builddir; ninja
+      run: mkdir install && meson builddir --prefix $(pwd)/install && cd builddir && ninja && ninja install
     - id: running-pytest  
       run: cd tests; pytest
 
@@ -34,7 +34,7 @@ jobs:
     - id: install-python-deps
       run: pip3 install -r requirements.txt
     - id: build-meson
-      run: meson builddir; cd builddir; ninja
+      run: mkdir install; meson builddir --prefix %cd%\install; cd builddir; ninja; ninja install
     - id: running-pytest  
       run: cd tests; pytest
 

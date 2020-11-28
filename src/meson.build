@@ -1,13 +1,11 @@
 # Building the interpreter
 
-# Adding flags for the parser to be more verbose
-add_global_arguments('-DYYERROR_VERBOSE', language: 'c')
-
 target_os = target_machine.system()
 
 cc = meson.get_compiler('c')
 
-ric_c_args = []
+# Adding flags for the parser to be more verbose
+ric_c_args = ['-DYYERROR_VERBOSE']
 ric_links = []
 
 # Getting external projects

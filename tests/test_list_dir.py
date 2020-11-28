@@ -31,6 +31,7 @@ def test_directory_print():
 "    b.txt",
 " README.md",
 "ric_lib.ric",
+"find_files.ric",
 "funccall_as_expr.ric",
 "load.ric",
 "listFiles.ric",

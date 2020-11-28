@@ -1,0 +1,14 @@
+# Using the 'find' functions that searches the 
+# current working directory for files
+# matching a regular expression
+
+samples = find("\.py$")
+i = 0
+. [ i < len(samples) ] {
+  print(samples[i])
+  i = i + 1
+  @
+}
+
+
+

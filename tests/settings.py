@@ -1,6 +1,6 @@
 import os
 
-EXECUTABLE = "../builddir/src/ric"
+EXECUTABLE = "../install/bin/ric"
 
 def callSample(sample):
   if (os.name == 'nt'):

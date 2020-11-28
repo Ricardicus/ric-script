@@ -5,12 +5,12 @@ def test_no_args():
 
   output_lines = [
   "Number of arguments: 2",
-  "args: ['./../builddir/src/ric','../samples/args.ric']"
+  "args: ['./../install/bin/ric','../samples/args.ric']"
   ]
 
   if (os.name == 'nt'):
     # Windows
-    output_lines[1] = "args: ['..\\builddir\\src\\ric.exe','..\\samples\\args.ric']"
+    output_lines[1] = "args: ['..\\install\\bin\\ric.exe','..\\samples\\args.ric']"
 
 
   lib_script = callSample('args.ric')
@@ -27,12 +27,12 @@ def test_some_args_ints():
 
   output_lines = [
   "Number of arguments: 5",
-  "args: ['./../builddir/src/ric','../samples/args.ric',1,2,3]"
+  "args: ['./../install/bin/ric','../samples/args.ric',1,2,3]"
   ]
 
   if (os.name == 'nt'):
     # Windows
-    output_lines[1] = "args: ['..\\builddir\\src\\ric.exe','..\\samples\\args.ric',1,2,3]"
+    output_lines[1] = "args: ['..\\install\\bin\\ric.exe','..\\samples\\args.ric',1,2,3]"
 
   args = [1,2,3]
 
@@ -49,12 +49,12 @@ def test_some_args_strings():
 
   output_lines = [
   "Number of arguments: 5",
-  "args: ['./../builddir/src/ric','../samples/args.ric','a','ab','abc']"
+  "args: ['./../install/bin/ric','../samples/args.ric','a','ab','abc']"
   ]
 
   if (os.name == 'nt'):
     # Windows
-    output_lines[1] = "args: ['..\\builddir\\src\\ric.exe','..\\samples\\args.ric','a','ab','abc']"
+    output_lines[1] = "args: ['..\\install\\bin\\ric.exe','..\\samples\\args.ric','a','ab','abc']"
 
   args = ['a','ab','abc']
 

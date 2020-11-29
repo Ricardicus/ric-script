@@ -263,12 +263,13 @@ static int file_recursion_max_depth(char *pattern) {
   char *walker = pattern;
   int justFoundBackslash = 0;
   int dot = 0;
+  int addDepth = 0;
 
   while ( *walker ) {
     if ( *walker == '\\' ) {
       if ( justFoundBackslash ) {
         if ( !dot )
-          ret++; // Descend an additional level
+          addDepth++; // Descend an additional level
         dot = 0;
       }
       justFoundBackslash = 1;
@@ -278,6 +279,13 @@ static int file_recursion_max_depth(char *pattern) {
     if ( *walker == '.' )
       dot = 1;
     ++walker;
+  }
+
+  if ( addDepth == 0 ) {
+    /* Go through all the levels, limit at 100 */
+    ret = 100;
+  } else {
+    ret += addDepth;
   }
 
   return ret;

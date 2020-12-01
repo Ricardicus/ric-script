@@ -1,5 +1,9 @@
-#include "libxattr.h"
 #include <errno.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <regex.h>
+
+#include "libxattr.h"
 
 int ric_list_xattr(LIBRARY_PARAMS()) {
   stackval_t stv;
@@ -274,7 +278,7 @@ static void DirectoryWalkAndMatchXattrKey(const char *name,
     snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
 
     /* List and walk through all the xattr-keys of this file */
-    ret = listxattr(path, buffer, bufferSize, 0);
+    ret = listxattr(path, buffer, bufferSize);
     if ( ret >= 0 ) {
       offset = 0;
       while ( offset < ret ) {

@@ -18,6 +18,15 @@ i = 0
   @
 }
 
+print("Searching for user.* keyed files")
+s = xattrFindKey("user\.*")
+i = 0
+. [ i < len(s) ] {
+  print(s[i])
+  i = i + 1
+  @
+}
+
 print("Removing xattributes I just set")
 s = xattrList(file)
 i = 0
@@ -30,3 +39,5 @@ i = 0
 s = xattrList(file)
 print("xattr's of '" + file + "':")
 print(s)
+
+

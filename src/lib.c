@@ -8,13 +8,6 @@ hashtable_t *libCallbacks = NULL;
 
 /* The ric library */
 libFunction_t ric_library[] = {
-#ifndef NO_XATTR
-  // libxattr
-  DECLARE_LIB_FUNCTION("xattrList", 1, ric_list_xattr),
-  DECLARE_LIB_FUNCTION("xattrGet", 2, ric_get_xattr),
-  DECLARE_LIB_FUNCTION("xattrSet", 3, ric_set_xattr),
-  DECLARE_LIB_FUNCTION("xattrRm", 2, ric_remove_xattr),
-#endif
   // libstd
   DECLARE_LIB_FUNCTION("exit", 1, ric_exit),
   DECLARE_LIB_FUNCTION("print", 1, ric_print),
@@ -67,6 +60,14 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("timeWeek", 1, ric_time_week),
   DECLARE_LIB_FUNCTION("timeMonth", 1, ric_time_month),
   DECLARE_LIB_FUNCTION("timeYear", 1, ric_time_year),
+#ifndef NO_XATTR
+  // libxattr
+  DECLARE_LIB_FUNCTION("xattrList", 1, ric_list_xattr),
+  DECLARE_LIB_FUNCTION("xattrGet", 2, ric_get_xattr),
+  DECLARE_LIB_FUNCTION("xattrSet", 3, ric_set_xattr),
+  DECLARE_LIB_FUNCTION("xattrFindKey", 1, ric_find_xattr),
+  DECLARE_LIB_FUNCTION("xattrRm", 2, ric_remove_xattr),
+#endif
   // libos
   DECLARE_LIB_FUNCTION("sleep", 1, ric_sleep),
   DECLARE_LIB_FUNCTION("isDir", 1, ric_is_directory),
@@ -74,7 +75,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("rm", 1, ric_rm),
   DECLARE_LIB_FUNCTION("mkdir", 1, ric_mkdir),
   DECLARE_LIB_FUNCTION("find", 1, ric_find_files),
-  DECLARE_LIB_FUNCTION("cd", 1, ric_cd)
+  DECLARE_LIB_FUNCTION("cd", 1, ric_cd),
 };
 
 void initialize_ric_lib() {

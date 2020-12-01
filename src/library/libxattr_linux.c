@@ -240,3 +240,131 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
   return 0;
 }
 
+static void DirectoryWalkAndMatchXattrKey(const char *name,
+  regex_t *re, argsList_t **vecContent, int level, int maxDepth)
+{
+  char path[1024];
+  DIR *dir;
+  int ret;
+  int rc;
+  struct dirent *entry;
+  size_t offset = 0;
+  char *buffer;
+  size_t bufferSize = 1024;
+
+  buffer = calloc(bufferSize, 1);
+  if ( buffer == NULL ) {
+    fprintf(stderr, "error: Memory error, allocate\n");
+    exit(1);
+  }
+
+  if ( level > maxDepth ) {
+    free(buffer);
+    return;
+  }
+
+  if (!(dir = opendir(name))) {
+    free(buffer);
+    return;
+  }
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+      continue;
+    snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+
+    /* List and walk through all the xattr-keys of this file */
+    ret = listxattr(path, buffer, bufferSize, 0);
+    if ( ret >= 0 ) {
+      offset = 0;
+      while ( offset < ret ) {
+        /* Check if we have regex match */
+        char *key = &buffer[offset];
+
+        /* Execute regular expression matching */
+        rc = regexec(re, key, 0, NULL, 0);
+
+        if ( rc == 0 ) {
+          /* We had a match! */
+          expr_t *e;
+          argsList_t *a;
+          e = newExpr_Text(path);
+          a = newArgument(e, *vecContent);
+          *vecContent = a;
+          /* We don't have to look further */
+          break;
+        }
+
+        offset += strlen(&buffer[offset]) + 1;
+      }
+    }
+
+    if (entry->d_type == DT_DIR) {
+      DirectoryWalkAndMatchXattrKey(path, re, vecContent, level + 1, maxDepth);
+    }
+  }
+  closedir(dir);
+  free(buffer);
+}
+
+int ric_find_xattr(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  regex_t re;
+  int rc;
+  char *arg1 = NULL;
+  expr_t *vec;
+  argsList_t *vecContent = NULL;
+  heapval_t *hpv;
+  int dummy;
+  int maxDepth = 20;
+  char *rootDir = ".";
+
+  // pop arg 1 - key-pattern
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    arg1 = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  rc = regcomp(&re, arg1, REG_EXTENDED|REG_NOSUB);
+  if ( rc != 0 ) {
+    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n", LIBRARY_FUNC_NAME(), arg1);
+
+    vec = newExpr_Vector(NULL);
+
+    stv.type = VECTORTYPE;
+    stv.vec = vec->vec;
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    free(vec);
+
+    /* Pushing the parsed value */
+    PUSH_VECTOR(stv.vec, sp, sc);
+
+    return 0;
+  }
+
+  /* Walk through the file system and match */
+  DirectoryWalkAndMatchXattrKey(rootDir, &re, &vecContent, 1, maxDepth);
+  regfree(&re);
+
+  vec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
+
+  return 0;
+}
+

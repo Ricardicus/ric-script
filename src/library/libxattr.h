@@ -14,6 +14,7 @@
 int ric_list_xattr(LIBRARY_PARAMS());
 int ric_set_xattr(LIBRARY_PARAMS());
 int ric_get_xattr(LIBRARY_PARAMS());
+int ric_find_xattr(LIBRARY_PARAMS());
 int ric_remove_xattr(LIBRARY_PARAMS());
 
 

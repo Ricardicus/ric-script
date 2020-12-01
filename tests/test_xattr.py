@@ -9,6 +9,8 @@ def test_vector_print():
 "xattr's of 'requirements.txt' and values:",
 "    - 'user.owner': 'Rickard'",
 "    - 'user.master': 'Rickard of course'",
+"Searching for user.* keyed files",
+"./requirements.txt",
 "Removing xattributes I just set",
 "xattr's of 'requirements.txt':",
 "[]"

@@ -76,6 +76,12 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("mkdir", 1, ric_mkdir),
   DECLARE_LIB_FUNCTION("find", 1, ric_find_files),
   DECLARE_LIB_FUNCTION("cd", 1, ric_cd),
+  // libnet
+  DECLARE_LIB_FUNCTION("socketServer", 2, ric_setup_server_socket),
+  DECLARE_LIB_FUNCTION("socketAccept", 1, ric_socket_accept_incoming_connection),
+  DECLARE_LIB_FUNCTION("socketRead", 1, ric_read_socket),
+  DECLARE_LIB_FUNCTION("socketWrite", 2, ric_write_socket),
+  DECLARE_LIB_FUNCTION("socketClose", 1, ric_close_socket)
 };
 
 void initialize_ric_lib() {

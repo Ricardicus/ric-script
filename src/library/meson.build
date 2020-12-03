@@ -13,10 +13,10 @@ target_os = target_machine.system()
 
 # Handling windows NT vs. unix POSIX differences
 if ( target_os == 'windows' )
-  library_source_list += ['libos_nt.c']
+  library_source_list += ['libos_nt.c', 'libnet_nt.c']
   ric_c_args += ['-DNO_XATTR'] 
 else
-  library_source_list += ['libos.c']
+  library_source_list += ['libos.c', 'libnet.c']
 endif
 
 if ( target_os == 'darwin' ) 

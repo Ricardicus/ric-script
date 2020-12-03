@@ -223,7 +223,7 @@ int ric_read_socket(LIBRARY_PARAMS()) {
 
   if ( ret < 0 ) {
       int code = WSAGetLastError();
-      switch (code ) {
+      switch ( code ) {
         case WSANOTINITIALISED: printf("WSANOTINITIALISED"); break;
         case WSAENETDOWN: printf("WSAENETDOWN"); break;
         case WSAEFAULT: printf("WSAEFAULT"); break;

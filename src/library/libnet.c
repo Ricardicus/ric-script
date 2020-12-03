@@ -16,9 +16,7 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
   stackval_t stv;
   struct sockaddr_in svr_addr;
   int32_t port;
-  int32_t blocking = 0;
   int serverSocket;
-  int flags;
 
   /* Read first argument, port number */
   POP_VAL(&stv, sp, sc);
@@ -36,41 +34,10 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
     break;
   }
 
-  /* Read second argument, blocking or not */
-  POP_VAL(&stv, sp, sc);
-
-  switch (stv.type) {
-    case INT32TYPE:
-    blocking = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
-  }
-
   serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (serverSocket < 0) {
     fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
     return 1;
-  }
-
-  if ( blocking == 0 ) {
-    // Set the socket to be non-blocking
-    flags = fcntl(serverSocket, F_GETFL, 0);
-    if (flags == -1) {
-      fprintf(stderr, "error: function '%s' failed to set socket blocking state\n", LIBRARY_FUNC_NAME());
-      return 1;
-    }
-
-    flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-    if (fcntl(serverSocket, F_SETFL, flags) != 0) {
-      fprintf(stderr, "error: function '%s' failed to set socket blocking state\n", LIBRARY_FUNC_NAME());
-      return 1;
-    }
   }
 
   memset(&svr_addr, 0, sizeof(svr_addr));

@@ -1,3 +1,304 @@
+#include <iostream>
+#include <fstream>
+#include "os_util.hpp"
+#include <process.h>
+#include <windows.h>
+#include <stdio.h>
+#include <iphlpapi.h>
+#include <stdlib.h>
+#include <errno.h>
+
 #include "libnet.h"
 
+/* Initialize Windows Socket API */
+static void initializeWSA() {
+  static bool wsaInitialized = false;
+  static WSADATA wsa;
+
+  if ( wsaInitialized )
+    return;
+
+  if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+    printf("WSAStartup failed. Error Code : %d", WSAGetLastError());
+    return;
+  }
+
+  wsaInitialized = true;
+}
+
+int ric_setup_server_socket(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  struct sockaddr_in svr_addr;
+  int32_t port;
+  int32_t blocking = 0;
+  unsigned long mode;
+  int serverSocket;
+  int flags;
+  int iResult;
+  struct addrinfo *result = NULL;
+  struct addrinfo hints;
+  struct sockaddr_in svr_addr;
+  char portToUse[20];
+
+  /* Read first argument, port number */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    port = stv.i;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  memset(portToUse, 0, sizeof(portToUse));
+  snprintf(portToUse, sizeof(portToUse), "%d", port);
+
+  initializeWSA();
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_flags = AI_PASSIVE;
+
+  // Resolve the server address and port
+  iResult = getaddrinfo(NULL, portToUse, &hints, &result);
+  if ( iResult != 0 ) {
+    WSACleanup();
+    fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  // Create a SOCKET for connecting to server
+  serverSocket = socket(
+    result->ai_family,
+    result->ai_socktype,
+    result->ai_protocol);
+
+  if (serverSocket == INVALID_SOCKET) {
+    freeaddrinfo(result);
+    WSACleanup();
+    fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  mode = 1;
+  /* Set socket to blocking */
+  if (ioctlsocket(fd, FIONBIO, &mode) != 0) {
+    fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  // Setup the TCP listening socket
+  iResult = bind(serverSocket, result->ai_addr, result->ai_addrlen);
+  if (iResult == SOCKET_ERROR) {
+    freeaddrinfo(result);
+    closesocket(serverSocket);
+    WSACleanup();
+    fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  freeaddrinfo(result);
+
+  iResult = listen(serverSocket, SOMAXCONN);
+  if (iResult == SOCKET_ERROR) {
+    closesocket(serverSocket);
+    WSACleanup();
+    fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  return 0;
+}
+
+int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int socket;
+  struct sockaddr_in cliAddr;
+  socklen_t sinLen;
+  int32_t clientSocket;
+  // Setup timeval variable
+  struct timeval timeout;
+  struct fd_set fds;
+  int selectRet;
+
+  /* Read first argument, socket */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    socket = stv.i;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 0;
+  // Setup fd_set structure
+  FD_ZERO(&fds);
+  FD_SET(socket, &fds);
+  // Possible return values:
+  // -1: error occurred
+  // 0: timed out
+  // > 0: data ready to be read
+  selectRet = select(0, &fds, 0, 0, &timeout);
+  if ( selectRet == 0 ) {
+    // Timeout
+    PUSH_INT(-1, sp, sc);
+    return 0;
+  }
+
+  if ( selectRet < 0 ) {
+    fprintf(stderr, "error: function '%s' failed to accept incoming connection\n", LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  clientSocket = WSAAccept(socket, NULL, NULL, NULL, NULL);
+
+  if ( clientSocket < 0 ) {
+    int errorStatus = WSAGetLastError();
+
+    if ( errorStatus == WSAEWOULDBLOCK ) {
+      // Timeout
+      PUSH_INT(-1, sp, sc);
+      return 0;
+    } else {
+      fprintf(stderr, "error: function '%s' failed to accept incoming connection\n", LIBRARY_FUNC_NAME());
+      return 1;
+    }
+  }
+
+  /* Pushing result */
+  PUSH_INT(clientSocket, sp, sc);
+
+  return 0;
+}
+
+int ric_read_socket(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  heapval_t *hpv;
+  int socket;
+  char *t;
+  int dummy;
+  size_t maxReadSize = 1024;
+  /* Read first argument, socket */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    socket = stv.i;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  t = calloc(maxReadSize, 1);
+  if ( t == NULL ) {
+    fprintf(stderr, "error: function '%s' allocate enough memory.\n",
+      LIBRARY_FUNC_NAME());
+    return 1;
+  }
+
+  recv(socket, t, maxReadSize, 0);
+
+  stv.type = TEXT;
+  stv.t = t;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
+int ric_write_socket(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int32_t socket;
+  int32_t ret;
+  char *t;
+  /* Read first argument, socket */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    socket = stv.i;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  /* Read second argument, text to send */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    t = stv.t;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  ret = send(socket, t, strlen(t), 0);
+
+  /* Pushing result */
+  PUSH_INT(ret, sp, sc);
+
+  return 0;
+}
+
+int ric_close_socket(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int socket;
+  int32_t ret;
+  /* Read first argument, socket */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    socket = stv.i;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  ret = shutdown(socket, SD_SEND);
+
+  /* Pushing result */
+  PUSH_INT(ret, sp, sc);
+
+  return 0;
+}
 

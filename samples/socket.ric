@@ -12,7 +12,7 @@
   usage()
 }
 
-s = socketServer(args[2], 1)
+s = socketServer(args[2])
 ? [ s < 0 ] {
   print("Failed to create the socket, sorry..")
   exit(1)

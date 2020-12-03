@@ -12,6 +12,7 @@ def test_directory_print():
 "folder",
 "time_of_day.ric",
 "xattr.ric",
+"socket.ric",
 " a",
 "  a",
 "   c.txt",

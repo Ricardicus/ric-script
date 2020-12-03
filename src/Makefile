@@ -38,7 +38,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libstring \
 	$(LIB_DIR)/libload \
 	$(LIB_DIR)/libos \
-	$(LIB_DIR)/libtime
+	$(LIB_DIR)/libtime \
+	$(LIB_DIR)/libnet
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)

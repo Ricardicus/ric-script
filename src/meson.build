@@ -29,6 +29,11 @@ if ( target_os == 'windows' )
 	# Make lex not use unistd
   ric_c_args += ['-DYY_NO_UNISTD_H']
 
+  compiler = meson.get_compiler('c')
+  dep = compiler.find_library('ws2_32', required: true)
+
+  deps += [dep]
+
   # Regexp
   ric_links += [pcre_lib]
   includes += [pcre_inc]

@@ -1,14 +1,14 @@
-#include <iostream>
-#include <fstream>
-#include "os_util.hpp"
 #include <process.h>
+#include <winsock2.h>
 #include <windows.h>
 #include <stdio.h>
 #include <iphlpapi.h>
 #include <stdlib.h>
 #include <errno.h>
-
 #include "libnet.h"
+#include <ws2tcpip.h>
+
+#pragma comment(lib, "Ws2_32.lib")
 
 /* Initialize Windows Socket API */
 static void initializeWSA() {
@@ -37,7 +37,6 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
   int iResult;
   struct addrinfo *result = NULL;
   struct addrinfo hints;
-  struct sockaddr_in svr_addr;
   char portToUse[20];
 
   /* Read first argument, port number */
@@ -88,9 +87,9 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
     return 1;
   }
 
-  mode = 1;
+  mode = 0;
   /* Set socket to blocking */
-  if (ioctlsocket(fd, FIONBIO, &mode) != 0) {
+  if (ioctlsocket(serverSocket, FIONBIO, &mode) != 0) {
     fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
     return 1;
   }
@@ -114,6 +113,8 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
     fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
     return 1;
   }
+
+  PUSH_INT(serverSocket, sp, sc);
 
   return 0;
 }
@@ -145,7 +146,7 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
     break;
   }
 
-  timeout.tv_sec = 1;
+  timeout.tv_sec = 1000;
   timeout.tv_usec = 0;
   // Setup fd_set structure
   FD_ZERO(&fds);
@@ -193,6 +194,7 @@ int ric_read_socket(LIBRARY_PARAMS()) {
   int socket;
   char *t;
   int dummy;
+  int ret;
   size_t maxReadSize = 1024;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
@@ -217,7 +219,34 @@ int ric_read_socket(LIBRARY_PARAMS()) {
     return 1;
   }
 
-  recv(socket, t, maxReadSize, 0);
+  ret = recv(socket, t, maxReadSize, 0);
+
+  if ( ret < 0 ) {
+      int code = WSAGetLastError();
+      switch (code ) {
+        case WSANOTINITIALISED: printf("WSANOTINITIALISED"); break;
+        case WSAENETDOWN: printf("WSAENETDOWN"); break;
+        case WSAEFAULT: printf("WSAEFAULT"); break;
+        case WSAENOTCONN: printf("WSAENOTCONN"); break;
+        case WSAEINTR: printf("WSAEINTR"); break;
+        case WSAEINPROGRESS: printf("WSAEINPROGRESS"); break;
+        case WSAENETRESET: printf("WSAENETRESET"); break;
+        case WSAENOTSOCK: printf("WSAENOTSOCK"); break;
+        case WSAEOPNOTSUPP: printf("WSAEOPNOTSUPP"); break;
+        case WSAESHUTDOWN: printf("WSAESHUTDOWN"); break;
+        case WSAEWOULDBLOCK: printf("WSAEWOULDBLOCK"); break;
+        case WSAEMSGSIZE: printf("WSAEMSGSIZE"); break;
+        case WSAEINVAL: printf("WSAEINVAL"); break;
+        case WSAECONNABORTED: printf("WSAECONNABORTED"); break;
+        case WSAETIMEDOUT: printf("WSAETIMEDOUT"); break;
+        case WSAECONNRESET: printf("WSAECONNRESET"); break;
+        default:
+        break;
+      }
+
+      printf("\n");
+
+  }
 
   stv.type = TEXT;
   stv.t = t;

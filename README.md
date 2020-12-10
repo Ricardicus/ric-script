@@ -1,5 +1,5 @@
 <p align="center">
-<img width="300px" src="https://github.com/Ricardicus/ric-script/blob/master/images/icon.png?raw=true" />
+<img width="300px" src="https://github.com/Ricardicus/ric-script/blob/master/images/icon_round.png?raw=true" />
 </p>
 
 ![Building and testing](https://github.com/Ricardicus/ric-script/workflows/Building%20and%20testing/badge.svg)

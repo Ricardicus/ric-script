@@ -1,14 +1,19 @@
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <process.h>
-#include <winsock2.h>
-#include <windows.h>
 #include <stdio.h>
 #include <iphlpapi.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "libnet.h"
+#include <winsock2.h>
 #include <ws2tcpip.h>
+#include "libnet.h"
+
 
 #pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "wsock32.lib")
 
 /* Initialize Windows Socket API */
 static void initializeWSA() {
@@ -328,6 +333,95 @@ int ric_close_socket(LIBRARY_PARAMS()) {
   /* Pushing result */
   PUSH_INT(ret, sp, sc);
 
+  return 0;
+}
+
+int ric_connect_socket(LIBRARY_PARAMS()) {
+  struct sockaddr_in serv_addr;
+  stackval_t stv;
+  int socketFd;
+  int portNo;
+  int32_t ret;
+  char *address = NULL;
+  WSADATA wsa;
+  int s;
+  struct sockaddr_in server;
+  char ip[100];
+  struct hostent *he;
+  struct in_addr **addr_list;
+  int i;
+
+  /* Read first argument, host address */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    address = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  /* Read second argument, port */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    portNo = stv.i;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  WSAStartup(MAKEWORD(2,2),&wsa);
+  
+  //Create a socket
+  if ((s = socket(AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET) {
+    /* Pushing result */
+    ret = -1;
+    PUSH_INT(ret, sp, sc);
+    return 0;
+  }
+
+  if ( (he = gethostbyname( address ) ) == NULL) {
+    /* Pushing result */
+    ret = -1;
+    PUSH_INT(ret, sp, sc);
+    return 0;
+  }
+  
+  //Cast the h_addr_list to in_addr , since h_addr_list also has the ip address in long format only
+  addr_list = (struct in_addr **) he->h_addr_list;
+  
+  for(i = 0; addr_list[i] != NULL; i++) 
+  {
+    //Return the first one;
+    strcpy(ip , inet_ntoa(*addr_list[i]) );
+  }  
+
+  server.sin_addr.s_addr = inet_addr(ip);
+  server.sin_family = AF_INET;
+  server.sin_port = htons(portNo);
+
+  //Connect to remote server
+  if (connect(s , (struct sockaddr *)&server , sizeof(server)) < 0)
+  {
+    /* Pushing result */
+    ret = -1;
+    PUSH_INT(ret, sp, sc);
+    return 0;
+  }
+
+  /* Push connected socket */
+  PUSH_INT(s, sp, sc);
   return 0;
 }
 

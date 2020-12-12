@@ -34,6 +34,9 @@ if ( target_os == 'windows' )
 
   deps += [dep]
 
+  dep = compiler.find_library('wsock32', required: true)
+
+  deps += [dep]
   # Regexp
   ric_links += [pcre_lib]
   includes += [pcre_inc]

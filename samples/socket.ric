@@ -18,11 +18,15 @@ s = socketServer(args[2])
   exit(1)
 }
 
-t = socketAccept(s)
-? [ t > 0 ] {
-  in = socketRead(t)
-  print("received: " + in)
-  socketWrite(t, in)
-  socketClose(t)
+. [ 1 ] {
+  t = socketAccept(s)
+  ? [ t > 0 ] {
+    in = socketRead(t)
+    print("received: " + in)
+    socketWrite(t, in)
+    socketClose(t)
+  }
+  @
 }
+
 socketClose(s)

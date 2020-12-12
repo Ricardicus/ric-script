@@ -81,7 +81,8 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("socketAccept", 1, ric_socket_accept_incoming_connection),
   DECLARE_LIB_FUNCTION("socketRead", 1, ric_read_socket),
   DECLARE_LIB_FUNCTION("socketWrite", 2, ric_write_socket),
-  DECLARE_LIB_FUNCTION("socketClose", 1, ric_close_socket)
+  DECLARE_LIB_FUNCTION("socketClose", 1, ric_close_socket),
+  DECLARE_LIB_FUNCTION("socketConnect", 2, ric_connect_socket)
 };
 
 void initialize_ric_lib() {

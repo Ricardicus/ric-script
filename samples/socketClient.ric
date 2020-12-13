@@ -1,7 +1,7 @@
 #!/usr/bin/ric
 # Example of how to use the built in
 # socket interface in ric script.
-# This is an echo-server.
+# This is a client program.
 
 @ usage () {
   print("usage: " + args[0] + " " + args[1] + " host port content-to-write")

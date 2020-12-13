@@ -9,6 +9,7 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS());
 int ric_read_socket(LIBRARY_PARAMS());
 int ric_write_socket(LIBRARY_PARAMS());
 int ric_close_socket(LIBRARY_PARAMS());
+int ric_connect_socket(LIBRARY_PARAMS());
 
 #endif
 

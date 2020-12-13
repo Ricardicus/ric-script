@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #include "libnet.h"
 
@@ -236,6 +238,76 @@ int ric_close_socket(LIBRARY_PARAMS()) {
   /* Pushing result */
   PUSH_INT(ret, sp, sc);
 
+  return 0;
+}
+
+int ric_connect_socket(LIBRARY_PARAMS()) {
+  struct sockaddr_in serv_addr;
+  stackval_t stv;
+  struct hostent *server;
+  int socketFd;
+  int portNo;
+  int32_t ret;
+  char *address = NULL;
+
+  /* Read first argument, host address */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    address = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  /* Read second argument, port */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    portNo = stv.i;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  /* a socket is created through call to socket() function */
+  if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    /* Pushing result */
+    ret = -1;
+    PUSH_INT(ret, sp, sc);
+    return 0;
+  }
+
+  server = gethostbyname(address);
+
+  memset(&serv_addr, '0', sizeof(serv_addr));
+
+  serv_addr.sin_family = AF_INET;
+
+  bcopy((char *)server->h_addr, 
+       (char *)&serv_addr.sin_addr.s_addr,
+       server->h_length);
+  serv_addr.sin_port = htons(portNo);
+
+  if (connect(socketFd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    /* Pushing result */
+    ret = -1;
+    PUSH_INT(ret, sp, sc);
+    return 0;
+  }
+
+  /* Pushing the socket */
+  PUSH_INT(socketFd, sp, sc);
   return 0;
 }
 

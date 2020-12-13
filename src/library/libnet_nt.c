@@ -386,7 +386,7 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
     return 0;
   }
 
-  if ( (he = gethostbyname( address ) ) == NULL) {
+  if ((he = gethostbyname(address)) == NULL) {
     /* Pushing result */
     ret = -1;
     PUSH_INT(ret, sp, sc);
@@ -396,8 +396,7 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
   //Cast the h_addr_list to in_addr , since h_addr_list also has the ip address in long format only
   addr_list = (struct in_addr **) he->h_addr_list;
   
-  for(i = 0; addr_list[i] != NULL; i++) 
-  {
+  for (i = 0; addr_list[i] != NULL; i++) {
     //Return the first one;
     strcpy(ip , inet_ntoa(*addr_list[i]) );
   }  

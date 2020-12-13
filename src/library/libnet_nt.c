@@ -1,19 +1,14 @@
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
 #include <process.h>
+#include <winsock2.h>
+#include <windows.h>
 #include <stdio.h>
 #include <iphlpapi.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include "libnet.h"
-
+#include <ws2tcpip.h>
 
 #pragma comment(lib, "Ws2_32.lib")
-#pragma comment(lib, "wsock32.lib")
 
 /* Initialize Windows Socket API */
 static void initializeWSA() {

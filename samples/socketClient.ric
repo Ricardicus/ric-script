@@ -1,0 +1,33 @@
+#!/usr/bin/ric
+# Example of how to use the built in
+# socket interface in ric script.
+# This is an echo-server.
+
+@ usage () {
+  print("usage: " + args[0] + " " + args[1] + " host port content-to-write")
+  exit(1) 
+}
+
+? [ len(args) < 5 ] {
+  usage()
+}
+
+. [ 1 ] {
+  print("Opening connection to host: " + args[2] + ":" + args[3])
+  s = socketConnect(args[2], args[3])
+  ? [ s < 0 ] {
+    print("Failed to create the socket, sorry.. error code: " + s)
+    exit(1)
+  }
+
+  t = socketWrite(s, args[4])
+  ? [ t > 0 ] {
+    in = socketRead(s)
+    print("received: " + in)
+  } ~ {
+    print("Failed to write to host...")
+  }
+  socketClose(s)
+  @
+}
+

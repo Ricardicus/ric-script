@@ -73,7 +73,7 @@ The interpreter GUI looks like this:
 
 <img src="https://raw.githubusercontent.com/Ricardicus/ric-script/master/images/screenshot-docker-app.png"></img>
 
-# Online ric-script interpreter
+### Online ric-script interpreter
 
 I also host the docker server for you to play around with [here](https://ric-script-u5ep8.ondigitalocean.app/).
 

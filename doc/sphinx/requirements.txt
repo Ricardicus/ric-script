@@ -1,0 +1,9 @@
+wheel
+recommonmark
+sphinx
+pdflatex
+sphinx-rtd-theme
+breathe
+sphinx-sitemap
+exhale
+

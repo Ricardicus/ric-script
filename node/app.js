@@ -36,6 +36,14 @@ app.get('/js/:script([a-z][a-z]*)', function(req, res) {
     res.sendFile(__dirname + '/js/' + req.params.script);
 });
 
+app.get('/doc', function(req, res) {
+    res.sendFile(__dirname + '/doc/index.html');
+});
+
+app.get('/doc/*', function(req, res) {
+    res.sendFile(__dirname + req.originalUrl);
+});
+
 app.get('/samples/:script([a-z][a-z]*)', function(req, res) {
     var file = __dirname + '/samples/' + req.params.script;
     res.sendFile(file);

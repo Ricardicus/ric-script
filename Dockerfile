@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install --yes python3.7 python3-pip python3-setupt
 RUN pip3 install --upgrade pip && pip install meson==0.52.0 ninja
 
 COPY . /src
+
+RUN cp -r /src/doc/sphinx/buildRootMod/html /src/node/doc
+
 WORKDIR /src/node
 
 # Install app dependencies

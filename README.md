@@ -20,6 +20,8 @@ Not sure what target there will be (if so).
 
 The samples folder contains ric scripts with OK syntax.
 
+[More documentation can be found here.]: https://ric-script-u5ep8.ondigitalocean.app/doc
+
 # Build
 
 On linux or mac use meson or GNU make

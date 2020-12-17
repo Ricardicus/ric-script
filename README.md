@@ -18,9 +18,10 @@ of intermediate codes that I can build a much smaller
 interpreter for (some sort of virtual RISC).
 Not sure what target there will be (if so).
 
-The samples folder contains ric scripts with OK syntax.
+The samples folder contains ric scripts with OK syntax I 
+will also provide some samples here in the README further below.
 
-[More documentation can be found here.]: https://ric-script-u5ep8.ondigitalocean.app/doc
+<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is also some more documentation I am working on!</a>
 
 # Build
 

@@ -40,7 +40,20 @@ app.get('/doc', function(req, res) {
     res.sendFile(__dirname + '/doc/index.html');
 });
 
+app.get('/favicon.ico', function(req, res) {
+    res.sendFile(__dirname + '/favicon.ico');
+});
+
 app.get('/doc/*', function(req, res) {
+    if ( req.originalUrl.includes("?") ) {
+        res.sendFile(__dirname + req.originalUrl.split("?")[0]);
+    } else {
+        res.sendFile(__dirname + req.originalUrl);
+    }
+
+});
+
+app.get('/images/*', function(req, res) {
     res.sendFile(__dirname + req.originalUrl);
 });
 

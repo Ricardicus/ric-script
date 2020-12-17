@@ -33,6 +33,9 @@ release = '0.1'
 
 # -- General configuration ---------------------------------------------------
 
+def setup(app):
+    app.add_css_file('style.css')
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'

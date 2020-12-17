@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; RicScript documentation 0.1 documentation</title>
+  <title>Installation &mdash; RicScript documentation 0.1 documentation</title>
   
 
   
@@ -21,7 +21,6 @@
   
 
   
-    
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -36,9 +35,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-    <script type="text/javascript" src="_static/searchtools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Syntax walkthrough" href="syntaxwalkthrough.html" />
+    <link rel="prev" title="Welcome to RicScript" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -65,7 +65,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -84,8 +84,12 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#linux-osx">Linux &amp; OSX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="syntaxwalkthrough.html">Syntax walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="standardlibrary.html">Standard library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker image</a></li>
@@ -135,12 +139,14 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Search</li>
+      <li>Installation</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -152,23 +158,64 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search functionality.
-    </p>
-  </div>
-  </noscript>
+  <a class="reference internal image-reference" href="images/icon_small.png"><img alt="images/icon_small.png" class="align-right" src="images/icon_small.png" style="width: 15.0px; height: 15.0px;" /></a>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>I have support for building it on Windows, OSX and Linux today.</p>
+<div class="section" id="linux-osx">
+<h2>Linux &amp; OSX<a class="headerlink" href="#linux-osx" title="Permalink to this headline">¶</a></h2>
+<p>On Linux or mac use meson or GNU make.
+You need <a class="reference external" href="https://mesonbuild.com/index.html">Meson</a> and <a class="reference external" href="https://www.python.org/">Python3</a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># on linux or mac</span>
+make
+<span class="c1"># or, with meson:</span>
+python3 -m venv venv
+<span class="nb">source</span> venv/bin/activate
+pip install -r requirements.txt
+meson builddir
+<span class="nb">cd</span> builddir
+ninja
+<span class="c1"># Now the interpreter binary &#39;ric&#39; will be found under</span>
+<span class="c1"># the folder &#39;src&#39;</span>
+For windows only meson works:
+</pre></div>
+</div>
+</div>
+<div class="section" id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
+<p>On Window, only the Meson installation works. You also need to make some additional steps.
+You need to install <a class="reference external" href="https://mesonbuild.com/index.html">Meson</a> and <a class="reference external" href="https://www.python.org/">Python3</a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># on windows</span>
+python3 -m venv venv
+venv<span class="se">\S</span>ource<span class="se">\a</span>ctivate
+pip install -r requirements.txt
+mkdir install
+meson builddir --prefix %cd%<span class="se">\i</span>nstall
+<span class="nb">cd</span> builddir
+ninja
+<span class="c1"># Ignore the warnings...</span>
+ninja install
+<span class="c1"># Now you have built the program!</span>
+<span class="c1"># You find it under ..\install\bin\ric.exe</span>
+</pre></div>
+</div>
+</div>
+</div>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="syntaxwalkthrough.html" class="btn btn-neutral float-right" title="Syntax walkthrough" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to RicScript" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -208,14 +255,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

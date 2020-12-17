@@ -15,7 +15,8 @@ RUN pip3 install --upgrade pip && pip install meson==0.52.0 ninja
 
 COPY . /src
 
-RUN cp -r /src/doc/sphinx/buildRootMod/html /src/node/doc
+RUN cp -r /src/doc/sphinx/buildRootMod/html /src/node/doc && cp /src/images/icon_small.png /src/node/favicon.ico && \
+    cp -r /src/images /src/node/doc/images && cp -r /src/images /src/node/images  
 
 WORKDIR /src/node
 

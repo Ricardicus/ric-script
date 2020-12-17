@@ -37,6 +37,11 @@
       <div id="terminal"></div>
       <script type="text/javascript">
 
+function openInNewTab(url) {
+  var win = window.open(url, '_blank');
+  win.focus();
+}
+
 $(document).ready(function(){
 
 $("div.btn").hover(function () {
@@ -147,6 +152,9 @@ $("#interpret-btn").click(function(){
             </td>
             <td>
               <center><p id="output-monitor-exit-code"></p></center>
+            </td>
+            <td>
+              <center><div class="btn" onclick="openInNewTab('/doc');">Documentation</div></center>
             </td>
           </tr>
         </tbody>

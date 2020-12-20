@@ -112,7 +112,7 @@ well as haven't implemented:
 - [x] Classes
 - [x] Better error reporting (always include at least line number)
 - [x] Socket interface
-- [ ] Support for at least swedish UTF-8 characters å, ä and ö. 
+- [x] Support for at least swedish UTF-8 characters å, ä and ö. 
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).

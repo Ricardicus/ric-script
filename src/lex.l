@@ -18,7 +18,7 @@ FLOAT_VAL        [0-9]+"."[0-9]*
 KEYWORD_PROCESS  process
 HASHTAG          [#]
 RETURN_TOKEN     "->"
-ID_TOKEN         [_[:alnum:]]
+ID_TOKEN         [_[:alnum:]åäöÅÄÖ]
 RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 
 %%
@@ -55,12 +55,18 @@ RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 	} else if ( yytext[0] == '\"' && !simple_citation ) {
 		double_citation = (double_citation+1) % 2;
 	}
-
 	return yytext[0];
 }
 
 {RETURN_TOKEN} {
 	return RETURN;
+}
+
+[ ] {
+	// return spaces only if within a citation
+	if ( double_citation|| simple_citation ) {
+		return ' ';
+	}
 }
 
 {ID_TOKEN}+ {
@@ -75,13 +81,6 @@ RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 
 \n {
 	yylinenor++;
-}
-
-[ ] {
-	// return spaces only if within a citation
-	if ( double_citation|| simple_citation ) {
-		return ' ';
-	}
 }
 
 .               ;

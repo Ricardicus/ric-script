@@ -365,8 +365,8 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[22] =
     {   0,
-        0,    0,   11,    9,    9,    7,    8,    4,    1,    4,
-        2,    6,    0,    1,    1,    5,    3,    2,    6,    3,
+        0,    0,   11,    9,    9,    8,    6,    4,    1,    4,
+        2,    7,    0,    1,    1,    5,    3,    2,    7,    3,
         0
     } ;
 
@@ -386,13 +386,13 @@ static const YY_CHAR yy_ec[256] =
        11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
        11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
        11,   11,    5,    1,    5,    5,    1,    1,    1,    1,
+        1,   11,   11,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,   11,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,   11,   11,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,   11,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,   11,    1,    1,    1,    1,    1,
 
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -788,20 +788,29 @@ YY_RULE_SETUP
 	} else if ( yytext[0] == '\"' && !simple_citation ) {
 		double_citation = (double_citation+1) % 2;
 	}
-
 	return yytext[0];
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 62 "lex.l"
+#line 61 "lex.l"
 {
 	return RETURN;
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 66 "lex.l"
+#line 65 "lex.l"
+{
+	// return spaces only if within a citation
+	if ( double_citation|| simple_citation ) {
+		return ' ';
+	}
+}
+	YY_BREAK
+case 7:
+YY_RULE_SETUP
+#line 72 "lex.l"
 {
 	memset(yylval.id,0,sizeof(yylval.id));
 	memcpy(
@@ -812,35 +821,25 @@ YY_RULE_SETUP
 	return ID;
 }
 	YY_BREAK
-case 7:
-/* rule 7 can match eol */
+case 8:
+/* rule 8 can match eol */
 YY_RULE_SETUP
-#line 76 "lex.l"
+#line 82 "lex.l"
 {
 	yylinenor++;
 }
 	YY_BREAK
-case 8:
-YY_RULE_SETUP
-#line 80 "lex.l"
-{
-	// return spaces only if within a citation
-	if ( double_citation|| simple_citation ) {
-		return ' ';
-	}
-}
-	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 87 "lex.l"
+#line 86 "lex.l"
 ;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 89 "lex.l"
+#line 88 "lex.l"
 ECHO;
 	YY_BREAK
-#line 844 "lex.yy.c"
+#line 843 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1845,6 +1844,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 89 "lex.l"
+#line 88 "lex.l"
 
 

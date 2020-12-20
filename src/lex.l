@@ -13,13 +13,12 @@ int simple_citation = 0;
 
 %}
 
-UB               [\200-\277]
 DIGIT_VAL        [0-9]
 FLOAT_VAL        [0-9]+"."[0-9]*
 KEYWORD_PROCESS  process
 HASHTAG          [#]
 RETURN_TOKEN     "->"
-ID_TOKEN         [_[:alnum:]]
+ID_TOKEN         [_[:alnum:]åäöÅÄÖ]
 RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 
 %%
@@ -63,7 +62,14 @@ RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 	return RETURN;
 }
 
-({ID_TOKEN}|([\300-\337]{UB}))+ {
+[ ] {
+	// return spaces only if within a citation
+	if ( double_citation|| simple_citation ) {
+		return ' ';
+	}
+}
+
+{ID_TOKEN}+ {
 	memset(yylval.id,0,sizeof(yylval.id));
 	memcpy(
 		yylval.id, yytext,
@@ -75,13 +81,6 @@ RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 
 \n {
 	yylinenor++;
-}
-
-[ ] {
-	// return spaces only if within a citation
-	if ( double_citation|| simple_citation ) {
-		return ' ';
-	}
 }
 
 .               ;

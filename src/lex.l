@@ -13,6 +13,7 @@ int simple_citation = 0;
 
 %}
 
+UB               [\200-\277]
 DIGIT_VAL        [0-9]
 FLOAT_VAL        [0-9]+"."[0-9]*
 KEYWORD_PROCESS  process
@@ -55,7 +56,6 @@ RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 	} else if ( yytext[0] == '\"' && !simple_citation ) {
 		double_citation = (double_citation+1) % 2;
 	}
-
 	return yytext[0];
 }
 
@@ -63,7 +63,7 @@ RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 	return RETURN;
 }
 
-{ID_TOKEN}+ {
+({ID_TOKEN}|([\300-\337]{UB}))+ {
 	memset(yylval.id,0,sizeof(yylval.id));
 	memcpy(
 		yylval.id, yytext,

@@ -4,6 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+>> å
+strlen(yytext): 2, (-61, -91)
+>> ä
+strlen(yytext): 2, (-61, -92)
+>> ö
+strlen(yytext): 2, (-61, -74)
+>> Å
+strlen(yytext): 2, (-61, -123)
+>> Ä
+strlen(yytext): 2, (-61, -124)
+>> Ö
+strlen(yytext): 2, (-61, -106)
+*/
+
 extern FILE *yyin;
 extern char *ParsedFile;
 

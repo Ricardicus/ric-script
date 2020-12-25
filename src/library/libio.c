@@ -69,11 +69,70 @@ int ric_close_file(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_read_file(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  FILE *fp;
+  size_t datasize = 0;
+  expr_t *e;
+  size_t readBytes = 0;
+  int dummy;
+  heapval_t *hpv;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case POINTERTYPE:
+    fp = (FILE*)stv.p;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    datasize = (size_t) stv.i;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, integer expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  e = newExpr_RawData(datasize);
+
+  readBytes = fread(e->rawdata->data, 1, e->rawdata->size, fp);
+
+  if ( readBytes != e->rawdata->size ) {
+    e->rawdata->size = readBytes;
+  }
+
+  stv.type = RAWDATATYPE;
+  stv.rawdata = e->rawdata;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the raw data read */
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+
+  free(e);
+
+  return 0;
+}
+
 int ric_write_file(LIBRARY_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
   char *text = NULL;
+  rawdata_t *rawdata = NULL;
   int backslash = 0;
   char *c;
 
@@ -97,6 +156,9 @@ int ric_write_file(LIBRARY_PARAMS())
     case TEXT:
     text = stv.t;
     break;
+    case RAWDATATYPE:
+    rawdata = stv.rawdata;
+    break;
     default: {
       fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
         LIBRARY_FUNC_NAME());
@@ -105,44 +167,49 @@ int ric_write_file(LIBRARY_PARAMS())
     break;
   }
 
-  /* Parsing the string, some character combos: '\r', '\n' should be interpreted disctincly */
-  c = text;
-  while ( *c ) {
+  if ( text != NULL ) {
+    /* Parsing the string, some character combos: '\r', '\n' should be interpreted disctincly */
+    c = text;
+    while ( *c ) {
 
-    if ( !backslash && *c == '\\' ) {
-      backslash = 1;
-      ++c;
-      continue;
-    }
-
-    if ( backslash ) {
-      switch (*c) {
-      case 'n':
-      // Print a new line
-      fprintf(fp, "\n");
-      break;
-      case 'r':
-      // print the other one windows likes
-      fprintf(fp, "\r");
-      break;
-      case '\\':
-      // print a backslash
-      fprintf(fp, "\\");
-      break;
-      case 't':
-      // print a tab
-      fprintf(fp, "\t");
-      break;
-      default:
-      // Ignoring this backslashed one, since I don't understand it..
-      break;
+      if ( !backslash && *c == '\\' ) {
+        backslash = 1;
+        ++c;
+        continue;
       }
-    } else {
-      fputc(*c, fp);
-    }
 
-    ++c;
-    backslash = 0;
+      if ( backslash ) {
+        switch (*c) {
+        case 'n':
+        // Print a new line
+        fprintf(fp, "\n");
+        break;
+        case 'r':
+        // print the other one windows likes
+        fprintf(fp, "\r");
+        break;
+        case '\\':
+        // print a backslash
+        fprintf(fp, "\\");
+        break;
+        case 't':
+        // print a tab
+        fprintf(fp, "\t");
+        break;
+        default:
+        // Ignoring this backslashed one, since I don't understand it..
+        break;
+        }
+      } else {
+        fputc(*c, fp);
+      }
+
+      ++c;
+      backslash = 0;
+    }
+  } else if ( rawdata != NULL ) {
+    /* Write raw data to file */
+    fwrite(rawdata->data, 1, rawdata->size, fp);
   }
 
   /* Pushing 0, as in OK */

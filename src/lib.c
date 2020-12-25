@@ -18,6 +18,8 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("keys", 1, ric_keys),
   DECLARE_LIB_FUNCTION("isDefined", 1, ric_is_defined),
   DECLARE_LIB_FUNCTION("help", 0, ric_help),
+  DECLARE_LIB_FUNCTION("type", 1, ric_type),
+  DECLARE_LIB_FUNCTION("typeInText", 1, ric_type_text),
   // libstring
   DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
   DECLARE_LIB_FUNCTION("split", 2, ric_split),
@@ -27,6 +29,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("fileOpen", 1, ric_open_file),
   DECLARE_LIB_FUNCTION("fileClose", 1, ric_close_file),
   DECLARE_LIB_FUNCTION("fileWrite", 2, ric_write_file),
+  DECLARE_LIB_FUNCTION("fileRead", 2, ric_read_file),
   DECLARE_LIB_FUNCTION("fileReadLines", 1, ric_read_lines_file),
   DECLARE_LIB_FUNCTION("input", 1, ric_read_input),
   // libmath
@@ -79,7 +82,7 @@ libFunction_t ric_library[] = {
   // libnet
   DECLARE_LIB_FUNCTION("socketServer", 1, ric_setup_server_socket),
   DECLARE_LIB_FUNCTION("socketAccept", 1, ric_socket_accept_incoming_connection),
-  DECLARE_LIB_FUNCTION("socketRead", 1, ric_read_socket),
+  DECLARE_LIB_FUNCTION("socketRead", 2, ric_read_socket),
   DECLARE_LIB_FUNCTION("socketWrite", 2, ric_write_socket),
   DECLARE_LIB_FUNCTION("socketClose", 1, ric_close_socket),
   DECLARE_LIB_FUNCTION("socketConnect", 2, ric_connect_socket)

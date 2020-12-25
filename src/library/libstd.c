@@ -23,6 +23,55 @@ int ric_exit(LIBRARY_PARAMS())
   return 1;
 }
 
+int ric_type(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int result = 0;
+
+  POP_VAL(&stv, sp, sc);
+
+  result = stv.type;
+
+  PUSH_INT(result, sp, sc);
+  return 0;
+}
+
+int ric_type_text(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *resultText = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case INT32TYPE: resultText = "i32"; break;
+  case DOUBLETYPE: resultText = "double"; break;
+  case TEXT: resultText = "text"; break;
+  case POINTERTYPE: resultText = "pointer"; break;
+  case FUNCPTRTYPE: resultText = "function-pointer"; break;
+  case LIBFUNCPTRTYPE: resultText = "standard-library-function-pointer"; break;
+  case VECTORTYPE: resultText = "list"; break;
+  case DICTTYPE: resultText = "dictionary"; break;
+  case CLASSTYPE: resultText = "class"; break;
+  case TIMETYPE: resultText = "time"; break;
+  case RAWDATATYPE: resultText = "data"; break;
+  default:
+  resultText = "Unknown? Please file an error report at: " GENERAL_ERROR_ISSUE_URL;
+  break;
+  }
+
+  stv.type = TEXT;
+  stv.t = resultText;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
 int ric_print(LIBRARY_PARAMS())
 {
   stackval_t stv;
@@ -132,6 +181,15 @@ int ric_print(LIBRARY_PARAMS())
     {
       print_vector(stv.vec, EXPRESSION_ARGS());
       printf("\n");
+    }
+    break;
+    case RAWDATATYPE:
+    {
+      size_t i = 0;
+      while ( i < stv.rawdata->size ) {
+        printf("%c", ((char*)stv.rawdata->data)[i]);
+        ++i;
+      }
     }
     break;
     default: {
@@ -468,6 +526,7 @@ int ric_len(LIBRARY_PARAMS())
   stackval_t stv;
   vector_t *argVec = NULL;
   char *argText = NULL;
+  rawdata_t *rawdata = NULL;
   int32_t result = 0;
 
   // Pop arg1
@@ -479,6 +538,9 @@ int ric_len(LIBRARY_PARAMS())
     break;
     case TEXT:
     argText = stv.t;
+    break;
+    case RAWDATATYPE:
+    rawdata = stv.rawdata;
     break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
@@ -492,6 +554,8 @@ int ric_len(LIBRARY_PARAMS())
     result = argVec->length;
   } else if ( argText != NULL ) {
     result = (int32_t) strlen(argText);
+  } else if ( rawdata != NULL ) {
+    result = rawdata->size;
   } else {
     /* The switch above should have taken care avout this */
     return 1;

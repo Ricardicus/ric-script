@@ -39,6 +39,7 @@
 #define EXPR_TYPE_CLASSPTR       20
 #define EXPR_TYPE_CLASSFUNCCALL  21
 #define EXPR_TYPE_TIME           22
+#define EXPR_TYPE_RAWDATA        23
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -144,6 +145,8 @@ struct keyValList;
 typedef struct keyValList keyValList_t;
 struct class_t;
 typedef struct class_t class_t;
+struct rawdata_t;
+typedef struct rawdata_t rawdata_t;
 
 typedef struct vector_t {
   int32_t length;
@@ -183,6 +186,7 @@ typedef struct expr_s {
     dictionary_t  *dict;
     class_t       *classObj;
     time_t        time;
+    rawdata_t     *rawdata;
 	};
 } expr_t;
 
@@ -241,6 +245,11 @@ typedef struct functionCall_t {
 	argsList_t *args;
 } functionCall_t;
 
+typedef struct rawdata_t {
+  void *data;
+  size_t size;
+} rawdata_t;
+
 typedef struct classFunctionCall {
   expr_t *classID;
   char   *funcID;
@@ -277,6 +286,7 @@ expr_t* newExpr_Float(double val);
 expr_t* newExpr_ID(char *id);
 expr_t* newExpr_Pointer(uintptr_t val);
 expr_t* newExpr_FuncPtr(void *func);
+expr_t* newExpr_RawData(size_t size);
 expr_t* newExpr_Dictionary(keyValList_t *keyVals);
 expr_t* newExpr_FuncCall(functionCall_t *func);
 expr_t* newExpr_LibFuncPtr(libFunction_t *func);
@@ -319,7 +329,8 @@ typedef enum stackvaltypes {
   VECTORTYPE,
   DICTTYPE,
   CLASSTYPE,
-  TIMETYPE
+  TIMETYPE,
+  RAWDATATYPE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -335,6 +346,7 @@ typedef struct stackval {
     dictionary_t *dict;
     class_t *classObj;
     time_t time;
+    rawdata_t *rawdata;
 	};
 } stackval_t;
 
@@ -567,6 +579,22 @@ stackval.classObj = a;\
 *sc = *sc + 1;\
 } while (0)
 
+#define PUSH_RAWDATA(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = RAWDATATYPE;\
+stackval.rawdata = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+
 #define POP_VAL(a, sp, sc) do {\
 if ( *sc == 0 ) {\
 	fprintf(stderr, "Error: Intepreter stack corruption\n\
@@ -589,7 +617,8 @@ if ( upd != NULL ) {\
 }\
 hv.sv = *a;\
 if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || \
-     hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ) {\
+     hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ||\
+     hv.sv.type == RAWDATATYPE ) {\
 	hv.toFree = true;\
 } else {\
   hv.toFree = false;\

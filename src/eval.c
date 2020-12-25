@@ -64,6 +64,10 @@ void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
       PUSH_TIME(sv.time, sp, sc);
       break;
     }
+    case RAWDATATYPE: {
+      PUSH_RAWDATA(sv.rawdata, sp, sc);
+      break;
+    }
     default:
       fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
@@ -100,6 +104,9 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
       break;
     case TIMETYPE:
       PUSH_TIME(hv->sv.time, sp, sc);
+      break;
+    case RAWDATATYPE:
+      PUSH_RAWDATA(hv->sv.rawdata, sp, sc);
       break;
     case TEXT: {
       PUSH_STRING(hv->sv.t, sp, sc);
@@ -514,6 +521,9 @@ void evaluate_expression(
             case EXPR_TYPE_TIME:
               PUSH_TIME(expArg->time, sp, sc);
               break;
+            case EXPR_TYPE_RAWDATA:
+              PUSH_RAWDATA(expArg->rawdata, sp, sc);
+              break;
             case EXPR_TYPE_DICT:
               PUSH_DICTIONARY(expArg->dict, sp, sc);
               break;
@@ -635,6 +645,9 @@ Please report back to me.\n\
     case EXPR_TYPE_DICT:
     PUSH_DICTIONARY(expr->dict, sp, sc);
     break;
+    case EXPR_TYPE_RAWDATA:
+    PUSH_RAWDATA(expr->rawdata, sp, sc);
+    break;
     case EXPR_TYPE_VECTOR_IDX:
     {
       int32_t arrayIndex = 0;
@@ -738,6 +751,10 @@ Please report back to me.\n\
               PUSH_TIME(sv.time, sp, sc);
               break;
             }
+            case RAWDATATYPE: {
+              PUSH_RAWDATA(sv.rawdata, sp, sc);
+              break;
+            }
             default:
               fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
               exit(1);
@@ -826,6 +843,10 @@ Please report back to me.\n\
               PUSH_TIME(sv.time, sp, sc);
               break;
             }
+            case RAWDATATYPE: {
+              PUSH_RAWDATA(sv.rawdata, sp, sc);
+              break;
+            }
             default:
               fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
               exit(1);
@@ -905,6 +926,11 @@ Please report back to me.\n\
           *f0 = svLeft.d;
           break;
         }
+        case RAWDATATYPE: {
+          /* Interpret as text */
+          svLeft.type = TEXT;
+          svLeft.t = svLeft.rawdata->data;
+        }
         case TEXT:
         case VECTORTYPE:
         case POINTERTYPE:
@@ -925,13 +951,19 @@ Please report back to me.\n\
           *f1 = svRight.d;
           break;
         }
+        case RAWDATATYPE: {
+          /* Interpret as text */
+          svRight.type = TEXT;
+          svRight.t = svRight.rawdata->data;
+        }
         case TEXT:
         case VECTORTYPE:
-        case POINTERTYPE: 
+        case POINTERTYPE:
         case TIMETYPE:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          fprintf(stderr, "error %s.%d: Unexpected stackval_t type: %d\n",
+            ((statement_t*) stmt)->file, ((statement_t*) stmt)->line, svRight.type);
           exit(1);
           break;
       }
@@ -1677,6 +1709,12 @@ void call_func(
                 newArg = newExpr_LibFuncPtr(sv.libfunc);
                 break;
               }
+              case RAWDATATYPE: {
+                expr_t *e = newExpr_RawData(sv.rawdata->size);
+                memcpy(e->rawdata->data, sv.rawdata->data, sv.rawdata->size);
+                newArg = e;
+                break;
+              }
               case DICTTYPE: {
                 expr_t *e = ast_emalloc(sizeof(expr_t));
                 e->type = EXPR_TYPE_DICT;
@@ -2244,6 +2282,11 @@ void interpret_statements_(
           } else if ( sv.type == DICTTYPE ) {
             dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
             sv.dict = dict;
+          } else if ( sv.type == RAWDATATYPE ) {
+            expr_t *e = newExpr_RawData(sv.rawdata->size);
+            memcpy(e->rawdata->data, sv.rawdata->data, sv.rawdata->size);
+            sv.rawdata = e->rawdata;
+            free(e);
           }
 
           ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
@@ -2511,6 +2554,10 @@ void interpret_statements_(
         case TIMETYPE:
           /* Pushing the return value as an int */
           PUSH_TIME(sv.time, sp, sc);
+          break;
+        case RAWDATATYPE:
+          /* Pushing the return value as an int */
+          PUSH_RAWDATA(sv.rawdata, sp, sc);
           break;
         case VECTORTYPE:
           /* Pushing the return value as a vector */
@@ -3436,6 +3483,7 @@ int print_vector(
         info = localtime( &sv.time );
       }
       printf("%s", asctime(info));
+      break;
     }
     case POINTERTYPE:
       printf("<%" PRIuPTR ">", sv.p);
@@ -3475,6 +3523,9 @@ static void flush_arg(void *key, void *val)
   } else if ( e->type == EXPR_TYPE_DICT ) {
     hashtable_free(e->dict->hash);
     free(e->dict);
+  } else if ( e->type == EXPR_TYPE_RAWDATA ) {
+    free(e->rawdata->data);
+    free(e->rawdata);
   }
 }
 
@@ -3667,8 +3718,7 @@ void print_statements(statement_t *stmt)
 void interpret_statements(
   int argc,
   char *argv[],
-  statement_t *stmt
-)
+  statement_t *stmt)
 {
   // "CPU" registers definitions
   DEF_NEW_CONTEXT();

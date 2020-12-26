@@ -5,7 +5,7 @@ print(typeInText(s) + " (" + type(s) + ")")
 s = parseInt(s)
 print(s)
 print(typeInText(s) + " (" + type(s) + ")")
-s = "foobar åäö"
+s = "foobar"
 s = data(s)
 print(s)
 print(typeInText(s) + " (" + type(s) + ")")

@@ -19,7 +19,9 @@ def test_types_print():
 "{'a' : 1337}",
 "dictionary (8)",
 "standard-library-function-pointer (6)",
-"function-pointer (5)"
+"function-pointer (5)",
+"foobar",
+"foobar"
 ]
 
   lib_script = callSample('types.ric')

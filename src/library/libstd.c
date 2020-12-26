@@ -357,7 +357,7 @@ int ric_print(LIBRARY_PARAMS())
         printf("%c", ((char*)stv.rawdata->data)[i]);
         ++i;
       }
-      printf("\r\n");
+      printf("\n");
     }
     break;
     default: {

@@ -1,0 +1,42 @@
+#!/usr/bin/ric
+s = "1337"
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+s = parseInt(s)
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+s = "foobar åäö"
+s = data(s)
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+print(len(s))
+s = list(s)
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+print(len(s))
+s = now()
+print(typeInText(s) + " (" + type(s) + ")")
+
+;; dummy ;; {
+	@ hello () {
+		print("Dummy")
+	}
+}
+
+s = dummy()
+s::hello()
+print(typeInText(s) + " (" + type(s) + ")")
+
+s = {"a" : 1337}
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+
+s = print
+print(typeInText(s) + " (" + type(s) + ")")
+
+@ foobar () {
+	print("dummy")
+}
+
+s = foobar
+print(typeInText(s) + " (" + type(s) + ")")

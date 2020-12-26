@@ -41,24 +41,25 @@ int ric_type_text(LIBRARY_PARAMS())
   stackval_t stv;
   int dummy;
   heapval_t *hpv;
-  char *resultText = NULL;
+  size_t strSize = 100;
+  char *resultText = ast_ecalloc(strSize);
 
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
-  case INT32TYPE: resultText = "i32"; break;
-  case DOUBLETYPE: resultText = "double"; break;
-  case TEXT: resultText = "text"; break;
-  case POINTERTYPE: resultText = "pointer"; break;
-  case FUNCPTRTYPE: resultText = "function-pointer"; break;
-  case LIBFUNCPTRTYPE: resultText = "standard-library-function-pointer"; break;
-  case VECTORTYPE: resultText = "list"; break;
-  case DICTTYPE: resultText = "dictionary"; break;
-  case CLASSTYPE: resultText = "class"; break;
-  case TIMETYPE: resultText = "time"; break;
-  case RAWDATATYPE: resultText = "data"; break;
+  case INT32TYPE: snprintf(resultText, strSize, "%s", "i32"); break;
+  case DOUBLETYPE: snprintf(resultText, strSize, "%s", "double"); break;
+  case TEXT: snprintf(resultText, strSize, "%s", "text"); break;
+  case POINTERTYPE: snprintf(resultText, strSize, "%s", "pointer"); break;
+  case FUNCPTRTYPE: snprintf(resultText, strSize, "%s", "function-pointer"); break;
+  case LIBFUNCPTRTYPE: snprintf(resultText, strSize, "%s", "standard-library-function-pointer"); break;
+  case VECTORTYPE: snprintf(resultText, strSize, "%s", "list"); break;
+  case DICTTYPE: snprintf(resultText, strSize, "%s", "dictionary"); break;
+  case CLASSTYPE: snprintf(resultText, strSize, "%s", "class"); break;
+  case TIMETYPE: snprintf(resultText, strSize, "%s", "time"); break;
+  case RAWDATATYPE: snprintf(resultText, strSize, "%s", "data"); break;
   default:
-  resultText = "Unknown? Please file an error report at: " GENERAL_ERROR_ISSUE_URL;
+  snprintf(resultText, strSize, "%s%s", "Unknown? Please file an error report at: ", GENERAL_ERROR_ISSUE_URL);
   break;
   }
 
@@ -356,6 +357,7 @@ int ric_print(LIBRARY_PARAMS())
         printf("%c", ((char*)stv.rawdata->data)[i]);
         ++i;
       }
+      printf("\r\n");
     }
     break;
     default: {
@@ -475,6 +477,15 @@ int ric_printf(LIBRARY_PARAMS())
     case VECTORTYPE:
     {
       print_vector(stv.vec, EXPRESSION_ARGS());
+    }
+    break;
+    case RAWDATATYPE:
+    {
+      size_t i = 0;
+      while ( i < stv.rawdata->size ) {
+        printf("%c", ((char*)stv.rawdata->data)[i]);
+        ++i;
+      }
     }
     break;
     default: {

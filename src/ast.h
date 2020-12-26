@@ -277,6 +277,7 @@ typedef struct entity_eval {
 } entity_eval_t;
 
 void* ast_emalloc(size_t size);
+void* ast_ecalloc(size_t size);
 
 expr_t* newExpr_Text(char *text);
 expr_t* newExpr_Ival(int val);

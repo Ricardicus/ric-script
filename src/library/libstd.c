@@ -72,6 +72,172 @@ int ric_type_text(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_create_list(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *inText = NULL;
+  char *c;
+  int32_t inSize = 0;
+  rawdata_t *rawdata = NULL;
+  expr_t *vec;
+  argsList_t *vecContent = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case TEXT:
+  inText = stv.t;
+  break;
+  case INT32TYPE:
+  inSize = stv.i;
+  break;
+  case RAWDATATYPE:
+  rawdata = stv.rawdata;
+  break;
+  default:
+  fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text, int or data\n",
+    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, LIBRARY_FUNC_NAME());
+  exit(1);
+  break;
+  }
+
+  if ( inText != NULL ) {
+    c = inText;
+    while ( *c ) {
+      expr_t *e;
+      argsList_t *a;
+      char buf[2];
+
+      buf[0] = *c;
+      buf[1] = 0;
+      e = newExpr_Text(buf);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+
+      ++c;
+    }
+  } else if ( inSize > 0 ) {
+    int32_t i = 0;
+    while ( i < inSize ) {
+      expr_t *e;
+      argsList_t *a;
+
+      e = newExpr_Ival(0);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+
+      ++i;
+    }
+  } else if ( rawdata != NULL ) {
+    size_t i = 0;
+    while ( i < rawdata->size ) {
+      expr_t *e;
+      argsList_t *a;
+      int val = (int)((unsigned char*)rawdata->data)[i];
+
+      e = newExpr_Ival(val);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+
+      ++i;
+    }
+  }
+
+  vec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
+
+  return 0;
+}
+
+int ric_create_data(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *inText = NULL;
+  vector_t *vec = NULL;
+  expr_t *newRawData = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case TEXT:
+  inText = stv.t;
+  break;
+  case VECTORTYPE:
+  vec = stv.vec;
+  break;
+  default:
+  fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text or list\n",
+    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, LIBRARY_FUNC_NAME());
+  exit(1);
+  break;
+  }
+
+  if ( inText != NULL ) {
+    size_t textlen = strlen(inText);
+    newRawData = newExpr_RawData(textlen);
+
+    newRawData->rawdata->size = textlen;
+    memcpy(newRawData->rawdata->data, inText, newRawData->rawdata->size);
+  } else if ( vec != NULL ) {
+    argsList_t *content = vec->content;
+    size_t i = 0;
+    size_t contentSize = (size_t)vec->length;
+
+    newRawData = newExpr_RawData(contentSize);
+    i = 0;
+    while ( content != NULL ) {
+      /* Evaluate expression */
+      int32_t val;
+      evaluate_expression(content->arg, EXPRESSION_ARGS());
+      POP_VAL(&stv, sp, sc);
+      
+      if ( stv.type != INT32TYPE ) {
+        /* This is not ok */
+        fprintf(stderr, "error %s.%d: Cannot create data out of this list, only integer values acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      val = stv.i;
+
+      if ( val > 255 || val < 0 ) {
+        fprintf(stderr, "error %s.%d: Cannot create data out of this list, only integer values in the range [0, 255] acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      ((unsigned char*)newRawData->rawdata->data)[i] = (unsigned char) (val & ((1<<8) - 1));
+      ++i;
+      content = content->next;
+    }
+  }
+
+  stv.type = RAWDATATYPE;
+  stv.rawdata = newRawData->rawdata;  
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(newRawData);
+  /* Pushing the parsed value */
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+
+  return 0;
+}
+
+
 int ric_print(LIBRARY_PARAMS())
 {
   stackval_t stv;

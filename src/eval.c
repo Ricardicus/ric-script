@@ -619,7 +619,9 @@ Please report back to me.\n\
             stop = 1;
           } else {
             fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
-            exit(1);
+            if ( ! *interactive ) {
+              exit(1);
+            }
           }
         }
 
@@ -667,8 +669,11 @@ Please report back to me.\n\
         POP_VAL(&sv, sp, sc);
 
         if ( sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT ) {
-          fprintf(stderr, "index error: '%s' is a datatype the does not support indexing.\n", id->id.id);
-          exit(1);
+          fprintf(stderr, "%s.%d index error: '%s' is a datatype the does not support indexing.\n",
+            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, id->id.id);
+          if ( ! *interactive ) {
+            exit(1);
+          }
         }
 
         typeOfVal = sv.type;

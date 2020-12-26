@@ -40,3 +40,11 @@ print(typeInText(s) + " (" + type(s) + ")")
 
 s = foobar
 print(typeInText(s) + " (" + type(s) + ")")
+
+s = [102,111,111,98,97,114]
+s = text(s)
+print(s)
+s = [102,111,111,98,97,114]
+s = data(s)
+s = text(s)
+print(s)

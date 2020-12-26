@@ -238,6 +238,88 @@ int ric_create_data(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_create_text(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *inText = NULL;
+  vector_t *vec = NULL;
+  rawdata_t *rawData = NULL;
+  expr_t *newText = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case TEXT:
+  inText = stv.t;
+  break;
+  case VECTORTYPE:
+  vec = stv.vec;
+  break;
+  case RAWDATATYPE:
+  rawData = stv.rawdata;
+  break;
+  default:
+  fprintf(stderr, "error %s.%d: %s unexpected input argument; expected vector, data or text\n",
+    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, LIBRARY_FUNC_NAME());
+  exit(1);
+  break;
+  }
+
+  if ( inText != NULL ) {
+    newText = newExpr_Text(inText);
+  } else if ( rawData != NULL ) {
+    newText = newExpr_Text(rawData->data);
+  } else if ( vec != NULL ) {
+    argsList_t *content = vec->content;
+    size_t i = 0;
+    size_t contentSize = (size_t)vec->length;
+    char *buffer = ast_ecalloc(contentSize+1);
+
+    i = 0;
+    while ( content != NULL ) {
+      /* Evaluate expression */
+      int32_t val;
+      evaluate_expression(content->arg, EXPRESSION_ARGS());
+      POP_VAL(&stv, sp, sc);
+
+      if ( stv.type != INT32TYPE ) {
+        /* This is not ok */
+        fprintf(stderr, "error %s.%d: Cannot create text out of this list, only integer values acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      val = stv.i;
+
+      if ( val > 255 || val < 0 ) {
+        fprintf(stderr, "error %s.%d: Cannot create text out of this list, only integer values in the range [0, 255] acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      buffer[i] = (char) (val & ((1<<8) - 1));
+      ++i;
+      content = content->next;
+    }
+    newText = newExpr_Text(buffer);
+    free(buffer);
+  }
+
+  stv.type = TEXT;
+  stv.t = newText->text;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(newText);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
 
 int ric_print(LIBRARY_PARAMS())
 {

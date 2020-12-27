@@ -656,7 +656,8 @@ Please report back to me.\n\
       vector_t *vec = NULL;
       dictionary_t *dict = NULL;
       argsList_t *walk;
-      char *text;
+      char *text = NULL;
+      rawdata_t *rawdata = NULL;
       int typeOfVal = 0;
       expr_t *exp = NULL;
       expr_t *id = expr->vecIdx->id;
@@ -668,7 +669,12 @@ Please report back to me.\n\
         evaluate_expression(id, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
 
-        if ( sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT ) {
+        if (
+          sv.type != VECTORTYPE &&
+          sv.type != DICTTYPE &&
+          sv.type != TEXT &&
+          sv.type != RAWDATATYPE
+        ) {
           fprintf(stderr, "%s.%d index error: '%s' is a datatype the does not support indexing.\n",
             ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, id->id.id);
           if ( ! *interactive ) {
@@ -683,6 +689,8 @@ Please report back to me.\n\
           dict = sv.dict;
         } else if ( sv.type == TEXT ) {
           text = sv.t;
+        } else if ( sv.type == RAWDATATYPE ) {
+          rawdata = sv.rawdata;
         }
       } else {
         fprintf(stderr, "error: Invalid indexing\n");
@@ -889,6 +897,40 @@ Please report back to me.\n\
 
           ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
           PUSH_STRING(sv.t, sp, sc);
+        }
+        break;
+        case RAWDATATYPE: {
+          size_t len = 1;
+          stackval_t sv;
+          heapval_t *hvp;
+          int heapUpdated;
+          expr_t *newRawData = NULL;
+
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if ( sv.type != INT32TYPE ) {
+            fprintf(stderr, "index error: Must provide an integer as index (%d)\n", sv.type);
+            exit(1);
+          }
+
+          arrayIndex = sv.i;
+
+          if ( arrayIndex > rawdata->size ) {
+            fprintf(stderr, "index error: out of bounds\n");
+            exit(1);
+          }
+
+          newRawData = newExpr_RawData(len);
+
+          ((char*)newRawData->rawdata->data)[0] = ((char*)rawdata->data)[arrayIndex];
+          sv.type = RAWDATATYPE;
+          sv.rawdata = newRawData->rawdata;
+
+          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+          PUSH_RAWDATA(sv.rawdata, sp, sc);
+
+          free(newRawData);
         }
         break;
         default:

@@ -48,3 +48,17 @@ s = [102,111,111,98,97,114]
 s = data(s)
 s = text(s)
 print(s)
+
+s = "hejsan"
+s = s[0]
+print(s[0])
+print(typeInText(s) + " (" + type(s) + ")")
+s = data("hejsan")
+s = s[0]
+print(s[0])
+print(typeInText(s) + " (" + type(s) + ")")
+s = data("hejsan")
+print(len(s))
+print(s[0] + s[1] + s[2])
+print(typeInText(s) + " (" + type(s) + ")")
+

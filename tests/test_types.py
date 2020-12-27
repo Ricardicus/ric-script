@@ -21,7 +21,14 @@ def test_types_print():
 "standard-library-function-pointer (6)",
 "function-pointer (5)",
 "foobar",
-"foobar"
+"foobar",
+"h",
+"text (3)",
+"h",
+"data (11)",
+"6",
+"hej",
+"data (11)"
 ]
 
   lib_script = callSample('types.ric')

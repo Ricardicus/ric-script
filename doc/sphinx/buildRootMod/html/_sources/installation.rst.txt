@@ -17,6 +17,8 @@ You need `Meson <https://mesonbuild.com/index.html>`_ and `Python3 <https://www.
 
 .. code-block:: bash
 
+	git clone https://github.com/Ricardicus/ric-script
+	cd ric-script
 	# on linux or mac
 	make
 	# or, with meson:
@@ -38,6 +40,8 @@ You need to install `Meson <https://mesonbuild.com/index.html>`_ and `Python3 <h
 
 .. code-block:: bash
 
+	git clone https://github.com/Ricardicus/ric-script
+	cd ric-script
 	# on windows
 	python3 -m venv venv
 	venv\Source\activate

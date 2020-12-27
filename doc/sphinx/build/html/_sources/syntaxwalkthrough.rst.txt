@@ -114,33 +114,53 @@ declaration of a **map** and two of the **list** sort.
 Data types
 ~~~~~~~~~~
 
+To find out the type of value a variable is referencing, the functions
+**type** and **typeInText** can be used. Each type of value is associated with 
+a number, and you can also get a text representation of it.
+
 As of today the following types of data are supported:
 
-- Integers
+Integers
+########
 
 .. code-block:: bash
 
 	a = 1337
 	print(a)
+	print(typeInText(a) + " (" + type(a) + ")")
 
-**output**: 1337
+**output**:
 
-- Floats
+.. code-block:: bash
+
+	1337
+	i32 (1)
+
+Floats
+######
 
 .. code-block:: bash
 
 	a = 1337.0
 	print(a)
+	print(typeInText(a) + " (" + type(a) + ")")
 
-**output**: 1337.000000
+**output**:
 
-- Strings
+.. code-block:: bash
+
+	1337.000000
+	double (2)
+
+Strings
+#######
 
 .. code-block:: bash
 
 	a = "Hello world!"
 	print(a)
 	a = 'Hello world!'
+	print(typeInText(a) + " (" + type(a) + ")")
 
 **output**:
 
@@ -148,8 +168,10 @@ As of today the following types of data are supported:
 
 	Hello world!
 	Hello world!
+	text (3)
 
-- Function pointers
+Function pointers
+#################
 
 .. code-block:: bash
 
@@ -160,16 +182,26 @@ As of today the following types of data are supported:
 	}
 
 	hej(print, "hejsan")
+	print(typeInText(hej) + " (" + type(hej) + ")")
 
-**output**: hejsan
+**output**:
 
-- Dictionary
+.. code-block::
+
+	hejsan
+	function-pointer (5)
+
+Dictionary
+##########
+
+A dictionary maps a string to any type of references.
 
 .. code-block:: bash
 
 	d = {"a" : "b", "c" : "d", "1337" : 1337}
 
 	print(d)
+	print(typeInText(d) + " (" + type(d) + ")")
 	print(d["a"])
 	print(d["c"])
 	print(d["1337"] - 1 + 1)
@@ -211,6 +243,7 @@ As of today the following types of data are supported:
 .. code-block:: bash
 
 	{'a' : 'b', '1337' : 1337, 'c' : 'd'}
+	dictionary (8)
 	b
 	d
 	1337
@@ -222,13 +255,18 @@ As of today the following types of data are supported:
 	e
 	foobar
 
-- List
+List
+####
+
+The list data type is implemented as a linked list
+and can hold any type of expressions.
 
 .. code-block:: bash
 
 	s = ["hej", 1337, "hejsan"]
 
 	print(s)
+	print(typeInText(s) + " (" + type(s) + ")")
 
 	print(s[0])
 	print(s[1])
@@ -305,6 +343,7 @@ As of today the following types of data are supported:
 .. code-block:: bash
 
 	['hej',1337,'hejsan']
+	list (7)
 	hej
 	1337
 	hejsan
@@ -331,7 +370,36 @@ As of today the following types of data are supported:
 	foo
 	bar
 
-- Class pointer
+Raw data
+########
+
+Raw data is a list with values that fit into 8 bits.
+This list is implemented as an array in C, and not like
+a linked list like the 'list' datastructure. 
+It can be constructed using strings or lists, and if it is
+printed, it will be printed like it contains chars.
+
+.. code-block:: bash
+
+	s = [102,111,111,98,97,114]
+	s = data(s)
+
+	print(typeInText(s) + " (" + type(s) + ")")
+	print(s[0])
+	print(len(s))
+	print(s)
+
+**outputs**:
+
+.. code-block:: bash
+
+	data (11)
+	102
+	6
+	foobar
+
+Class pointer
+#############
 
 .. code-block:: bash
 
@@ -353,6 +421,7 @@ As of today the following types of data are supported:
 	}
 
 	print(hej)
+	print(typeInText(hej) + " (" + type(hej) + ")")
 
 	s = hej()
 	print(s)
@@ -368,6 +437,7 @@ As of today the following types of data are supported:
 .. code-block:: bash
 
 	<Class: 'hej'>
+	class (9)
 	hello
 	my member 'a' has value: 1337
 	Now 'a' is: 1338

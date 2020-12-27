@@ -900,11 +900,7 @@ Please report back to me.\n\
         }
         break;
         case RAWDATATYPE: {
-          size_t len = 1;
           stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          expr_t *newRawData = NULL;
 
           evaluate_expression(index, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
@@ -921,16 +917,10 @@ Please report back to me.\n\
             exit(1);
           }
 
-          newRawData = newExpr_RawData(len);
+          sv.type = INT32TYPE;
+          sv.i = ((unsigned char*)rawdata->data)[arrayIndex];
 
-          ((char*)newRawData->rawdata->data)[0] = ((char*)rawdata->data)[arrayIndex];
-          sv.type = RAWDATATYPE;
-          sv.rawdata = newRawData->rawdata;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-          PUSH_RAWDATA(sv.rawdata, sp, sc);
-
-          free(newRawData);
+          PUSH_INT(sv.i, sp, sc);
         }
         break;
         default:

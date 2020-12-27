@@ -4,6 +4,7 @@ int ric_atoi(LIBRARY_PARAMS())
 {
   stackval_t stv;
   char *string = NULL;
+  rawdata_t *rawdata = NULL;
   int result = 0;
 
   POP_VAL(&stv, sp, sc);
@@ -12,15 +13,22 @@ int ric_atoi(LIBRARY_PARAMS())
     case TEXT:
     string = stv.t;
     break;
+    case RAWDATATYPE:
+    rawdata = stv.rawdata;
+    break;
     default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
         LIBRARY_FUNC_NAME());
       exit(1);
     }
     break;
   }
 
-  result = atoi(string);
+  if ( string != NULL ) {
+    result = atoi(string);
+  } else if ( rawdata != NULL ) {
+    result = (int)((unsigned char*) rawdata->data)[0];
+  }
   
   /* Pushing the parsed value */
   PUSH_INT(result, sp, sc);

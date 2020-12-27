@@ -24,11 +24,11 @@ def test_types_print():
 "foobar",
 "h",
 "text (3)",
-"h",
-"data (11)",
+"104",
+"i32 (1)",
 "6",
 "hej",
-"data (11)"
+"text (3)"
 ]
 
   lib_script = callSample('types.ric')

@@ -21,7 +21,7 @@ Not sure what target there will be (if so).
 The samples folder contains ric scripts with OK syntax I 
 will also provide some samples here in the README further below.
 
-<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is also some more documentation I am working on!</a>
+<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">See here for more documentation</a>
 
 # Build
 

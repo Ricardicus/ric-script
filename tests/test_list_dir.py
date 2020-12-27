@@ -5,6 +5,7 @@ def test_directory_print():
 
   output_lines = [
 "load_nt.ric",
+"types.ric",
 "demo.ric",
 "forever_and_ever.ric",
 "gcd.ric",

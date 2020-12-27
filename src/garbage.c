@@ -101,6 +101,9 @@ static void sweep (
         } else if ( heap[i].sv.type == DICTTYPE ) {
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(heap[i].sv.dict);
+        } else if ( heap[i].sv.type == RAWDATATYPE ) {
+          free(heap[i].sv.rawdata->data);
+          free(heap[i].sv.rawdata);
         } else if ( heap[i].sv.type == CLASSTYPE ) {
           if ( ((heapval_t*) hp)[i].sv.classObj->initialized ) {
             hashtable_free(((heapval_t*) hp)[i].sv.classObj->varMembers);
@@ -146,6 +149,9 @@ void free_heap(void *hp, void *hbp) {
         } else if ( ((heapval_t*) hp)[i].sv.type == DICTTYPE ) {
           hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
           free(((heapval_t*) hp)[i].sv.dict);
+        } else if ( ((heapval_t*) hp)[i].sv.type == RAWDATATYPE ) {
+          free(((heapval_t*) hp)[i].sv.rawdata->data);
+          free(((heapval_t*) hp)[i].sv.rawdata);
         } else if ( ((heapval_t*) hp)[i].sv.type == CLASSTYPE ) {
           /* References to initialized classes are unique */
           if ( ((heapval_t*) hp)[i].sv.classObj != NULL ) {

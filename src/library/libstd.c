@@ -23,6 +23,304 @@ int ric_exit(LIBRARY_PARAMS())
   return 1;
 }
 
+int ric_type(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int result = 0;
+
+  POP_VAL(&stv, sp, sc);
+
+  result = stv.type;
+
+  PUSH_INT(result, sp, sc);
+  return 0;
+}
+
+int ric_type_text(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  size_t strSize = 100;
+  char *resultText = ast_ecalloc(strSize);
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case INT32TYPE: snprintf(resultText, strSize, "%s", "i32"); break;
+  case DOUBLETYPE: snprintf(resultText, strSize, "%s", "double"); break;
+  case TEXT: snprintf(resultText, strSize, "%s", "text"); break;
+  case POINTERTYPE: snprintf(resultText, strSize, "%s", "pointer"); break;
+  case FUNCPTRTYPE: snprintf(resultText, strSize, "%s", "function-pointer"); break;
+  case LIBFUNCPTRTYPE: snprintf(resultText, strSize, "%s", "standard-library-function-pointer"); break;
+  case VECTORTYPE: snprintf(resultText, strSize, "%s", "list"); break;
+  case DICTTYPE: snprintf(resultText, strSize, "%s", "dictionary"); break;
+  case CLASSTYPE: snprintf(resultText, strSize, "%s", "class"); break;
+  case TIMETYPE: snprintf(resultText, strSize, "%s", "time"); break;
+  case RAWDATATYPE: snprintf(resultText, strSize, "%s", "data"); break;
+  default:
+  snprintf(resultText, strSize, "%s%s", "Unknown? Please file an error report at: ", GENERAL_ERROR_ISSUE_URL);
+  break;
+  }
+
+  stv.type = TEXT;
+  stv.t = resultText;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
+int ric_create_list(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *inText = NULL;
+  char *c;
+  int32_t inSize = 0;
+  rawdata_t *rawdata = NULL;
+  expr_t *vec;
+  argsList_t *vecContent = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case TEXT:
+  inText = stv.t;
+  break;
+  case INT32TYPE:
+  inSize = stv.i;
+  break;
+  case RAWDATATYPE:
+  rawdata = stv.rawdata;
+  break;
+  default:
+  fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text, int or data\n",
+    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, LIBRARY_FUNC_NAME());
+  exit(1);
+  break;
+  }
+
+  if ( inText != NULL ) {
+    c = inText;
+    while ( *c ) {
+      expr_t *e;
+      argsList_t *a;
+      char buf[2];
+
+      buf[0] = *c;
+      buf[1] = 0;
+      e = newExpr_Text(buf);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+
+      ++c;
+    }
+  } else if ( inSize > 0 ) {
+    int32_t i = 0;
+    while ( i < inSize ) {
+      expr_t *e;
+      argsList_t *a;
+
+      e = newExpr_Ival(0);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+
+      ++i;
+    }
+  } else if ( rawdata != NULL ) {
+    size_t i = 0;
+    while ( i < rawdata->size ) {
+      expr_t *e;
+      argsList_t *a;
+      int val = (int)((unsigned char*)rawdata->data)[i];
+
+      e = newExpr_Ival(val);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+
+      ++i;
+    }
+  }
+
+  vec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
+
+  return 0;
+}
+
+int ric_create_data(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *inText = NULL;
+  vector_t *vec = NULL;
+  expr_t *newRawData = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case TEXT:
+  inText = stv.t;
+  break;
+  case VECTORTYPE:
+  vec = stv.vec;
+  break;
+  default:
+  fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text or list\n",
+    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, LIBRARY_FUNC_NAME());
+  exit(1);
+  break;
+  }
+
+  if ( inText != NULL ) {
+    size_t textlen = strlen(inText);
+    newRawData = newExpr_RawData(textlen);
+
+    newRawData->rawdata->size = textlen;
+    memcpy(newRawData->rawdata->data, inText, newRawData->rawdata->size);
+  } else if ( vec != NULL ) {
+    argsList_t *content = vec->content;
+    size_t i = 0;
+    size_t contentSize = (size_t)vec->length;
+
+    newRawData = newExpr_RawData(contentSize);
+    i = 0;
+    while ( content != NULL ) {
+      /* Evaluate expression */
+      int32_t val;
+      evaluate_expression(content->arg, EXPRESSION_ARGS());
+      POP_VAL(&stv, sp, sc);
+      
+      if ( stv.type != INT32TYPE ) {
+        /* This is not ok */
+        fprintf(stderr, "error %s.%d: Cannot create data out of this list, only integer values acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      val = stv.i;
+
+      if ( val > 255 || val < 0 ) {
+        fprintf(stderr, "error %s.%d: Cannot create data out of this list, only integer values in the range [0, 255] acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      ((unsigned char*)newRawData->rawdata->data)[i] = (unsigned char) (val & ((1<<8) - 1));
+      ++i;
+      content = content->next;
+    }
+  }
+
+  stv.type = RAWDATATYPE;
+  stv.rawdata = newRawData->rawdata;  
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(newRawData);
+  /* Pushing the parsed value */
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+
+  return 0;
+}
+
+int ric_create_text(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  char *inText = NULL;
+  vector_t *vec = NULL;
+  rawdata_t *rawData = NULL;
+  expr_t *newText = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+  case TEXT:
+  inText = stv.t;
+  break;
+  case VECTORTYPE:
+  vec = stv.vec;
+  break;
+  case RAWDATATYPE:
+  rawData = stv.rawdata;
+  break;
+  default:
+  fprintf(stderr, "error %s.%d: %s unexpected input argument; expected vector, data or text\n",
+    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, LIBRARY_FUNC_NAME());
+  exit(1);
+  break;
+  }
+
+  if ( inText != NULL ) {
+    newText = newExpr_Text(inText);
+  } else if ( rawData != NULL ) {
+    newText = newExpr_Text(rawData->data);
+  } else if ( vec != NULL ) {
+    argsList_t *content = vec->content;
+    size_t i = 0;
+    size_t contentSize = (size_t)vec->length;
+    char *buffer = ast_ecalloc(contentSize+1);
+
+    i = 0;
+    while ( content != NULL ) {
+      /* Evaluate expression */
+      int32_t val;
+      evaluate_expression(content->arg, EXPRESSION_ARGS());
+      POP_VAL(&stv, sp, sc);
+
+      if ( stv.type != INT32TYPE ) {
+        /* This is not ok */
+        fprintf(stderr, "error %s.%d: Cannot create text out of this list, only integer values acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      val = stv.i;
+
+      if ( val > 255 || val < 0 ) {
+        fprintf(stderr, "error %s.%d: Cannot create text out of this list, only integer values in the range [0, 255] acceptable\n",
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
+      }
+
+      buffer[i] = (char) (val & ((1<<8) - 1));
+      ++i;
+      content = content->next;
+    }
+    newText = newExpr_Text(buffer);
+    free(buffer);
+  }
+
+  stv.type = TEXT;
+  stv.t = newText->text;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(newText);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
 int ric_print(LIBRARY_PARAMS())
 {
   stackval_t stv;
@@ -131,6 +429,16 @@ int ric_print(LIBRARY_PARAMS())
     case VECTORTYPE:
     {
       print_vector(stv.vec, EXPRESSION_ARGS());
+      printf("\n");
+    }
+    break;
+    case RAWDATATYPE:
+    {
+      size_t i = 0;
+      while ( i < stv.rawdata->size ) {
+        printf("%c", ((char*)stv.rawdata->data)[i]);
+        ++i;
+      }
       printf("\n");
     }
     break;
@@ -251,6 +559,15 @@ int ric_printf(LIBRARY_PARAMS())
     case VECTORTYPE:
     {
       print_vector(stv.vec, EXPRESSION_ARGS());
+    }
+    break;
+    case RAWDATATYPE:
+    {
+      size_t i = 0;
+      while ( i < stv.rawdata->size ) {
+        printf("%c", ((char*)stv.rawdata->data)[i]);
+        ++i;
+      }
     }
     break;
     default: {
@@ -468,6 +785,7 @@ int ric_len(LIBRARY_PARAMS())
   stackval_t stv;
   vector_t *argVec = NULL;
   char *argText = NULL;
+  rawdata_t *rawdata = NULL;
   int32_t result = 0;
 
   // Pop arg1
@@ -479,6 +797,9 @@ int ric_len(LIBRARY_PARAMS())
     break;
     case TEXT:
     argText = stv.t;
+    break;
+    case RAWDATATYPE:
+    rawdata = stv.rawdata;
     break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
@@ -492,6 +813,8 @@ int ric_len(LIBRARY_PARAMS())
     result = argVec->length;
   } else if ( argText != NULL ) {
     result = (int32_t) strlen(argText);
+  } else if ( rawdata != NULL ) {
+    result = rawdata->size;
   } else {
     /* The switch above should have taken care avout this */
     return 1;

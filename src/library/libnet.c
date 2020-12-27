@@ -130,9 +130,10 @@ int ric_read_socket(LIBRARY_PARAMS()) {
   stackval_t stv;
   heapval_t *hpv;
   int socket;
-  char *t;
+  expr_t *e;
   int dummy;
-  size_t maxReadSize = 1024;
+  ssize_t readBytes = 0;
+  size_t maxReadSize;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
 
@@ -149,21 +150,37 @@ int ric_read_socket(LIBRARY_PARAMS()) {
     break;
   }
 
-  t = calloc(maxReadSize, 1);
-  if ( t == NULL ) {
-    fprintf(stderr, "error: function '%s' allocate enough memory.\n",
-      LIBRARY_FUNC_NAME());
-    return 1;
+  /* Read second argument, how much to read */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    maxReadSize = (size_t) stv.i;
+    break;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
   }
 
-  read(socket, t, maxReadSize);
+  e = newExpr_RawData(maxReadSize);
 
-  stv.type = TEXT;
-  stv.t = t;
+  readBytes = read(socket, e->rawdata->data, maxReadSize);
+
+  if ( readBytes != maxReadSize ) {
+    e->rawdata->size = readBytes;
+  }
+
+  stv.type = RAWDATATYPE;
+  stv.rawdata = e->rawdata;
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
   /* Pushing the parsed value */
-  PUSH_STRING(stv.t, sp, sc);
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+  free(e);
 
   return 0;
 }
@@ -171,8 +188,9 @@ int ric_read_socket(LIBRARY_PARAMS()) {
 int ric_write_socket(LIBRARY_PARAMS()) {
   stackval_t stv;
   int32_t socket;
-  int32_t ret;
-  char *t;
+  int32_t ret = -1;
+  char *t = NULL;
+  rawdata_t *rawdata = NULL;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
 
@@ -196,6 +214,8 @@ int ric_write_socket(LIBRARY_PARAMS()) {
     case TEXT:
     t = stv.t;
     break;
+    case RAWDATATYPE:
+    rawdata = stv.rawdata;
     break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
@@ -205,7 +225,11 @@ int ric_write_socket(LIBRARY_PARAMS()) {
     break;
   }
 
-  ret = write(socket, t, strlen(t));
+  if ( t != NULL ) {
+    ret = write(socket, t, strlen(t));
+  } else if ( rawdata != NULL ) {
+    ret = write(socket, rawdata->data, rawdata->size);
+  }
 
   /* Pushing result */
   PUSH_INT(ret, sp, sc);

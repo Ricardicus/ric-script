@@ -1,0 +1,64 @@
+#!/usr/bin/ric
+s = "1337"
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+s = parseInt(s)
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+s = "foobar"
+s = data(s)
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+print(len(s))
+s = list(s)
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+print(len(s))
+s = now()
+print(typeInText(s) + " (" + type(s) + ")")
+
+;; dummy ;; {
+	@ hello () {
+		print("Dummy")
+	}
+}
+
+s = dummy()
+s::hello()
+print(typeInText(s) + " (" + type(s) + ")")
+
+s = {"a" : 1337}
+print(s)
+print(typeInText(s) + " (" + type(s) + ")")
+
+s = print
+print(typeInText(s) + " (" + type(s) + ")")
+
+@ foobar () {
+	print("dummy")
+}
+
+s = foobar
+print(typeInText(s) + " (" + type(s) + ")")
+
+s = [102,111,111,98,97,114]
+s = text(s)
+print(s)
+s = [102,111,111,98,97,114]
+s = data(s)
+s = text(s)
+print(s)
+
+s = "hejsan"
+s = s[0]
+print(s[0])
+print(typeInText(s) + " (" + type(s) + ")")
+s = data("hejsan")
+s = s[0]
+print(s[0])
+print(typeInText(s) + " (" + type(s) + ")")
+s = data("hejsan")
+print(len(s))
+print(s[0] + s[1] + s[2])
+print(typeInText(s) + " (" + type(s) + ")")
+

@@ -23,6 +23,11 @@ int ric_contains(LIBRARY_PARAMS());
 int ric_keys(LIBRARY_PARAMS());
 int ric_is_defined(LIBRARY_PARAMS());
 int ric_help(LIBRARY_PARAMS());
+int ric_type(LIBRARY_PARAMS());
+int ric_type_text(LIBRARY_PARAMS());
+int ric_create_list(LIBRARY_PARAMS());
+int ric_create_data(LIBRARY_PARAMS());
+int ric_create_text(LIBRARY_PARAMS());
 
 #endif
 

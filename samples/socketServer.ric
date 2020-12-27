@@ -3,6 +3,8 @@
 # socket interface in ric script.
 # This is an echo-server.
 
+reads = 10
+
 @ usage () {
   print("usage: " + args[0] + " " + args[1] + " port")
   exit(1) 
@@ -18,15 +20,18 @@ s = socketServer(args[2])
   exit(1)
 }
 
-. [ 1 ] {
+i = 0
+. [ i < reads ] {
   t = socketAccept(s)
   ? [ t > 0 ] {
-    in = socketRead(t)
-    print("received: " + in)
+    in = socketRead(t, 50)
+    print("read " + len(in) + " bytes: " + in)
     socketWrite(t, in)
     socketClose(t)
   }
+  i = i + 1
   @
 }
 
 socketClose(s)
+

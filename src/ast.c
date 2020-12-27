@@ -16,6 +16,18 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
+void *ast_ecalloc(size_t size) {
+  char *p = (char *)calloc(size, 1);
+  if (p == NULL) {
+    fprintf(stderr,
+            "%s %s error: Failed to build AST, malloc failed (%zu bytes)\n",
+            __FILE__, __func__, size);
+    exit(EXIT_FAILURE);
+  }
+  return (void *)p;
+}
+
+
 expr_t* newExpr_Time(time_t time) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   expr->type = EXPR_TYPE_TIME;
@@ -152,6 +164,19 @@ expr_t *newExpr_Float(double val) {
 
   expr->type = EXPR_TYPE_FVAL;
   expr->fval = val;
+
+  return expr;
+}
+
+expr_t* newExpr_RawData(size_t size) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  rawdata_t *rawdata = ast_emalloc(sizeof(rawdata_t));
+
+  rawdata->data = ast_ecalloc(size+1);
+  rawdata->size = size;
+
+  expr->type = EXPR_TYPE_RAWDATA;
+  expr->rawdata = rawdata;
 
   return expr;
 }

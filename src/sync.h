@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "ast.h"
+
 #define RICSCRIPT_MAX_THREADS 100
 
 void *createContext();

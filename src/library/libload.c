@@ -19,6 +19,8 @@ int ric_load(LIBRARY_PARAMS())
   statement_t *mainRoot = NULL;
   statement_t *importedFuncDecs = NULL;
   statement_t *importedFuncDecsStart = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Read arg1, the name of the script
   POP_VAL(&stv, sp, sc);

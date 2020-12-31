@@ -6,6 +6,8 @@ int ric_atoi(LIBRARY_PARAMS())
   char *string = NULL;
   rawdata_t *rawdata = NULL;
   int result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -48,6 +50,9 @@ int ric_split(LIBRARY_PARAMS())
   char *c;
   heapval_t *hpv;
   int dummy;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   // pop arg 1 - string to split
   POP_VAL(&stv, sp, sc);
@@ -129,6 +134,8 @@ int ric_char_code(LIBRARY_PARAMS())
   stackval_t stv;
   char *string = NULL;
   int result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 

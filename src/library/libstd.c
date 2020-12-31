@@ -4,6 +4,8 @@ int ric_exit(LIBRARY_PARAMS())
 {
   stackval_t stv;
   int exitCode = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -27,6 +29,8 @@ int ric_type(LIBRARY_PARAMS())
 {
   stackval_t stv;
   int result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -42,7 +46,10 @@ int ric_type_text(LIBRARY_PARAMS())
   int dummy;
   heapval_t *hpv;
   size_t strSize = 100;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   char *resultText = ast_ecalloc(strSize);
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
 
@@ -84,6 +91,9 @@ int ric_create_list(LIBRARY_PARAMS())
   rawdata_t *rawdata = NULL;
   expr_t *vec;
   argsList_t *vecContent = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Read argument */
   POP_VAL(&stv, sp, sc);
@@ -168,6 +178,9 @@ int ric_create_data(LIBRARY_PARAMS())
   char *inText = NULL;
   vector_t *vec = NULL;
   expr_t *newRawData = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Read argument */
   POP_VAL(&stv, sp, sc);
@@ -247,6 +260,9 @@ int ric_create_text(LIBRARY_PARAMS())
   vector_t *vec = NULL;
   rawdata_t *rawData = NULL;
   expr_t *newText = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Read argument */
   POP_VAL(&stv, sp, sc);
@@ -324,6 +340,8 @@ int ric_create_text(LIBRARY_PARAMS())
 int ric_print(LIBRARY_PARAMS())
 {
   stackval_t stv;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -456,6 +474,8 @@ int ric_print(LIBRARY_PARAMS())
 int ric_printf(LIBRARY_PARAMS())
 {
   stackval_t stv;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -589,6 +609,8 @@ int ric_append(LIBRARY_PARAMS())
   expr_t *entry = NULL;
   argsList_t *addition = NULL;
   argsList_t *walk;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   /* Get vector reference */
   POP_VAL(&stv, sp, sc);
@@ -666,6 +688,8 @@ int ric_contains(LIBRARY_PARAMS())
   int32_t containInt = 0;
   int32_t result = 0;
   int searchForInt = 0;  // Lazy, search for int or text.
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -787,6 +811,8 @@ int ric_len(LIBRARY_PARAMS())
   char *argText = NULL;
   rawdata_t *rawdata = NULL;
   int32_t result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -835,6 +861,9 @@ int ric_keys(LIBRARY_PARAMS())
   int32_t result = 0;
   heapval_t *hpv = NULL;
   int dummy;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -895,6 +924,8 @@ int ric_is_defined(LIBRARY_PARAMS())
   stackval_t stv;
   int32_t result;
   char *arg1 = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -925,6 +956,8 @@ int ric_help(LIBRARY_PARAMS())
 {
   int32_t result = 0;
   int walk = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   printf("These are the functions I know:\nfunction-name ( number-of-arguments)\n");
 

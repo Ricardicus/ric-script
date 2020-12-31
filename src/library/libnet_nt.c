@@ -38,6 +38,9 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
   struct addrinfo *result = NULL;
   struct addrinfo hints;
   char portToUse[20];
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Read first argument, port number */
   POP_VAL(&stv, sp, sc);
@@ -129,6 +132,8 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
   struct timeval timeout;
   struct fd_set fds;
   int selectRet;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
@@ -196,6 +201,9 @@ int ric_read_socket(LIBRARY_PARAMS()) {
   int dummy;
   int ret;
   size_t maxReadSize = 1024;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
 
@@ -263,6 +271,8 @@ int ric_write_socket(LIBRARY_PARAMS()) {
   int32_t socket;
   int32_t ret;
   char *t;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
 
@@ -307,6 +317,8 @@ int ric_close_socket(LIBRARY_PARAMS()) {
   stackval_t stv;
   int socket;
   int32_t ret;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
 
@@ -345,6 +357,8 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
   struct hostent *he;
   struct in_addr **addr_list;
   int i;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   /* Read first argument, host address */
   POP_VAL(&stv, sp, sc);

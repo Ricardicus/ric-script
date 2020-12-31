@@ -16,6 +16,7 @@
 #include "libos.h"
 #include "libtime.h"
 #include "libnet.h"
+#include "libctx.h"
 
 #ifndef NO_XATTR
 #include "libxattr.h"

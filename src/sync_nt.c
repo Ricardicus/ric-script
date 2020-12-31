@@ -12,6 +12,11 @@ typedef struct ricSyncCtx {
   int threadIndex;
 } ricSyncCtx_t;
 
+DWORD WINAPI initiateRicCall(void* ctx) {
+
+  return 0;
+}
+
 void *createContext() {
   int i;
   ricSyncCtx_t *ctx = calloc(1, sizeof(ricSyncCtx_t));

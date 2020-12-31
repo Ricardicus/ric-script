@@ -7,6 +7,7 @@
 #include "hashtable.h"
 #include "garbage.h"
 #include "lib.h"
+#include "sync.h"
 
 #define JMP_CODE_INITIAL     0
 #define JMP_CODE_CONTINUE    1

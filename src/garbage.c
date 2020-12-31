@@ -31,6 +31,7 @@ static void mark (
   int i = 0;
   int hashSize = varDecs->size;
   struct key_val_pair *ptr;
+  locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
 
   if ( varLocals != NULL ) {
     /* Mark local variables */
@@ -80,6 +81,7 @@ static void sweep (
   uint32_t markVal,
   EXPRESSION_PARAMS()) {
   int i = 0;
+  void *hp = PROVIDE_CONTEXT()->hp;
   int32_t size = (*(heapval_t*)hp).sv.i;
   heapval_t *heap = (heapval_t*)hp;
 

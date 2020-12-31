@@ -121,6 +121,7 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
 int evaluate_condition(ifCondition_t *cond,
   EXPRESSION_PARAMS())
 {
+  UNPACK_CONTEXT();
   /* Will set ax either 1 or 0 (or interrupt the program on error) */
   stackval_t svLeft;
   stackval_t svRight;
@@ -396,6 +397,7 @@ void free_vector(vector_t *vec) {
 expr_t*  copy_vector(
   vector_t *vec,
   EXPRESSION_PARAMS()) {
+  UNPACK_CONTEXT();
   // The idea is to create a new vector based on
   // a raw one, where all identifiers have been replaced
   // with their actual value
@@ -473,6 +475,7 @@ void evaluate_expression(
   expr_t *expr,
   EXPRESSION_PARAMS())
 {
+  UNPACK_CONTEXT();
   if ( expr == NULL )
     return;
 
@@ -1520,6 +1523,7 @@ int evaluate_id_valid(
   char *id,
   EXPRESSION_PARAMS())
 {
+  UNPACK_CONTEXT();
   heapval_t *hv = NULL;
   /* Check if this ID is among the arguments */
   argsList_t *walk = args;
@@ -1583,6 +1587,7 @@ void call_func(
   functionCallContainer_t *func,
   EXPRESSION_PARAMS())
 {
+  UNPACK_CONTEXT();
   functionDef_t *funcDef = NULL;
   functionCall_t *funcCall = NULL;
   classFunctionCall_t *classCall = NULL;
@@ -1643,7 +1648,7 @@ void call_func(
       /* Find the constructor hook and run it if so */
       constructor = hashtable_get(class->funcDefs, funcID);
       if ( constructor != NULL ) {
-        classCtx = class;
+        exeCtx->classCtx = class;
         /* Moving along, interpreting function */
         int localsStackSp = varLocals->sp;
         int localsStackSb = varLocals->sb;
@@ -2228,6 +2233,7 @@ void interpret_statements_(
   hashtable_t *argVals
 )
 {
+  UNPACK_CONTEXT();
   entity_eval_t *eval;
   void *next = NULL;
   ctx_table_t *ctx = ast_emalloc(sizeof(ctx_table_t));
@@ -3083,6 +3089,7 @@ void print_expr(expr_t *expr)
 }
 
 void initClass(class_t *cls, EXPRESSION_PARAMS()) {
+  UNPACK_CONTEXT();
   statement_t *initWalk = cls->defines;
 
   /* Sanity check */
@@ -3394,6 +3401,7 @@ void print_indents(int indent) {
 
 int print_dictionary(dictionary_t *dict,
   EXPRESSION_PARAMS()) {
+  UNPACK_CONTEXT();
   hashtable_t *hash = dict->hash;
   int size = hash->size;
   int i = 0;
@@ -3489,6 +3497,7 @@ int print_vector(
   vector_t *vec,
   EXPRESSION_PARAMS())
 {
+  UNPACK_CONTEXT();
   argsList_t *walk = vec->content;
   
   printf("[");
@@ -3790,8 +3799,14 @@ void interpret_statements(
   /* Set class context to NULL */
   classCtx = NULL;
 
+  /* Set thread synchronization context */
+  syncCtx = createContext();
+
   /* Set starting depth */
   depth = 0;
+
+  /* Assigning the execution context super structure */
+  ASSIGN_CONTEXT(exeCtx);
 
   if ( setjmp(endingJmpBuf) == JMP_CODE_INITIAL ) {
     /* Start descending and evaluating the AST */
@@ -3861,6 +3876,9 @@ void interpret_statements_interactive(
 
     /* Flag that setup has been done already */
     firstCall = 0;
+
+    /* Assigning the execution context super structure */
+    ASSIGN_CONTEXT(exeCtx);
   }
 
   if ( stmt != NULL ) {
@@ -4096,6 +4114,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
 }
 
 dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
+  UNPACK_CONTEXT();
   dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
   newDict->hash = hashtable_new(
     DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);

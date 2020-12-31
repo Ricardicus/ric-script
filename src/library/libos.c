@@ -10,6 +10,8 @@ int ric_sleep(LIBRARY_PARAMS())
 {
   stackval_t stv;
   int32_t sleepTime = 0;  // Sleep time is seconds
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -39,6 +41,8 @@ int ric_is_directory(LIBRARY_PARAMS())
   char *string = NULL;
   int result = 0;
   struct stat path_stat;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -118,6 +122,8 @@ int ric_rm(LIBRARY_PARAMS())
   char *file = NULL;
   int result = 0;
   struct stat path_stat;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -157,7 +163,9 @@ int ric_ls(LIBRARY_PARAMS())
   heapval_t *hpv;
   int dummy;
   char *argText;
-
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
   // pop arg 1 - directory to search in
   POP_VAL(&stv, sp, sc);
 
@@ -202,6 +210,8 @@ int ric_cd(LIBRARY_PARAMS())
   stackval_t stv;
   char *argText;
   int result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // pop arg 1 - directory to search in
   POP_VAL(&stv, sp, sc);
@@ -231,6 +241,8 @@ int ric_is_file(LIBRARY_PARAMS())
   char *filename = NULL;
   struct stat path_stat;
   int result;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -263,6 +275,8 @@ int ric_mkdir(LIBRARY_PARAMS())
   stackval_t stv;
   int32_t result;
   char *dir = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -375,6 +389,9 @@ int ric_find_files(LIBRARY_PARAMS()) {
   expr_t *vec;
   argsList_t *vecContent = NULL;
   char *rootDir = ".";
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);

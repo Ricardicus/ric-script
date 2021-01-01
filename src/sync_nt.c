@@ -32,7 +32,6 @@ DWORD WINAPI initiateRicCall(void* ctx) {
   newCtx.varLocals = ast_emalloc(sizeof(locals_stack_t));
   newCtx.varLocals->sp = 0;
   newCtx.varLocals->sb = 0;
-  newCtx.depth = 1;
   getContext(ctx);
   func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
@@ -44,7 +43,7 @@ DWORD WINAPI initiateRicCall(void* ctx) {
   free(newCtx.varLocals);
 
   // Free stack
-  FREE_STACK(newCtx.sp, newCtx.sb);
+  FREE_STACK(sp, sb);
 
   return 0;
 }

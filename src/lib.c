@@ -83,8 +83,8 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("find", 1, ric_find_files),
   DECLARE_LIB_FUNCTION("cd", 1, ric_cd),
   // libctx
-  DECLARE_LIB_FUNCTION("setTimeout", 3, ric_set_timeout),
-  DECLARE_LIB_FUNCTION("setInterval", 3, ric_set_interval),
+  DECLARE_LIB_FUNCTION("setTimeout", 2, ric_set_timeout),
+  DECLARE_LIB_FUNCTION("setInterval", 2, ric_set_interval),
   // libnet
   DECLARE_LIB_FUNCTION("socketServer", 1, ric_setup_server_socket),
   DECLARE_LIB_FUNCTION("socketAccept", 1, ric_socket_accept_incoming_connection),

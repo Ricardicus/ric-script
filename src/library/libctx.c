@@ -9,7 +9,7 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
-  /* Read first argument, port number */
+  /* Read first argument, function definiton */
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
@@ -24,7 +24,7 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
     break;
   }
 
-  /* Read second argument, port number */
+  /* Read second argument, timeout */
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
@@ -39,8 +39,15 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
     break;
   }
 
+  /* TODO: Add timeout feature here, the delaying of execution in a separate thread */
+
+  /* Launching the function in another thread */
+  createThread(PROVIDE_CONTEXT()->syncCtx, func, 0, PROVIDE_CONTEXT());
+
+  PUSH_INT(0, sp, sc);
 }
 
 int ric_set_interval(LIBRARY_PARAMS()) {
 
+  return 0;
 }

@@ -478,13 +478,15 @@ void evaluate_expression(
   UNPACK_CONTEXT();
   if ( expr == NULL )
     return;
-
+  printf("%s expr->type: %d\n", __func__, expr->type);
   switch (expr->type) 
   {
     case EXPR_TYPE_ID:
     {
       heapval_t *hv = NULL;
       int stop = 0;
+
+      printf("%s expr->id.id: %s\n", __func__, expr->id.id);
 
       /* Check if this ID is among the arguments */
       argsList_t *walk = args;
@@ -618,7 +620,9 @@ Please report back to me.\n\
           libFunction_t *libFunc = look_up_lib(expr->id.id);
 
           if ( libFunc != NULL ) {
+            printf("Pushing libfuncptr...\n");
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
+            printf("Pushed!\n");
             stop = 1;
           } else {
             fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
@@ -3815,6 +3819,9 @@ void interpret_statements(
     // Close namespaces
     close_namespaces();
 
+    // Free thread context
+    freeContext(syncCtx);
+
     // free locals
     free(varLocals);
 
@@ -3877,6 +3884,9 @@ void interpret_statements_interactive(
     /* Flag that setup has been done already */
     firstCall = 0;
 
+    /* Set thread synchronization context */
+    syncCtx = createContext();
+
     /* Assigning the execution context super structure */
     ASSIGN_CONTEXT(exeCtx);
   }
@@ -3918,6 +3928,9 @@ void interpret_statements_interactive(
       // Close namespaces
       close_namespaces();
 
+      // free thread context
+      freeContext(syncCtx);
+
       // free locals
       free(varLocals);
 
@@ -3938,6 +3951,9 @@ void interpret_statements_interactive(
   if ( teardown != 0 ) {
     // Close namespaces
     close_namespaces();
+
+    // free thread context
+    freeContext(syncCtx);
 
     // free locals
     free(varLocals);

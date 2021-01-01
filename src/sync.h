@@ -10,7 +10,7 @@
 void *createContext();
 void getContext(void *ctx);
 void releaseContext(void *ctx);
-void createThread(void *ctx, void *func, size_t stacksize);
+void createThread(void *ctx, void *func, size_t stacksize, void *arg);
 void freeContext(void *ctx);
 
 #endif

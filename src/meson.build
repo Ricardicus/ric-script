@@ -25,6 +25,10 @@ deps = []
 
 links = []
 
+# Multithreading
+thread_dep = dependency('threads')
+deps += [thread_dep]
+
 if ( target_os == 'windows' )
 	# Make lex not use unistd
   ric_c_args += ['-DYY_NO_UNISTD_H']
@@ -46,7 +50,7 @@ if ( target_os == 'windows' )
 else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
 	mathlib = cc.find_library('m', required: true)
-	deps = [mathlib]
+	deps += [mathlib]
 
   # Silence some warnings
   ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function']

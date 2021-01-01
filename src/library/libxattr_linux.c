@@ -16,6 +16,7 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
   ssize_t ret;
   heapval_t *hpv;
   int dummy;
+  void *hp = PROVIDE_CONTEXT()->hp;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -154,6 +155,7 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
   int dummy;
   char *resultValue = NULL;
   size_t valueMaxLen = 256;
+  void *hp = PROVIDE_CONTEXT()->hp;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -263,8 +265,6 @@ static void DirectoryWalkAndMatchXattrKey(const char *name,
   size_t offset = 0;
   char *buffer;
   size_t bufferSize = 1024;
-  void *sp = PROVIDE_CONTEXT()->sp;
-  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   buffer = calloc(bufferSize, 1);
   if ( buffer == NULL ) {
@@ -332,6 +332,7 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
   int dummy;
   int maxDepth = 20;
   char *rootDir = ".";
+  void *hp = PROVIDE_CONTEXT()->hp;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 

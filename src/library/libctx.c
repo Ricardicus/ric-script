@@ -40,11 +40,14 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
   }
 
   /* TODO: Add timeout feature here, the delaying of execution in a separate thread */
+  (void)timeout;
 
   /* Launching the function in another thread */
   createThread(PROVIDE_CONTEXT()->syncCtx, func, 0, PROVIDE_CONTEXT());
 
   PUSH_INT(0, sp, sc);
+
+  return 0;
 }
 
 int ric_set_interval(LIBRARY_PARAMS()) {

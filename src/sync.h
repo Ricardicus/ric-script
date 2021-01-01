@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "ast.h"
+#include "eval.h"
 
 #define RICSCRIPT_MAX_THREADS 100
 

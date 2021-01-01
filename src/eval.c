@@ -121,7 +121,11 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
 int evaluate_condition(ifCondition_t *cond,
   EXPRESSION_PARAMS())
 {
-  UNPACK_CONTEXT();
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  int32_t *ax = PROVIDE_CONTEXT()->ax;
+  double *f0 = PROVIDE_CONTEXT()->f0;
+  double *f1 = PROVIDE_CONTEXT()->f1;
   /* Will set ax either 1 or 0 (or interrupt the program on error) */
   stackval_t svLeft;
   stackval_t svRight;
@@ -397,7 +401,8 @@ void free_vector(vector_t *vec) {
 expr_t*  copy_vector(
   vector_t *vec,
   EXPRESSION_PARAMS()) {
-  UNPACK_CONTEXT();
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *sp = PROVIDE_CONTEXT()->sp;
   // The idea is to create a new vector based on
   // a raw one, where all identifiers have been replaced
   // with their actual value
@@ -475,18 +480,25 @@ void evaluate_expression(
   expr_t *expr,
   EXPRESSION_PARAMS())
 {
-  UNPACK_CONTEXT();
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  class_t *classCtx = PROVIDE_CONTEXT()->classCtx;
+  locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
+  int *interactive = PROVIDE_CONTEXT()->interactive;
+  double *f0 = PROVIDE_CONTEXT()->f0;
+  double *f1 = PROVIDE_CONTEXT()->f1;
+  int32_t *r0 = PROVIDE_CONTEXT()->r0;
+  int32_t *r1 = PROVIDE_CONTEXT()->r1;
+  int32_t *ax = PROVIDE_CONTEXT()->ax;
   if ( expr == NULL )
     return;
-  printf("%s expr->type: %d\n", __func__, expr->type);
   switch (expr->type) 
   {
     case EXPR_TYPE_ID:
     {
       heapval_t *hv = NULL;
       int stop = 0;
-
-      printf("%s expr->id.id: %s\n", __func__, expr->id.id);
 
       /* Check if this ID is among the arguments */
       argsList_t *walk = args;
@@ -620,9 +632,7 @@ Please report back to me.\n\
           libFunction_t *libFunc = look_up_lib(expr->id.id);
 
           if ( libFunc != NULL ) {
-            printf("Pushing libfuncptr...\n");
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
-            printf("Pushed!\n");
             stop = 1;
           } else {
             fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
@@ -1527,7 +1537,7 @@ int evaluate_id_valid(
   char *id,
   EXPRESSION_PARAMS())
 {
-  UNPACK_CONTEXT();
+  locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
   heapval_t *hv = NULL;
   /* Check if this ID is among the arguments */
   argsList_t *walk = args;
@@ -1591,7 +1601,11 @@ void call_func(
   functionCallContainer_t *func,
   EXPRESSION_PARAMS())
 {
-  UNPACK_CONTEXT();
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
+  int *depth = PROVIDE_CONTEXT()->depth;
+  class_t *classCtx = PROVIDE_CONTEXT()->classCtx;
   functionDef_t *funcDef = NULL;
   functionCall_t *funcCall = NULL;
   classFunctionCall_t *classCall = NULL;
@@ -2237,7 +2251,13 @@ void interpret_statements_(
   hashtable_t *argVals
 )
 {
-  UNPACK_CONTEXT();
+  locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  class_t *classCtx = PROVIDE_CONTEXT()->classCtx;
+  int *interactive = PROVIDE_CONTEXT()->interactive;
+  int32_t *ax = PROVIDE_CONTEXT()->ax;
   entity_eval_t *eval;
   void *next = NULL;
   ctx_table_t *ctx = ast_emalloc(sizeof(ctx_table_t));
@@ -3093,7 +3113,9 @@ void print_expr(expr_t *expr)
 }
 
 void initClass(class_t *cls, EXPRESSION_PARAMS()) {
-  UNPACK_CONTEXT();
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  void *hp = PROVIDE_CONTEXT()->hp;
   statement_t *initWalk = cls->defines;
 
   /* Sanity check */
@@ -3405,7 +3427,6 @@ void print_indents(int indent) {
 
 int print_dictionary(dictionary_t *dict,
   EXPRESSION_PARAMS()) {
-  UNPACK_CONTEXT();
   hashtable_t *hash = dict->hash;
   int size = hash->size;
   int i = 0;
@@ -3501,7 +3522,8 @@ int print_vector(
   vector_t *vec,
   EXPRESSION_PARAMS())
 {
-  UNPACK_CONTEXT();
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   argsList_t *walk = vec->content;
   
   printf("[");
@@ -4130,7 +4152,9 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
 }
 
 dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
-  UNPACK_CONTEXT();
+  void *hp = PROVIDE_CONTEXT()->hp;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
   newDict->hash = hashtable_new(
     DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);

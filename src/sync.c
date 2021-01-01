@@ -46,7 +46,7 @@ void* initiateRicCall(void* ctx) {
   free(newCtx.varLocals);
 
   // Free stack
-  FREE_STACK(newCtx.sp, newCtx.sb);
+  FREE_STACK(sp, sb);
 
   return NULL;
 }
@@ -56,20 +56,20 @@ void *createContext() {
   ricSyncCtx_t *ctx = calloc(1, sizeof(ricSyncCtx_t));
 
   if ( ctx == NULL ) {
-  	return NULL;
+    return NULL;
   }
 
   i = 0;
   while ( i < RICSCRIPT_MAX_THREADS ) {
-  	ctx->threadTaken[i] = false;
-  	++i;
+    ctx->threadTaken[i] = false;
+    ++i;
   }
 
   ctx->threadIndex = 0;
 
   if (pthread_mutex_init(&ctx->mutex, NULL) != 0) { 
-  	free(ctx);
-  	return NULL;
+    free(ctx);
+    return NULL;
   }
 
   return ctx;
@@ -114,8 +114,7 @@ void createThread(void *ctx, void *func, size_t stacksize, void *arg) {
   getContext(ctx);
   ricCtx->threadFuncs[ricCtx->threadIndex] = func;
   pthread_create(&(ricCtx->threads[ricCtx->threadIndex]), 
-    NULL, 
-    &initiateRicCall, arg); 
+    NULL, &initiateRicCall, arg);
   releaseContext(ctx);
 }
 

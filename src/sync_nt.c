@@ -128,7 +128,7 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
   PulseEvent(ricCtx->event);
 
   Sleep((unsigned int)timeout * 1000);
-  while ( 1 ) {
+  while (1) {
     time_t endTime;
 
     /* Current time */

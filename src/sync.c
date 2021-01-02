@@ -134,7 +134,7 @@ void* initiateRicCallInterval(void* ctx) {
 
   (void)sleep((unsigned int)timeout);
 
-  while ( 1 ) {
+  while (1) {
     time_t endTime;
 
     /* Current time */

@@ -19,6 +19,7 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   context_full_t newCtx = *((context_full_t*)ctx);
   ricSyncCtx_t *ricCtx = ((context_full_t*)ctx)->syncCtx;
   functionDef_t *func;
+  int thisThreadID;
   size_t sc;
   void *sp;
   void *sb;
@@ -31,6 +32,10 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   newCtx.sp = &sp;
   newCtx.sb = &sb;
 
+  if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
+    WaitForSingleObject(ricSyncCtx->threads[ricCtx->threadIndex], INFINITE);
+  }
+
   // Setup a set of locals 
   newCtx.varLocals = ast_emalloc(sizeof(locals_stack_t));
   newCtx.varLocals->sp = 0;
@@ -39,6 +44,7 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
   timeout = ricCtx->time[ricCtx->threadIndex];
+  thisThreadID = ricCtx->threadIndex;
   ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
   releaseContext(ctx);
 
@@ -56,6 +62,8 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   // Free stack
   FREE_STACK(sp, sb);
 
+  ricCtx->threadTaken[thisThreadID] = false;
+
   return 0;
 }
 
@@ -63,6 +71,7 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
   context_full_t newCtx = *((context_full_t*)ctx);
   ricSyncCtx_t *ricCtx = ((context_full_t*)ctx)->syncCtx;
   functionDef_t *func;
+  int thisThreadID;
   stackval_t stv;
   size_t sc;
   void *sp;
@@ -81,9 +90,15 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
   newCtx.varLocals = ast_emalloc(sizeof(locals_stack_t));
   newCtx.varLocals->sp = 0;
   newCtx.varLocals->sb = 0;
+
+  if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
+    WaitForSingleObject(ricSyncCtx->threads[ricCtx->threadIndex], INFINITE);
+  }
+
   getContext(ctx);
   func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
   timeout = ricCtx->time[ricCtx->threadIndex];
+  thisThreadID = ricCtx->threadIndex;
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
   ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
   releaseContext(ctx);
@@ -122,6 +137,8 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
 
   // Free stack
   FREE_STACK(sp, sb);
+
+  ricCtx->threadTaken[thisThreadID] = false;
 
   return 0;
 }
@@ -246,6 +263,16 @@ void freeContext(void *ctx) {
 
   if ( ctx == NULL )
     return;
+
+  /* Wait for all threads to finish */
+  i = 0;
+  while ( i < RICSCRIPT_MAX_THREADS ) {
+    if ( ricCtx->threadTaken[i] == true ) {
+      WaitForSingleObject(ricSyncCtx->threads[i], INFINITE);
+    }
+    ++i;
+  }
+
 
   ricCtx = (ricSyncCtx_t*)ctx;
   CloseHandle(ricCtx->mutex);

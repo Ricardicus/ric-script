@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h> 
+#include <errno.h>
 
 #include "sync.h"
 
@@ -23,6 +24,7 @@ typedef struct ricSyncCtx {
 void* initiateRicCallTimeout(void* ctx) {
   context_full_t newCtx = *((context_full_t*)ctx);
   ricSyncCtx_t *ricCtx = ((context_full_t*)ctx)->syncCtx;
+  int thisThreadIndex = 0;
   functionDef_t *func;
   int timeout;
   size_t sc;
@@ -44,6 +46,7 @@ void* initiateRicCallTimeout(void* ctx) {
   func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
   timeout = ricCtx->times[ricCtx->threadIndex];
+  thisThreadIndex = ricCtx->threadIndex;
   ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
   ricCtx->eventVal = 1;
   releaseContext(ricCtx);
@@ -61,6 +64,8 @@ void* initiateRicCallTimeout(void* ctx) {
   // Free stack
   FREE_STACK(sp, sb);
 
+  ricCtx->threadTaken[thisThreadIndex] = false;
+
   return NULL;
 }
 
@@ -69,6 +74,7 @@ void* initiateRicCallInterval(void* ctx) {
   ricSyncCtx_t *ricCtx = ((context_full_t*)ctx)->syncCtx;
   functionDef_t *func;
   stackval_t stv;
+  int thisThreadIndex = 0;
   int timeout;
   time_t startTime;
   size_t sc;
@@ -90,6 +96,7 @@ void* initiateRicCallInterval(void* ctx) {
   func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
   timeout = ricCtx->times[ricCtx->threadIndex];
+  thisThreadIndex = ricCtx->threadIndex;
   ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
   ricCtx->eventVal = 1;
   releaseContext(ricCtx);
@@ -124,13 +131,13 @@ void* initiateRicCallInterval(void* ctx) {
     }
   }
 
-  interpret_statements_(func->body, &newCtx, NULL, NULL);
-
   // free locals
   free(newCtx.varLocals);
 
   // Free stack
   FREE_STACK(sp, sb);
+
+  ricCtx->threadTaken[thisThreadIndex] = false;
 
   return NULL;
 }
@@ -197,7 +204,7 @@ void createThreadTimeout(void *ctx, void *func, size_t stacksize, void *arg, int
 
   ricCtx = (ricSyncCtx_t*)ctx;
 
-  if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
+  if ( ricCtx->threadTaken[ricCtx->threadIndex] == true ) {
   	// Waiting for the thread to finish
   	pthread_join(ricCtx->threads[ricCtx->threadIndex], NULL);
   }
@@ -223,7 +230,7 @@ void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, in
 
   ricCtx = (ricSyncCtx_t*)ctx;
 
-  if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
+  if ( ricCtx->threadTaken[ricCtx->threadIndex] == true ) {
     // Waiting for the thread to finish
     pthread_join(ricCtx->threads[ricCtx->threadIndex], NULL);
   }
@@ -242,11 +249,41 @@ void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, in
 
 void freeContext(void *ctx) {
   ricSyncCtx_t *ricCtx;
+  int i;
 
   if ( ctx == NULL )
   	return;
 
   ricCtx = (ricSyncCtx_t*)ctx;
+
+  /* Wait for all threads to finish */
+  i = 0;
+  while ( i < RICSCRIPT_MAX_THREADS ) {
+    if ( ricCtx->threadTaken[i] == true ) {
+      errno = 0;
+      if ( pthread_join(ricCtx->threads[i], NULL) != 0 ) {
+        int errorType = errno;
+        switch (errorType) {
+        case EDEADLK:
+          fprintf(stderr, "error: A deadlock was detected (e.g., two threads tried to join with each other); or thread specifies the calling thread.\n");
+          break;
+        case EINVAL:
+          fprintf(stderr, "error: Thread is not a joinable thread.\n");
+          fprintf(stderr, "       Another thread is already waiting to join with this thread.\n");
+          break;
+        case ESRCH:
+          fprintf(stderr, "error: No thread with the ID thread could be found.\n");
+          break;
+        default:
+          fprintf(stderr, "error: Other error on join %d\n", errorType);
+        break;
+        }
+      }
+    }
+    ++i;
+  }
+
+  close(ricCtx->event);
   pthread_mutex_destroy(&ricCtx->mutex); 
   free(ricCtx);
 }

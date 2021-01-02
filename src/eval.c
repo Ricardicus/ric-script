@@ -3838,11 +3838,11 @@ void interpret_statements(
     /* Start descending and evaluating the AST */
     interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
   } else {
-    // Close namespaces
-    close_namespaces();
-
     // Free thread context
     freeContext(syncCtx);
+
+    // Close namespaces
+    close_namespaces();
 
     // free locals
     free(varLocals);
@@ -3947,11 +3947,11 @@ void interpret_statements_interactive(
       interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
       break;
     case JMP_CODE_TEARDOWN:
-      // Close namespaces
-      close_namespaces();
-
       // free thread context
       freeContext(syncCtx);
+
+      // Close namespaces
+      close_namespaces();
 
       // free locals
       free(varLocals);
@@ -3971,11 +3971,11 @@ void interpret_statements_interactive(
   }
 
   if ( teardown != 0 ) {
-    // Close namespaces
-    close_namespaces();
-
     // free thread context
     freeContext(syncCtx);
+    
+    // Close namespaces
+    close_namespaces();
 
     // free locals
     free(varLocals);

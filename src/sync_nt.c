@@ -33,7 +33,7 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   newCtx.sb = &sb;
 
   if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
-    WaitForSingleObject(ricSyncCtx->threads[ricCtx->threadIndex], INFINITE);
+    WaitForSingleObject(ricCtx->threads[ricCtx->threadIndex], INFINITE);
   }
 
   // Setup a set of locals 
@@ -260,6 +260,7 @@ void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, in
 
 void freeContext(void *ctx) {
   ricSyncCtx_t *ricCtx;
+  int i;
 
   if ( ctx == NULL )
     return;

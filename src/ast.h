@@ -659,6 +659,8 @@ GENERAL_ERROR_ISSUE_URL);\
 *sc = *sc - 1;\
 } while (0)
 
+extern void getContext(void*);
+
 #define ALLOC_HEAP(a, hp, hpv, upd) do { \
 int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\

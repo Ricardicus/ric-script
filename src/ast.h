@@ -663,6 +663,7 @@ GENERAL_ERROR_ISSUE_URL);\
 int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\
 heapval_t hv;\
+getContext(PROVIDE_CONTEXT()->syncCtx);\
 if ( upd != NULL ) {\
   *(int*)upd = 1;\
 }\
@@ -686,7 +687,39 @@ while ( i < size ) {\
 if ( i == size ) {\
 	fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
 	exit(1);\
-} } while (0);
+}\
+releaseContext(PROVIDE_CONTEXT()->syncCtx);\
+} while (0);
+
+#define ALLOC_HEAP_UNSAFE(a, hp, hpv, upd) do { \
+int32_t size = (*(heapval_t*)hp).sv.i;\
+int32_t i = 0;\
+heapval_t hv;\
+if ( upd != NULL ) {\
+  *(int*)upd = 1;\
+}\
+hv.sv = *a;\
+if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || \
+     hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ||\
+     hv.sv.type == RAWDATATYPE ) {\
+  hv.toFree = true;\
+} else {\
+  hv.toFree = false;\
+}\
+hv.occupied = true;\
+while ( i < size ) {\
+  if ( !((heapval_t*) hp)[i].occupied ) {\
+    ((heapval_t*) hp)[i] = hv;\
+    *hpv = &((heapval_t*) hp)[i];\
+    break;\
+  }\
+  ++i;\
+}\
+if ( i == size ) {\
+  fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
+  exit(1);\
+}\
+} while (0);
 
 #define FREE_STACK(sp, spb) do { \
 free(spb);\

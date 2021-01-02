@@ -4145,7 +4145,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   sv.vec = args->vec;
   free(args);
 
-  ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+  ALLOC_HEAP_UNSAFE(&sv, hp, &hvp, &heapUpdated);
 
   /* Placing variable declaration in global variable namespace */
   hashtable_put(varDecs, argumentListName, hvp);

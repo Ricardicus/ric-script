@@ -92,7 +92,7 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
   newCtx.varLocals->sb = 0;
 
   if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
-    WaitForSingleObject(ricSyncCtx->threads[ricCtx->threadIndex], INFINITE);
+    WaitForSingleObject(ricCtx->threads[ricCtx->threadIndex], INFINITE);
   }
 
   getContext(ctx);
@@ -269,7 +269,7 @@ void freeContext(void *ctx) {
   i = 0;
   while ( i < RICSCRIPT_MAX_THREADS ) {
     if ( ricCtx->threadTaken[i] == true ) {
-      WaitForSingleObject(ricSyncCtx->threads[i], INFINITE);
+      WaitForSingleObject(ricCtx->threads[i], INFINITE);
     }
     ++i;
   }

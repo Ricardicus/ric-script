@@ -23,16 +23,20 @@ uint32_t generate_mark_value()
   return r;
 }
 
-static void mark (
+void mark (
   hashtable_t *varDecs,
   uint32_t markVal,
   EXPRESSION_PARAMS()) {
   char *variableIDS[RIC_MAX_NBR_VARS];
   int argCount = 0;
   int i = 0;
-  int hashSize = varDecs->size;
+  int hashSize = 0;
   struct key_val_pair *ptr;
   locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
+
+  if ( varDecs != NULL ) {
+    hashSize = varDecs->size;
+  }
 
   if ( varLocals != NULL ) {
     /* Mark local variables */
@@ -131,6 +135,8 @@ void mark_and_sweep (
   getContext(PROVIDE_CONTEXT()->syncCtx);
   /* Generate mark value */
   markVal = generate_mark_value();
+  /* Safeguard local variables in threads */
+  markContext(PROVIDE_CONTEXT()->syncCtx, markVal);
   /* Mark objects to keep */
   mark(varDecs, markVal, EXPRESSION_ARGS());
   /* Sweep the rest */

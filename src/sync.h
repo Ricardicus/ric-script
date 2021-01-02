@@ -14,5 +14,6 @@ void releaseContext(void *ctx);
 void createThreadTimeout(void *ctx, void *func, size_t stacksize, void *arg, int time);
 void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, int time);
 void freeContext(void *ctx);
+void markContext(void *ctx, uint32_t markval);
 
 #endif

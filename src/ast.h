@@ -659,7 +659,9 @@ GENERAL_ERROR_ISSUE_URL);\
 *sc = *sc - 1;\
 } while (0)
 
+/* Imported from sync.c */
 extern void getContext(void*);
+extern void releaseContext(void*);
 
 #define ALLOC_HEAP(a, hp, hpv, upd) do { \
 int32_t size = (*(heapval_t*)hp).sv.i;\

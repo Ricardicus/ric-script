@@ -9,6 +9,7 @@ def test_directory_print():
 "demo.ric",
 "forever_and_ever.ric",
 "gcd.ric",
+"threads.ric",
 "dictionary.ric",
 "folder",
 "time_of_day.ric",

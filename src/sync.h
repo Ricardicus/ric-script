@@ -11,7 +11,8 @@
 void *createContext();
 void getContext(void *ctx);
 void releaseContext(void *ctx);
-void createThread(void *ctx, void *func, size_t stacksize, void *arg);
+void createThreadTimeout(void *ctx, void *func, size_t stacksize, void *arg, int time);
+void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, int time);
 void freeContext(void *ctx);
 
 #endif

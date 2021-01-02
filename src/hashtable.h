@@ -26,7 +26,7 @@ typedef struct hash {
   int key_also;
 	float load;
 	entry_t ** table;
-	void (*put)(struct hash*,char*,void *);
+	void (*put)(struct hash*,void*,char*,void *);
 } hashtable_t;
 
 // Make sure it outputs its name on recieving the "NAME" command

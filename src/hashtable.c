@@ -56,7 +56,7 @@ void hashtable_rehash(hashtable_t * hashtable)
 	while (i<size_old) {
 		struct key_val_pair * ptr = hashtable->table[i];
 		while (ptr!=NULL) {
-			newhash->put(newhash,ptr->key,ptr->data);
+			newhash->put(newhash,NULL,ptr->key,ptr->data);
 			ptr = ptr->next;
 		}
 		i++;
@@ -122,7 +122,7 @@ void hashtable_put(hashtable_t * hashtable, void *ctx, char * key, void * val)
 	max_load_level = (float) hashtable->size * hashtable->load;
 	if(load_level > max_load_level) {
 		hashtable_rehash(hashtable);
-		hashtable->put(hashtable,key,val);
+		hashtable->put(hashtable,NULL,key,val);
 		releaseContext(ctx);
 		return;
 	} 

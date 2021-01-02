@@ -113,10 +113,10 @@ well as haven't implemented:
 - [x] Better error reporting (always include at least line number)
 - [x] Socket interface
 - [x] Support for at least swedish UTF-8 characters å, ä and ö. 
+- [x] Threading interface
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).
-- [ ] Threading interface
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
 I will be using **javascript syntax highlighting** for the examples provided below, for the sake of making it look pretty

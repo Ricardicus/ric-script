@@ -4,6 +4,7 @@
 
 #include "garbage.h"
 #include "eval.h"
+#include "sync.h"
 
 uint32_t generate_mark_value()
 {
@@ -65,7 +66,7 @@ static void mark (
   /* Mark all variables in the heap */
   i = 0;
   while ( i < argCount ) {
-    heapval_t *hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, variableIDS[i]);
+    heapval_t *hv = hashtable_get(varDecs, NULL, variableIDS[i]);
     hv->mark = markVal;
 
     if ( hv->sv.type == DICTTYPE ) {
@@ -126,12 +127,15 @@ void mark_and_sweep (
   hashtable_t *varDecs,
   EXPRESSION_PARAMS()) {
   uint32_t markVal;
+  /* Rest assure, you are doing this safely */
+  getContext(PROVIDE_CONTEXT()->syncCtx);
   /* Generate mark value */
   markVal = generate_mark_value();
   /* Mark objects to keep */
   mark(varDecs, markVal, EXPRESSION_ARGS());
   /* Sweep the rest */
   sweep(markVal, EXPRESSION_ARGS());
+  releaseContext(PROVIDE_CONTEXT()->syncCtx);
 }
 
 void free_heap(void *hp, void *hbp) {

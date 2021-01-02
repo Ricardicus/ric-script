@@ -4,6 +4,7 @@
 
 #include "garbage.h"
 #include "eval.h"
+#include "sync.h"
 
 uint32_t generate_mark_value()
 {
@@ -22,15 +23,20 @@ uint32_t generate_mark_value()
   return r;
 }
 
-static void mark (
+void mark (
   hashtable_t *varDecs,
   uint32_t markVal,
   EXPRESSION_PARAMS()) {
   char *variableIDS[RIC_MAX_NBR_VARS];
   int argCount = 0;
   int i = 0;
-  int hashSize = varDecs->size;
+  int hashSize = 0;
   struct key_val_pair *ptr;
+  locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
+
+  if ( varDecs != NULL ) {
+    hashSize = varDecs->size;
+  }
 
   if ( varLocals != NULL ) {
     /* Mark local variables */
@@ -64,7 +70,7 @@ static void mark (
   /* Mark all variables in the heap */
   i = 0;
   while ( i < argCount ) {
-    heapval_t *hv = hashtable_get(varDecs, variableIDS[i]);
+    heapval_t *hv = hashtable_get(varDecs, NULL, variableIDS[i]);
     hv->mark = markVal;
 
     if ( hv->sv.type == DICTTYPE ) {
@@ -80,6 +86,7 @@ static void sweep (
   uint32_t markVal,
   EXPRESSION_PARAMS()) {
   int i = 0;
+  void *hp = PROVIDE_CONTEXT()->hp;
   int32_t size = (*(heapval_t*)hp).sv.i;
   heapval_t *heap = (heapval_t*)hp;
 
@@ -124,12 +131,17 @@ void mark_and_sweep (
   hashtable_t *varDecs,
   EXPRESSION_PARAMS()) {
   uint32_t markVal;
+  /* Rest assure, you are doing this safely */
+  getContext(PROVIDE_CONTEXT()->syncCtx);
   /* Generate mark value */
   markVal = generate_mark_value();
+  /* Safeguard local variables in threads */
+  markContext(PROVIDE_CONTEXT()->syncCtx, markVal);
   /* Mark objects to keep */
   mark(varDecs, markVal, EXPRESSION_ARGS());
   /* Sweep the rest */
   sweep(markVal, EXPRESSION_ARGS());
+  releaseContext(PROVIDE_CONTEXT()->syncCtx);
 }
 
 void free_heap(void *hp, void *hbp) {

@@ -16,6 +16,9 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
   ssize_t ret;
   heapval_t *hpv;
   int dummy;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // pop arg 1 - path to file
   POP_VAL(&stv, sp, sc);
@@ -74,6 +77,8 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
   char *arg2;
   char *arg3;
   int32_t result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // pop arg 1 - path to file
   POP_VAL(&stv, sp, sc);
@@ -150,6 +155,9 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
   int dummy;
   char *resultValue = NULL;
   size_t valueMaxLen = 256;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // pop arg 1 - path to file
   POP_VAL(&stv, sp, sc);
@@ -205,6 +213,8 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
   char *arg1;
   char *arg2;
   int32_t result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // pop arg 1 - path to file
   POP_VAL(&stv, sp, sc);
@@ -322,6 +332,9 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
   int dummy;
   int maxDepth = 20;
   char *rootDir = ".";
+  void *hp = PROVIDE_CONTEXT()->hp;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // pop arg 1 - key-pattern
   POP_VAL(&stv, sp, sc);

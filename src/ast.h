@@ -370,23 +370,73 @@ typedef struct locals_stack {
   int sb;
 } locals_stack_t;
 
-#define DEF_NEW_CONTEXT() int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; \
-size_t sc; int depth; locals_stack_t *varLocals; int interactive; class_t *classCtx;
-#define DEF_NEW_CONTEXT_STATIC() static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
+/* Context provider/container structure */
+typedef struct context_full_t {
+  int32_t *r0;
+  int32_t *r1;
+  int32_t *r2;
+  int32_t *ax;
+  double *f0;
+  double *f1;
+  double *f2;
+  void *sp;
+  void *sb;
+  void *hp;
+  void *hb;
+  void **st;
+  void **ed;
+  size_t *sc;
+  int *depth;
+  locals_stack_t *varLocals;
+  int *interactive;
+  class_t *classCtx;
+  void *syncCtx;
+} context_full_t;
+
+#define DEF_NEW_CONTEXT() context_full_t exeCtx; int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; \
+size_t sc; int depth; locals_stack_t *varLocals; int interactive; class_t *classCtx; void *syncCtx;
+#define DEF_NEW_CONTEXT_STATIC() static context_full_t exeCtx; static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
 static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals; static int interactive; \
-static class_t *classCtx;
-#define PROVIDE_CONTEXT_INIT() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive, classCtx
-#define PROVIDE_CONTEXT() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, classCtx
-#define ASSIGN_CONTEXT() (context_full_t) { *r0, *r1, *r2, *ax, *f0, *f1, *f2, *(void**)sp, *(void**)sb, hp, hb, *(void**)st,\
-*(void**)ed, *sc, *depth, varLocals, *interactive, classCtx }
-#define PROVIDE_CONTEXT_ARGS() int32_t *r0, int32_t *r1, int32_t *r2, \
+static class_t *classCtx; static void *syncCtx;
+
+#define PROVIDE_CONTEXT_INIT() &exeCtx
+#define PROVIDE_CONTEXT() exeCtx
+
+#define PROVIDE_CONTEXT_INIT_MEMBERS() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive, classCtx, syncCtx
+#define PROVIDE_CONTEXT_MEMBERS() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, classCtx, syncCtx
+
+#define ASSIGN_CONTEXT(ctx) ctx = (context_full_t) {PROVIDE_CONTEXT_INIT_MEMBERS()}
+
+#define PROVIDE_CONTEXT_ARGS() context_full_t* exeCtx
+#define UNPACK_CONTEXT() int32_t *r0 = PROVIDE_CONTEXT()->r0;\
+int32_t *r1 = PROVIDE_CONTEXT()->r1;\
+int32_t *r2 = PROVIDE_CONTEXT()->r2;\
+int32_t *ax = PROVIDE_CONTEXT()->ax;\
+double *f0 = PROVIDE_CONTEXT()->f0;\
+double *f1 = PROVIDE_CONTEXT()->f1;\
+double *f2 = PROVIDE_CONTEXT()->f2;\
+void *sp = PROVIDE_CONTEXT()->sp;\
+void *sb = PROVIDE_CONTEXT()->sb;\
+void *hp = PROVIDE_CONTEXT()->hp;\
+void *hb = PROVIDE_CONTEXT()->hb;\
+void **st = PROVIDE_CONTEXT()->st;\
+void **ed = PROVIDE_CONTEXT()->ed;\
+size_t *sc = PROVIDE_CONTEXT()->sc;\
+int *depth = PROVIDE_CONTEXT()->depth;\
+locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;\
+int *interactive = PROVIDE_CONTEXT()->interactive;\
+class_t *classCtx = PROVIDE_CONTEXT()->classCtx;\
+void *syncCtx = PROVIDE_CONTEXT()->syncCtx;
+
+#define PROVIDE_CONTEXT_ARGS_OLD() int32_t *r0, int32_t *r1, int32_t *r2, \
 int32_t *ax, double *f0, double *f1, double *f2, void *sp, void *sb, \
 void *hp, void *hb, void **st, void **ed, size_t *sc, int *depth, locals_stack_t *varLocals, \
-int *interactive, class_t *classCtx
+int *interactive, class_t *classCtx, void *syncCtx
 #define EXPRESSION_PARAMS() void *stmt, void *next, \
 PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define EXPRESSION_ARGS() stmt, next, PROVIDE_CONTEXT(), args, argVals
 #define LIBRARY_PARAMS() char *func_name, EXPRESSION_PARAMS()
+#define LIBRARY_INIT() UNPACK_CONTEXT()
 #define LIBRARY_FUNC_NAME() func_name
 
 typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
@@ -609,10 +659,15 @@ GENERAL_ERROR_ISSUE_URL);\
 *sc = *sc - 1;\
 } while (0)
 
+/* Imported from sync.c */
+extern void getContext(void*);
+extern void releaseContext(void*);
+
 #define ALLOC_HEAP(a, hp, hpv, upd) do { \
 int32_t size = (*(heapval_t*)hp).sv.i;\
 int32_t i = 0;\
 heapval_t hv;\
+getContext(PROVIDE_CONTEXT()->syncCtx);\
 if ( upd != NULL ) {\
   *(int*)upd = 1;\
 }\
@@ -636,18 +691,45 @@ while ( i < size ) {\
 if ( i == size ) {\
 	fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
 	exit(1);\
-} } while (0);
+}\
+releaseContext(PROVIDE_CONTEXT()->syncCtx);\
+} while (0);
+
+#define ALLOC_HEAP_UNSAFE(a, hp, hpv, upd) do { \
+int32_t size = (*(heapval_t*)hp).sv.i;\
+int32_t i = 0;\
+heapval_t hv;\
+if ( upd != NULL ) {\
+  *(int*)upd = 1;\
+}\
+hv.sv = *a;\
+if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || \
+     hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ||\
+     hv.sv.type == RAWDATATYPE ) {\
+  hv.toFree = true;\
+} else {\
+  hv.toFree = false;\
+}\
+hv.occupied = true;\
+while ( i < size ) {\
+  if ( !((heapval_t*) hp)[i].occupied ) {\
+    ((heapval_t*) hp)[i] = hv;\
+    *hpv = &((heapval_t*) hp)[i];\
+    break;\
+  }\
+  ++i;\
+}\
+if ( i == size ) {\
+  fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
+  exit(1);\
+}\
+} while (0);
 
 #define FREE_STACK(sp, spb) do { \
 free(spb);\
 } while (0);
 
 void free_ast(statement_t *stmt);
-
-
-typedef struct context_full_t {
-DEF_NEW_CONTEXT()
-} context_full_t;
 
 #define PRINT_INTERACTIVE_BANNER() do {\
   printf("You are running in interactive mode. Stop it by typing: 'quit'.\n");\

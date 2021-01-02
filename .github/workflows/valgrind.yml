@@ -49,3 +49,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/time_of_day.ric
     - name: Run valgrind on types.ric
       run: valgrind --leak-check=full ./ric samples/types.ric
+    - name: Run valgrind on threads.ric
+      run: valgrind --leak-check=full ./ric samples/threads.ric

@@ -6,6 +6,8 @@ int ric_power(LIBRARY_PARAMS())
   double arg1 = 1;
   double arg2 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -56,6 +58,8 @@ int ric_log(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -88,6 +92,8 @@ int ric_sqrt(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -120,6 +126,8 @@ int ric_sin(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -153,6 +161,8 @@ int ric_cos(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -186,6 +196,8 @@ int ric_tan(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -219,6 +231,8 @@ int ric_exp(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -251,6 +265,8 @@ int ric_abs(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -283,6 +299,8 @@ int ric_floor(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -315,6 +333,8 @@ int ric_ceil(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -348,6 +368,8 @@ int ric_random_uniform_int(LIBRARY_PARAMS())
   int32_t arg1 = 0;
   int32_t arg2 = 0;
   int32_t result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -397,6 +419,8 @@ int ric_random_uniform_int(LIBRARY_PARAMS())
 int ric_random_uniform(LIBRARY_PARAMS())
 {
   double result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   result = (rand() / (double) RAND_MAX);
 

@@ -25,6 +25,10 @@ deps = []
 
 links = []
 
+# Multithreading
+thread_dep = dependency('threads')
+deps += [thread_dep]
+
 if ( target_os == 'windows' )
 	# Make lex not use unistd
   ric_c_args += ['-DYY_NO_UNISTD_H']
@@ -40,13 +44,19 @@ if ( target_os == 'windows' )
   # Regexp
   ric_links += [pcre_lib]
   includes += [pcre_inc]
+
+  # Adding windows specific translation units 
+  sources += ['sync_nt.c']
 else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
 	mathlib = cc.find_library('m', required: true)
-	deps = [mathlib]
+	deps += [mathlib]
 
   # Silence some warnings
   ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function']
+
+  # Adding POSIX translation units (for darwin, linux etc.)
+  sources += ['sync.c']
 endif
 
 interpreter = executable('ric',

@@ -32,6 +32,7 @@ RIC_SOURCES = \
 	eval \
 	lib \
 	garbage \
+	sync \
 	$(LIB_DIR)/libio \
 	$(LIB_DIR)/libmath \
 	$(LIB_DIR)/libstd \
@@ -39,7 +40,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libload \
 	$(LIB_DIR)/libos \
 	$(LIB_DIR)/libtime \
-	$(LIB_DIR)/libnet
+	$(LIB_DIR)/libnet \
+	$(LIB_DIR)/libctx
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -53,7 +55,7 @@ RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
 DEFINES = YYERROR_VERBOSE
 
-LIBS = m
+LIBS = m rt pthread
 
 CFLAGS = Wall \
 	Werror \

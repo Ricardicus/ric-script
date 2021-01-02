@@ -5,6 +5,8 @@ int ric_open_file(LIBRARY_PARAMS())
   stackval_t stv;
   FILE *fp;
   char *filename = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -46,6 +48,8 @@ int ric_close_file(LIBRARY_PARAMS())
 {
   stackval_t stv;
   FILE *fp;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -78,6 +82,9 @@ int ric_read_file(LIBRARY_PARAMS())
   size_t readBytes = 0;
   int dummy;
   heapval_t *hpv;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
 
@@ -135,6 +142,8 @@ int ric_write_file(LIBRARY_PARAMS())
   rawdata_t *rawdata = NULL;
   int backslash = 0;
   char *c;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   POP_VAL(&stv, sp, sc);
 
@@ -227,6 +236,9 @@ int ric_read_lines_file(LIBRARY_PARAMS())
   char *buffer = NULL;
   heapval_t *hpv;
   int dummy;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
 
@@ -285,6 +297,9 @@ int ric_read_input(LIBRARY_PARAMS())
   char *c = NULL;
   heapval_t *hpv;
   int dummy;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
 

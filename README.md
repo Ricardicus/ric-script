@@ -113,10 +113,10 @@ well as haven't implemented:
 - [x] Better error reporting (always include at least line number)
 - [x] Socket interface
 - [x] Support for at least swedish UTF-8 characters å, ä and ö. 
+- [x] Threading interface
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).
-- [ ] Threading interface
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
 I will be using **javascript syntax highlighting** for the examples provided below, for the sake of making it look pretty
@@ -367,6 +367,71 @@ ric-script comment symbol **#**.
 }
 
 print(ram_three(2, 100))
+```
+
+
+# syntax snapshot: Multithreading
+
+I have been inspired by Javascript and added the functions **setTimeout** and **setInterval** for
+handling multithreading. Since I use JavaScript syntax highlighting here on GitHub, I have **added /\*\*/** just before the original
+ric-script comment symbol **#**.
+
+```javascript
+#!/usr/bin/ric
+/*
+# This program shows how you can create
+# different types of thread contexts in
+# ricscript. It is inspired by Javascript.
+# You can do function calls by timeouts
+# over intervals.
+# The interval thread stops if the function
+# returns a non-zero value.
+*/
+a = 1
+
+@ iterate () {
+  ? [ a > 10 ] {
+    -> 1
+  }
+  a = a + 1
+}
+
+@ end () {
+  print("Hi, the shared variable now holds value: " + a)
+}
+
+print("Hi I am gonna start some threads...")
+print("I have set a variable, named 'a', to: " + a)
+print("In 10 seconds, I will read its value again.")
+print("By the time, a thread running with an interval")
+print("will increment this variables value with each iteration.")
+print("Let's begin...")
+
+setTimeout(end, 10)
+setInterval(iterate, 1)
+
+print("I have now launched the threads!")
+print("They are running in a separate context.")
+print("I will return with an update...")
+print("...")
+
+```
+
+The example above outputs:
+
+```
+$ ./ric samples/threads.ric
+Hi I am gonna start some threads...
+I have set a variable, named 'a', to: 1
+In 10 seconds, I will read its value again.
+By the time, a thread running with an interval
+will increment this variables value with each iteration.
+Let's begin...
+I have now launched the threads!
+They are running in a separate context.
+I will return with an update...
+...
+Hi, the shared variable now holds value: 10
 ```
 
 # syntax snapshot: File listing

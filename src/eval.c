@@ -2126,6 +2126,7 @@ void call_func(
       argsList_t *params = funcDef->params;
       int localsStackSp;
       int localsStackSb;
+      class_t *tmp;
 
       if ( params == NULL && argsWalk != NULL ) {
         fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n",
@@ -2225,10 +2226,12 @@ void call_func(
       localsStackSb = varLocals->sb;
       varLocals->sb = varLocals->sp;
       *depth = 1;  // There is only one global scope
-      classCtx = classObj;  // Set class context
+      tmp = PROVIDE_CONTEXT()->classCtx;
+      PROVIDE_CONTEXT()->classCtx = classObj;  // Set class context
       interpret_statements_(funcDef->body, PROVIDE_CONTEXT(), funcDef->params, newArgumentTable);
       varLocals->sb = localsStackSb;
       varLocals->sp = localsStackSp;
+      PROVIDE_CONTEXT()->classCtx = tmp;
     }
 
     if ( *(uintptr_t*)sp != spBefore ) {

@@ -3,6 +3,9 @@
 */ 
 #include "hashtable.h"
 
+extern void getContext(void *);
+extern void releaseContext(void *);
+
 hashtable_t * hashtable_new(int size, float load)
 {
 	hashtable_t * hashtable = malloc(sizeof(hashtable_t));
@@ -106,7 +109,7 @@ int hashtable_hash(hashtable_t * hashtable,const char * str)
 	return hash % size;
 }
 
-void hashtable_put(hashtable_t * hashtable, char * key, void * val)
+void hashtable_put(hashtable_t * hashtable, void *ctx, char * key, void * val)
 {
 	float load_level;
 	float max_load_level;
@@ -114,11 +117,13 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 	if ( hashtable == NULL )
 		return;
 	
+	getContext(ctx);
 	load_level = (float) hashtable->ocupied * hashtable->load;
 	max_load_level = (float) hashtable->size * hashtable->load;
 	if(load_level > max_load_level) {
 		hashtable_rehash(hashtable);
 		hashtable->put(hashtable,key,val);
+		releaseContext(ctx);
 		return;
 	} 
 	int index = hashtable_hash(hashtable,key);
@@ -128,6 +133,7 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 		hashtable->table[index]->data = val;
 		hashtable->table[index]->next = NULL;
 		hashtable->ocupied++;
+		releaseContext(ctx);
 		return;
 	} else {
 		struct key_val_pair * ptr1 = hashtable->table[index];
@@ -142,6 +148,7 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
           ptr1->key = key;
         }
 				ptr1->data = val;
+				releaseContext(ctx);
 				return;
 			}
 			ptr2 = ptr1;
@@ -154,9 +161,10 @@ void hashtable_put(hashtable_t * hashtable, char * key, void * val)
 		ptr2->next = NULL;
 		hashtable->ocupied++;
 	}
+	releaseContext(ctx);
 }
 
-void * hashtable_get(hashtable_t * hashtable, const char * key)
+void * hashtable_get(hashtable_t * hashtable, void *ctx, const char * key)
 {
 	if ( hashtable == NULL )
 		return NULL;
@@ -165,13 +173,17 @@ void * hashtable_get(hashtable_t * hashtable, const char * key)
 	if (hashtable->table[index] == NULL) {
 		return NULL;
 	}
+
+	getContext(ctx);
 	struct key_val_pair * p = hashtable->table[index];
 	while (p!=NULL) {	
 		if (strcmp(p->key,key) == 0) {
+			releaseContext(ctx);
 			return p->data;
 		}
 		p = p->next;
 	}
+	releaseContext(ctx);
 	return NULL;
 }
 

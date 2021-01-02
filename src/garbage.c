@@ -65,7 +65,7 @@ static void mark (
   /* Mark all variables in the heap */
   i = 0;
   while ( i < argCount ) {
-    heapval_t *hv = hashtable_get(varDecs, variableIDS[i]);
+    heapval_t *hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, variableIDS[i]);
     hv->mark = markVal;
 
     if ( hv->sv.type == DICTTYPE ) {

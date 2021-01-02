@@ -509,7 +509,7 @@ void evaluate_expression(
           expr_t *expArg;
 
           /* Check among the arguments if we have it defined there */
-          expArg = hashtable_get(argVals, expr->id.id);
+          expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
           if ( expArg != NULL ) {
             /* This was an argument! */
@@ -574,14 +574,14 @@ Please report back to me.\n\
       /* Check if it is among the class context members */
       if ( classCtx != NULL ) {
         functionDef_t *classFunc = NULL;
-        hv = hashtable_get(classCtx->varMembers, expr->id.id);
+        hv = hashtable_get(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
         if ( hv != NULL ) {
           push_heapval(hv, sp, sc);
           stop = 1;
         }
 
-        classFunc = hashtable_get(classCtx->funcDefs, expr->id.id);
+        classFunc = hashtable_get(classCtx->funcDefs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
         if ( classFunc != NULL ) {
           // Pushing the function definition
           PUSH_FUNCPTR(classFunc, sp, sc);
@@ -595,7 +595,7 @@ Please report back to me.\n\
         functionDef_t *funcDef; // if it is a function pointer
 
         /* Check among the global variables if we have it defined there */
-        hv = hashtable_get(varDecs, expr->id.id);
+        hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
         if ( hv == NULL ) {
           /* Check among the locals if we have it defined there */
@@ -611,7 +611,7 @@ Please report back to me.\n\
           break;
         }
         /* Check among the class declaration if we have this id defined there */
-        classDef = hashtable_get(classDecs, expr->id.id);
+        classDef = hashtable_get(classDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
         if ( classDef != NULL ) {
           PUSH_CLASSREF(classDef, sp, sc);
           stop = 1;
@@ -619,7 +619,7 @@ Please report back to me.\n\
 
         if ( !stop ) {
           /* Check among the function declarations if we have it defined there */
-          funcDef = hashtable_get(funcDecs, expr->id.id);
+          funcDef = hashtable_get(funcDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
           if ( funcDef != NULL ) {
             // Pushing the function definition
             PUSH_FUNCPTR(funcDef, sp, sc);
@@ -731,7 +731,7 @@ Please report back to me.\n\
           key = sv.t;
 
           /* find heapval */
-          hpv = hashtable_get(dict->hash, key);
+          hpv = hashtable_get(dict->hash, PROVIDE_CONTEXT()->syncCtx, key);
           if ( hpv == NULL ) {
             fprintf(stderr, "error: key '%s' not present in dictionary\n", key);
             exit(1);
@@ -1551,7 +1551,7 @@ int evaluate_id_valid(
       expr_t *expArg;
 
       /* Check among the arguments if we have it defined there */
-      expArg = hashtable_get(argVals, id);
+      expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, id);
 
       if ( expArg != NULL ) {
         /* This was an argument, ID ok! */
@@ -1566,7 +1566,7 @@ int evaluate_id_valid(
     functionDef_t *funcDef; // if it is a function pointer
 
     /* Check among the global variables if we have it defined there */
-    hv = hashtable_get(varDecs, id);
+    hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, id);
 
     if ( hv == NULL ) {
       /* Check among the locals if we have it defined there */
@@ -1578,7 +1578,7 @@ int evaluate_id_valid(
     }
 
     /* Check among the function declarations if we have it defined there */
-    funcDef = hashtable_get(funcDecs, id);
+    funcDef = hashtable_get(funcDecs, PROVIDE_CONTEXT()->syncCtx, id);
     if ( funcDef != NULL ) {
       // Pushing the function definition
       return 1;
@@ -1653,7 +1653,7 @@ void call_func(
     }
 
     /* Check if this is a class construction call */
-    classRef = hashtable_get(classDecs, funcID);
+    classRef = hashtable_get(classDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
     if ( classRef != NULL ) {
       functionDef_t *constructor = NULL;
       class_t *class = NULL;
@@ -1664,7 +1664,7 @@ void call_func(
       /* Run the initializer */
       initClass(class, EXPRESSION_ARGS());
       /* Find the constructor hook and run it if so */
-      constructor = hashtable_get(class->funcDefs, funcID);
+      constructor = hashtable_get(class->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcID);
       if ( constructor != NULL ) {
         exeCtx->classCtx = class;
         /* Moving along, interpreting function */
@@ -1683,7 +1683,7 @@ void call_func(
 
     if ( !stop && classCtx != NULL ) {
       /* Check if this is a function member call */
-      functionDef_t *classFunc = hashtable_get(classCtx->funcDefs, funcID);
+      functionDef_t *classFunc = hashtable_get(classCtx->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcID);
       /* Call the function */
       if ( classFunc ) {
         uintptr_t spBefore;
@@ -1789,7 +1789,7 @@ void call_func(
             }
 
             /* Adding expression to argument table */
-            hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+            hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id, newArg);
 
             params = params->next;
             argsWalk = argsWalk->next;
@@ -1822,7 +1822,7 @@ void call_func(
 
     if ( ! stop ) {
       /* Check among the arguments if we have it defined there */
-      expArg = hashtable_get(argVals, funcID);
+      expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, funcID);
 
       /* The argument might be a function! Evaluate and see ... */
       if ( expArg != NULL && classRef == NULL ) {
@@ -1844,7 +1844,7 @@ void call_func(
 
       if ( funcDef == NULL && libFunc == NULL && classRef == NULL ) {
         /* Looking up the function and calling it if it exists */
-        funcDef = hashtable_get(funcDecs, funcID);
+        funcDef = hashtable_get(funcDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
         /* Looking up the function among the library */
         libFunc = look_up_lib(funcID);
 
@@ -1852,13 +1852,13 @@ void call_func(
         if ( funcDef == NULL && libFunc == NULL ) {
           heapval_t *hv;
           /* Check if this is a function pointer call (lowest priority) */
-          hv = hashtable_get(varDecs, funcID);
+          hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
 
           if ( hv == NULL ) {
             // Check among the arguments 
 
             /* Check among the arguments if we have it defined there */
-            expArg = hashtable_get(argVals, funcID);
+            expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, funcID);
 
             if ( expArg == NULL ) {
               fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
@@ -1994,7 +1994,7 @@ void call_func(
             }
 
             /* Adding expression to argument table */
-            hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+            hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id, newArg);
 
             params = params->next;
             argsWalk = argsWalk->next;
@@ -2106,7 +2106,7 @@ void call_func(
     funcID = classCall->funcID;
 
     /* Find the class function */
-    funcDef = hashtable_get(classObj->funcDefs, funcID);
+    funcDef = hashtable_get(classObj->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcID);
 
     if ( funcDef == NULL ) {
       fprintf(stderr, "error: cannot find function '%s' in class '%s'.\n", 
@@ -2212,7 +2212,7 @@ void call_func(
           }
 
           /* Adding expression to argument table */
-          hashtable_put(newArgumentTable, params->arg->id.id, newArg);
+          hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id, newArg);
 
           params = params->next;
           argsWalk = argsWalk->next;
@@ -2360,21 +2360,21 @@ void interpret_statements_(
 
           /* Check if the variable is to be put in the class namespace */
           if ( classCtx != NULL ) {
-            classCheck = hashtable_get(classCtx->varMembers, idStr);
+            classCheck = hashtable_get(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr);
             if ( classCheck != NULL ) {
               /* Placing variable declaration in class member namespace */
-              hashtable_put(classCtx->varMembers, idStr, hvp);
+              hashtable_put(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
               stop = 1;
             }
           }
 
           if ( !stop ) {
             /* Check if the variable is in the global namespace */
-            globalCheck = hashtable_get(varDecs, idStr);
+            globalCheck = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, idStr);
 
             if ( globalCheck != NULL || ctx->depth == 0 ) {
               /* Placing variable declaration in global variable namespace */
-              hashtable_put(varDecs, idStr, hvp);
+              hashtable_put(varDecs, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
             } else {
               /* Placing variable declaration in local variable namespace */
               locals_push(varLocals, idStr, hvp);
@@ -2439,7 +2439,7 @@ void interpret_statements_(
               ALLOC_HEAP(&sv, hp, &hvp, &dummy);
 
               // Check if collision, if so, free key
-              hashtable_put(dict->hash, key, hvp);
+              hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
             }
             break;
             case VECTORTYPE: {
@@ -2649,7 +2649,7 @@ void interpret_statements_(
         class_t *newClass = ((statement_t*)stmt)->content;
 
         /* Placing funciton declaration in global function namespace */
-        hashtable_put(classDecs, newClass->id, newClass);
+        hashtable_put(classDecs, PROVIDE_CONTEXT()->syncCtx, newClass->id, newClass);
       }
       break;
       case LANG_ENTITY_FUNCDECL:
@@ -2657,7 +2657,7 @@ void interpret_statements_(
         functionDef_t *funcDef = ((statement_t*)stmt)->content;
 
         /* Placing funciton declaration in global function namespace */
-        hashtable_put(funcDecs, funcDef->id.id, funcDef);
+        hashtable_put(funcDecs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
       }
       break;
       case LANG_ENTITY_CONTINUE:
@@ -3130,7 +3130,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
       functionDef_t *funcDef = initWalk->content;
 
       /* Placing funciton declaration in global function namespace */
-      hashtable_put(cls->funcDefs, funcDef->id.id, funcDef);
+      hashtable_put(cls->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
     }
     break;
     case LANG_ENTITY_DECL: {
@@ -3169,7 +3169,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
         ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
 
         /* Placing variable declaration in class variable member namespace */
-        hashtable_put(cls->varMembers, idStr, hvp);
+        hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
       }
       break;
       case EXPR_TYPE_VECTOR_IDX: {
@@ -3229,7 +3229,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
 
             // Check if collision, if so, free key
-            hashtable_put(dict->hash, key, hvp);
+            hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
           }
           break;
           case VECTORTYPE: {
@@ -4148,7 +4148,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   ALLOC_HEAP_UNSAFE(&sv, hp, &hvp, &heapUpdated);
 
   /* Placing variable declaration in global variable namespace */
-  hashtable_put(varDecs, argumentListName, hvp);
+  hashtable_put(varDecs, NULL, argumentListName, hvp);
 }
 
 dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
@@ -4246,7 +4246,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         break;
       }
       /* Adding heap allocated value to dictionary hash table */
-      hashtable_put(newDict->hash, newKeyStr, hvp);
+      hashtable_put(newDict->hash, PROVIDE_CONTEXT()->syncCtx, newKeyStr, hvp);
 
       walk = walk->next;
     }
@@ -4328,7 +4328,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         /* Adding heap allocated value to dictionary hash table */
-        hashtable_put(newDict->hash, newKeyStr, hvp);
+        hashtable_put(newDict->hash, PROVIDE_CONTEXT()->syncCtx, newKeyStr, hvp);
 
         walk = walk->next;
       }

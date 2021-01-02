@@ -102,7 +102,7 @@ void initialize_ric_lib() {
 
   while ( i < libFuncs ) {
     libFunction_t *func = &ric_library[i];
-    hashtable_put(libCallbacks, func->libFuncName, func);
+    hashtable_put(libCallbacks, NULL, func->libFuncName, func);
     ++i;
   }
 }
@@ -115,6 +115,6 @@ libFunction_t* look_up_lib(char *id) {
   if ( libCallbacks == NULL ) {
     return NULL;
   }
-  return (libFunction_t*) hashtable_get(libCallbacks, id);
+  return (libFunction_t*) hashtable_get(libCallbacks, NULL, id);
 }
 

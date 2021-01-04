@@ -1,19 +1,18 @@
 #include "sync.h"
 
-#include <sys/eventfd.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h> 
 #include <errno.h>
+#include <semaphore.h> 
 
 #include "sync.h"
 
 typedef struct ricSyncCtx {
   pthread_mutex_t mutex;
-  int event;
-  uint64_t eventVal;
+  sem_t *event;
   pthread_t threads[RICSCRIPT_MAX_THREADS];
   int times[RICSCRIPT_MAX_THREADS];
   bool threadTaken[RICSCRIPT_MAX_THREADS];
@@ -70,11 +69,10 @@ void* initiateRicCallTimeout(void* ctx) {
   ricCtx->ctxs[ricCtx->threadIndex] = newCtx;
   thisThreadIndex = ricCtx->threadIndex;
   ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
-  ricCtx->eventVal = 1;
   releaseContext(ricCtx);
 
   /* Signal that we are running */
-  write(ricCtx->event, &ricCtx->eventVal, sizeof(uint64_t));
+  sem_post(ricCtx->event);
 
   (void)sleep((unsigned int)timeout);
 
@@ -126,11 +124,10 @@ void* initiateRicCallInterval(void* ctx) {
   ricCtx->ctxs[ricCtx->threadIndex] = newCtx;
   thisThreadIndex = ricCtx->threadIndex;
   ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
-  ricCtx->eventVal = 1;
   releaseContext(ricCtx);
 
   /* Signal that we are running */
-  write(ricCtx->event, &ricCtx->eventVal, sizeof(uint64_t));
+  sem_post(ricCtx->event);
 
   (void)sleep((unsigned int)timeout);
 
@@ -195,8 +192,8 @@ void *createContext() {
     return NULL;
   }
 
-  ctx->event = eventfd(0, 0);
-  if ( ctx->event == -1 ) {
+  ctx->event = sem_open("RicScriptSync", O_CREAT, 0664, 0);
+  if ( ctx->event == NULL ) {
     pthread_mutex_destroy(&ctx->mutex);
     free(ctx);
     return NULL;
@@ -229,7 +226,6 @@ void releaseContext(void *ctx) {
 
 void createThreadTimeout(void *ctx, void *func, size_t stacksize, void *arg, int time) {
   ricSyncCtx_t *ricCtx;
-  uint64_t eventVal;
 
   if ( ctx == NULL )
   	return;
@@ -250,12 +246,11 @@ void createThreadTimeout(void *ctx, void *func, size_t stacksize, void *arg, int
   releaseContext(ctx);
 
   /* Await the start signal */
-  read(ricCtx->event, &eventVal, sizeof(eventVal));
+  sem_wait(ricCtx->event);
 }
 
 void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, int time) {
   ricSyncCtx_t *ricCtx;
-  uint64_t eventVal;
 
   if ( ctx == NULL )
     return;
@@ -276,7 +271,7 @@ void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, in
   releaseContext(ctx);
 
   /* Await the start signal */
-  read(ricCtx->event, &eventVal, sizeof(eventVal));
+  sem_wait(ricCtx->event);
 }
 
 void freeContext(void *ctx) {
@@ -315,7 +310,7 @@ void freeContext(void *ctx) {
     ++i;
   }
 
-  close(ricCtx->event);
+  sem_close(ricCtx->event);
   pthread_mutex_destroy(&ricCtx->mutex); 
   free(ricCtx);
 }

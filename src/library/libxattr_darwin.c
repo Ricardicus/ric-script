@@ -249,8 +249,6 @@ static void DirectoryWalkAndMatchXattrKey(const char *name,
   size_t offset = 0;
   char *buffer;
   size_t bufferSize = 1024;
-  void *sp = PROVIDE_CONTEXT()->sp;
-  size_t *sc = PROVIDE_CONTEXT()->sc;
 
   buffer = calloc(bufferSize, 1);
   if ( buffer == NULL ) {

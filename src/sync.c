@@ -4,9 +4,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <errno.h>
-#include <semaphore.h> 
+#include <semaphore.h>
+#include <fcntl.h>
 
 #include "sync.h"
 

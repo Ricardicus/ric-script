@@ -2664,6 +2664,42 @@ void interpret_statements_(
         hashtable_put(funcDecs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
       }
       break;
+      case LANG_ENTITY_FOREACH:
+      {
+        forEachStmt_t *festmt = ((statement_t*)stmt)->content;
+        expr_t *root = festmt->root;
+        expr_t *entry = festmt->entry;
+        char *entryId;
+        stackval_t sv;
+
+        evaluate_expression(root, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+        switch ( sv.type ) {
+        case VECTORTYPE:
+        break;
+        default:
+          printf("%s.%d error: '%s' isn't an indexable array\n", 
+            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, root->id.id);
+        break;
+        }
+
+        if ( entry->type != EXPR_TYPE_ID ) {
+          printf("%s.%d error: '%s' isn't a correct variable\n",
+            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, entry->id.id);
+        } else {
+          entryId = entry->id.id;
+        }
+
+        if ( festmt->index == 0 ) {
+          /* Set starting */
+          ctx->start[ctx->depth] = stmt;
+          ctx->end[ctx->depth] = next;
+          ctx->ctxDepth[ctx->depth] = ctx->depth;
+        }
+
+        (void)entryId;
+      }
+      break;
       case LANG_ENTITY_CONTINUE:
       {
         /* Set PC to continue 'start' */
@@ -3647,6 +3683,7 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_EXPR:
     case LANG_ENTITY_CLASSDECL:
     case LANG_ENTITY_RETURN:
+    case LANG_ENTITY_FOREACH:
       printf("[0x%lx] ", (uintptr_t)stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
@@ -3667,6 +3704,20 @@ void print_statements_(void *stmt, int indent)
       printf("Expr(");
       print_expr(((statement_t*)stmt)->content);
       printf(");\n");
+    }
+    break;
+    case LANG_ENTITY_FOREACH:
+    {
+      forEachStmt_t *festmt = (forEachStmt_t*)((statement_t*)stmt)->content;
+      body_t *bd = festmt->body;
+      printf("For each: Expr(");
+      print_expr(festmt->entry);
+      printf(") <- Expr(");
+      print_expr(festmt->root);
+      printf(")\n");
+
+      print_indents(indent);
+      print_statements_(bd->content, indent+1);
     }
     break;
     case LANG_ENTITY_CLASSDECL:

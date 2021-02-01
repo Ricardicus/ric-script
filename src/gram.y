@@ -165,7 +165,18 @@ systemStatement: '$' ID {
 };
 
 forEachStatement: '(' ID '.' '.' '.' ID ')' body {
-    $$ = newForEach($2, $6, $8);
+    body_t *bd = $8;
+    statement_t *stmt = bd->content;
+
+    while ( stmt != NULL ) {
+        if ( stmt->entity == LANG_ENTITY_BODY_END ) {
+            /* Set entity to continue */
+            stmt->entity = LANG_ENTITY_CONTINUE;
+        }
+        stmt = stmt->next;
+    }
+
+    $$ = newForEach($2, $6, bd);
 };
 
 returnStatement: RETURN expressions {

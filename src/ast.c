@@ -449,6 +449,7 @@ forEachStmt_t* newForEach(char *root, char *entry, void *body) {
   stmt->body = body;
   stmt->root = idRoot;
   stmt->entry = idEntry;
+  stmt->index = 0;
 
   return stmt;
 }

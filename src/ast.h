@@ -244,7 +244,8 @@ typedef struct forEachStmt {
   int entity;
   expr_t *root;
   expr_t *entry;
-  statement_t *body;
+  body_t *body;
+  uint32_t index;
 } forEachStmt_t;
 
 typedef struct functionCall_t {

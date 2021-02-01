@@ -59,6 +59,7 @@
 #define LANG_ENTITY_EXPR         16
 #define LANG_ENTITY_BODY_END     17
 #define LANG_ENTITY_CLASSDECL    18
+#define LANG_ENTITY_FOREACH      19
 
 #define LANG_CONDITIONAL_IF      BIT(1)
 #define LANG_CONDITIONAL_ELIF    BIT(2)
@@ -239,6 +240,13 @@ typedef struct functionDef {
 	statement_t *body;
 } functionDef_t;
 
+typedef struct forEachStmt {
+  int entity;
+  expr_t *root;
+  expr_t *entry;
+  statement_t *body;
+} forEachStmt_t;
+
 typedef struct functionCall_t {
 	int entity;
 	expr_t *id;
@@ -308,6 +316,7 @@ statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
+forEachStmt_t*  newForEach(char *root, char *entry, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
 expr_t*         newClassFunCall(expr_t *classID, char *funcID, void *args);
 body_t*         newBody(void *body);

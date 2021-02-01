@@ -81,6 +81,7 @@ statement_t *root = NULL;
 %type<data> vector
 %type<data> ifStatement
 %type<data> loopStatement
+%type<data> forEachStatement
 %type<data> continueStatement
 %type<data> returnStatement
 %type<data> breakStatement
@@ -138,6 +139,9 @@ statement:
     | loopStatement {
         $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
     }
+    | forEachStatement {
+        $$ = newStatement(LANG_ENTITY_FOREACH, $1);
+    }
     | continueStatement {
         $$ = newStatement(LANG_ENTITY_CONTINUE, $1);
     }
@@ -158,6 +162,10 @@ systemStatement: '$' ID {
     $$ = newExpr_ID($2);
 } | '$' stringContents {
     $$ = $2;
+};
+
+forEachStatement: '(' ID '.' '.' '.' ID ')' body {
+    $$ = newForEach($2, $6, $8);
 };
 
 returnStatement: RETURN expressions {
@@ -400,7 +408,6 @@ classFunctionCall:
     | expression ':' ':' ID '(' ')' {
         $$ = newClassFunCall($1, $4, NULL);
     };
-
 
 functionCall:
     ID '(' arguments_list ')' {

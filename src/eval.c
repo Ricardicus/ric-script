@@ -2279,6 +2279,7 @@ void interpret_statements_(
       case LANG_ENTITY_SYSTEM:
       case LANG_ENTITY_EXPR:
       case LANG_ENTITY_CLASSDECL:
+      case LANG_ENTITY_FOREACH:
         next = ((statement_t*)stmt)->next;
       break;
       case LANG_ENTITY_RETURN:

@@ -55,7 +55,7 @@ RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
 DEFINES = YYERROR_VERBOSE
 
-LIBS = m rt pthread
+LIBS = m pthread
 
 CFLAGS = Wall \
 	Werror \

@@ -207,11 +207,9 @@ A dictionary maps a string to any type of references.
 	print(d["1337"] - 1 + 1)
 
 	d["e"] = "f"
-
 	print(d["e"])
 
 	d["e"] = "hej"
-
 	print(d["e"])
 
 	d = {}
@@ -238,6 +236,21 @@ A dictionary maps a string to any type of references.
 	s["foobar"] = foobar
 	s["foobar"]()
 
+	# Checking stdlib 'contains' function
+	print(contains(s, "foobar"))
+	print(contains(s, "barfoo"))
+
+	# Checkoing stdlib 'keys' function
+	print(keys(s))
+	print(keys(d))
+	print(keys(d["a"]))
+
+	# For each loop, iterating over the keys
+	( s ... key ) {
+		print(key)
+		print(s[key])
+	}
+
 **outputs**:
 
 .. code-block:: bash
@@ -254,6 +267,15 @@ A dictionary maps a string to any type of references.
 	{'a' : {'a' : 1, 'b' : 2}}
 	e
 	foobar
+	1
+	0
+	['a','foobar']
+	['a']
+	['a','b']
+	a
+	{'b' : {'c' : {'d' : 'e'}}}
+	foobar
+	<Function: 'foobar'>
 
 List
 ####
@@ -299,11 +321,9 @@ and can hold any type of expressions.
 
 	print( len(h) )
 
-	i = 0
-	. [ i < len(h) ] {
-	  print(h[i])
-	  i = i + 1
-	  @
+	# For each loop
+	( h ... entry ) {
+		print(entry)
 	}
 
 	append(h, "foo")
@@ -313,11 +333,9 @@ and can hold any type of expressions.
 
 	print(h[0])
 
-	i = 0
-	. [ i < len(h) ] {
-	  print(h[i])
-	  i = i + 1
-	  @
+	# For each loop
+	( h ... entry ) {
+		print(entry)
 	}
 
 	print(h)

@@ -18,7 +18,11 @@ def test_dict_print():
 "0",
 "['a','foobar']",
 "['a']",
-"['a','b']"
+"['a','b']",
+"a",
+"{'b' : {'c' : {'d' : 'e'}}}",
+"foobar",
+"<Function: 'foobar'>"
 ]
 
   lib_script = callSample('dictionary.ric')

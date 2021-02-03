@@ -2279,6 +2279,7 @@ void interpret_statements_(
       case LANG_ENTITY_SYSTEM:
       case LANG_ENTITY_EXPR:
       case LANG_ENTITY_CLASSDECL:
+      case LANG_ENTITY_FOREACH:
         next = ((statement_t*)stmt)->next;
       break;
       case LANG_ENTITY_RETURN:
@@ -2661,6 +2662,153 @@ void interpret_statements_(
 
         /* Placing funciton declaration in global function namespace */
         hashtable_put(funcDecs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
+      }
+      break;
+      case LANG_ENTITY_FOREACH:
+      {
+        forEachStmt_t *festmt = ((statement_t*)stmt)->content;
+        expr_t *root = festmt->root;
+        expr_t *entry = festmt->entry;
+        vector_t *rootVec = NULL;
+        argsList_t *walk = NULL;
+        expr_t *expToSet = NULL;
+        heapval_t *hvp = NULL;
+        dictionary_t *rootDict = NULL;
+        int dummy;
+        int arrayIndex;
+        char *entryId = NULL;
+        stackval_t sv;
+
+        evaluate_expression(root, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+        switch ( sv.type ) {
+        case VECTORTYPE:
+        rootVec = sv.vec;
+        break;
+        case DICTTYPE:
+        rootDict = sv.dict;
+        break;
+        default:
+          printf("%s.%d error: '%s' isn't an indexable array\n", 
+            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, root->id.id);
+        break;
+        }
+
+        if ( entry->type != EXPR_TYPE_ID ) {
+          printf("%s.%d error: '%s' isn't a correct variable\n",
+            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, entry->id.id);
+        } else {
+          entryId = entry->id.id;
+        }
+
+        if ( festmt->index == 0 ) {
+          /* Set starting */
+          ctx->start[ctx->depth] = stmt;
+          ctx->end[ctx->depth] = next;
+          ctx->ctxDepth[ctx->depth] = ctx->depth;
+          ctx->bodyEnd[ctx->depth] = next;
+        }
+
+        arrayIndex = festmt->index;
+
+        if ( rootVec != NULL ) {
+
+          /* check the limits */
+          if ( festmt->index >= rootVec->length ) {
+            /* End this iteration */
+            stmt = next;
+            continue;
+          }
+
+          festmt->index++;
+          walk = rootVec->content;
+          while ( walk != NULL && arrayIndex >= 0 ) {
+            expToSet = walk->arg;
+            walk = walk->next;
+            --arrayIndex;
+          }
+
+          if ( expToSet == NULL ) {
+            fprintf(stderr, "%s.%d error: Unexpected index error!\n",
+              ((statement_t*) stmt)->file, ((statement_t*) stmt)->line);
+            GENERAL_REPORT_ISSUE_MSG();
+            exit(1);
+          }
+
+          evaluate_expression(expToSet, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          /* Placing value on the heap */
+          if ( sv.type == TEXT ) {
+            /* Special case */
+            char *c = sv.t;
+            size_t len = strlen(c)+1;
+            char *newText = ast_emalloc(len);
+            snprintf(newText,len,"%s",c);
+            sv.t = newText;
+          } else if ( sv.type == VECTORTYPE ) {
+            expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+            sv.vec = e->vec;
+            free(e);
+          } else if ( sv.type == DICTTYPE ) {
+            dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+            sv.dict = dict;
+          }
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+          locals_push(varLocals, entryId, hvp);
+        } else if ( rootDict != NULL ) {
+          /* traverse the dictionary keys */
+          hashtable_t *hash = rootDict->hash;
+          int hashSize = hash->size;
+          struct key_val_pair *ptr;
+          int i = 0;
+          int keyCount = 0;
+
+          /* Check limits */
+          while ( i < hashSize ) {
+            ptr = hash->table[i];
+            while (ptr != NULL) {
+              /* Here is a key.. */
+              ptr = ptr->next;
+              keyCount++;
+            }
+            i++;
+          }
+
+          if ( arrayIndex >= keyCount ) {
+            /* We are out of here */
+            stmt = next;
+            continue;
+          }
+
+          keyCount = 0;
+          i = 0;
+          while ( i < hashSize ) {
+            ptr = hash->table[i];
+            while (ptr != NULL) {
+              /* Add this key to the list */
+              char *c = (char*)ptr->key;
+
+              if ( keyCount == arrayIndex ) {
+                size_t len = strlen(c)+1;
+                char *newText = ast_emalloc(len);
+                snprintf(newText,len,"%s",c);
+                sv.type = TEXT;
+                sv.t = newText;
+                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+                locals_push(varLocals, entryId, hvp);
+                festmt->index++;
+              }
+
+              ptr = ptr->next;
+              keyCount++;
+            }
+            i++;
+          }
+        }
+
+        next = festmt->body;
       }
       break;
       case LANG_ENTITY_CONTINUE:
@@ -3646,6 +3794,7 @@ void print_statements_(void *stmt, int indent)
     case LANG_ENTITY_EXPR:
     case LANG_ENTITY_CLASSDECL:
     case LANG_ENTITY_RETURN:
+    case LANG_ENTITY_FOREACH:
       printf("[0x%lx] ", (uintptr_t)stmt);
       print_indents(indent);
       next = ((statement_t*)stmt)->next;
@@ -3666,6 +3815,20 @@ void print_statements_(void *stmt, int indent)
       printf("Expr(");
       print_expr(((statement_t*)stmt)->content);
       printf(");\n");
+    }
+    break;
+    case LANG_ENTITY_FOREACH:
+    {
+      forEachStmt_t *festmt = (forEachStmt_t*)((statement_t*)stmt)->content;
+      body_t *bd = festmt->body;
+      printf("For each: Expr(");
+      print_expr(festmt->entry);
+      printf(") <- Expr(");
+      print_expr(festmt->root);
+      printf(")\n");
+
+      print_indents(indent);
+      print_statements_(bd->content, indent+1);
     }
     break;
     case LANG_ENTITY_CLASSDECL:

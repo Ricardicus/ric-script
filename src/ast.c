@@ -325,6 +325,7 @@ statement_t *newStatement(int type, void *content) {
   case LANG_ENTITY_EXPR:
   case LANG_ENTITY_BODY_END:
   case LANG_ENTITY_CLASSDECL:
+  case LANG_ENTITY_FOREACH:
     stmt->content = content;
     break;
   default:
@@ -438,6 +439,19 @@ argsList_t *newArgument(expr_t *expr, void *next) {
   }
 
   return argl;
+}
+
+forEachStmt_t* newForEach(char *root, char *entry, void *body) {
+  forEachStmt_t *stmt = ast_emalloc(sizeof(forEachStmt_t));
+  expr_t *idRoot = newExpr_ID(root);
+  expr_t *idEntry = newExpr_ID(entry);
+
+  stmt->body = body;
+  stmt->root = idRoot;
+  stmt->entry = idEntry;
+  stmt->index = 0;
+
+  return stmt;
 }
 
 functionDef_t *newFunc(const char *id, void *params, void *body) {

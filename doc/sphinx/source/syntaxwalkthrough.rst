@@ -89,20 +89,17 @@ declaration of a **map** and two of the **list** sort.
 	. [ run ] {
 	  in = input(">> ")
 	  expr = split(in, " ")
-	  i = 0
-	  . [ i < len(expr) ] {
-	    ? [ isNumber(expr[i]) ] {
-	      push( parseInt(expr[i]) )
-	    } ~[ contains(operators, expr[i]) ] {
-	      s = eval(expr[i])
+	  ( expr ... e ) {
+	    ? [ isNumber(e) ] {
+	      push( parseInt(e) )
+	    } ~[ contains(operators, e) ] {
+	      s = eval(e)
 	      push(s)
-	    } ~[ contains(expr[i], "q") ] {
+	    } ~[ contains(e, "q") ] {
 	      run = 0
 	    } ~ {
-	      print("Sorry, I don't understand this: " + expr[i])
+	      print("Sorry, I don't understand this: " + e)
 	    }
-	    i = i + 1
-	    @
 	  }
 	  ? [ stack["head"] > 0 ] {
 	    print(stack["data"][ stack["head"] - 1 ])
@@ -110,6 +107,7 @@ declaration of a **map** and two of the **list** sort.
 	  stack["head"] = 0
 	  @
 	}
+
 
 Data types
 ~~~~~~~~~~
@@ -554,20 +552,17 @@ Below is an implementation of an RPN calculator implemented using a class.
 	. [ run ] {
 	  in = input(">> ")
 	  expr = split(in, " ")
-	  i = 0
-	  . [ i < len(expr) ] {
-	    ? [ isNumber(expr[i]) ] {
-	      calc::push( parseInt(expr[i]) )
-	    } ~[ contains(operators, expr[i]) ] {
-	      s = calc::eval(expr[i])
+	  ( expr ... e ) {
+	    ? [ isNumber(e) ] {
+	      calc::push( parseInt(e) )
+	    } ~[ contains(operators, e) ] {
+	      s = calc::eval(e)
 	      calc::push(s)
-	    } ~[ contains(expr[i], "q") ] {
+	    } ~[ contains(e, "q") ] {
 	      run = 0
 	    } ~ {
-	      print("Sorry, I don't understad this: " + expr[i])
+	      print("Sorry, I don't understand this: " + e)
 	    }
-	    i = i + 1
-	    @
 	  }
 	  calc::printResult()
 	  calc::reset()

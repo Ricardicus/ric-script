@@ -133,7 +133,7 @@ stack = {"head" : 0, "data" : []}
 operators = ["+", "*", "-", "/"]
 numberChars = ['0','1','2','3','4','5','6','7','8','9']
 
-@ isNumber(num) {
+@ isNumber(num) {
   isNr = 1
   i = 0
   . [ i < len(num) ] {
@@ -147,7 +147,7 @@ numberChars = ['0','1','2','3','4','5','6','7','8','9']
   -> isNr
 }
 
-@ pop() {
+@ pop() {
   head = stack["head"]
   ? [ head == 0 ] {
     print("Too few arguments on the stack. Goodbye!")
@@ -191,20 +191,17 @@ run = 1
 . [ run ] {
   in = input(">> ")
   expr = split(in, " ")
-  i = 0
-  . [ i < len(expr) ] {
-    ? [ isNumber(expr[i]) ] {
-      push( parseInt(expr[i]) )
-    } ~[ contains(operators, expr[i]) ] {
-      s = eval(expr[i])
+  ( expr ... e ) {
+    ? [ isNumber(e) ] {
+      push( parseInt(e) )
+    } ~[ contains(operators, e) ] {
+      s = eval(e)
       push(s)
-    } ~[ contains(expr[i], "q") ] {
+    } ~[ contains(e, "q") ] {
       run = 0
     } ~ {
-      print("Sorry, I don't understad this: " + expr[i])
+      print("Sorry, I don't understand this: " + e)
     }
-    i = i + 1
-    @
   }
   ? [ stack["head"] > 0 ] {
     print(stack["data"][ stack["head"] - 1 ])
@@ -311,20 +308,17 @@ run = 1
 . [ run ] {
   in = input(">> ")
   expr = split(in, " ")
-  i = 0
-  . [ i < len(expr) ] {
-    ? [ isNumber(expr[i]) ] {
-      calc::push( parseInt(expr[i]) )
-    } ~[ contains(operators, expr[i]) ] {
-      s = calc::eval(expr[i])
+  ( expr ... e ) {
+    ? [ isNumber(e) ] {
+      calc::push( parseInt(e) )
+    } ~[ contains(operators, e) ] {
+      s = calc::eval(e)
       calc::push(s)
-    } ~[ contains(expr[i], "q") ] {
+    } ~[ contains(e, "q") ] {
       run = 0
     } ~ {
-      print("Sorry, I don't understad this: " + expr[i])
+      print("Sorry, I don't understand this: " + e)
     }
-    i = i + 1
-    @
   }
   calc::printResult()
   calc::reset()

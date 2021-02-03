@@ -2717,6 +2717,7 @@ void interpret_statements_(
           if ( festmt->index >= rootVec->length ) {
             /* End this iteration */
             stmt = next;
+            festmt->index = 0;
             continue;
           }
 
@@ -2779,6 +2780,7 @@ void interpret_statements_(
           if ( arrayIndex >= keyCount ) {
             /* We are out of here */
             stmt = next;
+            festmt->index = 0;
             continue;
           }
 

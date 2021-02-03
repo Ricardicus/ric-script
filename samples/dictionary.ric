@@ -44,3 +44,9 @@ print(contains(s, "barfoo"))
 print(keys(s))
 print(keys(d))
 print(keys(d["a"]))
+
+# For each loop, iterating over the keys
+( s ... key ) {
+	print(key)
+	print(s[key])
+}

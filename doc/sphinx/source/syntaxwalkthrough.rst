@@ -299,11 +299,9 @@ and can hold any type of expressions.
 
 	print( len(h) )
 
-	i = 0
-	. [ i < len(h) ] {
-	  print(h[i])
-	  i = i + 1
-	  @
+	# For each loop
+	( h ... entry ) {
+		print(entry)
 	}
 
 	append(h, "foo")
@@ -313,11 +311,9 @@ and can hold any type of expressions.
 
 	print(h[0])
 
-	i = 0
-	. [ i < len(h) ] {
-	  print(h[i])
-	  i = i + 1
-	  @
+	# For each loop
+	( h ... entry ) {
+		print(entry)
 	}
 
 	print(h)

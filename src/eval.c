@@ -2669,13 +2669,20 @@ void interpret_statements_(
         forEachStmt_t *festmt = ((statement_t*)stmt)->content;
         expr_t *root = festmt->root;
         expr_t *entry = festmt->entry;
-        char *entryId;
+        vector_t *rootVec = NULL;
+        argsList_t *walk = NULL;
+        expr_t *expToSet = NULL;
+        heapval_t *hvp = NULL;
+        int dummy;
+        int arrayIndex;
+        char *entryId = NULL;
         stackval_t sv;
 
         evaluate_expression(root, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
         switch ( sv.type ) {
         case VECTORTYPE:
+        rootVec = sv.vec;
         break;
         default:
           printf("%s.%d error: '%s' isn't an indexable array\n", 
@@ -2695,9 +2702,57 @@ void interpret_statements_(
           ctx->start[ctx->depth] = stmt;
           ctx->end[ctx->depth] = next;
           ctx->ctxDepth[ctx->depth] = ctx->depth;
+          ctx->bodyEnd[ctx->depth] = next;
         }
 
-        (void)entryId;
+        /* check the limits */
+        if ( festmt->index >= rootVec->length ) {
+          /* End this iteration */
+          stmt = next;
+          continue;
+        }
+
+        arrayIndex = festmt->index;
+        festmt->index++;
+        walk = rootVec->content;
+        while ( walk != NULL && arrayIndex >= 0 ) {
+          expToSet = walk->arg;
+          walk = walk->next;
+          --arrayIndex;
+        }
+
+        if ( expToSet == NULL ) {
+          fprintf(stderr, "%s.%d error: Unexpected index error!\n",
+            ((statement_t*) stmt)->file, ((statement_t*) stmt)->line);
+          GENERAL_REPORT_ISSUE_MSG();
+          exit(1);
+        }
+
+        evaluate_expression(expToSet, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+
+        /* Placing value on the heap */
+        if ( sv.type == TEXT ) {
+          /* Special case */
+          char *c = sv.t;
+          size_t len = strlen(c)+1;
+          char *newText = ast_emalloc(len);
+          snprintf(newText,len,"%s",c);
+          sv.t = newText;
+        } else if ( sv.type == VECTORTYPE ) {
+          expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+          sv.vec = e->vec;
+          free(e);
+        } else if ( sv.type == DICTTYPE ) {
+          dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          sv.dict = dict;
+        }
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+        locals_push(varLocals, entryId, hvp);
+
+        next = festmt->body;
       }
       break;
       case LANG_ENTITY_CONTINUE:

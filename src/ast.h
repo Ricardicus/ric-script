@@ -245,7 +245,7 @@ typedef struct forEachStmt {
   expr_t *root;
   expr_t *entry;
   body_t *body;
-  uint32_t index;
+  char *uniqueUnfoldID;
 } forEachStmt_t;
 
 typedef struct functionCall_t {

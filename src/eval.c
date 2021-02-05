@@ -2678,6 +2678,7 @@ void interpret_statements_(
         heapval_t *hvp = NULL;
         int dummy;
         int32_t arrayIndex;
+        int32_t festmtIndex;
         char *entryId = NULL;
         stackval_t sv;
 
@@ -2709,7 +2710,29 @@ void interpret_statements_(
           entryId = entry->id.id;
         }
 
-        if ( festmt->index == 0 ) {
+        /* Get for-each unfold variable value */
+        hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+        if ( hvp == NULL ) {
+          /* Create the variable with the value to be used for indexing, start with 0 */
+          sv.type = INT32TYPE;
+          sv.i = 0;
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
+        }
+
+        /* Get the index value */
+        hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+        if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+          /* This is really not support to happen */
+          printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+          exit(1);
+        }
+
+        festmtIndex = hvp->sv.i;
+
+        if ( festmtIndex == 0 ) {
           /* Set starting */
           ctx->start[ctx->depth] = stmt;
           ctx->end[ctx->depth] = next;
@@ -2717,19 +2740,43 @@ void interpret_statements_(
           ctx->bodyEnd[ctx->depth] = next;
         }
 
-        arrayIndex = festmt->index;
+        arrayIndex = festmtIndex;
 
         if ( rootVec != NULL ) {
 
           /* check the limits */
-          if ( festmt->index >= rootVec->length ) {
+          if ( festmtIndex >= rootVec->length ) {
             /* End this iteration */
             stmt = next;
-            festmt->index = 0;
+            /* Set the variable to 0 */
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+              /* This is really not support to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            hvp->sv.i = 0;
+            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
             continue;
           }
 
-          festmt->index++;
+          /* Increase the value of the unfolded variable */
+          festmtIndex++;
+          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+            /* This is really not support to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1);
+          }
+
+          hvp->sv.i = festmtIndex;
+          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);        
+
           walk = rootVec->content;
           while ( walk != NULL && arrayIndex >= 0 ) {
             expToSet = walk->arg;
@@ -2788,7 +2835,18 @@ void interpret_statements_(
           if ( arrayIndex >= keyCount ) {
             /* We are out of here */
             stmt = next;
-            festmt->index = 0;
+            /* Set the variable to 0 */
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+              /* This is really not support to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            hvp->sv.i = 0;
+            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
             continue;
           }
 
@@ -2808,7 +2866,19 @@ void interpret_statements_(
                 sv.t = newText;
                 ALLOC_HEAP(&sv, hp, &hvp, &dummy);
                 locals_push(varLocals, entryId, hvp);
-                festmt->index++;
+                /* Increase the value of the unfolded variable */
+                festmtIndex++;
+                hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+                if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+                  /* This is really not support to happen */
+                  printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+                  exit(1);
+                }
+
+                hvp->sv.i = festmtIndex;
+                locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
               }
 
               ptr = ptr->next;
@@ -2826,7 +2896,18 @@ void interpret_statements_(
           if ( arrayIndex >= strlen(rootChars) ) {
             /* We are out of here */
             stmt = next;
-            festmt->index = 0;
+            /* Set the variable to 0 */
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+              /* This is really not support to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            hvp->sv.i = 0;
+            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
             continue; 
           }
 
@@ -2837,24 +2918,59 @@ void interpret_statements_(
           sv.t = newText;
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           locals_push(varLocals, entryId, hvp);
-          festmt->index++;
+          /* Increase the value of the unfolded variable */
+          festmtIndex++;
+          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+            /* This is really not support to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1);
+          }
+
+          hvp->sv.i = festmtIndex;
+          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
         } else if ( rootInt > 0 ) {
           /* traverse the integer, start from zero */
           stackval_t sv;
 
           /* Check limits */
-          if ( festmt->index >= rootInt ) {
+          if ( festmtIndex >= rootInt ) {
             /* We are out of here */
             stmt = next;
-            festmt->index = 0;
+            /* Set the variable to 0 */
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+              /* This is really not support to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            hvp->sv.i = 0;
+            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
             continue;
           }
 
           sv.type = INT32TYPE;
-          sv.i = festmt->index;
+          sv.i = festmtIndex;
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           locals_push(varLocals, entryId, hvp);
-          festmt->index++;
+          /* Increase the value of the unfolded variable */
+          festmtIndex++;
+          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+
+          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+            /* This is really not support to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1);
+          }
+
+          hvp->sv.i = festmtIndex;
+          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
         }
 
         next = festmt->body;

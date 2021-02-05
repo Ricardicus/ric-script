@@ -442,6 +442,8 @@ argsList_t *newArgument(expr_t *expr, void *next) {
 }
 
 forEachStmt_t* newForEach(expr_t *root, char *entry, void *body) {
+  static int uniqueForEachUnfoldIndex = 0;
+
   forEachStmt_t *stmt = ast_emalloc(sizeof(forEachStmt_t));
   expr_t *idRoot = root;
   expr_t *idEntry = newExpr_ID(entry);
@@ -449,8 +451,12 @@ forEachStmt_t* newForEach(expr_t *root, char *entry, void *body) {
   stmt->body = body;
   stmt->root = idRoot;
   stmt->entry = idEntry;
-  stmt->index = 0;
+  stmt->uniqueUnfoldID = ast_emalloc(40);
 
+  memset(stmt->uniqueUnfoldID, 0, 40);
+  snprintf(stmt->uniqueUnfoldID, 40, "__UniqueShadyRicForEach%d", uniqueForEachUnfoldIndex);
+
+  uniqueForEachUnfoldIndex++;
   return stmt;
 }
 
@@ -786,6 +792,7 @@ void free_ast(statement_t *stmt) {
 
     free_expression(foreach->root);
     free_expression(foreach->entry);
+    free(foreach->uniqueUnfoldID);
     free_ast(foreach->body->content);
   }
   break;

@@ -3,7 +3,10 @@ from settings import *
 
 def test_find_files():
 
-  output_lines = ['./test_find_files.py', './test_types.py', './test_class.py','./test_ric_lib.py','./test_xattr.py','./test_locals_globals.py','./test_list_dir.py','./test_vector_print.py','./test_time_of_day.py','./test_args.py','./test_sample_function_within_function.py','./settings.py','./test_sample_gcd.py','./test_string_manipulations.py','./test_func_ptr.py','./test_load.py','./test_math.py','./test_dict_print.py']
+  output_lines = ['./test_find_files.py', './test_types.py', './test_class.py','./test_ric_lib.py','./test_xattr.py',
+  './test_locals_globals.py','./test_list_dir.py','./test_vector_print.py','./test_time_of_day.py','./test_args.py',
+  './test_sample_function_within_function.py','./settings.py','./test_sample_gcd.py','./test_string_manipulations.py',
+  './test_func_ptr.py','./test_load.py','./test_math.py','./test_dict_print.py', './test_for_eaching.py']
 
   if ( os.name == 'nt' ):
     # due to the fact that Windows uses backslash

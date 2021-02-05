@@ -164,7 +164,7 @@ systemStatement: '$' ID {
     $$ = $2;
 };
 
-forEachStatement: '(' ID '.' '.' '.' ID ')' body {
+forEachStatement: '(' expressions '.' '.' '.' ID ')' body {
     body_t *bd = $8;
     statement_t *stmt = bd->content;
 

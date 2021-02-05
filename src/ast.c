@@ -441,9 +441,9 @@ argsList_t *newArgument(expr_t *expr, void *next) {
   return argl;
 }
 
-forEachStmt_t* newForEach(char *root, char *entry, void *body) {
+forEachStmt_t* newForEach(expr_t *root, char *entry, void *body) {
   forEachStmt_t *stmt = ast_emalloc(sizeof(forEachStmt_t));
-  expr_t *idRoot = newExpr_ID(root);
+  expr_t *idRoot = root;
   expr_t *idEntry = newExpr_ID(entry);
 
   stmt->body = body;
@@ -756,6 +756,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_SYSTEM:
   case LANG_ENTITY_CLASSDECL:
   case LANG_ENTITY_FIN:
+  case LANG_ENTITY_FOREACH:
     next = ((statement_t *)stmt)->next;
     break;
   case LANG_ENTITY_RETURN:
@@ -780,6 +781,14 @@ void free_ast(statement_t *stmt) {
     //free_expression(decl->val);
     free_expression(decl->id);
   } break;
+  case LANG_ENTITY_FOREACH: {
+    forEachStmt_t *foreach = ((statement_t *)stmt)->content;
+
+    free_expression(foreach->root);
+    free_expression(foreach->entry);
+    free_ast(foreach->body->content);
+  }
+  break;
   case LANG_ENTITY_EMPTY_STR: {
     free_expression(((statement_t *)stmt)->content);
     break;

@@ -317,7 +317,7 @@ statement_t*    newStatement(int type, void *content);
 argsList_t*     newArgument(expr_t *exp, void *next);
 ifStmt_t*       newIfStatement(int ifType, void *cond, void *body);
 functionDef_t*  newFunc(const char *id, void *args, void *body);
-forEachStmt_t*  newForEach(char *root, char *entry, void *body);
+forEachStmt_t*  newForEach(expr_t *root, char *entry, void *body);
 expr_t*         newFunCall(expr_t *id, void *args);
 expr_t*         newClassFunCall(expr_t *classID, char *funcID, void *args);
 body_t*         newBody(void *body);

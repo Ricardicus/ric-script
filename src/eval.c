@@ -2677,7 +2677,7 @@ void interpret_statements_(
         expr_t *expToSet = NULL;
         heapval_t *hvp = NULL;
         int dummy;
-        uint32_t arrayIndex;
+        int32_t arrayIndex;
         char *entryId = NULL;
         stackval_t sv;
 
@@ -2847,7 +2847,7 @@ void interpret_statements_(
             /* We are out of here */
             stmt = next;
             festmt->index = 0;
-            continue; 
+            continue;
           }
 
           sv.type = INT32TYPE;

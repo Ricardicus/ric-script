@@ -1,0 +1,24 @@
+# For-eaching
+# Integers
+limit = 10
+( limit ... i ) {
+  print(i)
+}
+
+# Dictionary
+dict = {"a" : 1, "b" : 2, "c" : 3}
+( dict ... key ) {
+  print(key + ": " + dict[key])
+}
+
+# Strings
+string = "Hello world!"
+( string ... c ) {
+  print(c)
+}
+
+# Lists
+list = ["a", 2, "b", 4]
+( list ... entry ) {
+  print(entry)
+}

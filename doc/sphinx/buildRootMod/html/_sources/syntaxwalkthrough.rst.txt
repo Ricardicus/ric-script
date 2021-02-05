@@ -610,4 +610,70 @@ As an example, this is interesting, you can write code like this:
 	yey!
 
 
+For-each looping
+~~~~~~~~~~~~~~~~
 
+For looping you can use the control flow structures used above,
+but there is also a for-each structure in the language.
+It works for dictionaries, lists, integers and strings.
+
+.. code-block:: bash
+
+	# For-eaching
+	# Integers
+	limit = 10
+	( limit ... i ) {
+	  print(i)
+	}
+
+	# Dictionary
+	dict = {"a" : 1, "b" : 2, "c" : 3}
+	( dict ... key ) {
+	  print(key + ": " + dict[key])
+	}
+
+	# Strings
+	string = "Hello world!"
+	( string ... c ) {
+	  print(c)
+	}
+
+	# Lists
+	list = ["a", 2, "b", 4]
+	( list ... entry ) {
+	  print(entry)
+	}
+
+**outputs**:
+
+.. code-block:: bash
+
+	0
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	a: 1
+	b: 2
+	c: 3
+	H
+	e
+	l
+	l
+	o
+
+	w
+	o
+	r
+	l
+	d
+	!
+	a
+	2
+	b
+	4

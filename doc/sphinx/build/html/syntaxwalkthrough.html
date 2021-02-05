@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Syntax walkthrough &mdash; RicScript documentation 0.1 documentation</title>
   
@@ -17,10 +17,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -33,6 +30,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -54,7 +52,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> RicScript documentation
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> RicScript documentation
           
 
           
@@ -103,6 +101,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#class-declarations">Class declarations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#control-flow">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#for-each-looping">For-each looping</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="standardlibrary.html">Standard library</a></li>
@@ -147,8 +146,6 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -160,7 +157,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/syntaxwalkthrough.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -249,8 +246,8 @@ print<span class="o">(</span><span class="s2">&quot;RPN Calculator (quit by typi
 
 <span class="nv">run</span> <span class="o">=</span> <span class="m">1</span>
 . <span class="o">[</span> run <span class="o">]</span> <span class="o">{</span>
-  <span class="k">in</span> <span class="o">=</span> input<span class="o">(</span><span class="s2">&quot;&gt;&gt; &quot;</span><span class="o">)</span>
-  <span class="nv">expr</span> <span class="o">=</span> split<span class="o">(</span><span class="k">in</span>, <span class="s2">&quot; &quot;</span><span class="o">)</span>
+  <span class="nv">in</span> <span class="o">=</span> input<span class="o">(</span><span class="s2">&quot;&gt;&gt; &quot;</span><span class="o">)</span>
+  <span class="nv">expr</span> <span class="o">=</span> split<span class="o">(</span>in, <span class="s2">&quot; &quot;</span><span class="o">)</span>
   <span class="o">(</span> expr ... e <span class="o">)</span> <span class="o">{</span>
     ? <span class="o">[</span> isNumber<span class="o">(</span>e<span class="o">)</span> <span class="o">]</span> <span class="o">{</span>
       push<span class="o">(</span> parseInt<span class="o">(</span>e<span class="o">)</span> <span class="o">)</span>
@@ -680,8 +677,8 @@ print<span class="o">(</span><span class="s2">&quot;RPN Calculator (quit by typi
 <span class="nv">operators</span> <span class="o">=</span> calc::getOperators<span class="o">()</span>
 <span class="nv">run</span> <span class="o">=</span> <span class="m">1</span>
 . <span class="o">[</span> run <span class="o">]</span> <span class="o">{</span>
-  <span class="k">in</span> <span class="o">=</span> input<span class="o">(</span><span class="s2">&quot;&gt;&gt; &quot;</span><span class="o">)</span>
-  <span class="nv">expr</span> <span class="o">=</span> split<span class="o">(</span><span class="k">in</span>, <span class="s2">&quot; &quot;</span><span class="o">)</span>
+  <span class="nv">in</span> <span class="o">=</span> input<span class="o">(</span><span class="s2">&quot;&gt;&gt; &quot;</span><span class="o">)</span>
+  <span class="nv">expr</span> <span class="o">=</span> split<span class="o">(</span>in, <span class="s2">&quot; &quot;</span><span class="o">)</span>
   <span class="o">(</span> expr ... e <span class="o">)</span> <span class="o">{</span>
     ? <span class="o">[</span> isNumber<span class="o">(</span>e<span class="o">)</span> <span class="o">]</span> <span class="o">{</span>
       calc::push<span class="o">(</span> parseInt<span class="o">(</span>e<span class="o">)</span> <span class="o">)</span>
@@ -752,6 +749,70 @@ yey!
 </pre></div>
 </div>
 </div>
+<div class="section" id="for-each-looping">
+<h2>For-each looping<a class="headerlink" href="#for-each-looping" title="Permalink to this headline">¶</a></h2>
+<p>For looping you can use the control flow structures used above,
+but there is also a for-each structure in the language.
+It works for dictionaries, lists, integers and strings.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For-eaching</span>
+<span class="c1"># Integers</span>
+<span class="nv">limit</span> <span class="o">=</span> <span class="m">10</span>
+<span class="o">(</span> limit ... i <span class="o">)</span> <span class="o">{</span>
+  print<span class="o">(</span>i<span class="o">)</span>
+<span class="o">}</span>
+
+<span class="c1"># Dictionary</span>
+<span class="nv">dict</span> <span class="o">=</span> <span class="o">{</span><span class="s2">&quot;a&quot;</span> : <span class="m">1</span>, <span class="s2">&quot;b&quot;</span> : <span class="m">2</span>, <span class="s2">&quot;c&quot;</span> : <span class="m">3</span><span class="o">}</span>
+<span class="o">(</span> dict ... key <span class="o">)</span> <span class="o">{</span>
+  print<span class="o">(</span>key + <span class="s2">&quot;: &quot;</span> + dict<span class="o">[</span>key<span class="o">])</span>
+<span class="o">}</span>
+
+<span class="c1"># Strings</span>
+<span class="nv">string</span> <span class="o">=</span> <span class="s2">&quot;Hello world!&quot;</span>
+<span class="o">(</span> string ... c <span class="o">)</span> <span class="o">{</span>
+  print<span class="o">(</span>c<span class="o">)</span>
+<span class="o">}</span>
+
+<span class="c1"># Lists</span>
+<span class="nv">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span>, <span class="m">2</span>, <span class="s2">&quot;b&quot;</span>, <span class="m">4</span><span class="o">]</span>
+<span class="o">(</span> list ... entry <span class="o">)</span> <span class="o">{</span>
+  print<span class="o">(</span>entry<span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p><strong>outputs</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span>
+<span class="m">1</span>
+<span class="m">2</span>
+<span class="m">3</span>
+<span class="m">4</span>
+<span class="m">5</span>
+<span class="m">6</span>
+<span class="m">7</span>
+<span class="m">8</span>
+<span class="m">9</span>
+a: <span class="m">1</span>
+b: <span class="m">2</span>
+c: <span class="m">3</span>
+H
+e
+l
+l
+o
+
+w
+o
+r
+l
+d
+!
+a
+<span class="m">2</span>
+b
+<span class="m">4</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -759,29 +820,37 @@ yey!
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="standardlibrary.html" class="btn btn-neutral float-right" title="Standard library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="standardlibrary.html" class="btn btn-neutral float-right" title="Standard library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Rickard Hallerbäck.
+        
+        &copy; Copyright 2020, Rickard Hallerbäck
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

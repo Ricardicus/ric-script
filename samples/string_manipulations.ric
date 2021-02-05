@@ -17,3 +17,7 @@ d = "tja"
 s[0] = d
 print(s)
 
+s = "Hello world!"
+( s ... c ) {
+	print(c)
+}

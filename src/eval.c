@@ -2670,6 +2670,7 @@ void interpret_statements_(
         expr_t *root = festmt->root;
         expr_t *entry = festmt->entry;
         vector_t *rootVec = NULL;
+        char *rootChars = NULL;
         argsList_t *walk = NULL;
         expr_t *expToSet = NULL;
         heapval_t *hvp = NULL;
@@ -2687,6 +2688,9 @@ void interpret_statements_(
         break;
         case DICTTYPE:
         rootDict = sv.dict;
+        break;
+        case TEXT:
+        rootChars = sv.t;
         break;
         default:
           printf("%s.%d error: '%s' isn't an indexable array\n", 
@@ -2808,6 +2812,28 @@ void interpret_statements_(
             }
             i++;
           }
+        } else if ( rootChars != NULL ) {
+          /* traverse the string chars */
+          stackval_t sv;
+          size_t len;
+          char *newText;
+
+          /* Check limits */
+          if ( arrayIndex >= strlen(rootChars) ) {
+            /* We are out of here */
+            stmt = next;
+            festmt->index = 0;
+            continue; 
+          }
+
+          len = 2;
+          newText = ast_emalloc(len);
+          snprintf(newText, 2, "%c", rootChars[arrayIndex]);
+          sv.type = TEXT;
+          sv.t = newText;
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          locals_push(varLocals, entryId, hvp);
+          festmt->index++;
         }
 
         next = festmt->body;

@@ -436,6 +436,7 @@ ric-script comment symbol **#** so it looks alright.
 ```javascript
 #!/usr/bin/ric
 //# A script to demonstrate how one can list files using ric-script
+//# A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {
   print("usage: " + args[0] + " " + args[1] + " directory")
@@ -443,9 +444,7 @@ ric-script comment symbol **#** so it looks alright.
 
 @ listFiles(folder, indent) {
   files = ls(folder)
-  i = 0
-  . [ i < len(files) ] {
-    file = files[i]
+  ( files ... file ) {
     fullfile = folder + "/" + file
     ? [ isFile(fullfile) ] {
       printf(" " * indent)
@@ -458,8 +457,6 @@ ric-script comment symbol **#** so it looks alright.
         listFiles(fullfile, indent + 1)
       }}
     }
-    i = i + 1
-    @
   }
 }
 

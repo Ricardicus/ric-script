@@ -9,7 +9,19 @@ def test_vector_print():
 "hejhej",
 "-ejhej",
 "--jhej",
-"tjahej"
+"tjahej",
+"H",
+"e",
+"l",
+"l",
+"o",
+" ",
+"w",
+"o",
+"r",
+"l",
+"d",
+"!"
 ]
 
   script = callSample('string_manipulations.ric')

@@ -2671,12 +2671,13 @@ void interpret_statements_(
         expr_t *entry = festmt->entry;
         vector_t *rootVec = NULL;
         char *rootChars = NULL;
+        int32_t rootInt = -1;
+        dictionary_t *rootDict = NULL;
         argsList_t *walk = NULL;
         expr_t *expToSet = NULL;
         heapval_t *hvp = NULL;
-        dictionary_t *rootDict = NULL;
         int dummy;
-        int arrayIndex;
+        uint32_t arrayIndex;
         char *entryId = NULL;
         stackval_t sv;
 
@@ -2691,6 +2692,9 @@ void interpret_statements_(
         break;
         case TEXT:
         rootChars = sv.t;
+        break;
+        case INT32TYPE:
+        rootInt = sv.i;
         break;
         default:
           printf("%s.%d error: '%s' isn't an indexable array\n", 
@@ -2831,6 +2835,23 @@ void interpret_statements_(
           snprintf(newText, 2, "%c", rootChars[arrayIndex]);
           sv.type = TEXT;
           sv.t = newText;
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          locals_push(varLocals, entryId, hvp);
+          festmt->index++;
+        } else if ( rootInt > 0 ) {
+          /* traverse the integer, start from zero */
+          stackval_t sv;
+
+          /* Check limits */
+          if ( festmt->index >= rootInt ) {
+            /* We are out of here */
+            stmt = next;
+            festmt->index = 0;
+            continue; 
+          }
+
+          sv.type = INT32TYPE;
+          sv.i = festmt->index;
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           locals_push(varLocals, entryId, hvp);
           festmt->index++;

@@ -88,11 +88,13 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="syntaxwalkthrough.html">Syntax walkthrough</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Standard library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-batteries">List of batteries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#file-io">File io</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#socket">Socket</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#math">Math</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#extended-file-attributes-xattr">Extended File Attributes (xattr)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time">Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#threads">Threads</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker image</a></li>
@@ -164,21 +166,416 @@
   <a class="reference internal image-reference" href="images/icon_small.png"><img alt="images/icon_small.png" class="align-right" src="images/icon_small.png" style="width: 15.0px; height: 15.0px;" /></a>
 <div class="section" id="standard-library">
 <h1>Standard library<a class="headerlink" href="#standard-library" title="Permalink to this headline">¶</a></h1>
-<p><em>Will be filled in!</em></p>
+<p>The language comes with some batteries included!
+I will present some of them here</p>
+<div class="section" id="list-of-batteries">
+<h2>List of batteries<a class="headerlink" href="#list-of-batteries" title="Permalink to this headline">¶</a></h2>
+<p>Using <strong>help()</strong> you get, as of today, the following output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">help</span><span class="p">()</span>
+<span class="n">These</span> <span class="n">are</span> <span class="n">the</span> <span class="n">functions</span> <span class="n">I</span> <span class="n">know</span><span class="p">:</span>
+<span class="n">function</span><span class="o">-</span><span class="n">name</span> <span class="p">(</span><span class="n">number</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">arguments</span><span class="p">)</span>
+<span class="o">-</span> <span class="n">exit</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">print</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">printf</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">append</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">len</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">contains</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">keys</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">isDefined</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">help</span> <span class="p">(</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">type</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">typeInText</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">list</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">data</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">text</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">parseInt</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">split</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">charCode</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">isFile</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">fileOpen</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">fileClose</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">fileWrite</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">fileRead</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">fileReadLines</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">input</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">pow</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">log</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">sqrt</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">sin</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">cos</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">tan</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">exp</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nb">abs</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">floor</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">ceil</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">randomInt</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">random</span> <span class="p">(</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">load</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">now</span> <span class="p">(</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeSeconds</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeMinutes</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeHours</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeDays</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeWeeks</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeMonths</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeYears</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeSecond</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeMinute</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeHour</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeDay</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeWeek</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeMonth</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">timeYear</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">xattrList</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">xattrGet</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">xattrSet</span> <span class="p">(</span> <span class="mi">3</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">xattrFindKey</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">xattrRm</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">sleep</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">isDir</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">ls</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">rm</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">mkdir</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">find</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">cd</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">setTimeout</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">setInterval</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">socketServer</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">socketAccept</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">socketRead</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">socketWrite</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">socketClose</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="n">socketConnect</span> <span class="p">(</span> <span class="mi">2</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Due to the underlying structure, I have not been able to add function argument
+names to the structure that handles the extended library.
+All the extended library functions are implemented <a class="reference external" href="https://github.com/Ricardicus/ric-script/tree/master/src/library">here</a>.</p>
+</div>
 <div class="section" id="file-io">
 <h2>File io<a class="headerlink" href="#file-io" title="Permalink to this headline">¶</a></h2>
+<p>You can do file IO, but only basic things as of today. More to come!
+Here is an example of functions that do file IO:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="nx">isFile</span> <span class="p">(</span> <span class="mf">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nx">fileOpen</span> <span class="p">(</span> <span class="mf">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nx">fileClose</span> <span class="p">(</span> <span class="mf">1</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nx">fileWrite</span> <span class="p">(</span> <span class="mf">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nx">fileRead</span> <span class="p">(</span> <span class="mf">2</span> <span class="p">)</span>
+<span class="o">-</span> <span class="nx">fileReadLines</span> <span class="p">(</span> <span class="mf">1</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Using <strong>isFile</strong>, you can for example list all files in a directory like
+this:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>#!/usr/bin/ric
+# A script to demonstrate how one can list files using ric-script
+
+@ printUsage() {
+  print(&quot;usage: &quot; + args[0] + &quot; &quot; + args[1] + &quot; directory&quot;)
+}
+
+@ listFiles(folder, indent) {
+  files = ls(folder)
+  ( files ... file ) {
+    fullfile = folder + &quot;/&quot; + file
+    ? [ isFile(fullfile) ] {
+      printf(&quot; &quot; * indent)
+      print(file)
+    } ~ {
+      ? [ file != &#39;.&#39; ] {
+      ? [ file != &#39;..&#39;] {
+        printf(&quot; &quot; * indent)
+        print(file)
+        listFiles(fullfile, indent + 1)
+      }}
+    }
+  }
+}
+
+# argument checking
+? [ len(args) &lt; 3 ] {
+  printUsage()
+  exit(1)
+}
+
+? [ isDir(args[2]) ] {
+  # print folder structure
+  listFiles(args[2], 0)
+} ~ {
+  # not a folder given
+  printUsage()
+  exit(1)
+}
+</pre></div>
+</div>
+<p>You can read and write data to a file like this:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>fp = fileOpen(fileCheck)
+
+# A file has been opened
+content = &quot;Hello World!\nThis is a message :)\n&quot;
+fileWrite(fp, content)
+
+# Closing the file
+fileClose(fp)
+
+# Opening the file, and print its contents
+fp = fileOpen(fileCheck)
+print(fileReadLines(fp))
+fileClose(fp)
+</pre></div>
+</div>
+<p><strong>outputs:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span><span class="s1">&#39;Hello World!</span>
+<span class="s1">&#39;</span>,<span class="s1">&#39;This is a message :)</span>
+<span class="s1">&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="socket">
 <h2>Socket<a class="headerlink" href="#socket" title="Permalink to this headline">¶</a></h2>
+<p>Here is an example of how you can create a web server in ric-script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/ric</span>
+<span class="c1"># Example of how to use the built in</span>
+<span class="c1"># socket interface in ric script.</span>
+<span class="c1"># This is an echo-server.</span>
+
+<span class="nv">reads</span> <span class="o">=</span> <span class="m">10</span>
+
+@ usage <span class="o">()</span> <span class="o">{</span>
+  print<span class="o">(</span><span class="s2">&quot;usage: &quot;</span> + args<span class="o">[</span><span class="m">0</span><span class="o">]</span> + <span class="s2">&quot; &quot;</span> + args<span class="o">[</span><span class="m">1</span><span class="o">]</span> + <span class="s2">&quot; port&quot;</span><span class="o">)</span>
+  exit<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+<span class="o">}</span>
+
+? <span class="o">[</span> len<span class="o">(</span>args<span class="o">)</span> &lt; <span class="m">3</span> <span class="o">]</span> <span class="o">{</span>
+  usage<span class="o">()</span>
+<span class="o">}</span>
+
+<span class="nv">s</span> <span class="o">=</span> socketServer<span class="o">(</span>args<span class="o">[</span><span class="m">2</span><span class="o">])</span>
+? <span class="o">[</span> s &lt; <span class="m">0</span> <span class="o">]</span> <span class="o">{</span>
+  print<span class="o">(</span><span class="s2">&quot;Failed to create the socket, sorry..&quot;</span><span class="o">)</span>
+  exit<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="nv">i</span> <span class="o">=</span> <span class="m">0</span>
+. <span class="o">[</span> i &lt; reads <span class="o">]</span> <span class="o">{</span>
+  <span class="nv">t</span> <span class="o">=</span> socketAccept<span class="o">(</span>s<span class="o">)</span>
+  ? <span class="o">[</span> t &gt; <span class="m">0</span> <span class="o">]</span> <span class="o">{</span>
+    <span class="nv">in</span> <span class="o">=</span> socketRead<span class="o">(</span>t, <span class="m">50</span><span class="o">)</span>
+    print<span class="o">(</span><span class="s2">&quot;read &quot;</span> + len<span class="o">(</span>in<span class="o">)</span> + <span class="s2">&quot; bytes: &quot;</span> + in<span class="o">)</span>
+    socketWrite<span class="o">(</span>t, in<span class="o">)</span>
+    socketClose<span class="o">(</span>t<span class="o">)</span>
+  <span class="o">}</span>
+  <span class="nv">i</span> <span class="o">=</span> i + <span class="m">1</span>
+  @
+<span class="o">}</span>
+
+socketClose<span class="o">(</span>s<span class="o">)</span>
+</pre></div>
+</div>
+<p>Here is an example of how you can create a client in ric-script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/ric</span>
+<span class="c1"># Example of how to use the built in</span>
+<span class="c1"># socket interface in ric script.</span>
+<span class="c1"># This is a client program.</span>
+
+<span class="nv">sends</span> <span class="o">=</span> <span class="m">10</span>
+
+@ usage <span class="o">()</span> <span class="o">{</span>
+  print<span class="o">(</span><span class="s2">&quot;usage: &quot;</span> + args<span class="o">[</span><span class="m">0</span><span class="o">]</span> + <span class="s2">&quot; &quot;</span> + args<span class="o">[</span><span class="m">1</span><span class="o">]</span> + <span class="s2">&quot; host port content-to-write&quot;</span><span class="o">)</span>
+  exit<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+<span class="o">}</span>
+
+? <span class="o">[</span> len<span class="o">(</span>args<span class="o">)</span> &lt; <span class="m">5</span> <span class="o">]</span> <span class="o">{</span>
+  usage<span class="o">()</span>
+<span class="o">}</span>
+
+<span class="nv">i</span> <span class="o">=</span> <span class="m">0</span>
+. <span class="o">[</span> i &lt; sends <span class="o">]</span> <span class="o">{</span>
+  print<span class="o">(</span><span class="s2">&quot;Opening connection to host: &quot;</span> + args<span class="o">[</span><span class="m">2</span><span class="o">]</span> + <span class="s2">&quot;:&quot;</span> + args<span class="o">[</span><span class="m">3</span><span class="o">])</span>
+  <span class="nv">s</span> <span class="o">=</span> socketConnect<span class="o">(</span>args<span class="o">[</span><span class="m">2</span><span class="o">]</span>, args<span class="o">[</span><span class="m">3</span><span class="o">])</span>
+  ? <span class="o">[</span> s &lt; <span class="m">0</span> <span class="o">]</span> <span class="o">{</span>
+    print<span class="o">(</span><span class="s2">&quot;Failed to create the socket, sorry.. error code: &quot;</span> + s<span class="o">)</span>
+    exit<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+  <span class="o">}</span>
+
+  <span class="nv">t</span> <span class="o">=</span> socketWrite<span class="o">(</span>s, args<span class="o">[</span><span class="m">4</span><span class="o">])</span>
+  ? <span class="o">[</span> t &gt; <span class="m">0</span> <span class="o">]</span> <span class="o">{</span>
+    <span class="nv">in</span> <span class="o">=</span> socketRead<span class="o">(</span>s, <span class="m">50</span><span class="o">)</span>
+    print<span class="o">(</span><span class="s2">&quot;read &quot;</span> + len<span class="o">(</span>in<span class="o">)</span> + <span class="s2">&quot; bytes: &quot;</span> + in<span class="o">)</span>
+  <span class="o">}</span> ~ <span class="o">{</span>
+    print<span class="o">(</span><span class="s2">&quot;Failed to write to host...&quot;</span><span class="o">)</span>
+  <span class="o">}</span>
+  socketClose<span class="o">(</span>s<span class="o">)</span>
+  sleep<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+  <span class="nv">i</span> <span class="o">=</span> i + i
+  @
+<span class="o">}</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="math">
 <h2>Math<a class="headerlink" href="#math" title="Permalink to this headline">¶</a></h2>
+<p>You got some math functions at hand and they accept both integers and doubles.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>- pow <span class="o">(</span> <span class="m">2</span> <span class="o">)</span>
+- log <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- sqrt <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- sin <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- cos <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- tan <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- exp <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- abs <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- floor <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- ceil <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="extended-file-attributes-xattr">
 <h2>Extended File Attributes (xattr)<a class="headerlink" href="#extended-file-attributes-xattr" title="Permalink to this headline">¶</a></h2>
+<p>On POSIX systems, let’s say not Windows, you can get and set extended file attributes.
+Here is an example of how to do that in ric-script:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>file = &quot;requirements.txt&quot;
+s = xattrList(file)
+print(&quot;xattr&#39;s of &#39;&quot; + file + &quot;&#39;:&quot;)
+print(s)
+
+print(&quot;Setting some xattributes&quot;)
+
+xattrSet(file, &quot;user.owner&quot;, &quot;Rickard&quot;)
+xattrSet(file, &quot;user.master&quot;, &quot;Rickard of course&quot;)
+
+print(&quot;xattr&#39;s of &#39;&quot; + file + &quot;&#39; and values:&quot;)
+s = xattrList(file)
+i = 0
+. [ i &lt; len(s) ] {
+  val = xattrGet(file, s[i])
+  print(&quot;    - &#39;&quot; + s[i] + &quot;&#39;: &#39;&quot; + val + &quot;&#39;&quot;)
+  i = i + 1
+  @
+}
+
+print(&quot;Searching for user.* keyed files&quot;)
+s = xattrFindKey(&quot;user\.*&quot;)
+i = 0
+. [ i &lt; len(s) ] {
+  print(s[i])
+  i = i + 1
+  @
+}
+
+print(&quot;Removing xattributes I just set&quot;)
+s = xattrList(file)
+i = 0
+. [ i &lt; len(s) ] {
+  xattrRm(file, s[i])
+  i = i + 1
+  @
+}
+
+s = xattrList(file)
+print(&quot;xattr&#39;s of &#39;&quot; + file + &quot;&#39;:&quot;)
+print(s)
+</pre></div>
+</div>
+<p><strong>outputs</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xattr&#39;s of &#39;requirements.txt&#39;:
+[]
+Setting some xattributes
+xattr&#39;s of &#39;requirements.txt&#39; and values:
+    - &#39;user.owner&#39;: &#39;Rickard&#39;
+    - &#39;user.master&#39;: &#39;Rickard of course&#39;
+Searching for user.* keyed files
+./requirements.txt
+Removing xattributes I just set
+xattr&#39;s of &#39;requirements.txt&#39;:
+[]
+</pre></div>
+</div>
+<p>This was at least what I got on my system. Who knows what x-attrs you have on yours :)</p>
 </div>
 <div class="section" id="time">
 <h2>Time<a class="headerlink" href="#time" title="Permalink to this headline">¶</a></h2>
+<p>I have added support for handling time-values.
+The main point of entry is <strong>now</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>- now <span class="o">(</span> <span class="m">0</span> <span class="o">)</span>
+- timeSeconds <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeMinutes <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeHours <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeDays <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeWeeks <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeMonths <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeYears <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeSecond <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeMinute <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeHour <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeDay <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeWeek <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeMonth <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+- timeYear <span class="o">(</span> <span class="m">1</span> <span class="o">)</span>
+</pre></div>
+</div>
+<p>The functions are made to extract values from a given moment.
+I have not done so much work in this area, it would be nice
+with a function that creates a ‘date-time’ object based on input.
+Feel free to contribute!</p>
+</div>
+<div class="section" id="threads">
+<h2>Threads<a class="headerlink" href="#threads" title="Permalink to this headline">¶</a></h2>
+<p>Inspired by Javascript, you can create new contexts with the functions</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>- setTimeout <span class="o">(</span> <span class="m">2</span> <span class="o">)</span>
+- setInterval <span class="o">(</span> <span class="m">2</span> <span class="o">)</span>
+</pre></div>
+</div>
+<p>Here is an example of how they can be used, for demonstration:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>#!/usr/bin/ric
+# This program shows how you can create
+# different types of thread contexts in
+# ricscript. It is inspired by Javascript.
+# You can do function calls by timeouts
+# over intervals.
+# The interval thread stops if the function
+# returns a non-zero value.
+a = 1
+
+@ iterate () {
+  ? [ a &gt; 10 ] {
+    -&gt; 1
+  }
+  a = a + 1
+}
+
+@ end () {
+  print(&quot;Hi, the shared variable now holds value: &quot; + a)
+}
+
+print(&quot;Hi I am gonna start some threads...&quot;)
+print(&quot;I have set a variable, named &#39;a&#39;, to: &quot; + a)
+print(&quot;In 10 seconds, I will read its value again.&quot;)
+print(&quot;By the time, a thread running with an interval&quot;)
+print(&quot;will increment this variables value with each iteration.&quot;)
+print(&quot;Let&#39;s begin...&quot;)
+
+setTimeout(end, 10)
+setInterval(iterate, 1)
+
+print(&quot;I have now launched the threads!&quot;)
+print(&quot;They are running in a separate context.&quot;)
+print(&quot;I will return with an update...&quot;)
+print(&quot;...&quot;)
+</pre></div>
+</div>
+<p><strong>outputs</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Hi I am gonna start some threads...
+I have set a variable, named &#39;a&#39;, to: 1
+In 10 seconds, I will read its value again.
+By the time, a thread running with an interval
+will increment this variables value with each iteration.
+Let&#39;s begin...
+I have now launched the threads!
+They are running in a separate context.
+I will return with an update...
+...
+Hi, the shared variable now holds value: 10
+</pre></div>
+</div>
 </div>
 </div>
 

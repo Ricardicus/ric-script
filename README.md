@@ -60,7 +60,7 @@ ninja install
 
 # Docker
 
-A containarized node.js app has been developed to test the langauge.
+A containarized node.js app has been developed to test the language.
 The docker image exposes the port 3000. 
 ## Docker example
 ```
@@ -702,6 +702,8 @@ my memory is: not updated
 not updated
 updated from the outside
 ```
+
+For more of a walkthrough check [here](https://ricardicus.se/doc/syntaxwalkthrough.html).
 
 ## Loading external scripts
 

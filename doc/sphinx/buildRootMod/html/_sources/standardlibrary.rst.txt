@@ -106,12 +106,20 @@ Here is an example of functions that do file IO:
 .. code-block:: javascript
 
 	- isFile ( 1 )
+	- isDir ( 1 )
 	- fileOpen ( 1 )
 	- fileClose ( 1 )
 	- fileWrite ( 2 )
 	- fileRead ( 2 )
 	- fileReadLines ( 1 )
+	- isDir ( 1 )
+	- ls ( 1 )
+	- rm ( 1 )
+	- mkdir ( 1 )
+	- find ( 1 )
+	- cd ( 1 )
 
+**find** accepts a regular expression to search for a file, by its filename.
 Using **isFile**, you can for example list all files in a directory like
 this:
 
@@ -125,8 +133,7 @@ this:
 	}
 
 	@ listFiles(folder, indent) {
-	  files = ls(folder)
-	  ( files ... file ) {
+	  ( ls(folder) ... file ) {
 	    fullfile = folder + "/" + file
 	    ? [ isFile(fullfile) ] {
 	      printf(" " * indent)
@@ -292,7 +299,19 @@ Extended File Attributes (xattr)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 On POSIX systems, let's say not Windows, you can get and set extended file attributes.
-Here is an example of how to do that in ric-script:
+
+.. code-block:: bash
+
+	- xattrList ( 1 )
+	- xattrGet ( 2 )
+	- xattrSet ( 3 )
+	- xattrFindKey ( 1 )
+	- xattrRm ( 2 )
+
+**xattrFindKey** accepts a regular expression of a x-attribute key, and finds
+a file that has that key.
+
+Here is an example of how to set, get and list x-attributes in ric-script:
 
 .. code-block:: javascript
 
@@ -396,6 +415,7 @@ Inspired by Javascript, you can create new contexts with the functions
 
 	- setTimeout ( 2 )
 	- setInterval ( 2 )
+	- sleep ( 1 )
 
 Here is an example of how they can be used, for demonstration:
 

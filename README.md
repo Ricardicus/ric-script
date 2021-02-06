@@ -443,8 +443,7 @@ ric-script comment symbol **#** so it looks alright.
 }
 
 @ listFiles(folder, indent) {
-  files = ls(folder)
-  ( files ... file ) {
+  ( ls(folder) ... file ) {
     fullfile = folder + "/" + file
     ? [ isFile(fullfile) ] {
       printf(" " * indent)

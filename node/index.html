@@ -3,6 +3,11 @@
     <head>
       <script src="js/jqeury.v3.5.1.js"></script>
       <style>
+
+        body {
+          background-color: azure;
+        }
+
         textarea {
           border: 1px solid #888;
           outline: none;
@@ -14,8 +19,8 @@
         }
 
         div.btn, div.sample-btn {
-          color: white;
-          background-color: #888888;
+          color: black;
+          background-color: #f0f0f0;
           padding: 0px;
           border-radius: 20px;
           width: 200px;
@@ -23,6 +28,10 @@
           text-align: center;
           vertical-align: middle;
           line-height: 80px;
+        }
+
+        div.btn-link {
+          color: blue;
         }
 
         span.stdout {
@@ -136,16 +145,16 @@ $("#interpret-btn").click(function(){
               <textarea id="output-monitor" class="monitor" cols="60" rows="40" readonly></textarea>    
             </td>
             <td>
-              <div class="sample-btn" value="ric_lib.ric">Standard library</div><br>
-              <div class="sample-btn" value="function_within_function.ric">Function within function</div><br>
               <div class="sample-btn" value="gcd.ric">GCD calculation</div><br>
-              <div class="sample-btn" value="recursion.ric">Recursion</div><br>
-              <div class="sample-btn" value="func_ptr.ric">Function pointer</div><br>
-              <div class="sample-btn" value="vector_print.ric">Vectors</div><br>
+              <div class="sample-btn" value="dictionary.ric">Dictionary</div><br>
+              <div class="sample-btn" value="string_manipulations.ric">Strings</div><br>
+              <div class="sample-btn" value="vector_print.ric">Lists</div><br>
+              <div class="sample-btn" value="function_within_function.ric">Functions</div><br>
+              <div class="btn btn-link" onclick="window.open('https://github.com/Ricardicus/ric-script/tree/master/samples', '_blank');">Other samples</div>
             </td>
 
           </tr>
-          <tr><td style="height:100px;"><center>Arguments: <input id="interpret-args-inpt" value="arg1 arg2"></center></td><td></td><td></td></tr>
+          <tr><td style="height:100px;"><center><b>Arguments</b>: <input id="interpret-args-inpt" value="arg1 arg2"></center></td><td></td><td></td></tr>
           <tr>
             <td>
               <center><div class="btn" id="interpret-btn">Interpret</div></center>

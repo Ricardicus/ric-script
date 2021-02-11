@@ -1,6 +1,8 @@
-# In this language, everything is in a global
-# namespace. Even function declarations.
 # Functions can be defined multiple times
+# and anywhere in the code.
+# The latest interpreted definition holds.
+# This script shows a feature, not a bug, with
+# this language. It takes it rather far.
 
 @ foo (a) {
   # Defining a function within a function

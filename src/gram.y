@@ -332,6 +332,11 @@ logical:
     condition {
         $$ = $1;
     }
+    | '!' expression {
+        expr_t *zero = newExpr_Ival(0);
+        expr_t *cond = newConditional(CONDITION_EQ, zero, $2);
+        $$ = cond;
+    }
     | ID {
         $$ = newExpr_ID($1);
     }

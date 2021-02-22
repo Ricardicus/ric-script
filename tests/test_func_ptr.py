@@ -10,7 +10,8 @@ def test_file_exist():
 "Foobar! foobar",
 "Foobar! foo bar :)",
 "hejsan",
-"hej"
+"hej",
+"0"
   ]
 
   lib_script = callSample('func_ptr.ric')

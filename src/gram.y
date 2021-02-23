@@ -337,16 +337,7 @@ logical:
         expr_t *cond = newConditional(CONDITION_EQ, zero, $2);
         $$ = cond;
     }
-    | ID {
-        $$ = newExpr_ID($1);
-    }
-    | DIGIT {
-        $$ = newExpr_Ival($1);
-    }
-    | functionCall {
-        $$ = $1;
-    }
-    | classFunctionCall {
+    | expression {
         $$ = $1;
     };
 

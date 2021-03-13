@@ -233,6 +233,12 @@ expression:
     | mathContent {
       $$ = $1;
     }
+    | dictionary {
+      $$ = $1;
+    }
+    | vector {
+      $$ = $1;
+    }
     | functionCall {
       $$ = $1;
     }
@@ -440,27 +446,12 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | ID '=' dictionary {
-        expr_t *idexpr = newExpr_ID($1);
-
-        $$ = newDeclaration(idexpr,$3);
-    }
     | ID '=' condition {
         expr_t *idexpr = newExpr_ID($1);
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | ID '=' vector {
-        expr_t *idexpr = newExpr_ID($1);
-        $$ = newDeclaration(idexpr,$3);
-    }
     | indexedVector '=' expressions {
-        $$ = newDeclaration($1,$3);
-    }
-    | indexedVector '=' dictionary {
-        $$ = newDeclaration($1,$3);
-    }
-    | indexedVector '=' vector {
         $$ = newDeclaration($1,$3);
     }
     | indexedVector '=' condition {
@@ -499,26 +490,6 @@ dictionary_key_val:
       $$ = keyVal;
     }
     | stringContents ':' stringContents {
-      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
-
-      keyVal->entity = EXPR_TYPE_DICT;
-      keyVal->key = $1;
-      keyVal->val = $3;
-      keyVal->next = NULL;
-
-      $$ = keyVal;
-    }
-    | stringContents ':' dictionary {
-      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
-
-      keyVal->entity = EXPR_TYPE_DICT;
-      keyVal->key = $1;
-      keyVal->val = $3;
-      keyVal->next = NULL;
-
-      $$ = keyVal;
-    }
-    | stringContents ':' vector {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
       keyVal->entity = EXPR_TYPE_DICT;

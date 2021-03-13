@@ -282,3 +282,8 @@ print(s)
 print("Nu e de slut")
 
 
+# Some printing
+print({"a": 1337})
+print({"a": {"b": 1337}})
+print([1,2,3, {"a": 1337}])
+print({"a" : [{"a": 1337}, 1337]})

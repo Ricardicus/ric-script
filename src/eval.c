@@ -3744,15 +3744,83 @@ void print_indents(int indent) {
 int print_dictionary(dictionary_t *dict,
   EXPRESSION_PARAMS()) {
   hashtable_t *hash = dict->hash;
-  int size = hash->size;
-  int i = 0;
+  //dictionary_t *newDict = NULL;
+  int size;
+  int i;
   int keyCount = 0;
   int keyCountTotal = 0;
   struct key_val_pair *ptr;
 
   if ( dict->initialized == 0 ) {
-    return -1;
+    //stackval_t sv;
+    keyValList_t *walk = dict->keyVals;
+    i = 0;
+    printf("{");
+    while ( walk != NULL ) {
+      stackval_t sv;
+      void *sp = PROVIDE_CONTEXT()->sp;
+      size_t *sc = PROVIDE_CONTEXT()->sc;
+      /* Dictionary already initialized, evaluate expressions in the key-value list */
+      expr_t *expKey = walk->key;
+      expr_t *expVal = walk->val;
+
+      if ( expKey->type != EXPR_TYPE_TEXT ) {
+        walk = walk->next;
+        continue;
+      }
+
+      printf("%s'%s' : ", (i == 0 ? "" : ", "), expKey->text);
+
+      evaluate_expression(expVal, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      switch ( sv.type ) {
+        case INT32TYPE: {
+          printf("%" PRIi32 "", sv.i);
+        }
+        break;
+        case DOUBLETYPE: {
+          printf("%lf", sv.d);
+        }
+        break;
+        case TEXT: {
+          printf("'%s'", sv.t);
+        }
+        break;
+        case POINTERTYPE: {
+          printf("<Pointer: %" PRIxPTR ">", sv.p);
+        }
+        break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          printf("<FuncPointer: '%s'>", funcDec->id.id);
+        }
+        break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
+        }
+        break;
+        case VECTORTYPE: {
+          print_vector(sv.vec, EXPRESSION_ARGS());
+        }
+        break;
+        case DICTTYPE: {
+          print_dictionary(sv.dict, EXPRESSION_ARGS());
+        }
+        break;
+        default:
+        break;
+      }
+
+      walk = walk->next;
+      ++i;
+    }
+    printf("}");
+    return 0;
   }
+
+  size = hash->size;
 
   i = 0;
   while ( i < size ) {
@@ -3884,6 +3952,9 @@ int print_vector(
       break;
     case VECTORTYPE:
       print_vector(sv.vec, EXPRESSION_ARGS());
+      break;
+    case DICTTYPE:
+      print_dictionary(sv.dict, EXPRESSION_ARGS());
       break;
     default:
       printf("%s.error: unknown type of value on the stack (%d)\n", 

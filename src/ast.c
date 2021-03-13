@@ -349,7 +349,7 @@ class_t* newClass(char *id, body_t *body) {
 }
 
 expr_t* newExpr_Copy(expr_t *expr) {
-  expr_t *newExp = NULL;
+  expr_t *newExp = expr;
 
   if ( expr == NULL )
     return NULL;
@@ -416,7 +416,10 @@ expr_t* newExpr_Copy(expr_t *expr) {
     newExp = newExpr_Vector(args);
     break;
   }
-
+  case EXPR_TYPE_DICT: {
+    newExp = newExpr_Dictionary(expr->dict->keyVals);
+  }
+  break;
   case EXPR_TYPE_EMPTY:
   default:
     break;
@@ -617,15 +620,28 @@ void free_expression(expr_t *expr) {
       while ( walk != NULL ) {
         walk_next = walk->next;
         free_expression(walk->key);
+        free(walk->key);
         free_expression(walk->val);
+        free(walk->val);
         free(walk);
         walk = walk_next;
       }
-
     }
     free(dict);
     break;
   }
+  case EXPR_TYPE_FUNCCALL: {
+    functionCall_t *call = expr->func;
+    argsList_t *args = call->args;
+
+    free_expression(call->id);
+    while ( args != NULL ) {
+      free_expression(args->arg);
+      args = args->next;
+    }
+
+  }
+  break;
   case EXPR_TYPE_COND: {
     ifCondition_t *cond = expr->cond;
     free_expression((expr_t *)cond->left);
@@ -638,6 +654,8 @@ void free_expression(expr_t *expr) {
     argsList_t *v = vec->content;
     argsList_t *p;
 
+    //printf("(2)\n");
+
     while ( vecWalk < len ) {
       if ( v->arg != NULL ) {
         free_expression(v->arg);
@@ -648,6 +666,7 @@ void free_expression(expr_t *expr) {
       v = v->next;
       free(p);
       ++vecWalk;
+    //  printf("(2.1)\n");
     }
 
     free(vec);
@@ -763,6 +782,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CLASSDECL:
   case LANG_ENTITY_FIN:
   case LANG_ENTITY_FOREACH:
+ // case LANG_ENTITY_EXPR:
     next = ((statement_t *)stmt)->next;
     break;
   case LANG_ENTITY_RETURN:
@@ -787,6 +807,11 @@ void free_ast(statement_t *stmt) {
     //free_expression(decl->val);
     free_expression(decl->id);
   } break;
+  case LANG_ENTITY_EXPR: {
+    expr_t *e = ((statement_t *)stmt)->content;
+    free_expression(e);
+  }
+  break;
   case LANG_ENTITY_FOREACH: {
     forEachStmt_t *foreach = ((statement_t *)stmt)->content;
 
@@ -818,7 +843,13 @@ void free_ast(statement_t *stmt) {
   } break;
   case LANG_ENTITY_FUNCCALL: {
     functionCall_t *funcCall = ((statement_t *)stmt)->content;
+    argsList_t *args = funcCall->args;
+
     free_expression(funcCall->id);
+    while ( args != NULL ) {
+      free_expression(args->arg);
+      args = args->next;
+    }
   } break;
   case LANG_ENTITY_CONDITIONAL: {
     ifStmt_t *ifstmt = ((statement_t *)stmt)->content;

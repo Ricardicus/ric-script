@@ -436,7 +436,6 @@ ric-script comment symbol **#** so it looks alright.
 ```javascript
 #!/usr/bin/ric
 //# A script to demonstrate how one can list files using ric-script
-//# A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {
   print("usage: " + args[0] + " " + args[1] + " directory")

@@ -50,3 +50,5 @@ print(keys(d["a"]))
 	print(key)
 	print(s[key])
 }
+
+print({"a": "b", "c": ["d", "e", "f", {"g": "h"}]})

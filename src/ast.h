@@ -449,6 +449,8 @@ PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define LIBRARY_INIT() UNPACK_CONTEXT()
 #define LIBRARY_FUNC_NAME() func_name
 
+#define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
+
 typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
 
 typedef struct libFunction {

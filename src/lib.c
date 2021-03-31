@@ -3,8 +3,9 @@
 #include <string.h>
 
 #include "lib.h"
+#include "dl.h"
 
-hashtable_t *libCallbacks = NULL;
+#define MAX_NBR_MODULES 100
 
 /* The ric library */
 libFunction_t ric_library[] = {
@@ -94,7 +95,16 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("socketConnect", 2, ric_connect_socket)
 };
 
+/* Handling dynamically linked libraries */
+dl_handle_t libDlHandles[MAX_NBR_MODULES];
+int libOpenHandles = 0;
+hashtable_t *libCallbacks = NULL;
+
+/* For now, parse a line separated list of modules */
+char *ric_library_modules_file = "ric_dl_modules.txt";
+
 void initialize_ric_lib() {
+  FILE *fp;
   size_t i = 0;
   size_t libFuncs = sizeof(ric_library) / sizeof(*ric_library);
   libCallbacks = hashtable_new(100, 0.8);
@@ -104,6 +114,28 @@ void initialize_ric_lib() {
     libFunction_t *func = &ric_library[i];
     hashtable_put(libCallbacks, NULL, func->libFuncName, func);
     ++i;
+  }
+
+  fp = fopen(ric_library_modules_file, "r");
+  if ( fp != NULL ) {
+    char buf[256];
+
+    memset(buf, 0, sizeof(buf));
+    while ( fgets(buf, sizeof(buf), fp) ) {
+      dl_handle_t dl_hnd;
+      int res;
+
+      res = dl_open(buf, &dl_hnd);
+      if ( res == 0 ) {
+        libDlHandles[libOpenHandles] = dl_hnd;
+        libOpenHandles++;
+      }
+
+      memset(buf, 0, sizeof(buf));
+    }
+
+
+    fclose(fp);
   }
 }
 

@@ -144,8 +144,14 @@ size_t ric_lib_calls() {
 }
 
 libFunction_t* look_up_lib(char *id) {
+  libFunction_t* res = NULL;
   if ( libCallbacks == NULL ) {
-    return NULL;
+    res = (libFunction_t*) hashtable_get(libCallbacks, NULL, id);
+  }
+
+  if ( res == NULL ) {
+    /* check among the dymanic libraries */
+    
   }
   return (libFunction_t*) hashtable_get(libCallbacks, NULL, id);
 }

@@ -17,6 +17,8 @@
 #define BIT(x) ((1)<<((x)-1))
 #endif
 
+#define str(s) #s
+
 #define EXPR_TYPE_ID             1
 #define EXPR_TYPE_FVAL           2
 #define EXPR_TYPE_IVAL           3

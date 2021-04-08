@@ -100,9 +100,6 @@ dl_handle_t libDlHandles[MAX_NBR_MODULES];
 int libOpenHandles = 0;
 hashtable_t *libCallbacks = NULL;
 
-/* For now, parse a line separated list of modules */
-char *ric_library_modules_file = "ric_dl_modules.txt";
-
 void initialize_ric_lib() {
   FILE *fp;
   size_t i = 0;
@@ -116,24 +113,29 @@ void initialize_ric_lib() {
     ++i;
   }
 
-  fp = fopen(ric_library_modules_file, "r");
+  fp = fopen(EXPORT_MODULE_FILE, "r");
   if ( fp != NULL ) {
     char buf[256];
 
     memset(buf, 0, sizeof(buf));
     while ( fgets(buf, sizeof(buf), fp) ) {
       dl_handle_t dl_hnd;
+      char *c;
       int res;
+    
+      c = strchr(buf, '\n');
+      if ( c != NULL ) {
+        *c = 0;
+      }
 
       res = dl_open(buf, &dl_hnd);
       if ( res == 0 ) {
         libDlHandles[libOpenHandles] = dl_hnd;
+        dl_print_mod_info(stdout, &dl_hnd);
         libOpenHandles++;
       }
-
       memset(buf, 0, sizeof(buf));
     }
-
 
     fclose(fp);
   }

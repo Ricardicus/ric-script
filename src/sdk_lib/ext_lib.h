@@ -3,7 +3,7 @@
 
 #include "ast.h"
 
-#define EXPORT_MODULE(name) char *ext_lib_name = name;\
-size_t ext_lib_get_nbr_exported_funcs () { return sizeof(ric_library)/sizeof(*ric_library); }
+#define EXPORT_MODULE(name) char* EXPORT_MOD_NAME = name;\
+size_t EXPORT_MOD_NBR_FUNCS () { return sizeof(EXPORT_FUNCTION_LIST)/sizeof(*EXPORT_FUNCTION_LIST); }
 
 #endif

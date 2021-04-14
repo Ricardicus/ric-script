@@ -1,9 +1,11 @@
 #ifndef RIC_EXT_LIB_H
 #define RIC_EXT_LIB_H
 
-#include "ast.h"
+#include "lib.h"
 
 #define EXPORT_MODULE(name) char* EXPORT_MOD_NAME = name;\
-size_t EXPORT_MOD_NBR_FUNCS () { return sizeof(EXPORT_FUNCTION_LIST)/sizeof(*EXPORT_FUNCTION_LIST); }
+size_t EXPORT_MOD_NBR_FUNCS () { return sizeof(EXPORT_FUNCTION_LIST)/sizeof(*EXPORT_FUNCTION_LIST); } \
+int EXPORT_VERSION_SYM_MAJ = EXPORT_VERSION_MAJ; \
+int EXPORT_VERSION_SYM_MIN = EXPORT_VERSION_MIN;
 
 #endif

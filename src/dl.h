@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
-#include "ast.h"
 #include "lib.h"
 
 struct dl_handle;
@@ -16,6 +15,8 @@ struct dl_handle {
   libFunction_t *funcs;
   int nbr_funcs;
   char *mod_name;
+  int mod_ver_maj;
+  int mod_ver_min;
 };
 
 int dl_open(const char *lib, dl_handle_t *dl_lib);

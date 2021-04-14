@@ -3,6 +3,22 @@
 #include <string.h>
 
 #include "lib.h"
+
+/* Including the library functions */
+#include "libio.h"
+#include "libmath.h"
+#include "libstd.h"
+#include "libstring.h"
+#include "libload.h"
+#include "libos.h"
+#include "libtime.h"
+#include "libnet.h"
+#include "libctx.h"
+
+#ifndef NO_XATTR
+#include "libxattr.h"
+#endif
+
 #include "dl.h"
 
 #define MAX_NBR_MODULES 100

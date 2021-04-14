@@ -3,6 +3,7 @@
 int dl_open(const char *lib, dl_handle_t *dl_lib) {
   void *handle = NULL;
   char **mod_name = NULL;
+  int *mod_ver = NULL;
   exportModSizeFunc_t sizeFunc;
   libFunction_t *funcList;
 
@@ -14,20 +15,36 @@ int dl_open(const char *lib, dl_handle_t *dl_lib) {
   dlerror();
 
   dl_lib->hnd = handle;
-  mod_name = (char**) dlsym(dl_lib->hnd, str(EXPORT_MOD_NAME));
-  if ( mod_name != NULL ) {
-    dl_lib->mod_name = *mod_name;
+  mod_name = (char**) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_MOD_NAME));
+  
+  if ( mod_name == NULL ) {
+    return -1;
   }
-  sizeFunc = (exportModSizeFunc_t) dlsym(dl_lib->hnd, str(EXPORT_MOD_NBR_FUNCS));
-  if ( sizeFunc != NULL ) {
-    dl_lib->nbr_funcs = (sizeFunc)();
+  dl_lib->mod_name = *mod_name;
+
+  sizeFunc = (exportModSizeFunc_t) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_MOD_NBR_FUNCS));
+  if ( sizeFunc == NULL ) {
+    return -1;
   }
-  funcList = (libFunction_t*) dlsym(dl_lib->hnd, str(EXPORT_FUNCTION_LIST));
-  if ( funcList != NULL ) {
-    dl_lib->funcs = funcList;
-  } else {
-    printf("IS EMPTY\n");
+  dl_lib->nbr_funcs = (sizeFunc)();
+
+  funcList = (libFunction_t*) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_FUNCTION_LIST));
+  if ( funcList == NULL ) {
+    return -1;
   }
+  dl_lib->funcs = funcList;
+
+  mod_ver = (int*) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_VERSION_SYM_MAJ));
+  if ( mod_ver == NULL ) {
+    return -1;
+  }
+  dl_lib->mod_ver_maj = *mod_ver;
+
+  mod_ver = (int*) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_VERSION_SYM_MIN));
+  if ( mod_ver == NULL ) {
+    return -1;
+  }
+  dl_lib->mod_ver_min = *mod_ver;
 
   return 0;
 }
@@ -51,8 +68,14 @@ void dl_print_mod_info(FILE *stream, const dl_handle_t *hnd) {
   if ( hnd == NULL ) {
     return;
   }
-  fprintf(stream, "Module Name: %s\n", hnd->mod_name);
-  fprintf(stream, "Nbr funcs:   %d\n", hnd->nbr_funcs);
+
+  if ( hnd->mod_name == NULL ) {
+    return;
+  }
+
+  fprintf(stream, "Module    : %s\n", hnd->mod_name);
+  fprintf(stream, "Nbr funcs : %d\n", hnd->nbr_funcs);
+  fprintf(stream, "Version   : %d.%d\n", hnd->mod_ver_maj, hnd->mod_ver_min);
 
   i = 0;
   while ( i < hnd->nbr_funcs ) {

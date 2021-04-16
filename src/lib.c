@@ -147,7 +147,6 @@ void initialize_ric_lib() {
       res = dl_open(buf, &dl_hnd);
       if ( res == 0 ) {
         libDlHandles[libOpenHandles] = dl_hnd;
-        dl_print_mod_info(stdout, &dl_hnd);
         libOpenHandles++;
       }
       memset(buf, 0, sizeof(buf));
@@ -157,20 +156,44 @@ void initialize_ric_lib() {
   }
 }
 
+void ric_get_dynamic_libraries(dl_handle_t **hnds, int *nbrLibs) {
+  if ( hnds == NULL ) {
+    return;
+  }
+  *hnds = libDlHandles;
+  *nbrLibs = libOpenHandles;
+}
+
 size_t ric_lib_calls() {
   return sizeof(ric_library) / sizeof(libFunction_t);
 }
 
 libFunction_t* look_up_lib(char *id) {
   libFunction_t* res = NULL;
-  if ( libCallbacks == NULL ) {
+  if ( libCallbacks != NULL ) {
     res = (libFunction_t*) hashtable_get(libCallbacks, NULL, id);
   }
-
   if ( res == NULL ) {
+    int i;
     /* check among the dymanic libraries */
-    
+    i = 0;
+    while ( i < libOpenHandles ) {
+      int q;
+      dl_handle_t dl = libDlHandles[i];
+      int nbrFuncs = dl.nbr_funcs;
+      libFunction_t *funcs = dl.funcs;
+      q = 0;
+      while ( q < nbrFuncs ) {
+        libFunction_t l = funcs[q];
+        char *funcID = l.libFuncName;
+        if ( strcmp(funcID, id) == 0 ) {
+          return (libFunction_t*)&funcs[q];
+        }
+        q++;
+      }
+      ++i;
+    }
   }
-  return (libFunction_t*) hashtable_get(libCallbacks, NULL, id);
+  return res;
 }
 

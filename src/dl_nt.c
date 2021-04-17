@@ -1,49 +1,52 @@
 #include "dl.h"
 
-#include <dlfcn.h>
+#include <windows.h>
 
 int dl_open(const char *lib, dl_handle_t *dl_lib) {
-  void *handle = NULL;
   char **mod_name = NULL;
   int *mod_ver = NULL;
   exportModSizeFunc_t sizeFunc;
   libFunction_t *funcList;
+  HMODULE m = LoadLibrary(lib);
 
-  handle = dlopen(lib, RTLD_LAZY);
-  if ( !handle ) {
+  if ( m == NULL ) {
     return -1;
   }
+  dl_lib->hnd = m;
 
-  dlerror();
-
-  dl_lib->hnd = handle;
-  mod_name = (char**) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_MOD_NAME));
+  mod_name = (char**) GetProcAddress(dl_lib->hnd, EXPORT_STR(EXPORT_MOD_NAME));
   
   if ( mod_name == NULL ) {
     return -1;
   }
   dl_lib->mod_name = *mod_name;
 
-  sizeFunc = (exportModSizeFunc_t) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_MOD_NBR_FUNCS));
+  sizeFunc = (exportModSizeFunc_t) GetProcAddress(dl_lib->hnd, EXPORT_STR(EXPORT_MOD_NBR_FUNCS));
   if ( sizeFunc == NULL ) {
+    printf("failed to find %d\n",__LINE__);
     return -1;
   }
   dl_lib->nbr_funcs = (sizeFunc)();
 
-  funcList = (libFunction_t*) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_FUNCTION_LIST));
+  funcList = (libFunction_t*) GetProcAddress(dl_lib->hnd, EXPORT_STR(EXPORT_FUNCTION_LIST));
   if ( funcList == NULL ) {
+    printf("failed to find %d\n",__LINE__);
     return -1;
   }
   dl_lib->funcs = funcList;
 
-  mod_ver = (int*) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_VERSION_SYM_MAJ));
+  mod_ver = (int*) GetProcAddress(dl_lib->hnd, EXPORT_STR(EXPORT_VERSION_SYM_MAJ));
   if ( mod_ver == NULL ) {
+    printf("failed to find %d\n",__LINE__);
+
     return -1;
   }
   dl_lib->mod_ver_maj = *mod_ver;
 
-  mod_ver = (int*) dlsym(dl_lib->hnd, EXPORT_STR(EXPORT_VERSION_SYM_MIN));
+  mod_ver = (int*) GetProcAddress(dl_lib->hnd, EXPORT_STR(EXPORT_VERSION_SYM_MIN));
   if ( mod_ver == NULL ) {
+    printf("failed to find %d\n",__LINE__);
+
     return -1;
   }
   dl_lib->mod_ver_min = *mod_ver;
@@ -55,14 +58,14 @@ libFunction_t* dl_lookup(dl_handle_t *hnd, const char *sym) {
   if ( hnd->hnd == NULL ) {
     return NULL;
   }
-  return (libFunction_t*) dlsym(hnd->hnd, sym);
+  return (libFunction_t*) GetProcAddress(hnd->hnd, sym);
 }
 
 int dl_close(dl_handle_t *hnd) {
   if ( hnd->hnd == NULL ) {
     return -1;
   }
-  return dlclose(hnd->hnd);
+  return FreeLibrary(hnd->hnd);
 }
 
 void dl_print_mod_info(FILE *stream, const dl_handle_t *hnd) {
@@ -86,3 +89,4 @@ void dl_print_mod_info(FILE *stream, const dl_handle_t *hnd) {
     i++;
   }
 }
+

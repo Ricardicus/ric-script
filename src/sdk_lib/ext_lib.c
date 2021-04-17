@@ -6,7 +6,7 @@ int ric_example(LIBRARY_PARAMS())
   return 0;
 }
 
-libFunction_t EXPORT_FUNCTION_LIST[] = {
+MARK_EXPORT libFunction_t EXPORT_FUNCTION_LIST[] = {
   DECLARE_LIB_FUNCTION("ric_example", 0, ric_example)
 };
 

@@ -32,7 +32,7 @@ But I might change it if someone inspires me to..
 
 # Build
 
-You can build the interpreter for this language on multiple platforms.
+You can build the interpreter from source for this language on multiple platforms.
 I currently support iOSX, Linux and Windows.
 
 On linux or mac use meson or GNU make you build like this: 

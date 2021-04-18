@@ -4,10 +4,10 @@ from settings import *
 def test_ext_lib_args():
 
   output_lines = [
-  "hejsan svejsan"
+  "hejsan"
   ]
 
-  lib_script = callSampleArgs('ext_lib_example.ric', ['hejsan svejsan'])
+  lib_script = callSampleArgs('ext_lib_example.ric', ['hejsan'])
 
   ric_result = os.popen(lib_script).read().splitlines()
 

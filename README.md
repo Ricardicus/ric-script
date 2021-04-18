@@ -11,22 +11,34 @@
 
 I am developing a programming language!
 
-Parsing layer complete, continously working on the 
-interpreter for my language now. In the future I might
-make it possible to compile the program to some sort 
+It is an interpreted language and I draw a lot of inspiration from Python and Javascript.
+The AST is built using yacc and I implement everything in C. 
+I am continously working on the interpreter for my language, and it is a work
+in progress. In the future I might make it possible to compile the program to some sort 
 of intermediate codes that I can build a much smaller
 interpreter for (some sort of virtual RISC).
 Not sure what target there will be (if so).
 
 The samples folder contains ric scripts with OK syntax I 
 will also provide some samples here in the README further below.
+Much of these scripts there are created for use in the test suite,
+so not all of them are used to show the beauty of this language.
 
-<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">See here for more documentation</a>
+The entire thing has a working title of 'ric-script'. I want to stress that
+it is a scripting language, and I think 'ric' sounds cool (even if it is a bit self-congratulatory).
+But I might change it if someone inspires me to.. 
+
+<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is a ling to some of the language documentation</a>
 
 # Build
 
-On linux or mac use meson or GNU make
+You can build the interpreter for this language on multiple platforms.
+I currently support iOSX, Linux and Windows.
+
+On linux or mac use meson or GNU make you build like this: 
 ```
+# fetch the code 
+git clone https://github.com/Ricardicus/ric-script && cd ric-script
 # on linux or mac
 make
 # or, with meson:
@@ -44,7 +56,9 @@ ninja
 For windows only meson works:
 
 ```
-# on windows
+# fetch the code 
+git clone https://github.com/Ricardicus/ric-script && cd ric-script
+# set up a python environment
 python3 -m venv venv
 venv\Source\activate
 pip install -r requirements.txt

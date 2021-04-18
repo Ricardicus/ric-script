@@ -759,7 +759,7 @@ What now is required, and I must remind you this is a _work in progress_, is a
 file named "ric_modules.txt". In this file, you write the location of this file.
 It is best provided as an absolute path, but relative (containing a slash) also works.
 
-You can see if you successfully loaded your _help()_ function available in the interactive mode, will show you what it has loaded. It can look like this:
+You can see if you successfully loaded your dynamic library function by using the _help()_ function available in the interactive mode. It can look like this, after reading a module named 'example_ric':
 
 ```BASH
 $ ric

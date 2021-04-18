@@ -1,0 +1,1 @@
+builddir\ric_extended_lib_example-1.dll

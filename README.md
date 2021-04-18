@@ -543,7 +543,7 @@ xattr's of 'requirements.txt':
 []
 ```
 
-# Walkthrough of the language syntax
+# show walkthrough of some of the language syntax
 
 Since I use JavaScript syntax highlighting here on GitHub, I have **added //** just before the original
 ric-script comment symbol **#** so it looks alright.

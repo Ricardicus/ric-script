@@ -9,7 +9,7 @@
 
 # Work in progress
 
-I am developing my first programming language!
+I am developing a programming language!
 
 Parsing layer complete, continously working on the 
 interpreter for my language now. In the future I might

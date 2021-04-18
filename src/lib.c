@@ -144,6 +144,11 @@ void initialize_ric_lib() {
         *c = 0;
       }
 
+      c = strchr(buf, '\r');
+      if ( c != NULL ) {
+        *c = 0;
+      }
+
       res = dl_open(buf, &dl_hnd);
       if ( res == 0 ) {
         libDlHandles[libOpenHandles] = dl_hnd;

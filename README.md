@@ -21,8 +21,8 @@ Not sure what target there will be (if so).
 
 The samples folder contains ric scripts with OK syntax I 
 will also provide some samples here in the README further below.
-Much of these scripts there are created for use in the test suite,
-so not all of them are used to show the beauty of this language.
+Many of the scripts there are made for and used in the test suite,
+so not all of them explicitly show the beauty of this language.
 
 The entire thing has a working title of 'ric-script'. I want to stress that
 it is a scripting language, and I think 'ric' sounds cool (even if it is a bit self-congratulatory).

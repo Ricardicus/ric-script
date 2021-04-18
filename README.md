@@ -736,7 +736,9 @@ when to keep reading line after another without interpreting.
 For example, one typically makes a new line when opening
 a body bracket ('{'). In the future, I want to fix this. 
 But I am glad that it works anyhow. You can still
-do what you want, as long as you keep it on one line
+do what you want, as long as you keep it on one line.
+Fortunately; this language does not care about line breaks and
+much can be done in one single line.
 
 ```
 $ ./ric

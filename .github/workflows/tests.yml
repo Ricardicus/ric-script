@@ -33,7 +33,7 @@ jobs:
     - id: build-meson
       run: mkdir install && meson builddir --prefix $(pwd)/install && cd builddir && ninja && ninja install
     - id: build-dyn-lib
-      run: cd src/sdk_lib && meson builddir && cd builddir && ninja && cd .. && cp ../../install/ric . && echo 'builddir/libric_extended_lib_example.so.1.0.0' > ric_modules.txt
+      run: cd src/sdk_lib && meson builddir && cd builddir && ninja && cd .. && cp ../../install/bin/ric . && echo 'builddir/libric_extended_lib_example.so.1.0.0' > ric_modules.txt
     - id: test-dyn-lib
       run: cd src/sdk_lib && pytest
 
@@ -69,6 +69,6 @@ jobs:
     - id: build-meson
       run: mkdir install; meson builddir --prefix ${pwd}\install; cd builddir; ninja; ninja install
     - id: build-dyn-lib
-      run: cd src\sdk_lib && meson builddir && cd builddir && ninja && cd .. && copy ..\..\install\bin\pcre.dll . && copy ..\..\install\bin\ric.exe . && copy tests\ric_modules.txt .
+      run: cd src\sdk_lib && meson builddir && cd builddir && ninja && cd .. && copy ..\..\install\bin\libpcre.dll . && copy ..\..\install\bin\ric.exe . && copy tests\ric_modules.txt .
     - id: test-dyn-lib
       run: cd src/sdk_lib && pytest

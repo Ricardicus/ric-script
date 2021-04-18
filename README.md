@@ -114,6 +114,7 @@ well as haven't implemented:
 - [x] Socket interface
 - [x] Support for at least swedish UTF-8 characters å, ä and ö. 
 - [x] Threading interface
+- [x] Dynamic library support
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).

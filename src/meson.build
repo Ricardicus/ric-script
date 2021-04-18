@@ -46,17 +46,21 @@ if ( target_os == 'windows' )
   includes += [pcre_inc]
 
   # Adding windows specific translation units 
-  sources += ['sync_nt.c']
+  sources += ['sync_nt.c', 'dl_nt.c']
 else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
 	mathlib = cc.find_library('m', required: true)
 	deps += [mathlib]
 
+  # Dynamic lib as depencendy
+  dllib = cc.find_library('dl', required: true)
+  deps += [dllib]
+
   # Silence some warnings
   ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function']
 
   # Adding POSIX translation units (for darwin, linux etc.)
-  sources += ['sync.c']
+  sources += ['sync.c', 'dl.c']
 endif
 
 interpreter = executable('ric',

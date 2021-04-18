@@ -10,6 +10,7 @@
 */
 
 #include "lib.h"
+#include "dl.h"
 #include "hashtable.h"
 #include "ast.h"
 #include "eval.h"

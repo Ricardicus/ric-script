@@ -958,6 +958,8 @@ int ric_help(LIBRARY_PARAMS())
   int walk = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
+  dl_handle_t *dynLibs;
+  int nbrDynLibs = 0;
 
   printf("These are the functions I know:\nfunction-name ( number-of-arguments)\n");
 
@@ -965,6 +967,17 @@ int ric_help(LIBRARY_PARAMS())
   while ( walk < ric_lib_calls() ) {
     printf("- %s ( %d )\n", ric_library[walk].libFuncName, ric_library[walk].nbrArgs);
     ++walk;
+  }
+
+  /* Print dynamically loaded libraries */
+  ric_get_dynamic_libraries(&dynLibs, &nbrDynLibs);
+  if ( nbrDynLibs > 0 ) {
+    printf("These are the modules and functions I have loaded dynamically:\nfunction-name ( number-of-arguments)\n");
+    walk = 0;
+    while ( walk < nbrDynLibs ) {
+      dl_print_mod_info(stdout, &dynLibs[walk]);
+      walk++;
+    }
   }
 
   /* Pushing result */

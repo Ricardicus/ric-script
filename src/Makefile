@@ -33,6 +33,7 @@ RIC_SOURCES = \
 	lib \
 	garbage \
 	sync \
+	dl \
 	$(LIB_DIR)/libio \
 	$(LIB_DIR)/libmath \
 	$(LIB_DIR)/libstd \
@@ -55,7 +56,7 @@ RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
 DEFINES = YYERROR_VERBOSE
 
-LIBS = m pthread
+LIBS = m pthread dl
 
 CFLAGS = Wall \
 	Werror \

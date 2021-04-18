@@ -1,0 +1,4 @@
+# Example calling the function that was exported
+? [ len(args) > 2 ] {
+	ric_example_print(args[2])
+}

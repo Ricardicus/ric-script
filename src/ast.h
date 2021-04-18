@@ -17,6 +17,8 @@
 #define BIT(x) ((1)<<((x)-1))
 #endif
 
+#define str(s) #s
+
 #define EXPR_TYPE_ID             1
 #define EXPR_TYPE_FVAL           2
 #define EXPR_TYPE_IVAL           3
@@ -448,6 +450,8 @@ PROVIDE_CONTEXT_ARGS(), argsList_t* args, hashtable_t *argVals
 #define LIBRARY_PARAMS() char *func_name, EXPRESSION_PARAMS()
 #define LIBRARY_INIT() UNPACK_CONTEXT()
 #define LIBRARY_FUNC_NAME() func_name
+
+#define DECLARE_LIB_FUNCTION(name, args, func) {name, args, func}
 
 typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
 

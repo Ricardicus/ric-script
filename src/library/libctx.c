@@ -1,7 +1,5 @@
 #include "libctx.h"
 
-
-
 int ric_set_timeout(LIBRARY_PARAMS()) {
   stackval_t stv;
   functionDef_t *func;

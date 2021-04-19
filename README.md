@@ -28,7 +28,7 @@ The entire thing has a working title of 'ric-script'. I want to stress that
 it is a scripting language, and I think 'ric' sounds cool (even if it is a bit self-congratulatory).
 But I might change it if someone inspires me to.. 
 
-<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is a ling to some of the language documentation</a>
+<a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is a link to more of the language documentation</a>
 
 # Build
 

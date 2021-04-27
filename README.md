@@ -55,7 +55,7 @@ ninja
 
 For windows only meson works:
 
-```
+```BASH
 # fetch the code 
 git clone https://github.com/Ricardicus/ric-script && cd ric-script
 # set up a python environment
@@ -77,7 +77,7 @@ ninja install
 A containarized node.js app has been developed to test the language.
 The docker image exposes the port 3000. 
 ## Docker example
-```
+```BASH
 git clone https://github.com/Ricardicus/ric-script
 cd ric-script
 docker build -t node-ric-script:1.0 .

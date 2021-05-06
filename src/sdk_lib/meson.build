@@ -85,6 +85,52 @@ if ( target_os == 'windows' )
   dep = compiler.find_library('wsock32', required: true)
 
   deps += [dep]
+  # PCRE
+  pcre_sources_list = [
+    'pcre_compile.c',
+    'pcre_config.c',
+    'pcre_dfa_exec.c',
+    'pcre_exec.c',
+    'pcre_fullinfo.c',
+    'pcre_get.c',
+    'pcre_globals.c',
+    'pcre_info.c',
+    'pcre_maketables.c',
+    'pcre_newline.c',
+    'pcre_ord2utf8.c',
+    'pcre_refcount.c',
+    'pcre_study.c',
+    'pcre_tables.c',
+    'pcre_try_flipped.c',
+    'pcre_ucd.c',
+    'pcre_valid_utf8.c',
+    'pcre_version.c',
+    'pcre_chartables.c',
+    'pcre_xclass.c'
+  ]
+
+  pcre_sources = []
+
+  foreach pcre_source : pcre_sources_list
+    pcre_sources += [join_paths('..','external','pcre-8.00', pcre_source)]
+  endforeach
+
+  pcre_inc = include_directories(join_paths('..','external','pcre-8.00'))
+
+  # Adding flags for the parser to be more verbose
+  pcre_args = ['-DNEWLINE=-1','-DLINK_SIZE=2','-DMAX_NAME_SIZE=32',
+    '-DMAX_NAME_COUNT=10000', '-DMATCH_LIMIT=10000000','-DMATCH_LIMIT_RECURSION=10000000',
+    '-DPOSIX_MALLOC_THRESHOLD=10','-D_WIN32']
+
+  pcre_lib = shared_library('pcre',
+    sources : pcre_sources, 
+    c_args : [pcre_args],
+    link_with: [],
+    include_directories : [pcre_inc],
+    install: true)
+
+  ric_links += [pcre_lib]
+
   # Regexp
   ric_links += [pcre_lib]
   includes += [pcre_inc]
@@ -113,8 +159,9 @@ endif
 
 shared_library('ric_extended_lib_example',
   sources,
-  c_args: [ext_c_args],
+  c_args: [ext_c_args, ric_c_args],
   dependencies: [deps],
+  link_with: [ric_links],
   version : '1.0.0', include_directories: [includes])
 
 

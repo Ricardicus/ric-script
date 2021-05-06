@@ -2,3 +2,6 @@
 ? [ len(args) > 2 ] {
 	ric_example_print(args[2])
 }
+
+a = "hejsan"
+ric_example_print([a, "hejsan"])

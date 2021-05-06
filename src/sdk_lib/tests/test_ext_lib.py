@@ -4,7 +4,8 @@ from settings import *
 def test_ext_lib_args():
 
   output_lines = [
-  "hejsan"
+  "hejsan",
+  "[hejsan, hejsan]"
   ]
 
   lib_script = callSampleArgs('ext_lib_example.ric', ['hejsan'])

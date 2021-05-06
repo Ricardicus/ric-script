@@ -403,19 +403,26 @@ typedef struct context_full_t {
   int *interactive;
   class_t *classCtx;
   void *syncCtx;
+  hashtable_t *classDecs;
+  hashtable_t *funcDecs;
+  hashtable_t *varDecs;
 } context_full_t;
 
 #define DEF_NEW_CONTEXT() context_full_t exeCtx; int32_t r0, r1, r2, ax; double f0, f1, f2; void *sp, *sb, *hp, *hb; void *st, *ed; \
-size_t sc; int depth; locals_stack_t *varLocals; int interactive; class_t *classCtx; void *syncCtx;
+size_t sc; int depth; locals_stack_t *varLocals; int interactive; class_t *classCtx = NULL; void *syncCtx = NULL; hashtable_t *classDecs = NULL; \
+hashtable_t *funcDecs = NULL; hashtable_t *varDecs = NULL;
 #define DEF_NEW_CONTEXT_STATIC() static context_full_t exeCtx; static int32_t r0, r1, r2, ax; static double f0, f1, f2; static void *sp, *sb, *hp, *hb;\
 static void *st, *ed; static size_t sc; static int depth; static locals_stack_t *varLocals; static int interactive; \
-static class_t *classCtx; static void *syncCtx;
+static class_t *classCtx; static void *syncCtx; static hashtable_t *classDecs; static hashtable_t *funcDecs; \
+static hashtable_t *varDecs;
 
 #define PROVIDE_CONTEXT_INIT() &exeCtx
 #define PROVIDE_CONTEXT() exeCtx
 
-#define PROVIDE_CONTEXT_INIT_MEMBERS() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive, classCtx, syncCtx
-#define PROVIDE_CONTEXT_MEMBERS() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, classCtx, syncCtx
+#define PROVIDE_CONTEXT_INIT_MEMBERS() &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, &interactive, classCtx, syncCtx,\
+classDecs, funcDecs, varDecs
+#define PROVIDE_CONTEXT_MEMBERS() r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, classCtx, syncCtx, \
+classDecs, funcDecs, varDecs
 
 #define ASSIGN_CONTEXT(ctx) ctx = (context_full_t) {PROVIDE_CONTEXT_INIT_MEMBERS()}
 

@@ -1,11 +1,6 @@
 #include "eval.h"
 #include <stdarg.h>
 
-/* Namespace global */
-hashtable_t *classDecs = NULL;
-hashtable_t *funcDecs = NULL;
-hashtable_t *varDecs = NULL;
-
 jmp_buf endingJmpBuf;
 
 #if 0
@@ -595,7 +590,7 @@ Please report back to me.\n\
         functionDef_t *funcDef; // if it is a function pointer
 
         /* Check among the global variables if we have it defined there */
-        hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+        hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
         if ( hv == NULL ) {
           /* Check among the locals if we have it defined there */
@@ -611,7 +606,7 @@ Please report back to me.\n\
           break;
         }
         /* Check among the class declaration if we have this id defined there */
-        classDef = hashtable_get(classDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+        classDef = hashtable_get(PROVIDE_CONTEXT()->classDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
         if ( classDef != NULL ) {
           PUSH_CLASSREF(classDef, sp, sc);
           stop = 1;
@@ -619,7 +614,7 @@ Please report back to me.\n\
 
         if ( !stop ) {
           /* Check among the function declarations if we have it defined there */
-          funcDef = hashtable_get(funcDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+          funcDef = hashtable_get(PROVIDE_CONTEXT()->funcDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
           if ( funcDef != NULL ) {
             // Pushing the function definition
             PUSH_FUNCPTR(funcDef, sp, sc);
@@ -1566,7 +1561,7 @@ int evaluate_id_valid(
     functionDef_t *funcDef; // if it is a function pointer
 
     /* Check among the global variables if we have it defined there */
-    hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, id);
+    hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, id);
 
     if ( hv == NULL ) {
       /* Check among the locals if we have it defined there */
@@ -1578,7 +1573,7 @@ int evaluate_id_valid(
     }
 
     /* Check among the function declarations if we have it defined there */
-    funcDef = hashtable_get(funcDecs, PROVIDE_CONTEXT()->syncCtx, id);
+    funcDef = hashtable_get(PROVIDE_CONTEXT()->funcDecs, PROVIDE_CONTEXT()->syncCtx, id);
     if ( funcDef != NULL ) {
       // Pushing the function definition
       return 1;
@@ -1653,7 +1648,7 @@ void call_func(
     }
 
     /* Check if this is a class construction call */
-    classRef = hashtable_get(classDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
+    classRef = hashtable_get(PROVIDE_CONTEXT()->classDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
     if ( classRef != NULL ) {
       functionDef_t *constructor = NULL;
       class_t *class = NULL;
@@ -1844,7 +1839,7 @@ void call_func(
 
       if ( funcDef == NULL && libFunc == NULL && classRef == NULL ) {
         /* Looking up the function and calling it if it exists */
-        funcDef = hashtable_get(funcDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
+        funcDef = hashtable_get(PROVIDE_CONTEXT()->funcDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
         /* Looking up the function among the library */
         libFunc = look_up_lib(funcID);
 
@@ -1852,7 +1847,7 @@ void call_func(
         if ( funcDef == NULL && libFunc == NULL ) {
           heapval_t *hv;
           /* Check if this is a function pointer call (lowest priority) */
-          hv = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
+          hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
 
           if ( hv == NULL ) {
             // Check among the arguments 
@@ -2374,11 +2369,11 @@ void interpret_statements_(
 
           if ( !stop ) {
             /* Check if the variable is in the global namespace */
-            globalCheck = hashtable_get(varDecs, PROVIDE_CONTEXT()->syncCtx, idStr);
+            globalCheck = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, idStr);
 
             if ( globalCheck != NULL || ctx->depth == 0 ) {
               /* Placing variable declaration in global variable namespace */
-              hashtable_put(varDecs, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
+              hashtable_put(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
             } else {
               /* Placing variable declaration in local variable namespace */
               locals_push(varLocals, idStr, hvp);
@@ -2584,7 +2579,7 @@ void interpret_statements_(
         }
 
         // Mark and sweep the heap
-        mark_and_sweep(varDecs, EXPRESSION_ARGS());
+        mark_and_sweep(PROVIDE_CONTEXT()->varDecs, EXPRESSION_ARGS());
       }
       break;
       case LANG_ENTITY_SYSTEM:
@@ -2653,7 +2648,7 @@ void interpret_statements_(
         class_t *newClass = ((statement_t*)stmt)->content;
 
         /* Placing funciton declaration in global function namespace */
-        hashtable_put(classDecs, PROVIDE_CONTEXT()->syncCtx, newClass->id, newClass);
+        hashtable_put(PROVIDE_CONTEXT()->classDecs, PROVIDE_CONTEXT()->syncCtx, newClass->id, newClass);
       }
       break;
       case LANG_ENTITY_FUNCDECL:
@@ -2661,7 +2656,7 @@ void interpret_statements_(
         functionDef_t *funcDef = ((statement_t*)stmt)->content;
 
         /* Placing funciton declaration in global function namespace */
-        hashtable_put(funcDecs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
+        hashtable_put(PROVIDE_CONTEXT()->funcDecs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
       }
       break;
       case LANG_ENTITY_FOREACH:
@@ -3282,24 +3277,24 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
   stack->sp++;
 }
 
-void setup_namespaces() {
+void setup_namespaces(PROVIDE_CONTEXT_ARGS()) {
   static int globalNamespaceSetup = 0;
 
   if ( globalNamespaceSetup == 0 ) {
-    funcDecs = hashtable_new(100, 0.8);
-    assert(funcDecs != NULL);
-    varDecs = hashtable_new(200, 0.8);
-    assert(varDecs != NULL);
-    classDecs = hashtable_new(200, 0.8);
-    assert(classDecs != NULL);
+    PROVIDE_CONTEXT()->funcDecs = hashtable_new(100, 0.8);
+    assert(PROVIDE_CONTEXT()->funcDecs != NULL);
+    PROVIDE_CONTEXT()->varDecs = hashtable_new(200, 0.8);
+    assert(PROVIDE_CONTEXT()->varDecs != NULL);
+    PROVIDE_CONTEXT()->classDecs = hashtable_new(200, 0.8);
+    assert(PROVIDE_CONTEXT()->classDecs != NULL);
 
     globalNamespaceSetup = 1;
   }
 }
 
-void close_namespaces() {
-  hashtable_free(funcDecs);
-  hashtable_free(varDecs);
+void close_namespaces(PROVIDE_CONTEXT_ARGS()) {
+  hashtable_free(PROVIDE_CONTEXT()->funcDecs);
+  hashtable_free(PROVIDE_CONTEXT()->varDecs);
 }
 
 hashtable_t *new_argstable()
@@ -4203,16 +4198,10 @@ void interpret_statements(
   // Setup heap
   SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
 
-  // Setup global namespaces
-  setup_namespaces();
-
   // Setup locals 
   varLocals = ast_emalloc(sizeof(locals_stack_t));
   varLocals->sp = 0;
   varLocals->sb = 0;
-
-  // arguments to environment variables
-  arguments_to_variables(argc, argv, hp);
 
   // Set up ric library
   initialize_ric_lib();
@@ -4236,6 +4225,12 @@ void interpret_statements(
   /* Assigning the execution context super structure */
   ASSIGN_CONTEXT(exeCtx);
 
+  /* Setup namespaces */
+  setup_namespaces(PROVIDE_CONTEXT_INIT());
+
+  /* arguments to environment variables */
+  arguments_to_variables(PROVIDE_CONTEXT_INIT(), argc, argv, hp);
+
   if ( setjmp(endingJmpBuf) == JMP_CODE_INITIAL ) {
     /* Start descending and evaluating the AST */
     interpret_statements_(stmt, PROVIDE_CONTEXT_INIT(), NULL, NULL);
@@ -4244,7 +4239,7 @@ void interpret_statements(
     freeContext(syncCtx);
 
     // Close namespaces
-    close_namespaces();
+    close_namespaces(PROVIDE_CONTEXT_INIT());
 
     // free locals
     free(varLocals);
@@ -4278,16 +4273,10 @@ void interpret_statements_interactive(
     // Setup heap
     SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
 
-    // Setup global namespaces
-    setup_namespaces();
-
     // Setup locals 
     varLocals = ast_emalloc(sizeof(locals_stack_t));
     varLocals->sp = 0;
     varLocals->sb = 0;
-
-    // arguments to environment variables
-    arguments_to_variables(argc, argv, hp);
 
     // Set up ric library
     initialize_ric_lib();
@@ -4313,6 +4302,12 @@ void interpret_statements_interactive(
 
     /* Assigning the execution context super structure */
     ASSIGN_CONTEXT(exeCtx);
+
+    /* Setup namespaces */
+    setup_namespaces(PROVIDE_CONTEXT_INIT());
+
+    /* arguments to environment variables */
+    arguments_to_variables(PROVIDE_CONTEXT_INIT(), argc, argv, hp);
   }
 
   if ( stmt != NULL ) {
@@ -4353,7 +4348,7 @@ void interpret_statements_interactive(
       freeContext(syncCtx);
 
       // Close namespaces
-      close_namespaces();
+      close_namespaces(PROVIDE_CONTEXT_INIT());
 
       // free locals
       free(varLocals);
@@ -4377,7 +4372,7 @@ void interpret_statements_interactive(
     freeContext(syncCtx);
     
     // Close namespaces
-    close_namespaces();
+    close_namespaces(PROVIDE_CONTEXT_INIT());
 
     // free locals
     free(varLocals);
@@ -4452,7 +4447,7 @@ static char *reservedArgs[] = {
 
 static char *argumentListName = "args";
 
-void arguments_to_variables(int argc, char* argv[], void *hp)
+void arguments_to_variables(PROVIDE_CONTEXT_ARGS(), int argc, char* argv[], void *hp)
 {
   /*
   * Invoking the program with command arguments:
@@ -4550,7 +4545,7 @@ void arguments_to_variables(int argc, char* argv[], void *hp)
   ALLOC_HEAP_UNSAFE(&sv, hp, &hvp, &heapUpdated);
 
   /* Placing variable declaration in global variable namespace */
-  hashtable_put(varDecs, NULL, argumentListName, hvp);
+  hashtable_put(PROVIDE_CONTEXT()->varDecs, NULL, argumentListName, hvp);
 }
 
 dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {

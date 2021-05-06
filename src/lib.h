@@ -23,7 +23,7 @@ void ric_get_dynamic_libraries(dl_handle_t **hnds, int *nbrLibs);
 #define EXPORT_VERSION_MIN 1
 #define EXPORT_VERSION_SYM_MAJ export_ver_maj_nbr
 #define EXPORT_VERSION_SYM_MIN export_ver_min_nbr
-#define EXPORT_FUNCTION_LIST ric_library
+#define EXPORT_FUNCTION_LIST ric_export_library
 #define EXPORT_MOD_NAME ext_lib_name
 #define EXPORT_MOD_NBR_FUNCS ext_lib_get_nbr_exported_funcs
 #define EXPORT_MODULE_FILE "ric_modules.txt"

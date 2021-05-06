@@ -60,12 +60,12 @@ expr_t*  copy_vector(
 
 
 int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS());
-void setup_namespaces();
-void close_namespaces();
+void setup_namespaces(PROVIDE_CONTEXT_ARGS());
+void close_namespaces(PROVIDE_CONTEXT_ARGS());
 void flush_arguments(hashtable_t *args);
 void flush_heapval(void *key, void *val);
 
-void arguments_to_variables(int argc, char* argv[], void *hp);
+void arguments_to_variables(PROVIDE_CONTEXT_ARGS(), int argc, char* argv[], void *hp);
 
 void call_func(
   functionCallContainer_t *funcCall,

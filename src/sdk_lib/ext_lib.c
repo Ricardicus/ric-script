@@ -3,68 +3,18 @@
 int ric_example_print(LIBRARY_PARAMS())
 {
   stackval_t stv;
+  /* Getting the stack pointer */
   void *sp = PROVIDE_CONTEXT()->sp;
+  /* Getting the stack count */
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
+  /* Read the argument from the stack */
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
     case TEXT: 
     {
-      char *c = stv.t;
-      int backslash = 0;
-
-      /* 
-      * Parsing the string,
-      * some character combos (such as: '\r','\n)
-      * should be interpreted disctincly
-      */
-      while ( *c ) {
-
-        if ( !backslash && *c == '\\' ) {
-          backslash = 1;
-          ++c;
-          continue;
-        }
-
-        if ( backslash ) {
-          switch (*c) {
-          case 'n':
-          // Print a new line
-          printf("\n");
-          break;
-          case 'r':
-          // print the other one windows likes
-          printf("\r");
-          break;
-          case '\\':
-          // print a backslash
-          printf("\\");
-          break;
-          case 't':
-#ifdef _WIN32
-          printf("\\t");
-#else
-          // print a tab
-          printf("\t");
-#endif
-          break;
-          default:
-#ifdef _WIN32
-          printf("%c", *c);
-#endif
-          break;
-          }
-        } else {
-          printf("%c", *c);
-        }
-
-        ++c;
-        backslash = 0;
-      }
-
-      // end with new line
-      printf("\n");
+      printf("%s\n", stv.t);
     }
     break;
     case INT32TYPE:
@@ -108,7 +58,40 @@ int ric_example_print(LIBRARY_PARAMS())
     break;
     case VECTORTYPE:
     {
-      printf("VECTOR...\n");
+      /* Walking through the vector */
+      vector_t *vec = stv.vec;
+      argsList_t *content = vec->content;
+      size_t i = 0;
+
+      i = 0;
+      printf("[");
+      while ( content != NULL ) {
+        /* Evaluate the expression */
+        EVAL_EXPRESSION(content->arg);
+        POP_VAL(&stv, sp, sc);
+
+        if ( i > 0 ) {
+          printf(", ");
+        }
+
+        switch (stv.type) {
+        case TEXT: 
+        printf("%s", stv.t);
+        break;
+        case INT32TYPE:
+        printf("%d", stv.i);
+        break;
+        case DOUBLETYPE:
+        printf("%lf", stv.d);
+        break;
+        default:
+          printf("<other>");
+          break;
+        }
+        ++i;
+        content = content->next;
+      }
+      printf("]\n");
     }
     break;
     case RAWDATATYPE:
@@ -128,6 +111,9 @@ int ric_example_print(LIBRARY_PARAMS())
     }
     break;
   }
+
+  /* Return the number 1337 */
+  PUSH_INT(1337, sp, sc);
 
   return 0;
 }

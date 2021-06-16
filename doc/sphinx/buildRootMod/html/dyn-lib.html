@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Welcome to RicScript &mdash; RicScript documentation 0.1 documentation</title>
+  <title>Making your own library functions &mdash; RicScript documentation 0.1 documentation</title>
   
 
   
@@ -43,7 +43,7 @@
     
     <link rel="index" title="Index" href="/doc/genindex.html" />
     <link rel="search" title="Search" href="/doc/search.html" />
-    <link rel="next" title="Installation" href="/doc/installation.html" /> 
+    <link rel="prev" title="Docker image" href="/doc/docker.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -57,7 +57,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> RicScript documentation
+            <a href="/doc/index.html" class="icon icon-home"> RicScript documentation
           
 
           
@@ -89,12 +89,12 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="/doc/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="/doc/syntaxwalkthrough.html">Syntax walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="/doc/standardlibrary.html">Standard library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="/doc/docker.html">Docker image</a></li>
-<li class="toctree-l1"><a class="reference internal" href="/doc/dyn-lib.html">Making your own library functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Making your own library functions</a></li>
 </ul>
 
             
@@ -110,7 +110,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">RicScript documentation</a>
+          <a href="/doc/index.html">RicScript documentation</a>
         
       </nav>
 
@@ -141,15 +141,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="/doc/index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Welcome to RicScript</li>
+      <li>Making your own library functions</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="/doc/_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="/doc/_sources/dyn-lib.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -163,45 +163,46 @@
            <div itemprop="articleBody">
             
   <a class="reference internal image-reference" href="images/icon_small.png"><img alt="images/icon_small.png" class="align-right" src="images/icon_small.png" style="width: 15.0px; height: 15.0px;" /></a>
-<section id="welcome-to-ricscript">
-<h1>Welcome to RicScript<a class="headerlink" href="#welcome-to-ricscript" title="Permalink to this headline">¶</a></h1>
-<p>This is a project that I am working on, it is a scripting language.
-My ambition is to take this to a level where this tool is actually viable sometimes.
-I hope it can be interesting to use for whatever anyone might have in mind. Feel free to try it out.
-I want to take it to an interesting level.</p>
-<p>If you want to contribute, or you find something not working properly or whatever
-feel free to contact me; you find <a class="reference external" href="https://github.com/Ricardicus">me here</a> or you can also send
-me PRs or create issues on the projects public repository <a class="reference external" href="https://github.com/Ricardicus/ric-script">here</a>.</p>
-<a class="reference internal image-reference" href="images/icon_round.png"><img alt="images/icon_round.png" class="align-center" src="images/icon_round.png" style="width: 200px; height: 200px;" /></a>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="/doc/installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#linux-osx">Linux &amp; OSX</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#windows">Windows</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="/doc/syntaxwalkthrough.html">Syntax walkthrough</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="syntaxwalkthrough.html#declarations-functions-and-variables">Declarations: functions and variables</a></li>
-<li class="toctree-l2"><a class="reference internal" href="syntaxwalkthrough.html#data-types">Data types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="syntaxwalkthrough.html#class-declarations">Class declarations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="syntaxwalkthrough.html#control-flow">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="syntaxwalkthrough.html#for-each-looping">For-each looping</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="/doc/standardlibrary.html">Standard library</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#list-of-batteries">List of batteries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#file-io">File io</a></li>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#socket">Socket</a></li>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#math">Math</a></li>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#extended-file-attributes-xattr">Extended File Attributes (xattr)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#time">Time</a></li>
-<li class="toctree-l2"><a class="reference internal" href="standardlibrary.html#threads">Threads</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="/doc/docker.html">Docker image</a></li>
-<li class="toctree-l1"><a class="reference internal" href="/doc/dyn-lib.html">Making your own library functions</a></li>
-</ul>
+<section id="making-your-own-library-functions">
+<h1>Making your own library functions<a class="headerlink" href="#making-your-own-library-functions" title="Permalink to this headline">¶</a></h1>
+<p>There is support for compiling your own code and integrating it in the ric-script interpreter. On Windows this is done with .dll files, on Linux .so and on iOSX .dylib.</p>
+<p>Go to <a class="reference external" href="https://github.com/Ricardicus/ric-script/tree/master/src/sdk_lib">src/sdk_lib</a> and study the example there. Study in particual <a class="reference external" href="https://github.com/Ricardicus/ric-script/tree/master/src/sdk_lib/ext_lib.c">ext_lib.c</a>. It is a Meson project, that can be built like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> src/sdk_lib
+meson builddir <span class="o">&amp;&amp;</span> <span class="nb">cd</span> builddir <span class="o">&amp;&amp;</span> ninja
+</pre></div>
+</div>
+<p>Now the dynamic library is to be found in the build directory. What now is required, and I must remind you this is a work in progress, is a file named <strong>ric_modules.txt</strong>. In this file, you write the location of this file. It is best provided as an absolute path, but relative (containing a slash) also works.</p>
+<p>Say you have build a library file here <code class="docutils literal notranslate"><span class="pre">/my/home/is/here/builddir/libric_extended_lib_example.so.1.0.0</span></code>. Then
+the file content of this <strong>ric_modules.txt</strong> (that is placed in the interpreters current working directory by they way) would look like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ cat ric_modules.txt
+/my/home/is/here/builddir/libric_extended_lib_example.so.1.0.0aa
+</pre></div>
+</div>
+<p>You can see if you successfully loaded your dynamic library function by using the <code class="docutils literal notranslate"><span class="pre">help()</span></code> function available in the interactive mode. It can look like this, after reading a module named <code class="docutils literal notranslate"><span class="pre">example_ric</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ric
+You are running in interactive mode. Stop it by typing: &#39;quit&#39;.
+This is in it&#39;s very early stage... it only supports one liners!
+&gt;&gt; help()
+These are the functions I know:
+function-name ( number-of-arguments)
+- exit ( 1 )
+- print ( 1 )
+- printf ( 1 )
+- append ( 2 )
+...
+- socketRead ( 2 )
+- socketWrite ( 2 )
+- socketClose ( 1 )
+- socketConnect ( 2 )
+These are the modules and functions I have loaded dynamically:
+function-name ( number-of-arguments)
+Module    : example_ric
+Nbr funcs : 1
+Version   : 0.1
+  ric_example_print ( 1 )
+0
+&gt;&gt;
+</pre></div>
 </div>
 </section>
 
@@ -211,7 +212,7 @@ me PRs or create issues on the projects public repository <a class="reference ex
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="/doc/installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="/doc/docker.html" class="btn btn-neutral float-left" title="Docker image" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

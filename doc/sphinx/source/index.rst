@@ -34,6 +34,7 @@ me PRs or create issues on the projects public repository `here <https://github.
    syntaxwalkthrough
    standardlibrary
    docker
+   dyn-lib
 
 
 

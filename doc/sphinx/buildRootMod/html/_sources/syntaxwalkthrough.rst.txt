@@ -578,7 +578,7 @@ In this language, the symbols **?**, **.**, **~** and **@** are of importance fo
 Symbol Description
 ====== ==================================================
 **.**  The following condition will become a return spot
-**~**  The following condition will be an 'elif' or else if no condition is provided
+**~**  The following condition will be an 'elif' or 'else' if no condition is provided
 **@**  I will return to the last return spot
 **?**  The following condition is simply a condition
 ====== ==================================================

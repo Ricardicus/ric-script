@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Docker image &mdash; RicScript documentation 0.1 documentation</title>
   
@@ -13,11 +14,16 @@
   
   <link rel="stylesheet" href="/doc/_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="/doc/_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="/doc/_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="/doc/_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="/doc/_static/style.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,16 +33,17 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="/doc/genindex.html" />
     <link rel="search" title="Search" href="/doc/search.html" />
+    <link rel="next" title="Making your own library functions" href="/doc/dyn-lib.html" />
     <link rel="prev" title="Standard library" href="/doc/standardlibrary.html" /> 
 </head>
 
@@ -51,7 +58,7 @@
           
 
           
-            <a href="/doc/index.html" class="icon icon-home" alt="Documentation Home"> RicScript documentation
+            <a href="/doc/index.html" class="icon icon-home"> RicScript documentation
           
 
           
@@ -88,6 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="/doc/syntaxwalkthrough.html">Syntax walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="/doc/standardlibrary.html">Standard library</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Docker image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="/doc/dyn-lib.html">Making your own library functions</a></li>
 </ul>
 
             
@@ -128,6 +136,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -139,7 +149,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="/doc/_sources/docker.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -154,45 +164,46 @@
            <div itemprop="articleBody">
             
   <a class="reference internal image-reference" href="images/icon_small.png"><img alt="images/icon_small.png" class="align-right" src="images/icon_small.png" style="width: 15.0px; height: 15.0px;" /></a>
-<div class="section" id="docker-image">
+<section id="docker-image">
 <h1>Docker image<a class="headerlink" href="#docker-image" title="Permalink to this headline">¶</a></h1>
-<p><em>To be filled in!</em></p>
+<p>It is possible to play around with ric-script in a <a class="reference external" href="https://www.docker.com/get-started">docker</a> container.
+Try this out:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t node-ric-script:1.0 .
+docker run --rm -d -p <span class="m">3002</span>:3000 node-ric-script:1.0
+</pre></div>
 </div>
+<p>Now go visit <a class="reference external" href="http://localhost:3002">http://localhost:3002</a>, here a little interpreter window (one for inputs, one for outputs) should be
+available to you.</p>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="/doc/standardlibrary.html" class="btn btn-neutral float-left" title="Standard library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="/doc/dyn-lib.html" class="btn btn-neutral float-right" title="Making your own library functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="/doc/standardlibrary.html" class="btn btn-neutral float-left" title="Standard library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Rickard Hallerbäck
+        &#169; Copyright 2020, Rickard Hallerbäck.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

@@ -1,5 +1,8 @@
 # Pull base image, using Ubuntu latest
-FROM ubuntu:18.04
+FROM ubuntu:20.04
+
+# No interactive shenanigans
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Node.js
 RUN apt-get update && apt-get install --yes curl

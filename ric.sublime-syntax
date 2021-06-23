@@ -46,7 +46,13 @@ contexts:
       captures:
         1: entity.name.function.ric-script
 
-    - match: '\b([{{identifier}}]*)(::)'
+    - match: '(::[ ]*)({{identifier}}+)([ ]*::)'
+      captures:
+        1: punctuation.accessor.ric-script
+        2: entity.name.function.ric-script
+        3: punctuation.accessor.ric-script
+
+    - match: '\b({{identifier}}+)(::)'
       captures:
         1: entity.name.function.ric-script
         2: punctuation.accessor.ric-script
@@ -82,3 +88,5 @@ contexts:
     - meta_scope: entity.name.function.ric-script
     - match: $
       pop: true
+
+  

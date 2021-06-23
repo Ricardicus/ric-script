@@ -804,4 +804,9 @@ Version   : 0.1
 >>
 ```
 
+# Sublime Text syntax highlighter
+
+* Place the ricscript.sublime-syntax file inside the Sublime Text packages User folder (Preferences | Browse Packages...)
+* Restart Sublime Text
+
 

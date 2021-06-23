@@ -1,0 +1,84 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions: [ric]
+name: ric-script
+scope: source.ric-script
+variables:
+  # We support unicode here because ric-script is the future
+  svenska: '[åäöÅÄÖ]'
+  identifier: '[a-zA-Z0-9{{svenska}}]'
+contexts:
+  main:
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character
+    - match: '"'
+      scope: punctuation.definition.string.begin.ric-script
+      push: double_quoted_string_a
+
+    - match: "'"
+      scope: punctuation.definition.string.begin.ric-script
+      push: double_quoted_string_b
+
+    # Comments begin with a '#' and finish at the end of the line
+    - match: '#'
+      scope: punctuation.definition.comment.ric-script
+      push: line_comment
+
+    - match: '^\$'
+      scope: keyword.function.ric-script
+      push: syscall
+
+    - match: '(@)([ ]*[{{identifier}}]+[ ]*)'
+      captures:
+        1: keyword.function.ric-script
+        2: entity.name.function.ric-script
+      scope: punctuation.accessor.ric-script
+
+    - match: '->'
+      scope: punctuation.accessor.ric-script
+
+    # Numbers
+    - match: '\b(-)?[0-9.]+\b'
+      scope: constant.numeric.ric-script
+
+    - match: '\b([{{identifier}}]*)([ ]*\()'
+      captures:
+        1: entity.name.function.ric-script
+
+    - match: '\b([{{identifier}}]*)(::)'
+      captures:
+        1: entity.name.function.ric-script
+        2: punctuation.accessor.ric-script
+
+  postfix-operators:
+    - match: '-'
+      scope: keyword.operator.ric-script
+    - match: '\+'
+      scope: keyword.operator.ric-script
+
+  double_quoted_string_a:
+    - meta_scope: string.quoted.double.ric-script
+    - match: '\\.'
+      scope: constant.character.escape.ric-script
+    - match: '"'
+      scope: punctuation.definition.string.end.ric-script
+      pop: true
+
+  double_quoted_string_b:
+    - meta_scope: string.quoted.double.ric-script
+    - match: '\\.'
+      scope: constant.character.escape.ric-script
+    - match: "'"
+      scope: punctuation.definition.string.end.ric-script
+      pop: true
+
+  line_comment:
+    - meta_scope: comment.line.ric-script
+    - match: $
+      pop: true
+
+  syscall: 
+    - meta_scope: entity.name.function.ric-script
+    - match: $
+      pop: true

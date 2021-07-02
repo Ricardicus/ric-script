@@ -46,7 +46,7 @@ contexts:
       captures:
         1: entity.name.function.ric-script
 
-    - match: '(::[ ]*)({{identifier}}+)([ ]*::)'
+    - match: '(;;[ ]*)({{identifier}}+)([ ]*;;)'
       captures:
         1: punctuation.accessor.ric-script
         2: entity.name.function.ric-script

@@ -449,9 +449,9 @@ Hi, the shared variable now holds value: 10
 Since I use JavaScript syntax highlighting here on GitHub, I have **added //** just before the original
 ric-script comment symbol **#** so it looks alright.
 
-```javascript
+```python
 #!/usr/bin/ric
-//# A script to demonstrate how one can list files using ric-script
+# A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {
   print("usage: " + args[0] + " " + args[1] + " directory")
@@ -474,7 +474,7 @@ ric-script comment symbol **#** so it looks alright.
   }
 }
 
-//# argument checking
+# argument checking
 ? [ len(args) < 3 ] {
   printUsage()
   exit(1)

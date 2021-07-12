@@ -446,12 +446,12 @@ Hi, the shared variable now holds value: 10
 
 # syntax snapshot: File listing
 
-Since I use JavaScript syntax highlighting here on GitHub, I have **added //** just before the original
+Since I use other languages syntax highlighting here on GitHub, I have **added //** just before the original
 ric-script comment symbol **#** so it looks alright.
 
-```python
+```rust
 #!/usr/bin/ric
-# A script to demonstrate how one can list files using ric-script
+//# A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {
   print("usage: " + args[0] + " " + args[1] + " directory")
@@ -474,17 +474,17 @@ ric-script comment symbol **#** so it looks alright.
   }
 }
 
-# argument checking
+//# argument checking
 ? [ len(args) < 3 ] {
   printUsage()
   exit(1)
 }
 
 ? [ isDir(args[2]) ] {
-  # print folder structure
+  //# print folder structure
   listFiles(args[2], 0)
 } ~ {
-  # not a folder given
+  //# not a folder given
   printUsage()
   exit(1)
 }

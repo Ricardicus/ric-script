@@ -296,7 +296,8 @@ int ric_create_text(LIBRARY_PARAMS())
     newText = newExpr_Text(rawData->data);
   } else if ( isInt ) {
     char intCharBuf[100];
-    snprintf(intCharBuf, sizeof(intCharBuf), "%" PRIi32, inInt);
+    memset(intCharBuf, 0, sizeof(intCharBuf));
+    snprintf(intCharBuf, sizeof(intCharBuf), "%" PRIi32 "", inInt);
     newText = newExpr_Text(intCharBuf);
   } else if ( vec != NULL ) {
     argsList_t *content = vec->content;

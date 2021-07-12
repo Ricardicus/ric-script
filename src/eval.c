@@ -473,15 +473,24 @@ expr_t*  copy_vector(
   } else if ( forEach != NULL ) {
     void *sp;
     size_t *sc = PROVIDE_CONTEXT()->sc;
+    locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
     size_t stackCount = *sc;
     stackval_t sv;
     int *interactive = PROVIDE_CONTEXT()->interactive;
     int interactiveTmp = *interactive;
 
+    /* Moving along, interpreting function */
+    int localsStackSp = varLocals->sp;
+    int localsStackSb = varLocals->sb;
+    varLocals->sb = varLocals->sp;
+
     *interactive = INTERACTIVE_STACK;
 
     interpret_statements_(forEach, PROVIDE_CONTEXT(), NULL, NULL);
     
+    varLocals->sb = localsStackSb;
+    varLocals->sp = localsStackSp;
+
     sp = PROVIDE_CONTEXT()->sp;
     sc = PROVIDE_CONTEXT()->sc;
     *interactive = interactiveTmp;
@@ -2641,6 +2650,10 @@ void interpret_statements_(
           break;
         }
 
+        if ( *interactive & INTERACTIVE_STACK ) {
+          break;
+        }
+
         // Mark and sweep the heap
         mark_and_sweep(PROVIDE_CONTEXT()->varDecs, EXPRESSION_ARGS());
       }
@@ -3980,7 +3993,6 @@ int print_vector(
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   argsList_t *walk = vec->content;
-  // hej hopp
   expr_t *vec_e = NULL;
 
   if ( vec->content == NULL && vec->forEach != NULL ) {

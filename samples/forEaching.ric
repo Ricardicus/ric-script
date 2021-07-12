@@ -22,3 +22,10 @@ list = ["a", 2, "b", 4]
 ( list ... entry ) {
   print(entry)
 }
+
+# Constructing lists
+print([(
+  10 ... i
+) {
+  text(i * 10)
+}])

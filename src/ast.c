@@ -108,12 +108,29 @@ expr_t *newExpr_Vector(argsList_t *args) {
 
   vec->length = length;
   vec->content = args;
+  vec->forEach = NULL;
 
   expr->type = EXPR_TYPE_VECTOR;
   expr->vec = vec;
 
   return expr;
 }
+
+expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
+  int32_t length = 0;
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  vector_t *vec = ast_emalloc(sizeof(vector_t));
+
+  vec->length = length;
+  vec->content = NULL;
+  vec->forEach = forEach;
+
+  expr->type = EXPR_TYPE_VECTOR;
+  expr->vec = vec;
+
+  return expr;
+}
+
 
 expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
@@ -654,8 +671,6 @@ void free_expression(expr_t *expr) {
     argsList_t *v = vec->content;
     argsList_t *p;
 
-    //printf("(2)\n");
-
     while ( vecWalk < len ) {
       if ( v->arg != NULL ) {
         free_expression(v->arg);
@@ -667,6 +682,11 @@ void free_expression(expr_t *expr) {
       free(p);
       ++vecWalk;
     //  printf("(2.1)\n");
+    }
+
+    if ( vec->forEach != NULL ) {
+      free_ast(vec->forEach);
+      free(vec->forEach);
     }
 
     free(vec);

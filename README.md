@@ -146,7 +146,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
 # RPN calculator implementation in ric-script
 stack = {"head" : 0, "data" : []}
 operators = ["+", "*", "-", "/"]
-numberChars = ['0','1','2','3','4','5','6','7','8','9']
+numberChars = [ (10 ... i) { text(i) } ]
 
 @ isNumber(num) {
   isNr = 1

@@ -3075,7 +3075,7 @@ void interpret_statements_(
               EXPRESSION_ARGS()
             );
 
-            if ( *interactive | INTERACTIVE_STACK) {
+            if ( *interactive | INTERACTIVE_STACK ) {
               break;
             }
 
@@ -3133,7 +3133,7 @@ void interpret_statements_(
               EXPRESSION_ARGS()
             );
 
-            if ( *interactive | INTERACTIVE_STACK) {
+            if ( *interactive | INTERACTIVE_STACK ) {
               break;
             }
 
@@ -3186,7 +3186,7 @@ void interpret_statements_(
               /* Compute */
               evaluate_expression(e, EXPRESSION_ARGS());
 
-              if ( *interactive | INTERACTIVE_STACK) {
+              if ( *interactive | INTERACTIVE_STACK ) {
                 break;
               }
 

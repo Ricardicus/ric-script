@@ -301,7 +301,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
 }
 
 @ isNumber(num) {
-  numberChars = ['0','1','2','3','4','5','6','7','8','9']
+  numberChars = [ (10 ... i) { text(i) } ]
   isNr = 1
   i = 0
   . [ i < len(num) ] {

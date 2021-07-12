@@ -36,7 +36,8 @@ You can build the interpreter from source for this language on multiple platform
 I currently support iOSX, Linux and Windows.
 
 On linux or mac use meson or GNU make you build like this: 
-```
+
+```BASH
 # fetch the code 
 git clone https://github.com/Ricardicus/ric-script && cd ric-script
 # on linux or mac
@@ -228,7 +229,7 @@ run = 1
 
 Example of using this calculator:
 
-```
+```BASH
 $ ./ric samples/rpn.ric                    
 RPN Calculator (quit by typing 'q'):
 >> 2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -
@@ -343,7 +344,7 @@ run = 1
 
 Example of using this calculator:
 
-```
+```BASH
 $ ./ric samples/rpn.ric                    
 RPN Calculator (quit by typing 'q'):
 >> 2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -

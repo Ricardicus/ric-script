@@ -671,8 +671,6 @@ void free_expression(expr_t *expr) {
     argsList_t *v = vec->content;
     argsList_t *p;
 
-    //printf("(2)\n");
-
     while ( vecWalk < len ) {
       if ( v->arg != NULL ) {
         free_expression(v->arg);
@@ -684,6 +682,11 @@ void free_expression(expr_t *expr) {
       free(p);
       ++vecWalk;
     //  printf("(2.1)\n");
+    }
+
+    if ( vec->forEach != NULL ) {
+      free_ast(vec->forEach);
+      free(vec->forEach);
     }
 
     free(vec);

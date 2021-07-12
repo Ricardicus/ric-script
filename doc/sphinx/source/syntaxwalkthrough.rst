@@ -29,7 +29,7 @@ declaration of a **map** and two of the **list** sort.
 	# RPN calculator implementation in ric-script
 	stack = {"head" : 0, "data" : []}
 	operators = ["+", "*", "-", "/"]
-	numberChars = ['0','1','2','3','4','5','6','7','8','9']
+	numberChars = [ (10 ... i) { text(i) } ]
 
 	@ isNumber(num) {
 	  isNr = 1
@@ -249,6 +249,14 @@ A dictionary maps a string to any type of references.
 		print(s[key])
 	}
 
+	# Constructing lists with a for each loop
+	print([(
+		10 ... i
+	) {
+		text(i * 10)
+	}])
+
+
 **outputs**:
 
 .. code-block:: bash
@@ -274,6 +282,7 @@ A dictionary maps a string to any type of references.
 	{'b' : {'c' : {'d' : 'e'}}}
 	foobar
 	<Function: 'foobar'>
+	['0','10','20','30','40','50','60','70','80','90']
 
 List
 ####

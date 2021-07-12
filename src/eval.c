@@ -527,8 +527,6 @@ expr_t*  copy_vector(
       newContent = newArgument(newExp, newContent);
       newVec->vec->length++;
       newVec->vec->content = newContent;
-
-      walk = walk->next;
     }
   }
 
@@ -3372,6 +3370,7 @@ void setup_namespaces(PROVIDE_CONTEXT_ARGS()) {
 void close_namespaces(PROVIDE_CONTEXT_ARGS()) {
   hashtable_free(PROVIDE_CONTEXT()->funcDecs);
   hashtable_free(PROVIDE_CONTEXT()->varDecs);
+  hashtable_free(PROVIDE_CONTEXT()->classDecs);
 }
 
 hashtable_t *new_argstable()
@@ -4052,7 +4051,8 @@ int print_vector(
   printf("]");
 
   if ( vec_e != NULL ) {
-   // free_expression(vec_e);
+    free_expression(vec_e);
+    free(vec_e);
   }
 
   return 0;

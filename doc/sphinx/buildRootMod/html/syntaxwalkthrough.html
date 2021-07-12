@@ -89,7 +89,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="/doc/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Syntax walkthrough</a><ul>
@@ -197,7 +197,7 @@ declaration of a <strong>map</strong> and two of the <strong>list</strong> sort.
 <span class="c1"># RPN calculator implementation in ric-script</span>
 <span class="nv">stack</span> <span class="o">=</span> <span class="o">{</span><span class="s2">&quot;head&quot;</span> : <span class="m">0</span>, <span class="s2">&quot;data&quot;</span> : <span class="o">[]}</span>
 <span class="nv">operators</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;+&quot;</span>, <span class="s2">&quot;*&quot;</span>, <span class="s2">&quot;-&quot;</span>, <span class="s2">&quot;/&quot;</span><span class="o">]</span>
-<span class="nv">numberChars</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;0&#39;</span>,<span class="s1">&#39;1&#39;</span>,<span class="s1">&#39;2&#39;</span>,<span class="s1">&#39;3&#39;</span>,<span class="s1">&#39;4&#39;</span>,<span class="s1">&#39;5&#39;</span>,<span class="s1">&#39;6&#39;</span>,<span class="s1">&#39;7&#39;</span>,<span class="s1">&#39;8&#39;</span>,<span class="s1">&#39;9&#39;</span><span class="o">]</span>
+<span class="nv">numberChars</span> <span class="o">=</span> <span class="o">[</span> <span class="o">(</span><span class="m">10</span> ... i<span class="o">)</span> <span class="o">{</span> text<span class="o">(</span>i<span class="o">)</span> <span class="o">}</span> <span class="o">]</span>
 
 @ isNumber<span class="o">(</span>num<span class="o">)</span> <span class="o">{</span>
   <span class="nv">isNr</span> <span class="o">=</span> <span class="m">1</span>
@@ -398,6 +398,13 @@ print<span class="o">(</span>keys<span class="o">(</span>d<span class="o">[</spa
         print<span class="o">(</span>key<span class="o">)</span>
         print<span class="o">(</span>s<span class="o">[</span>key<span class="o">])</span>
 <span class="o">}</span>
+
+<span class="c1"># Constructing lists with a for each loop</span>
+print<span class="o">([(</span>
+        <span class="m">10</span> ... i
+<span class="o">)</span> <span class="o">{</span>
+        text<span class="o">(</span>i * <span class="m">10</span><span class="o">)</span>
+<span class="o">}])</span>
 </pre></div>
 </div>
 <p><strong>outputs</strong>:</p>
@@ -422,6 +429,7 @@ a
 <span class="o">{</span><span class="s1">&#39;b&#39;</span> : <span class="o">{</span><span class="s1">&#39;c&#39;</span> : <span class="o">{</span><span class="s1">&#39;d&#39;</span> : <span class="s1">&#39;e&#39;</span><span class="o">}}}</span>
 foobar
 &lt;Function: <span class="s1">&#39;foobar&#39;</span>&gt;
+<span class="o">[</span><span class="s1">&#39;0&#39;</span>,<span class="s1">&#39;10&#39;</span>,<span class="s1">&#39;20&#39;</span>,<span class="s1">&#39;30&#39;</span>,<span class="s1">&#39;40&#39;</span>,<span class="s1">&#39;50&#39;</span>,<span class="s1">&#39;60&#39;</span>,<span class="s1">&#39;70&#39;</span>,<span class="s1">&#39;80&#39;</span>,<span class="s1">&#39;90&#39;</span><span class="o">]</span>
 </pre></div>
 </div>
 </section>

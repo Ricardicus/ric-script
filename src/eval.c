@@ -404,68 +404,133 @@ expr_t*  copy_vector(
   expr_t *newVec = newExpr_Vector(NULL);
   argsList_t *newContent = NULL;
   argsList_t *walk = vec->content;
-  argsList_t *prev = NULL;
-  argsList_t *current;
-  argsList_t *walknext;
+  statement_t *forEach = vec->forEach;
 
-  while ( walk != NULL ) {
+  if ( walk != NULL ) {
+    argsList_t *prev = NULL;
+    argsList_t *current;
+    argsList_t *walknext;
+
+    while ( walk != NULL ) {
+      stackval_t sv;
+      expr_t *newExp;
+      evaluate_expression(walk->arg, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+      case INT32TYPE:
+        newExp = newExpr_Ival(sv.i);
+        break;
+      case DOUBLETYPE:
+        newExp = newExpr_Float(sv.d);
+        break;
+      case TEXT:
+        newExp = newExpr_Text(sv.t);
+        break;
+      case TIMETYPE:
+        newExp = newExpr_Time(sv.time);
+        break;
+      case POINTERTYPE:
+        newExp = newExpr_Pointer(sv.p);
+        break;
+      case FUNCPTRTYPE:
+        newExp = newExpr_FuncPtr(sv.func);
+        break;
+      case LIBFUNCPTRTYPE:
+        newExp = newExpr_LibFuncPtr(sv.libfunc);
+        break;
+      case VECTORTYPE: {
+        newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+        break;
+      }
+      default:
+        printf("%s.error: unknown type of value on the stack (%d)\n", 
+          __func__, sv.type);
+        GENERAL_REPORT_ISSUE_MSG();
+        break;
+      }
+
+      newContent = newArgument(newExp, newContent);
+      newVec->vec->length++;
+      newVec->vec->content = newContent;
+
+      walk = walk->next;
+    }
+
+    /* Reverse the order of the vector expressions */
+    /* Reverse the args list order */
+    prev = NULL;
+    current = newVec->vec->content;
+    while (current != NULL) {
+      walknext = current->next;
+      current->next = prev;
+      prev = current;
+      current = walknext;
+    }
+
+    newVec->vec->content = prev;
+
+  } else if ( forEach != NULL ) {
+    void *sp;
+    size_t *sc = PROVIDE_CONTEXT()->sc;
+    size_t stackCount = *sc;
     stackval_t sv;
-    expr_t *newExp;
-    evaluate_expression(walk->arg, EXPRESSION_ARGS());
-    POP_VAL(&sv, sp, sc);
+    int *interactive = PROVIDE_CONTEXT()->interactive;
+    int interactiveTmp = *interactive;
 
-    switch (sv.type) {
-    case INT32TYPE:
-      newExp = newExpr_Ival(sv.i);
-      break;
-    case DOUBLETYPE:
-      newExp = newExpr_Float(sv.d);
-      break;
-    case TEXT:
-      newExp = newExpr_Text(sv.t);
-      break;
-    case TIMETYPE:
-      newExp = newExpr_Time(sv.time);
-      break;
-    case POINTERTYPE:
-      newExp = newExpr_Pointer(sv.p);
-      break;
-    case FUNCPTRTYPE:
-      newExp = newExpr_FuncPtr(sv.func);
-      break;
-    case LIBFUNCPTRTYPE:
-      newExp = newExpr_LibFuncPtr(sv.libfunc);
-      break;
-    case VECTORTYPE: {
-      newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-      break;
+    *interactive = INTERACTIVE_STACK;
+
+    interpret_statements_(forEach, PROVIDE_CONTEXT(), NULL, NULL);
+    
+    sp = PROVIDE_CONTEXT()->sp;
+    sc = PROVIDE_CONTEXT()->sc;
+    *interactive = interactiveTmp;
+
+    /* Printing result of computation */
+    while ( *sc > stackCount ) {
+      expr_t *newExp;
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+      case INT32TYPE:
+        newExp = newExpr_Ival(sv.i);
+        break;
+      case DOUBLETYPE:
+        newExp = newExpr_Float(sv.d);
+        break;
+      case TEXT:
+        newExp = newExpr_Text(sv.t);
+        break;
+      case TIMETYPE:
+        newExp = newExpr_Time(sv.time);
+        break;
+      case POINTERTYPE:
+        newExp = newExpr_Pointer(sv.p);
+        break;
+      case FUNCPTRTYPE:
+        newExp = newExpr_FuncPtr(sv.func);
+        break;
+      case LIBFUNCPTRTYPE:
+        newExp = newExpr_LibFuncPtr(sv.libfunc);
+        break;
+      case VECTORTYPE: {
+        newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+        break;
+      }
+      default:
+        printf("%s.error: unknown type of value on the stack (%d)\n", 
+          __func__, sv.type);
+        GENERAL_REPORT_ISSUE_MSG();
+        break;
+      }
+
+      newContent = newArgument(newExp, newContent);
+      newVec->vec->length++;
+      newVec->vec->content = newContent;
+
+      walk = walk->next;
     }
-    default:
-      printf("%s.error: unknown type of value on the stack (%d)\n", 
-        __func__, sv.type);
-      GENERAL_REPORT_ISSUE_MSG();
-      break;
-    }
-
-    newContent = newArgument(newExp, newContent);
-    newVec->vec->length++;
-    newVec->vec->content = newContent;
-
-    walk = walk->next;
   }
-
-  /* Reverse the order of the vector expressions */
-  /* Reverse the args list order */
-  prev = NULL;
-  current = newVec->vec->content;
-  while (current != NULL) {
-    walknext = current->next;
-    current->next = prev;
-    prev = current;
-    current = walknext;
-  }
-
-  newVec->vec->content = prev;
 
   return newVec;
 }
@@ -3012,6 +3077,10 @@ void interpret_statements_(
               EXPRESSION_ARGS()
             );
 
+            if ( *interactive | INTERACTIVE_STACK) {
+              break;
+            }
+
             /* Printing result of function call, if string or vector */
             while ( *sc > stackCount ) {
               POP_VAL(&sv, sp, sc);
@@ -3066,6 +3135,10 @@ void interpret_statements_(
               EXPRESSION_ARGS()
             );
 
+            if ( *interactive | INTERACTIVE_STACK) {
+              break;
+            }
+
             /* Printing result of function call, if string or vector */
             while ( *sc > stackCount ) {
               POP_VAL(&sv, sp, sc);
@@ -3114,6 +3187,10 @@ void interpret_statements_(
             if ( *interactive ) {
               /* Compute */
               evaluate_expression(e, EXPRESSION_ARGS());
+
+              if ( *interactive | INTERACTIVE_STACK) {
+                break;
+              }
 
               /* Printing result of computation */
               while ( *sc > stackCount ) {
@@ -3904,7 +3981,16 @@ int print_vector(
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   argsList_t *walk = vec->content;
-  
+  // hej hopp
+  expr_t *vec_e = NULL;
+
+  if ( vec->content == NULL && vec->forEach != NULL ) {
+    vec_e = copy_vector(vec, EXPRESSION_ARGS());
+    if ( vec_e != NULL ) {
+      walk = vec_e->vec->content;
+    }
+  }
+
   printf("[");
   while ( walk != NULL ) {
     stackval_t sv;
@@ -3964,7 +4050,11 @@ int print_vector(
   }
 
   printf("]");
-  
+
+  if ( vec_e != NULL ) {
+   // free_expression(vec_e);
+  }
+
   return 0;
 }
 
@@ -4210,8 +4300,8 @@ void interpret_statements(
   st = stmt;
   ed = NULL;
 
-  /* Set interactive state to 0 */
-  interactive = 0;
+  /* Set interactive state to NON_INTERACTIVE */
+  interactive = NON_INTERACTIVE;
 
   /* Set class context to NULL */
   classCtx = NULL;
@@ -4292,7 +4382,7 @@ void interpret_statements_interactive(
     depth = 0;
 
     /* Set interactive state to 1 */
-    interactive = 1;
+    interactive = INTERACTIVE_PRINT;
 
     /* Flag that setup has been done already */
     firstCall = 0;

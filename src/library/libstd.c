@@ -257,6 +257,8 @@ int ric_create_text(LIBRARY_PARAMS())
   int dummy;
   heapval_t *hpv;
   char *inText = NULL;
+  int32_t inInt;
+  bool isInt = false;
   vector_t *vec = NULL;
   rawdata_t *rawData = NULL;
   expr_t *newText = NULL;
@@ -270,6 +272,10 @@ int ric_create_text(LIBRARY_PARAMS())
   switch (stv.type) {
   case TEXT:
   inText = stv.t;
+  break;
+  case INT32TYPE:
+  inInt = stv.i;
+  isInt = true;
   break;
   case VECTORTYPE:
   vec = stv.vec;
@@ -288,6 +294,10 @@ int ric_create_text(LIBRARY_PARAMS())
     newText = newExpr_Text(inText);
   } else if ( rawData != NULL ) {
     newText = newExpr_Text(rawData->data);
+  } else if ( isInt ) {
+    char intCharBuf[100];
+    snprintf(intCharBuf, sizeof(intCharBuf), "%" PRIi32, inInt);
+    newText = newExpr_Text(intCharBuf);
   } else if ( vec != NULL ) {
     argsList_t *content = vec->content;
     size_t i = 0;

@@ -164,7 +164,8 @@ systemStatement: '$' ID {
     $$ = $2;
 };
 
-forEachStatement: '(' expressions '.' '.' '.' ID ')' body {
+forEachStatement: 
+    '(' expressions '.' '.' '.' ID ')' body {
     body_t *bd = $8;
     statement_t *stmt = bd->content;
 
@@ -509,6 +510,11 @@ vector:
     '[' arguments_list ']' {
       argsList_t *args = (argsList_t*) $2;
       $$ = newExpr_Vector(args);
+    }
+    |
+    '[' forEachStatement ']' {
+      statement_t* stmt = newStatement(LANG_ENTITY_FOREACH, $2);
+      $$ = newExpr_VectorFromForEach(stmt);
     }
     | '[' ']' {
       $$ = newExpr_Vector(NULL);

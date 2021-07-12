@@ -108,12 +108,29 @@ expr_t *newExpr_Vector(argsList_t *args) {
 
   vec->length = length;
   vec->content = args;
+  vec->forEach = NULL;
 
   expr->type = EXPR_TYPE_VECTOR;
   expr->vec = vec;
 
   return expr;
 }
+
+expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
+  int32_t length = 0;
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  vector_t *vec = ast_emalloc(sizeof(vector_t));
+
+  vec->length = length;
+  vec->content = NULL;
+  vec->forEach = forEach;
+
+  expr->type = EXPR_TYPE_VECTOR;
+  expr->vec = vec;
+
+  return expr;
+}
+
 
 expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));

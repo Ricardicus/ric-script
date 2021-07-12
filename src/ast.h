@@ -102,6 +102,10 @@
         exit(1);\
 } while (0);
 
+#define NON_INTERACTIVE        0
+#define INTERACTIVE_PRINT      BIT(1)
+#define INTERACTIVE_STACK      BIT(2)
+
 typedef struct ID_s {
 	char *id;
 } ID_t;
@@ -150,10 +154,13 @@ struct class_t;
 typedef struct class_t class_t;
 struct rawdata_t;
 typedef struct rawdata_t rawdata_t;
+struct statement_s;
+typedef struct statement_s statement_t;
 
 typedef struct vector_t {
   int32_t length;
   argsList_t *content;
+  statement_t *forEach;
 } vector_t;
 
 typedef struct vectorIndex {
@@ -309,6 +316,7 @@ expr_t* newExpr_OPMod(expr_t *left, expr_t *right);
 expr_t* newExpr_OPDiv(expr_t *left, expr_t *right);
 expr_t* newExpr_Cond(ifCondition_t *cond);
 expr_t* newExpr_Vector(argsList_t *args);
+expr_t* newExpr_VectorFromForEach(statement_t *stmt);
 expr_t* newExpr_ClassPtr(class_t *class);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
@@ -400,7 +408,7 @@ typedef struct context_full_t {
   size_t *sc;
   int *depth;
   locals_stack_t *varLocals;
-  int *interactive;
+  int32_t *interactive;
   class_t *classCtx;
   void *syncCtx;
   hashtable_t *classDecs;

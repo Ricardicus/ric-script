@@ -245,15 +245,27 @@ A dictionary maps a string to any type of references.
 
 	# For each loop, iterating over the keys
 	( s ... key ) {
-		print(key)
-		print(s[key])
+	  print(key)
+	  print(s[key])
 	}
 
 	# Constructing lists with a for each loop
 	print([(
-		10 ... i
+	  10 ... i
 	) {
-		text(i * 10)
+	  text(i * 10)
+	}])
+
+	# Constructing lists, in a complex fashion
+	# all 'lonely' expressions are put on the stack
+	# and all on the stack is put into the list
+	print([(
+	  5 ... i
+	) {
+	  a = [i+1, i+2, i+3]
+	  text(a[0])
+	  text(a[1])
+	  text(a[2])
 	}])
 
 
@@ -283,6 +295,7 @@ A dictionary maps a string to any type of references.
 	foobar
 	<Function: 'foobar'>
 	['0','10','20','30','40','50','60','70','80','90']
+	['1','2','3','2','3','4','3','4','5','4','5','6','5','6','7']
 
 List
 ####

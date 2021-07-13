@@ -2906,18 +2906,10 @@ void interpret_statements_(
           if ( arrayIndex >= keyCount ) {
             /* We are out of here */
             stmt = next;
-            /* Set the variable to 0 */
-            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-
-            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-              /* This is really not support to happen */
-              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-              exit(1);
-            }
-
-            hvp->sv.i = 0;
-            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
+            /* Remove unique unfold from locals */
+            locals_remove(varLocals, festmt->uniqueUnfoldID);
+            /* remove entry from locals */
+            locals_remove(varLocals, entryId);
             continue;
           }
 
@@ -2967,19 +2959,11 @@ void interpret_statements_(
           if ( arrayIndex >= strlen(rootChars) ) {
             /* We are out of here */
             stmt = next;
-            /* Set the variable to 0 */
-            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-
-            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-              /* This is really not support to happen */
-              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-              exit(1);
-            }
-
-            hvp->sv.i = 0;
-            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
-            continue; 
+            /* Remove unique unfold from locals */
+            locals_remove(varLocals, festmt->uniqueUnfoldID);
+            /* remove entry from locals */
+            locals_remove(varLocals, entryId);
+            continue;
           }
 
           len = 2;
@@ -3010,18 +2994,10 @@ void interpret_statements_(
           if ( festmtIndex >= rootInt ) {
             /* We are out of here */
             stmt = next;
-            /* Set the variable to 0 */
-            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-
-            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-              /* This is really not support to happen */
-              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-              exit(1);
-            }
-
-            hvp->sv.i = 0;
-            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
+            /* Remove unique unfold from locals */
+            locals_remove(varLocals, festmt->uniqueUnfoldID);
+            /* remove entry from locals */
+            locals_remove(varLocals, entryId);
             continue;
           }
 
@@ -3343,13 +3319,14 @@ heapval_t *locals_lookup(locals_stack_t *stack, char *id) {
 }
 
 void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
+  int i;
   if ( stack->sp >= MAX_NBR_LOCALS ) {
     fprintf(stderr,
       "You are defining over %d locals, what are you doin? I will not cooperate with you. Sorry.\n",
       MAX_NBR_LOCALS);
     exit(1);
   }
-  int i = stack->sb;
+  i = stack->sb;
   while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
     local_t local = stack->stack[i];
     if ( strcmp(id, local.id) == 0 ) {
@@ -3363,6 +3340,31 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
   stack->stack[stack->sp].hpv = hpv;
   stack->stack[stack->sp].id = id;
   stack->sp++;
+}
+
+void locals_remove(locals_stack_t *stack, char *id) {
+  int i;
+  if ( stack->sp >= MAX_NBR_LOCALS ) {
+    fprintf(stderr,
+      "You are defining over %d locals, what are you doin? I will not cooperate with you. Sorry.\n",
+      MAX_NBR_LOCALS);
+    exit(1);
+  }
+  i = stack->sb;
+  while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
+    local_t local = stack->stack[i];
+    if ( strcmp(id, local.id) == 0 ) {
+      /* Remove this element from the stack */
+      int p = i + 1;
+      while ( p < stack->sp && i < MAX_NBR_LOCALS ) {
+        stack->stack[p - 1] = stack->stack[p];
+        ++p;
+      }
+      stack->sp--;
+      return;
+    }
+    ++i;
+  }
 }
 
 void setup_namespaces(PROVIDE_CONTEXT_ARGS()) {

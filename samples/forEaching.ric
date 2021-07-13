@@ -45,3 +45,5 @@ i = 0
 ( 2 ... i ) {
   print(i)
 }
+# Make sure it doesn't mess up the global namespace
+print(i)

@@ -40,3 +40,8 @@ print([(
   text(a[2])
 }])
 
+# Check that for-each locals overwrite globals
+i = 0
+( 2 ... i ) {
+  print(i)
+}

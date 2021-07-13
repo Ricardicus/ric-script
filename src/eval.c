@@ -661,12 +661,12 @@ Please report back to me.\n\
         class_t *classDef; // if it is a class construction reference
         functionDef_t *funcDef; // if it is a function pointer
 
-        /* Check among the global variables if we have it defined there */
-        hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+        /* Check among the locals if we have it defined there */
+        hv = locals_lookup(varLocals, expr->id.id);
 
         if ( hv == NULL ) {
-          /* Check among the locals if we have it defined there */
-          hv = locals_lookup(varLocals, expr->id.id);
+          /* Check among the global variables if we have it defined there */
+          hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
         }
 
         if ( hv != NULL ) {

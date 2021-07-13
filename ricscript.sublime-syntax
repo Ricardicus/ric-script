@@ -35,6 +35,12 @@ contexts:
         2: entity.name.function.ric-script
       scope: punctuation.accessor.ric-script
 
+    - match: '@'
+      scope: keyword.function.ric-script
+
+    - match: '\?'
+      scope: keyword.function.ric-script
+
     - match: '->'
       scope: punctuation.accessor.ric-script
 

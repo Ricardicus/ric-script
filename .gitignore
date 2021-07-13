@@ -11,6 +11,12 @@ ric
 # The name I typically give my meson build folders
 builddir
 
+# The sphinx build that isn't part of the node-app
+doc/sphinx/build/*
+doc/sphinx/build/*/*
+doc/sphinx/build/*/*/*
+doc/sphinx/build/*/*/*/*
+
 # The name I typically give my python virtual environments
 venv
 

@@ -80,4 +80,11 @@ s = "hejsan hoppsan falleralera"
 v = split(s, " ")
 print(v)
 
+# List multiplication
+s = ["hejsan", 1, 3, 4]
+s2 = s * 2
+s3 = s * 3
 
+print(s)
+print(s2)
+print(s3)

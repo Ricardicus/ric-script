@@ -1503,10 +1503,15 @@ Please report back to me.\n\
         PUSH_STRING(stv.t, sp, sc);
       } else if ( (svRight.type == VECTORTYPE && svLeft.type == INT32TYPE) || 
         (svLeft.type == VECTORTYPE && svRight.type == INT32TYPE) ) {
+        /* Multiply a list by a number; will make it repeat */
         expr_t *newVec = newExpr_Vector(NULL);
+        void *hp = PROVIDE_CONTEXT()->hp;
         int32_t mult;
         expr_t *e = NULL;
         vector_t *vec = NULL;
+        heapval_t *hvp = NULL;
+        stackval_t stv;
+        int dummy;
 
         if ( svRight.type == INT32TYPE ) {
           mult = svRight.i;
@@ -1525,10 +1530,13 @@ Please report back to me.\n\
         if ( e->vec->length > 0 ) {
           int32_t i = 0;
           argsList_t *newContent = NULL;
+          argsList_t *walk = NULL;
+          argsList_t *prevArg = NULL;
+          argsList_t *currentArg = NULL;
+          argsList_t *nextArg;
 
           while ( i < mult ) {
-            argsList_t *walk = e->vec->content;
-
+            walk = e->vec->content;
             while ( walk != NULL ) {
               expr_t *exp = walk->arg;
               expr_t *newExp = NULL;
@@ -1553,10 +1561,28 @@ Please report back to me.\n\
 
             i++;
           }
+
+          walk = newVec->vec->content;
+          /* Reverse the args list order */
+          prevArg = NULL;
+          currentArg = walk;
+          while (currentArg != NULL) {
+            nextArg = currentArg->next;
+            currentArg->next = prevArg;
+            prevArg = currentArg;
+            currentArg = nextArg;
+          }
+          newVec->vec->content = prevArg;
         }
+
+        /* Allocate this value on the heap, for garbage collection */
+        stv.type = VECTORTYPE;
+        stv.vec = newVec->vec;
+        ALLOC_HEAP(&stv, hp, &hvp, &dummy);
 
         PUSH_VECTOR(newVec->vec, sp, sc);
         free(newVec);
+        free_expression(e);
         free(e);
       }
 

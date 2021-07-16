@@ -113,6 +113,45 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
   }
 }
 
+expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
+  expr_t *newExp = NULL;
+
+  switch (sv->type) {
+  case INT32TYPE:
+  newExp = newExpr_Ival(sv->i);
+  break;
+  case DOUBLETYPE:
+  newExp = newExpr_Float(sv->d);
+  break;
+  case TEXT:
+  newExp = newExpr_Text(sv->t);
+  break;
+  case TIMETYPE:
+  newExp = newExpr_Time(sv->time);
+  break;
+  case POINTERTYPE:
+  newExp = newExpr_Pointer(sv->p);
+  break;
+  case FUNCPTRTYPE:
+  newExp = newExpr_FuncPtr(sv->func);
+  break;
+  case LIBFUNCPTRTYPE:
+  newExp = newExpr_LibFuncPtr(sv->libfunc);
+  break;
+  case VECTORTYPE: {
+  newExp = copy_vector(sv->vec, EXPRESSION_ARGS());
+  break;
+  }
+  default:
+  printf("%s.error: unknown type of value on the stack (%d)\n", 
+    __func__, sv->type);
+  GENERAL_REPORT_ISSUE_MSG();
+  break;
+  }
+
+  return newExp;
+}
+
 int evaluate_condition(ifCondition_t *cond,
   EXPRESSION_PARAMS())
 {
@@ -1370,6 +1409,9 @@ Please report back to me.\n\
           leftStr = svLeft.t;
           break;
         }
+        case VECTORTYPE: {
+          break;
+        }
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
@@ -1392,6 +1434,9 @@ Please report back to me.\n\
         }
         case TEXT: {
           rightStr = svRight.t;
+          break;
+        }
+        case VECTORTYPE: {
           break;
         }
         default:
@@ -1456,6 +1501,63 @@ Please report back to me.\n\
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
         PUSH_STRING(stv.t, sp, sc);
+      } else if ( (svRight.type == VECTORTYPE && svLeft.type == INT32TYPE) || 
+        (svLeft.type == VECTORTYPE && svRight.type == INT32TYPE) ) {
+        expr_t *newVec = newExpr_Vector(NULL);
+        int32_t mult;
+        expr_t *e = NULL;
+        vector_t *vec = NULL;
+
+        if ( svRight.type == INT32TYPE ) {
+          mult = svRight.i;
+          vec = svLeft.vec;
+        } else {
+          mult = svLeft.i;
+          vec = svRight.vec;
+        }
+
+        if ( mult > 0 ) {
+          e = copy_vector(vec, EXPRESSION_ARGS());
+        } else {
+          e = newExpr_Vector(NULL);
+        }
+
+        if ( e->vec->length > 0 ) {
+          int32_t i = 0;
+          argsList_t *newContent = NULL;
+
+          while ( i < mult ) {
+            argsList_t *walk = e->vec->content;
+
+            while ( walk != NULL ) {
+              expr_t *exp = walk->arg;
+              expr_t *newExp = NULL;
+              stackval_t sv;
+              void *sp = PROVIDE_CONTEXT()->sp;
+              size_t *sc = PROVIDE_CONTEXT()->sc;
+
+              /* Evaluate expression */
+              evaluate_expression(exp, EXPRESSION_ARGS());
+
+              /* Fetch the evaluated expression to the arguments table */
+              POP_VAL(&sv, sp, sc);
+
+              newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+
+              newContent = newArgument(newExp, newContent);
+              newVec->vec->length++;
+              newVec->vec->content = newContent;
+
+              walk = walk->next;
+            }
+
+            i++;
+          }
+        }
+
+        PUSH_VECTOR(newVec->vec, sp, sc);
+        free(newVec);
+        free(e);
       }
 
       break;

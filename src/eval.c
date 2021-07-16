@@ -1584,6 +1584,10 @@ Please report back to me.\n\
         free(newVec);
         free_expression(e);
         free(e);
+      } else {
+        fprintf(stderr, "Error: Invalid operands. Type %d and %d does not fit for multiplication.\n",
+          svRight.type, svLeft.type);
+        exit(2);
       }
 
       break;

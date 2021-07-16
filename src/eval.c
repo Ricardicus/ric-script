@@ -1349,6 +1349,7 @@ Please report back to me.\n\
       stackval_t svLeft;
       stackval_t svRight;
       char *leftStr = NULL;
+      char *rightStr = NULL;
 
       evaluate_expression((expr_t*)expr->add.left, EXPRESSION_ARGS());
       POP_VAL(&svLeft, sp, sc);
@@ -1390,8 +1391,7 @@ Please report back to me.\n\
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Cannot multiply strings..\n");
-          exit(1);
+          rightStr = svRight.t;
           break;
         }
         default:
@@ -1419,6 +1419,30 @@ Please report back to me.\n\
 
         while ( i < mult ) {
           snprintf(newStr+(i*strLen), strLen+1, "%s", leftStr);
+          ++i;
+        }
+
+        if ( mult == 0 )
+          newStr[0] = 0;
+
+        newStr[(mult * strLen) + 1] = 0;
+
+        stv.type = TEXT;
+        stv.t = newStr;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_STRING(stv.t, sp, sc);
+      } else if ( svRight.type == TEXT && svLeft.type == INT32TYPE ) {
+        heapval_t *hpv;
+        stackval_t stv;
+        size_t strLen = strlen(rightStr);
+        int32_t mult = *r0;
+        int32_t i = 0;
+        int dummy;
+        char *newStr = ast_emalloc(strLen*mult + 2);
+
+        while ( i < mult ) {
+          snprintf(newStr+(i*strLen), strLen+1, "%s", rightStr);
           ++i;
         }
 

@@ -24,3 +24,9 @@ print(s)
 ( getString() ... c ) {
 	print(c)
 }
+
+# String multiplication
+s = "hej " * 3
+print(s)
+s = 7 * "hej "
+print(s)

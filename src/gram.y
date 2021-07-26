@@ -341,7 +341,7 @@ logical_a:
     logical_a '|' '|' logical_b {
       $$ = newExpr_Logical($1, NULL, $4);
     }
-    | logical_expression {
+    | logical_b {
       $$ = $1;
     };
 

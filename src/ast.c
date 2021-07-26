@@ -654,13 +654,27 @@ void free_expression(expr_t *expr) {
     break;
   }
   case EXPR_TYPE_LOGICAL: {
+    printf("HEJaaaaa\n");
     if ( expr->logical->andsLen > 0 ) {
+      int32_t walk = 0;
+      while ( walk < expr->logical->andsLen ) {
+        printf("HEJ\n");
+        free_expression(expr->logical->ands[walk]);
+        walk++;
+      }
       free(expr->logical->ands);
     }
     if ( expr->logical->orsLen > 0 ) {
+      int32_t walk = 0;
+      while ( walk < expr->logical->orsLen ) {
+        printf("HEJ2\n");
+        free_expression(expr->logical->ors[walk]);
+        walk++;
+      }
       free(expr->logical->ors);
     }
     free(expr->logical);
+    free(expr);
     break;
   }
   case EXPR_TYPE_CLASSPTR: {
@@ -892,11 +906,9 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CLASSDECL:
   case LANG_ENTITY_FIN:
   case LANG_ENTITY_FOREACH:
- // case LANG_ENTITY_EXPR:
-    next = ((statement_t *)stmt)->next;
-    break;
   case LANG_ENTITY_RETURN:
-    next = NULL;
+  case LANG_ENTITY_EXPR:
+    next = ((statement_t *)stmt)->next;
     break;
   case LANG_ENTITY_EMPTY_MATH:
   case LANG_ENTITY_EMPTY_STR: {

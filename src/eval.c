@@ -4381,6 +4381,11 @@ static void flush_arg(void *key, void *val)
   } else if ( e->type == EXPR_TYPE_RAWDATA ) {
     free(e->rawdata->data);
     free(e->rawdata);
+  } else if ( e->type == EXPR_TYPE_CLASSPTR ) {
+    class_t *class = e->classObj;
+    hashtable_free(class->funcDefs);
+    hashtable_free(class->varMembers);
+    free(class);
   }
 }
 

@@ -14,6 +14,7 @@ def test_directory_print():
 "dictionary.ric",
 "folder",
 "time_of_day.ric",
+"conditional.ric",
 "xattr.ric",
 "socketServer.ric",
 "socketClient.ric",

@@ -16,12 +16,6 @@
   }
 }
 
-vals = testValues()
-
-? [ len(args) == 6 ] {
-  vals::setVals(args[2], args[3], args[4], args[5])
-  print(vals::getVals())
-}
 
 @ testConditionals(vals) {
   values = vals::getVals()
@@ -30,6 +24,7 @@ vals = testValues()
   c = values[2]
   d = values[3]
 
+  print("=== a=" + a + " b=" + b + " c=" + c + " d=" + d + " ===")
   ? [ a || b || c || d ] {
     print("a || b || c || d")
   }
@@ -46,11 +41,53 @@ vals = testValues()
     print("a && b && c || d")
   }
 
-  ? [ a || (b) ] {
-    print("a || (b && c)")
+  ? [ a || b && c ] {
+    print("a || b && c")
   }
+  print("=======================")
 
 }
 
-testConditionals(vals)
+vals = testValues()
+
+? [ len(args) == 6 ] {
+  vals::setVals(args[2], args[3], args[4], args[5])
+  print(vals::getVals())
+  testConditionals(vals)
+} ~ {
+  # Standard test
+  vals::setVals(0, 0, 0, 0)
+  testConditionals(vals)
+  vals::setVals(0, 0, 0, 1)
+  testConditionals(vals)
+  vals::setVals(0, 0, 1, 0)
+  testConditionals(vals)
+  vals::setVals(0, 0, 1, 1)
+  testConditionals(vals)
+  vals::setVals(0, 1, 0, 0)
+  testConditionals(vals)
+  vals::setVals(0, 1, 0, 1)
+  testConditionals(vals)
+  vals::setVals(0, 1, 1, 0)
+  testConditionals(vals)
+  vals::setVals(0, 1, 1, 1)
+  testConditionals(vals)
+  vals::setVals(1, 0, 0, 0)
+  testConditionals(vals)
+  vals::setVals(1, 0, 0, 1)
+  testConditionals(vals)
+  vals::setVals(1, 0, 1, 0)
+  testConditionals(vals)
+  vals::setVals(1, 0, 1, 1)
+  testConditionals(vals)
+  vals::setVals(1, 1, 0, 0)
+  testConditionals(vals)
+  vals::setVals(1, 1, 0, 1)
+  testConditionals(vals)
+  vals::setVals(1, 1, 1, 0)
+  testConditionals(vals)
+  vals::setVals(1, 1, 1, 1)
+}
+
+
 

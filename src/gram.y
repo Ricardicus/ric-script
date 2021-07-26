@@ -384,9 +384,6 @@ condition:
     }
     | expressions '>' expressions {
         $$ = newConditional(CONDITION_GE, $1, $3);
-    }
-    | '(' condition ')' {
-        $$ = $2;
     };
 
 class: ';' ';' ID ';' ';' body {

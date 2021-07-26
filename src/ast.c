@@ -654,12 +654,11 @@ void free_expression(expr_t *expr) {
     break;
   }
   case EXPR_TYPE_LOGICAL: {
-    printf("HEJaaaaa\n");
     if ( expr->logical->andsLen > 0 ) {
       int32_t walk = 0;
       while ( walk < expr->logical->andsLen ) {
-        printf("HEJ\n");
         free_expression(expr->logical->ands[walk]);
+        free(expr->logical->ands[walk]);
         walk++;
       }
       free(expr->logical->ands);
@@ -667,14 +666,13 @@ void free_expression(expr_t *expr) {
     if ( expr->logical->orsLen > 0 ) {
       int32_t walk = 0;
       while ( walk < expr->logical->orsLen ) {
-        printf("HEJ2\n");
         free_expression(expr->logical->ors[walk]);
+        free(expr->logical->ors[walk]);
         walk++;
       }
       free(expr->logical->ors);
     }
     free(expr->logical);
-    free(expr);
     break;
   }
   case EXPR_TYPE_CLASSPTR: {
@@ -683,7 +681,16 @@ void free_expression(expr_t *expr) {
   break;
   case EXPR_TYPE_CLASSFUNCCALL: {
     classFunctionCall_t *cls = expr->func;
+    argsList_t *args = cls->args;
     free_expression(cls->classID);
+    free(cls->classID);
+    while ( args != NULL ) {
+      argsList_t *tmp = args;
+      free_expression(args->arg);
+      free(args->arg);
+      args = args->next;
+      free(tmp);
+    }
     free(cls->funcID);
     free(cls);
   }
@@ -695,9 +702,12 @@ void free_expression(expr_t *expr) {
   case EXPR_TYPE_VECTOR_IDX: {
     vectorIndex_t *vecIdx = expr->vecIdx;
     free_expression(vecIdx->id);
+    free(vecIdx->id);
     free_expression(vecIdx->index);
+    free(vecIdx->index);
+    free(vecIdx);
+    break;
   }
-  break;
   case EXPR_TYPE_TEXT: {
     free(expr->text);
     break;
@@ -756,11 +766,15 @@ void free_expression(expr_t *expr) {
     argsList_t *args = call->args;
 
     free_expression(call->id);
+    free(call->id);
     while ( args != NULL ) {
+      argsList_t *tmp = args;
       free_expression(args->arg);
+      free(args->arg);
       args = args->next;
+      free(tmp);
     }
-
+    free(call);
   }
   break;
   case EXPR_TYPE_COND: {
@@ -805,89 +819,6 @@ void free_expression(expr_t *expr) {
 }
 
 
-void free_expression_not_raw(expr_t *expr) {
-  if (expr == NULL)
-    return;
-
-  switch (expr->type) {
-  case EXPR_TYPE_ID: {
-    free(expr->id.id);
-    break;
-  }
-  case EXPR_TYPE_FVAL:
-  case EXPR_TYPE_IVAL:
-  case EXPR_TYPE_UVAL:
-    break;
-  case EXPR_TYPE_VECTOR_IDX: {
-    vectorIndex_t *vecIdx = expr->vecIdx;
-    free_expression_not_raw(vecIdx->id);
-    free_expression_not_raw(vecIdx->index);
-  }
-  break;
-  case EXPR_TYPE_TEXT: {
-    free(expr->text);
-    break;
-  };
-  case EXPR_TYPE_OPADD: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  }
-  case EXPR_TYPE_OPSUB: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-
-    break;
-  }
-  case EXPR_TYPE_OPMUL: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  }
-  case EXPR_TYPE_OPMOD: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  } break;
-  case EXPR_TYPE_OPDIV: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  }
-  case EXPR_TYPE_COND: {
-    ifCondition_t *cond = expr->cond;
-    free_expression_not_raw((expr_t *)cond->left);
-    free_expression_not_raw((expr_t *)cond->right);
-  } break;
-  case EXPR_TYPE_VECTOR: {
-    vector_t *vec = expr->vec;
-    int32_t len = vec->length;
-    int32_t vecWalk = 0;
-    argsList_t *v = vec->content;
-    argsList_t *p;
-
-    while ( vecWalk < len ) {
-      if ( v->arg != NULL ) {
-        free_expression_not_raw(v->arg);
-        free(v->arg);
-        v->arg = NULL;
-      }
-      p = v;
-      v = v->next;
-      free(p);
-      ++vecWalk;
-    }
-
-    free(vec);
-    break;
-  }
-
-  case EXPR_TYPE_EMPTY:
-  default:
-    break;
-  }
-}
-
 void free_ast(statement_t *stmt) {
   entity_eval_t *eval = (entity_eval_t *)stmt;
   void *next = NULL;
@@ -931,7 +862,9 @@ void free_ast(statement_t *stmt) {
   } break;
   case LANG_ENTITY_EXPR: {
     expr_t *e = ((statement_t *)stmt)->content;
+
     free_expression(e);
+    free(e);
   }
   break;
   case LANG_ENTITY_FOREACH: {

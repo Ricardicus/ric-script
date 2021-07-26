@@ -838,7 +838,7 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_FIN:
   case LANG_ENTITY_FOREACH:
   case LANG_ENTITY_RETURN:
-  case LANG_ENTITY_EXPR:
+  //case LANG_ENTITY_EXPR:
     next = ((statement_t *)stmt)->next;
     break;
   case LANG_ENTITY_EMPTY_MATH:

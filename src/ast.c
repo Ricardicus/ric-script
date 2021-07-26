@@ -16,6 +16,17 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
+void *ast_remalloc(void *mem, size_t size) {
+  char *p = (char *)realloc(mem, size);
+  if (p == NULL) {
+    fprintf(stderr,
+            "%s %s error: Failed to build AST, malloc failed (%zu bytes)\n",
+            __FILE__, __func__, size);
+    exit(EXIT_FAILURE);
+  }
+  return (void *)p;
+}
+
 void *ast_ecalloc(size_t size) {
   char *p = (char *)calloc(size, 1);
   if (p == NULL) {
@@ -51,6 +62,21 @@ expr_t* newExpr_ClassPtr(class_t *class) {
   return expr;
 }
 
+expr_t* newExpr_ClassPtrCopy(class_t *class) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  class_t *cls = ast_emalloc(sizeof(class_t));
+
+  cls->id = class->id;
+  cls->defines = class->defines;
+  cls->funcDefs = hashtable_copy(class->funcDefs);
+  cls->varMembers = hashtable_copy(class->varMembers);
+  cls->initialized = class->initialized;
+
+  expr->type = EXPR_TYPE_CLASSPTR;
+  expr->classObj = cls;
+  return expr;
+}
+
 expr_t *newExpr_Cond(ifCondition_t *cond) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
@@ -74,6 +100,60 @@ expr_t *newExpr_FuncPtr(void *func) {
 
   expr->type = EXPR_TYPE_FUNCPTR;
   expr->func = func;
+
+  return expr;
+}
+
+expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  logical_t *logical = ast_emalloc(sizeof(logical_t));
+  int appendPrev = 0;
+
+  logical->andsLen = 0;
+  logical->orsLen = 0;
+  logical->ands = NULL;
+  logical->ors = NULL;
+
+  if ( prevLogical != NULL && prevLogical->type == EXPR_TYPE_LOGICAL ) {
+    logical->andsLen = prevLogical->logical->andsLen;
+    logical->ands = prevLogical->logical->ands;
+
+    logical->orsLen = prevLogical->logical->orsLen;
+    logical->ors = prevLogical->logical->ors;
+
+    /* Free this logical */
+    free(prevLogical->logical);
+    free(prevLogical);
+  } else if ( prevLogical != NULL ) {
+    appendPrev = 1;
+  }
+
+  if ( newAnd != NULL ) {
+    logical->andsLen++;
+    logical->ands = ast_remalloc(logical->ands, logical->andsLen*sizeof(expr_t*));
+    logical->ands[logical->andsLen-1] = newAnd;
+
+    if ( appendPrev ) {
+      logical->andsLen++;
+      logical->ands = ast_remalloc(logical->ands, logical->andsLen*sizeof(expr_t*));
+      logical->ands[logical->andsLen-1] = prevLogical; 
+    }
+  }
+
+  if ( newOr != NULL ) {
+    logical->orsLen++;
+    logical->ors = ast_remalloc(logical->ors, logical->orsLen*sizeof(expr_t*));
+    logical->ors[logical->orsLen-1] = newOr;
+
+    if ( appendPrev ) {
+      logical->orsLen++;
+      logical->ors = ast_remalloc(logical->ors, logical->orsLen*sizeof(expr_t*));
+      logical->ors[logical->orsLen-1] = prevLogical;
+    }
+  }
+
+  expr->type = EXPR_TYPE_LOGICAL;
+  expr->logical = logical;
 
   return expr;
 }
@@ -573,13 +653,44 @@ void free_expression(expr_t *expr) {
     free(expr->id.id);
     break;
   }
+  case EXPR_TYPE_LOGICAL: {
+    if ( expr->logical->andsLen > 0 ) {
+      int32_t walk = 0;
+      while ( walk < expr->logical->andsLen ) {
+        free_expression(expr->logical->ands[walk]);
+        free(expr->logical->ands[walk]);
+        walk++;
+      }
+      free(expr->logical->ands);
+    }
+    if ( expr->logical->orsLen > 0 ) {
+      int32_t walk = 0;
+      while ( walk < expr->logical->orsLen ) {
+        free_expression(expr->logical->ors[walk]);
+        free(expr->logical->ors[walk]);
+        walk++;
+      }
+      free(expr->logical->ors);
+    }
+    free(expr->logical);
+    break;
+  }
   case EXPR_TYPE_CLASSPTR: {
     free(expr->classObj);
   }
   break;
   case EXPR_TYPE_CLASSFUNCCALL: {
     classFunctionCall_t *cls = expr->func;
+    argsList_t *args = cls->args;
     free_expression(cls->classID);
+    free(cls->classID);
+    while ( args != NULL ) {
+      argsList_t *tmp = args;
+      free_expression(args->arg);
+      free(args->arg);
+      args = args->next;
+      free(tmp);
+    }
     free(cls->funcID);
     free(cls);
   }
@@ -591,9 +702,12 @@ void free_expression(expr_t *expr) {
   case EXPR_TYPE_VECTOR_IDX: {
     vectorIndex_t *vecIdx = expr->vecIdx;
     free_expression(vecIdx->id);
+    free(vecIdx->id);
     free_expression(vecIdx->index);
+    free(vecIdx->index);
+    free(vecIdx);
+    break;
   }
-  break;
   case EXPR_TYPE_TEXT: {
     free(expr->text);
     break;
@@ -652,11 +766,15 @@ void free_expression(expr_t *expr) {
     argsList_t *args = call->args;
 
     free_expression(call->id);
+    free(call->id);
     while ( args != NULL ) {
+      argsList_t *tmp = args;
       free_expression(args->arg);
+      free(args->arg);
       args = args->next;
+      free(tmp);
     }
-
+    free(call);
   }
   break;
   case EXPR_TYPE_COND: {
@@ -701,89 +819,6 @@ void free_expression(expr_t *expr) {
 }
 
 
-void free_expression_not_raw(expr_t *expr) {
-  if (expr == NULL)
-    return;
-
-  switch (expr->type) {
-  case EXPR_TYPE_ID: {
-    free(expr->id.id);
-    break;
-  }
-  case EXPR_TYPE_FVAL:
-  case EXPR_TYPE_IVAL:
-  case EXPR_TYPE_UVAL:
-    break;
-  case EXPR_TYPE_VECTOR_IDX: {
-    vectorIndex_t *vecIdx = expr->vecIdx;
-    free_expression_not_raw(vecIdx->id);
-    free_expression_not_raw(vecIdx->index);
-  }
-  break;
-  case EXPR_TYPE_TEXT: {
-    free(expr->text);
-    break;
-  };
-  case EXPR_TYPE_OPADD: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  }
-  case EXPR_TYPE_OPSUB: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-
-    break;
-  }
-  case EXPR_TYPE_OPMUL: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  }
-  case EXPR_TYPE_OPMOD: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  } break;
-  case EXPR_TYPE_OPDIV: {
-    free_expression_not_raw((expr_t *)expr->add.left);
-    free_expression_not_raw((expr_t *)expr->add.right);
-    break;
-  }
-  case EXPR_TYPE_COND: {
-    ifCondition_t *cond = expr->cond;
-    free_expression_not_raw((expr_t *)cond->left);
-    free_expression_not_raw((expr_t *)cond->right);
-  } break;
-  case EXPR_TYPE_VECTOR: {
-    vector_t *vec = expr->vec;
-    int32_t len = vec->length;
-    int32_t vecWalk = 0;
-    argsList_t *v = vec->content;
-    argsList_t *p;
-
-    while ( vecWalk < len ) {
-      if ( v->arg != NULL ) {
-        free_expression_not_raw(v->arg);
-        free(v->arg);
-        v->arg = NULL;
-      }
-      p = v;
-      v = v->next;
-      free(p);
-      ++vecWalk;
-    }
-
-    free(vec);
-    break;
-  }
-
-  case EXPR_TYPE_EMPTY:
-  default:
-    break;
-  }
-}
-
 void free_ast(statement_t *stmt) {
   entity_eval_t *eval = (entity_eval_t *)stmt;
   void *next = NULL;
@@ -802,11 +837,9 @@ void free_ast(statement_t *stmt) {
   case LANG_ENTITY_CLASSDECL:
   case LANG_ENTITY_FIN:
   case LANG_ENTITY_FOREACH:
- // case LANG_ENTITY_EXPR:
-    next = ((statement_t *)stmt)->next;
-    break;
   case LANG_ENTITY_RETURN:
-    next = NULL;
+  //case LANG_ENTITY_EXPR:
+    next = ((statement_t *)stmt)->next;
     break;
   case LANG_ENTITY_EMPTY_MATH:
   case LANG_ENTITY_EMPTY_STR: {
@@ -829,7 +862,9 @@ void free_ast(statement_t *stmt) {
   } break;
   case LANG_ENTITY_EXPR: {
     expr_t *e = ((statement_t *)stmt)->content;
+
     free_expression(e);
+    free(e);
   }
   break;
   case LANG_ENTITY_FOREACH: {

@@ -90,7 +90,9 @@ statement_t *root = NULL;
 %type<data> middleIf
 %type<data> endIf
 %type<data> condition
-%type<data> logical
+%type<data> logical_a
+%type<data> logical_b
+%type<data> logical_expression
 
 %right'=' 
 %left '+' '-'
@@ -257,17 +259,17 @@ expression:
     };
 
 ifStatement:
-    '?' '[' logical ']' body {
+    '?' '[' logical_a ']' body {
         $$ = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
     } | 
-    '?' '[' logical ']' body middleIfs {
+    '?' '[' logical_a ']' body middleIfs {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
 
         ifs->elif = $6;
         
         $$ = ifs;
     } |
-    '?' '[' logical ']' body middleIfs endIf {
+    '?' '[' logical_a ']' body middleIfs endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
 
         ifs->elif = $6;
@@ -275,7 +277,7 @@ ifStatement:
         
         $$ = ifs;
     } |
-    '?' '[' logical ']' body endIf {
+    '?' '[' logical_a ']' body endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, $3, $5);
 
         ifs->endif = $6;
@@ -284,17 +286,17 @@ ifStatement:
     };
 
 loopStatement:
-    '.' '[' logical ']' body {
+    '.' '[' logical_a ']' body {
         $$ = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
     }
-    | '.' '[' logical ']' body middleIfs {
+    | '.' '[' logical_a ']' body middleIfs {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
 
         ifs->elif = $6;
         
         $$ = ifs;
     }
-    | '.' '[' logical ']' body middleIfs endIf {
+    | '.' '[' logical_a ']' body middleIfs endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
 
         ifs->elif = $6;
@@ -302,7 +304,7 @@ loopStatement:
         
         $$ = ifs;
     }
-    | '.' '[' logical ']' body endIf {
+    | '.' '[' logical_a ']' body endIf {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, $3, $5);
 
         ifs->endif = $6;
@@ -323,7 +325,7 @@ middleIfs:
     };
 
 middleIf:
-    '~' '[' logical ']' body {
+    '~' '[' logical_a ']' body {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELIF, $3, $5);
        
         $$ = ifs;
@@ -335,7 +337,23 @@ endIf:
         $$ = ifs;
     };
 
-logical:
+logical_a:
+    logical_a '|' '|' logical_b {
+      $$ = newExpr_Logical($1, NULL, $4);
+    }
+    | logical_b {
+      $$ = $1;
+    };
+
+logical_b:
+    logical_b '&' '&' logical_expression {
+      $$ = newExpr_Logical($1, $4, NULL);
+    }
+    | logical_expression {
+      $$ = $1;
+    };
+
+logical_expression:
     condition {
         $$ = $1;
     }
@@ -790,6 +808,14 @@ otherChar:
         $$[1] = 0;
     }
     | '$' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '&' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '|' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }

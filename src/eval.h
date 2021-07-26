@@ -101,6 +101,8 @@ void locals_remove(locals_stack_t *stack, char *id);
 
 expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS());
 
+#define ERROR_PRINT_LOCATION ((statement_t*)stmt)->file, ((statement_t*)stmt)->line
+
 #endif
 
 

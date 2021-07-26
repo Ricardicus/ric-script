@@ -741,7 +741,9 @@ Please report back to me.\n\
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
             stop = 1;
           } else {
-            fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
+            fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", 
+               ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
+              expr->id.id);
             if ( ! *interactive ) {
               exit(1);
             }
@@ -767,6 +769,77 @@ Please report back to me.\n\
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
     break;
+    case EXPR_TYPE_LOGICAL: {
+      int32_t result = 0;
+      int32_t walk;
+      stackval_t sv;
+      logical_t *logic = expr->logical;
+
+      if ( logic->orsLen > 0 ) {
+        walk = 0;
+        while ( walk < logic->orsLen && result == 0 ) {
+          evaluate_expression(logic->ors[walk], EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch ( sv.type ) {
+            case INT32TYPE: {
+              if ( sv.i != 0 ) {
+                result = 1;
+              }
+              break;
+            }
+            case DOUBLETYPE: {
+              if ( fabs(sv.d) > 0.00000001 ) {
+                result = 1;
+              }
+              break;
+            }
+            default: {
+              fprintf(stderr, "%s.%d error: Invalid conditional, expected numerical; got type '%d'\n",
+                 ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
+            }
+          }
+          walk++;
+        }
+      }
+      if ( result == 0 && logic->andsLen > 0 ) {
+        walk = 0;
+        result = 1;  // True, until proven otherwise..
+        while ( walk < logic->andsLen ) {
+          int32_t tmpResult = 0;
+          evaluate_expression(logic->ands[walk], EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch ( sv.type ) {
+            case INT32TYPE: {
+              if ( sv.i != 0 ) {
+                tmpResult = 1;
+              }
+              break;
+            }
+            case DOUBLETYPE: {
+              if ( fabs(sv.d) > 0.00000001 ) {
+                tmpResult = 1;
+              }
+              break;
+            }
+            default: {
+              fprintf(stderr, "%s.%d index error: datatype the does not support conditioning.\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              if ( ! *interactive ) {
+                exit(1);
+              }
+            }
+          }
+          walk++;
+          if ( tmpResult == 0 ) {
+            result = 0;
+            break;
+          }
+        }
+      }
+
+      PUSH_INT(result, sp, sc);
+      break;
+    }
     case EXPR_TYPE_DICT:
     PUSH_DICTIONARY(expr->dict, sp, sc);
     break;
@@ -2005,8 +2078,14 @@ void call_func(
                 newArg = e;
                 break;
               }
+              case CLASSTYPE: {
+                newArg = newExpr_ClassPtrCopy(sv.classObj);
+                break;
+              }
               default:
-                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+                fprintf(stderr, "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
+                  ERROR_PRINT_LOCATION,
+                  sv.type);
                 exit(1);
                 break;
             }
@@ -2210,8 +2289,14 @@ void call_func(
                 newArg = e;
                 break;
               }
+              case CLASSTYPE: {
+                newArg = newExpr_ClassPtrCopy(sv.classObj);
+                break;
+              }
               default:
-                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+                fprintf(stderr, "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
+                  ERROR_PRINT_LOCATION,
+                  sv.type);
                 exit(1);
                 break;
             }
@@ -2429,8 +2514,14 @@ void call_func(
               newArg = e;
               break;
             }
+            case CLASSTYPE: {
+              newArg = newExpr_ClassPtrCopy(sv.classObj);
+              break;
+            }
             default:
-              fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+              fprintf(stderr, "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
+                ERROR_PRINT_LOCATION,
+                sv.type);
               exit(1);
               break;
           }
@@ -2857,10 +2948,28 @@ void interpret_statements_(
           /* Pushing the return value as an int */
           PUSH_RAWDATA(sv.rawdata, sp, sc);
           break;
-        case VECTORTYPE:
+        case VECTORTYPE: {
           /* Pushing the return value as a vector */
+          /* Placing value on the heap */
+          int dummy;
+          heapval_t *hvp = NULL;
+          expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+          sv.vec = e->vec;
+          free(e);
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           PUSH_VECTOR(sv.vec, sp, sc);
           break;
+        }
+        case DICTTYPE: {
+          /* Pushing the return value as a vector */
+          /* Placing value on the heap */
+          int dummy;
+          heapval_t *hvp = NULL;
+          dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          sv.dict = dict;
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          PUSH_DICTIONARY(sv.dict, sp, sc);
+        }
         case DOUBLETYPE:
           /* Pushing the return value as a double */
           PUSH_DOUBLE(sv.d, sp, sc);
@@ -3577,6 +3686,38 @@ void print_expr(expr_t *expr)
     case EXPR_TYPE_TEXT:
     printf("'%s'", expr->text);
     break;
+    case EXPR_TYPE_LOGICAL: {
+      int32_t walk;
+      logical_t *logic = expr->logical;
+      if ( logic->orsLen > 0 ) {
+        printf("(");
+        walk = 0;
+        while ( walk < logic->orsLen ) {
+          if ( walk > 0 ) {
+            printf(" || ");
+          }
+          print_expr(logic->ors[walk]);
+          walk++;
+        }
+        printf(")");
+      }
+      if ( logic->andsLen > 0 ) {
+        if ( logic->orsLen > 0 ) {
+          printf(" && ");
+        }
+        printf("(");
+        walk = 0;
+        while ( walk < logic->andsLen ) {
+          if ( walk > 0 ) {
+            printf(" && ");
+          }
+          print_expr(logic->ands[walk]);
+          walk++;
+        }
+        printf(")");
+      }
+      break;
+    }
     case EXPR_TYPE_VECTOR_IDX: {
       vectorIndex_t *vecIdx = expr->vecIdx;
       printf("ListIdx, ID: ");
@@ -4240,6 +4381,11 @@ static void flush_arg(void *key, void *val)
   } else if ( e->type == EXPR_TYPE_RAWDATA ) {
     free(e->rawdata->data);
     free(e->rawdata);
+  } else if ( e->type == EXPR_TYPE_CLASSPTR ) {
+    class_t *class = e->classObj;
+    hashtable_free(class->funcDefs);
+    hashtable_free(class->varMembers);
+    free(class);
   }
 }
 

@@ -1,0 +1,35 @@
+#!/bin/ric
+
+? [ len(args) < 6 ] {
+  print("usage: " + args[0] + " a b c d")
+  exit(1)
+}
+
+a = args[2]
+b = args[3]
+c = args[4]
+d = args[5]
+
+
+? [ a || b || c || d ] {
+  print("a || b || c || d")
+}
+
+? [ a || b || c && d ] {
+  print("a || b || c && d")
+}
+
+? [ a && b && c && d ] {
+  print("a && b && c && d")
+}
+
+? [ a && b && c || d ] {
+  print("a && b && c || d")
+}
+
+? [ a || (b) ] {
+  print("a || (b && c)")
+}
+
+
+

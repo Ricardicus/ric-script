@@ -42,6 +42,7 @@
 #define EXPR_TYPE_CLASSFUNCCALL  21
 #define EXPR_TYPE_TIME           22
 #define EXPR_TYPE_RAWDATA        23
+#define EXPR_TYPE_LOGICAL        24
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -154,6 +155,8 @@ struct class_t;
 typedef struct class_t class_t;
 struct rawdata_t;
 typedef struct rawdata_t rawdata_t;
+struct logical_t;
+typedef struct logical_t logical_t;
 struct statement_s;
 typedef struct statement_s statement_t;
 
@@ -167,6 +170,13 @@ typedef struct vectorIndex {
   expr_t *id;
   expr_t *index;
 } vectorIndex_t;
+
+typedef struct logical_t {
+  int32_t andsLen;
+  expr_t **ands;
+  int32_t orsLen;
+  expr_t **ors;
+} logical_t;
 
 typedef struct dictionary {
   int initialized;
@@ -197,6 +207,7 @@ typedef struct expr_s {
     class_t       *classObj;
     time_t        time;
     rawdata_t     *rawdata;
+    logical_t     *logical;
 	};
 } expr_t;
 
@@ -320,6 +331,7 @@ expr_t* newExpr_VectorFromForEach(statement_t *stmt);
 expr_t* newExpr_ClassPtr(class_t *class);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
+expr_t* newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr);
 
 expr_t*         newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(expr_t *id, expr_t *exp);

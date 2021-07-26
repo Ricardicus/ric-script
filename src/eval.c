@@ -767,6 +767,77 @@ Please report back to me.\n\
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
     break;
+    case EXPR_TYPE_LOGICAL: {
+      int32_t result = 0;
+      int32_t walk;
+      stackval_t sv;
+      logical_t *logic = expr->logical;
+
+      if ( logic->orsLen > 0 ) {
+        walk = 0;
+        while ( walk < logic->orsLen && result == 0 ) {
+          evaluate_expression(logic->ors[walk], EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch ( sv.type ) {
+            case INT32TYPE: {
+              if ( sv.i != 0 ) {
+                result = 1;
+              }
+              break;
+            }
+            case DOUBLETYPE: {
+              if ( fabs(sv.d) > 0.00000001 ) {
+                result = 1;
+              }
+              break;
+            }
+            default: {
+              fprintf(stderr, "error: Invalid conditional, expected numerical; got type '%d'\n",
+                sv.type);
+            }
+          }
+          walk++;
+        }
+      }
+      if ( result == 0 && logic->andsLen > 0 ) {
+        walk = 0;
+        result = 1;  // True, until proven otherwise..
+        while ( walk < logic->andsLen ) {
+          int32_t tmpResult = 0;
+          evaluate_expression(logic->ands[walk], EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch ( sv.type ) {
+            case INT32TYPE: {
+              if ( sv.i != 0 ) {
+                tmpResult = 1;
+              }
+              break;
+            }
+            case DOUBLETYPE: {
+              if ( fabs(sv.d) > 0.00000001 ) {
+                tmpResult = 1;
+              }
+              break;
+            }
+            default: {
+              fprintf(stderr, "%s.%d index error: datatype the does not support conditioning.\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+              if ( ! *interactive ) {
+                exit(1);
+              }
+            }
+          }
+          walk++;
+          if ( tmpResult == 0 ) {
+            result = 0;
+            break;
+          }
+        }
+      }
+
+      PUSH_INT(result, sp, sc);
+      break;
+    }
     case EXPR_TYPE_DICT:
     PUSH_DICTIONARY(expr->dict, sp, sc);
     break;
@@ -3577,6 +3648,38 @@ void print_expr(expr_t *expr)
     case EXPR_TYPE_TEXT:
     printf("'%s'", expr->text);
     break;
+    case EXPR_TYPE_LOGICAL: {
+      int32_t walk;
+      logical_t *logic = expr->logical;
+      if ( logic->orsLen > 0 ) {
+        printf("(");
+        walk = 0;
+        while ( walk < logic->orsLen ) {
+          if ( walk > 0 ) {
+            printf(" || ");
+          }
+          print_expr(logic->ors[walk]);
+          walk++;
+        }
+        printf(")");
+      }
+      if ( logic->andsLen > 0 ) {
+        if ( logic->orsLen > 0 ) {
+          printf(" && ");
+        }
+        printf("(");
+        walk = 0;
+        while ( walk < logic->andsLen ) {
+          if ( walk > 0 ) {
+            printf(" && ");
+          }
+          print_expr(logic->ands[walk]);
+          walk++;
+        }
+        printf(")");
+      }
+      break;
+    }
     case EXPR_TYPE_VECTOR_IDX: {
       vectorIndex_t *vecIdx = expr->vecIdx;
       printf("ListIdx, ID: ");

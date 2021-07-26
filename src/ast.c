@@ -16,6 +16,17 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
+void *ast_remalloc(void *mem, size_t size) {
+  char *p = (char *)realloc(mem, size);
+  if (p == NULL) {
+    fprintf(stderr,
+            "%s %s error: Failed to build AST, malloc failed (%zu bytes)\n",
+            __FILE__, __func__, size);
+    exit(EXIT_FAILURE);
+  }
+  return (void *)p;
+}
+
 void *ast_ecalloc(size_t size) {
   char *p = (char *)calloc(size, 1);
   if (p == NULL) {
@@ -74,6 +85,45 @@ expr_t *newExpr_FuncPtr(void *func) {
 
   expr->type = EXPR_TYPE_FUNCPTR;
   expr->func = func;
+
+  return expr;
+}
+
+expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  logical_t *logical = ast_emalloc(sizeof(logical_t));
+
+  logical->andsLen = 0;
+  logical->orsLen = 0;
+  logical->ands = NULL;
+  logical->ors = NULL;
+
+  if ( prevLogical != NULL && prevLogical->type == EXPR_TYPE_LOGICAL ) {
+    logical->andsLen = prevLogical->logical->andsLen;
+    logical->ands = prevLogical->logical->ands;
+
+    logical->orsLen = prevLogical->logical->orsLen;
+    logical->ors = prevLogical->logical->ors;
+
+    /* Free this logical */
+    free(prevLogical->logical);
+    free(prevLogical);
+  }
+
+  if ( newAnd != NULL ) {
+    logical->andsLen++;
+    logical->ands = ast_remalloc(logical->ands, logical->andsLen*sizeof(expr_t*));
+    logical->ands[logical->andsLen-1] = newAnd;
+  }
+
+  if ( newOr != NULL ) {
+    logical->orsLen++;
+    logical->ors = ast_remalloc(logical->ors, logical->orsLen*sizeof(expr_t*));
+    logical->ors[logical->orsLen-1] = newOr;
+  }
+
+  expr->type = EXPR_TYPE_LOGICAL;
+  expr->logical = logical;
 
   return expr;
 }
@@ -571,6 +621,16 @@ void free_expression(expr_t *expr) {
   switch (expr->type) {
   case EXPR_TYPE_ID: {
     free(expr->id.id);
+    break;
+  }
+  case EXPR_TYPE_LOGICAL: {
+    if ( expr->logical->andsLen > 0 ) {
+      free(expr->logical->ands);
+    }
+    if ( expr->logical->orsLen > 0 ) {
+      free(expr->logical->ors);
+    }
+    free(expr->logical);
     break;
   }
   case EXPR_TYPE_CLASSPTR: {

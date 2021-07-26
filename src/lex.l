@@ -19,7 +19,7 @@ KEYWORD_PROCESS  process
 HASHTAG          [#]
 RETURN_TOKEN     "->"
 ID_TOKEN         [_[:alnum:]åäöÅÄÖ]
-RETURN_AS_IS     [\"\'+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
+RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\]
 
 %%
 

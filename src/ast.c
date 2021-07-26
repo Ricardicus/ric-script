@@ -92,6 +92,7 @@ expr_t *newExpr_FuncPtr(void *func) {
 expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   logical_t *logical = ast_emalloc(sizeof(logical_t));
+  int appendPrev = 0;
 
   logical->andsLen = 0;
   logical->orsLen = 0;
@@ -108,18 +109,32 @@ expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
     /* Free this logical */
     free(prevLogical->logical);
     free(prevLogical);
+  } else if ( prevLogical != NULL ) {
+    appendPrev = 1;
   }
 
   if ( newAnd != NULL ) {
     logical->andsLen++;
     logical->ands = ast_remalloc(logical->ands, logical->andsLen*sizeof(expr_t*));
     logical->ands[logical->andsLen-1] = newAnd;
+
+    if ( appendPrev ) {
+      logical->andsLen++;
+      logical->ands = ast_remalloc(logical->ands, logical->andsLen*sizeof(expr_t*));
+      logical->ands[logical->andsLen-1] = prevLogical; 
+    }
   }
 
   if ( newOr != NULL ) {
     logical->orsLen++;
     logical->ors = ast_remalloc(logical->ors, logical->orsLen*sizeof(expr_t*));
     logical->ors[logical->orsLen-1] = newOr;
+
+    if ( appendPrev ) {
+      logical->orsLen++;
+      logical->ors = ast_remalloc(logical->ors, logical->orsLen*sizeof(expr_t*));
+      logical->ors[logical->orsLen-1] = prevLogical;
+    }
   }
 
   expr->type = EXPR_TYPE_LOGICAL;

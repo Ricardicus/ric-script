@@ -1,35 +1,56 @@
 #!/bin/ric
+;; testValues ;; {
+  a = 1
+  b = 0
+  c = 1
+  d = 0
+  @ setVals(a_, b_, c_, d_) {
+    a = a_
+    b = b_
+    c = c_
+    d = d_
+  }
 
-? [ len(args) < 6 ] {
-  print("usage: " + args[0] + " a b c d")
-  exit(1)
+  @ getVals() {
+    -> [a, b, c, d]
+  }
 }
 
-a = args[2]
-b = args[3]
-c = args[4]
-d = args[5]
+vals = testValues()
 
-
-? [ a || b || c || d ] {
-  print("a || b || c || d")
+? [ len(args) == 6 ] {
+  vals::setVals(args[2], args[3], args[4], args[5])
+  print(vals::getVals())
 }
 
-? [ a || b || c && d ] {
-  print("a || b || c && d")
+@ testConditionals(vals) {
+  values = vals::getVals()
+  a = values[0]
+  b = values[1]
+  c = values[2]
+  d = values[3]
+
+  ? [ a || b || c || d ] {
+    print("a || b || c || d")
+  }
+
+  ? [ a || b || c && d ] {
+    print("a || b || c && d")
+  }
+
+  ? [ a && b && c && d ] {
+    print("a && b && c && d")
+  }
+
+  ? [ a && b && c || d ] {
+    print("a && b && c || d")
+  }
+
+  ? [ a || (b) ] {
+    print("a || (b && c)")
+  }
+
 }
 
-? [ a && b && c && d ] {
-  print("a && b && c && d")
-}
-
-? [ a && b && c || d ] {
-  print("a && b && c || d")
-}
-
-? [ a || (b) ] {
-  print("a || (b && c)")
-}
-
-
+testConditionals(vals)
 

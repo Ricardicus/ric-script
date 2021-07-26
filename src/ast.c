@@ -62,6 +62,21 @@ expr_t* newExpr_ClassPtr(class_t *class) {
   return expr;
 }
 
+expr_t* newExpr_ClassPtrCopy(class_t *class) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  class_t *cls = ast_emalloc(sizeof(class_t));
+
+  cls->id = class->id;
+  cls->defines = class->defines;
+  cls->funcDefs = hashtable_copy(class->funcDefs);
+  cls->varMembers = hashtable_copy(class->varMembers);
+  cls->initialized = class->initialized;
+
+  expr->type = EXPR_TYPE_CLASSPTR;
+  expr->classObj = cls;
+  return expr;
+}
+
 expr_t *newExpr_Cond(ifCondition_t *cond) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 

@@ -741,7 +741,9 @@ Please report back to me.\n\
             PUSH_LIBFUNCPTR(libFunc, sp, sc);
             stop = 1;
           } else {
-            fprintf(stderr, "Failed to find ID: '%s'\n", expr->id.id);
+            fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", 
+               ((statement_t*)stmt)->file, ((statement_t*)stmt)->line,
+              expr->id.id);
             if ( ! *interactive ) {
               exit(1);
             }
@@ -792,8 +794,8 @@ Please report back to me.\n\
               break;
             }
             default: {
-              fprintf(stderr, "error: Invalid conditional, expected numerical; got type '%d'\n",
-                sv.type);
+              fprintf(stderr, "%s.%d error: Invalid conditional, expected numerical; got type '%d'\n",
+                 ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, sv.type);
             }
           }
           walk++;
@@ -2076,8 +2078,14 @@ void call_func(
                 newArg = e;
                 break;
               }
+              case CLASSTYPE: {
+                newArg = newExpr_ClassPtrCopy(sv.classObj);
+                break;
+              }
               default:
-                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+                fprintf(stderr, "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
+                  ERROR_PRINT_LOCATION,
+                  sv.type);
                 exit(1);
                 break;
             }
@@ -2281,8 +2289,14 @@ void call_func(
                 newArg = e;
                 break;
               }
+              case CLASSTYPE: {
+                newArg = newExpr_ClassPtrCopy(sv.classObj);
+                break;
+              }
               default:
-                fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+                fprintf(stderr, "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
+                  ERROR_PRINT_LOCATION,
+                  sv.type);
                 exit(1);
                 break;
             }
@@ -2500,8 +2514,14 @@ void call_func(
               newArg = e;
               break;
             }
+            case CLASSTYPE: {
+              newArg = newExpr_ClassPtrCopy(sv.classObj);
+              break;
+            }
             default:
-              fprintf(stderr, "error: sorry but argument datatype cannot be passed to a function, type: %d\n", sv.type);
+              fprintf(stderr, "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
+                ERROR_PRINT_LOCATION,
+                sv.type);
               exit(1);
               break;
           }
@@ -2928,10 +2948,28 @@ void interpret_statements_(
           /* Pushing the return value as an int */
           PUSH_RAWDATA(sv.rawdata, sp, sc);
           break;
-        case VECTORTYPE:
+        case VECTORTYPE: {
           /* Pushing the return value as a vector */
+          /* Placing value on the heap */
+          int dummy;
+          heapval_t *hvp = NULL;
+          expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+          sv.vec = e->vec;
+          free(e);
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           PUSH_VECTOR(sv.vec, sp, sc);
           break;
+        }
+        case DICTTYPE: {
+          /* Pushing the return value as a vector */
+          /* Placing value on the heap */
+          int dummy;
+          heapval_t *hvp = NULL;
+          dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+          sv.dict = dict;
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          PUSH_DICTIONARY(sv.dict, sp, sc);
+        }
         case DOUBLETYPE:
           /* Pushing the return value as a double */
           PUSH_DOUBLE(sv.d, sp, sc);

@@ -329,6 +329,7 @@ expr_t* newExpr_Cond(ifCondition_t *cond);
 expr_t* newExpr_Vector(argsList_t *args);
 expr_t* newExpr_VectorFromForEach(statement_t *stmt);
 expr_t* newExpr_ClassPtr(class_t *class);
+expr_t* newExpr_ClassPtrCopy(class_t *class);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
 expr_t* newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr);

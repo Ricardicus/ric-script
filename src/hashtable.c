@@ -66,6 +66,23 @@ void hashtable_rehash(hashtable_t * hashtable)
 	hashtable->size = newsize;
 }
 
+hashtable_t* hashtable_copy(hashtable_t *hashtable)
+{
+  int size_old = hashtable->size;
+  int newsize = size_old;
+  hashtable_t * newhash = hashtable_new(newsize,hashtable->load);
+  newhash->data_also = hashtable->data_also;
+  int i = 0;
+  while (i<size_old) {
+    struct key_val_pair * ptr = hashtable->table[i];
+    while (ptr!=NULL) {
+      newhash->put(newhash,NULL,ptr->key,ptr->data);
+      ptr = ptr->next;
+    }
+    i++;
+  }
+  return newhash;
+}
 
 void hashtable_free(hashtable_t * hash)
 {

@@ -122,7 +122,7 @@ well as haven't implemented:
 - [x] Garbage collector (mark & sweep)
 - [x] Passing arguments as vector instead of variables
 - [x] Dictionary expressions
-- [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_) (**implemented only function loading**)
+- [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
 - [x] Local scope for variables (distinction between global and local)
 - [x] Classes
 - [x] Better error reporting (always include at least line number)

@@ -5,7 +5,7 @@
 extern int yylinenor;
 extern char *ParsedFile;
 
-void *ast_emalloc(size_t size) {
+void* ast_emalloc(size_t size) {
   char *p = (char *)malloc(size);
   if (p == NULL) {
     fprintf(stderr,
@@ -16,7 +16,7 @@ void *ast_emalloc(size_t size) {
   return (void *)p;
 }
 
-void *ast_remalloc(void *mem, size_t size) {
+void* ast_remalloc(void *mem, size_t size) {
   char *p = (char *)realloc(mem, size);
   if (p == NULL) {
     fprintf(stderr,
@@ -27,7 +27,7 @@ void *ast_remalloc(void *mem, size_t size) {
   return (void *)p;
 }
 
-void *ast_ecalloc(size_t size) {
+void* ast_ecalloc(size_t size) {
   char *p = (char *)calloc(size, 1);
   if (p == NULL) {
     fprintf(stderr,
@@ -77,7 +77,7 @@ expr_t* newExpr_ClassPtrCopy(class_t *class) {
   return expr;
 }
 
-expr_t *newExpr_Cond(ifCondition_t *cond) {
+expr_t* newExpr_Cond(ifCondition_t *cond) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_COND;
@@ -86,7 +86,7 @@ expr_t *newExpr_Cond(ifCondition_t *cond) {
   return expr;
 }
 
-expr_t *newExpr_Pointer(uintptr_t val) {
+expr_t* newExpr_Pointer(uintptr_t val) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_POINTER;
@@ -95,7 +95,7 @@ expr_t *newExpr_Pointer(uintptr_t val) {
   return expr;
 }
 
-expr_t *newExpr_FuncPtr(void *func) {
+expr_t* newExpr_FuncPtr(void *func) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FUNCPTR;
@@ -104,7 +104,7 @@ expr_t *newExpr_FuncPtr(void *func) {
   return expr;
 }
 
-expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
+expr_t* newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   logical_t *logical = ast_emalloc(sizeof(logical_t));
   int appendPrev = 0;
@@ -158,7 +158,7 @@ expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
   return expr;
 }
 
-expr_t *newExpr_Vector(argsList_t *args) {
+expr_t* newExpr_Vector(argsList_t *args) {
   int32_t length = 0;
   argsList_t *walk;
   expr_t *expr = ast_emalloc(sizeof(expr_t));
@@ -196,7 +196,7 @@ expr_t *newExpr_Vector(argsList_t *args) {
   return expr;
 }
 
-expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
+expr_t* newExpr_VectorFromForEach(statement_t *forEach) {
   int32_t length = 0;
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
@@ -225,7 +225,7 @@ expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
   return expr;
 }
 
-expr_t *newExpr_Text(char *text) {
+expr_t* newExpr_Text(char *text) {
   size_t textLen = strlen(text);
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
@@ -238,7 +238,7 @@ expr_t *newExpr_Text(char *text) {
   return expr;
 }
 
-expr_t *newExpr_Ival(int val) {
+expr_t* newExpr_Ival(int val) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_IVAL;
@@ -247,7 +247,7 @@ expr_t *newExpr_Ival(int val) {
   return expr;
 }
 
-expr_t *newExpr_Uval(unsigned val) {
+expr_t* newExpr_Uval(unsigned val) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_UVAL;
@@ -256,7 +256,7 @@ expr_t *newExpr_Uval(unsigned val) {
   return expr;
 }
 
-expr_t *newExpr_Float(double val) {
+expr_t* newExpr_Float(double val) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FVAL;
@@ -278,7 +278,7 @@ expr_t* newExpr_RawData(size_t size) {
   return expr;
 }
 
-expr_t *newExpr_ID(char *id) {
+expr_t* newExpr_ID(char *id) {
   size_t textLen = strlen(id);
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
@@ -291,7 +291,7 @@ expr_t *newExpr_ID(char *id) {
   return expr;
 }
 
-expr_t *newExpr_FuncCall(functionCall_t *func) {
+expr_t* newExpr_FuncCall(functionCall_t *func) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FUNCCALL;
@@ -300,7 +300,7 @@ expr_t *newExpr_FuncCall(functionCall_t *func) {
   return expr;
 }
 
-expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
+expr_t* newExpr_LibFuncPtr(libFunction_t *func) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_LIBFUNCPTR;
@@ -309,7 +309,7 @@ expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
   return expr;
 }
 
-expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
+expr_t* newExpr_OPAdd(expr_t *left, expr_t *right) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPADD;
@@ -319,7 +319,7 @@ expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
   return expr;
 }
 
-expr_t *newExpr_OPSub(expr_t *left, expr_t *right) {
+expr_t* newExpr_OPSub(expr_t *left, expr_t *right) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPSUB;
@@ -329,7 +329,7 @@ expr_t *newExpr_OPSub(expr_t *left, expr_t *right) {
   return expr;
 }
 
-expr_t *newExpr_OPMul(expr_t *left, expr_t *right) {
+expr_t* newExpr_OPMul(expr_t *left, expr_t *right) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPMUL;
@@ -339,7 +339,7 @@ expr_t *newExpr_OPMul(expr_t *left, expr_t *right) {
   return expr;
 }
 
-expr_t *newExpr_OPMod(expr_t *left, expr_t *right) {
+expr_t* newExpr_OPMod(expr_t *left, expr_t *right) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPMOD;
@@ -349,7 +349,7 @@ expr_t *newExpr_OPMod(expr_t *left, expr_t *right) {
   return expr;
 }
 
-expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
+expr_t* newExpr_OPDiv(expr_t *left, expr_t *right) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPDIV;
@@ -359,7 +359,7 @@ expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
   return expr;
 }
 
-expr_t *newExpr_VectorIndex(expr_t *id, expr_t *index) {
+expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   expr->vecIdx = ast_emalloc(sizeof(vectorIndex_t));
 
@@ -371,7 +371,7 @@ expr_t *newExpr_VectorIndex(expr_t *id, expr_t *index) {
   return expr;
 }
 
-expr_t *newConditional(int type, expr_t *left, expr_t *right) {
+expr_t* newConditional(int type, expr_t *left, expr_t *right) {
   expr_t *e = ast_emalloc(sizeof(expr_t));
   ifCondition_t *cond = ast_emalloc(sizeof(ifCondition_t));
 
@@ -385,7 +385,7 @@ expr_t *newConditional(int type, expr_t *left, expr_t *right) {
   return e;
 }
 
-declaration_t *newDeclaration(expr_t *id, expr_t *expr) {
+declaration_t* newDeclaration(expr_t *id, expr_t *expr) {
   declaration_t *decl = ast_emalloc(sizeof(declaration_t));
 
   decl->entity = LANG_ENTITY_DECL;
@@ -395,7 +395,7 @@ declaration_t *newDeclaration(expr_t *id, expr_t *expr) {
   return decl;
 }
 
-statement_t *newStatement(int type, void *content) {
+statement_t* newStatement(int type, void *content) {
   statement_t *stmt = ast_emalloc(sizeof(statement_t));
   stmt->entity = type;
   stmt->next = NULL;
@@ -525,7 +525,7 @@ expr_t* newExpr_Copy(expr_t *expr) {
   return newExp;
 }
 
-argsList_t *newArgument(expr_t *expr, void *next) {
+argsList_t* newArgument(expr_t *expr, void *next) {
   argsList_t *argl = ast_emalloc(sizeof(argsList_t));
   expr_t *copy = expr; //newExpr_Copy(expr);
 
@@ -560,7 +560,7 @@ forEachStmt_t* newForEach(expr_t *root, char *entry, void *body) {
   return stmt;
 }
 
-functionDef_t *newFunc(const char *id, void *params, void *body) {
+functionDef_t* newFunc(const char *id, void *params, void *body) {
   size_t idLen = strlen(id);
   functionDef_t *func = ast_emalloc(sizeof(functionDef_t));
 
@@ -595,7 +595,7 @@ expr_t* newClassFunCall(expr_t *classID, char *funcID, void *args) {
   return e;
 }
 
-expr_t *newFunCall(expr_t *id, void *args) {
+expr_t* newFunCall(expr_t *id, void *args) {
   expr_t *e = ast_emalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
 
@@ -609,7 +609,7 @@ expr_t *newFunCall(expr_t *id, void *args) {
   return e;
 }
 
-ifStmt_t *newIfStatement(int ifType, void *cond, void *body) {
+ifStmt_t* newIfStatement(int ifType, void *cond, void *body) {
   ifStmt_t *ifstmt = ast_emalloc(sizeof(ifStmt_t));
 
   ifstmt->ifType = ifType;
@@ -621,7 +621,7 @@ ifStmt_t *newIfStatement(int ifType, void *cond, void *body) {
   return ifstmt;
 }
 
-body_t *newBody(void *bodyIn) {
+body_t* newBody(void *bodyIn) {
   statement_t *body = (statement_t*)bodyIn;
   statement_t *walkPrev = NULL;
   statement_t *walk = body;

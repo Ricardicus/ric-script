@@ -113,7 +113,7 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
   }
 }
 
-expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
+expr_t* stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
   expr_t *newExp = NULL;
 
   switch (sv->type) {
@@ -3569,7 +3569,7 @@ void interpret_statements_(
   free(ctx);
 }
 
-heapval_t *locals_lookup(locals_stack_t *stack, char *id) {
+heapval_t* locals_lookup(locals_stack_t *stack, char *id) {
   int i = stack->sb;
   while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
     local_t local = stack->stack[i];
@@ -3653,7 +3653,7 @@ void close_namespaces(PROVIDE_CONTEXT_ARGS()) {
   hashtable_free(PROVIDE_CONTEXT()->classDecs);
 }
 
-hashtable_t *new_argstable()
+hashtable_t* new_argstable()
 {
   hashtable_t *argTable = hashtable_new(20, 0.8);
   assert(argTable != NULL);

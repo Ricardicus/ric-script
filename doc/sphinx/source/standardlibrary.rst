@@ -139,12 +139,11 @@ this:
 	      printf(" " * indent)
 	      print(file)
 	    } ~ {
-	      ? [ file != '.' ] {
-	      ? [ file != '..'] {
+	      ? [ file != '.' && file != '..'] {
 	        printf(" " * indent)
 	        print(file)
 	        listFiles(fullfile, indent + 1)
-	      }}
+	      }
 	    }
 	  }
 	}

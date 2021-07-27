@@ -6,6 +6,7 @@ prefix = "/doc/"
 
 def editHrefs(html_file):
   patterns = [
+  (r'href="([a-zA-Z\-]*\.html\#[a-zA-Z\-]*)"', r'href="' + prefix + r'\1"'),
     (r'href="([a-zA-Z\-]*\.html)"', r'href="' + prefix + r'\1"'),
     (r'href="_', r'href="' + prefix + '_')
   ]

@@ -1,0 +1,26 @@
+#!/usr/bin/ric
+# This program shows how you can create
+# different types of thread contexts in
+# ricscript. It is inspired by Javascript.
+# You can do function calls by timeouts
+# over intervals.
+# The interval thread stops if the function
+# returns a non-zero value.
+a = 1
+
+@ iterate () {
+  ? [ a > 10 ] {
+    -> 1
+  }
+  a = a + 1
+}
+
+@ end () {
+  print("Hi, the shared variable now holds value: " + a)
+}
+
+print("I have set a variable, named 'a', to: " + a)
+
+setTimeout(end, 2)
+setInterval(iterate, 1)
+

@@ -7,7 +7,7 @@ def test_find_files():
   './test_locals_globals.py','./test_list_dir.py','./test_vector_print.py','./test_time_of_day.py','./test_args.py',
   './test_sample_function_within_function.py','./settings.py','./test_sample_gcd.py','./test_string_manipulations.py',
   './test_func_ptr.py','./test_load.py','./test_math.py','./test_dict_print.py', './test_for_eaching.py',
-  './test_conditional.py']
+  './test_conditional.py', './test_threading.py']
 
   if ( os.name == 'nt' ):
     # due to the fact that Windows uses backslash

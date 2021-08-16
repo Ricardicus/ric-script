@@ -809,7 +809,7 @@ Version   : 0.1
 
 ## Install without Package Control
 
-* Place the ricscript.sublime-syntax file inside the Sublime Text packages User folder (found under Preferences -> Browse Packages...)
+* Place the file sublime/ricscript.sublime-syntax inside the Sublime Text packages User folder (found under Preferences -> Browse Packages...)
 * Restart Sublime Text
 
 ## Install with Package Control

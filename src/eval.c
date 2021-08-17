@@ -1036,7 +1036,9 @@ Please report back to me.\n\
 
               if ( sv.type != INT32TYPE ) {
                 fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
-                exit(1);
+                if ( !*interactive ) {
+                  exit(1);
+                }
               }
 
               idxStart = (int)sv.i;
@@ -1051,7 +1053,9 @@ Please report back to me.\n\
 
               if ( sv.type != INT32TYPE ) {
                 fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
-                exit(1);
+                if ( !*interactive ) {
+                  exit(1);
+                }
               }
 
               idxEnd = (int)sv.i;
@@ -1060,13 +1064,17 @@ Please report back to me.\n\
             if ( idxStart < 0 || idxStart > vec->length || idxStart > idxEnd ) {
               fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
                 idxStart, idxEnd, (int)vec->length);
-              exit(1);
+              if ( !*interactive ) {
+                exit(1);
+              }
             }
 
             if ( idxEnd < 0 || idxEnd > vec->length || idxEnd < idxStart ) {
               fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
                 idxStart, idxEnd, (int)vec->length);
-              exit(1);
+              if ( !*interactive ) {
+                exit(1);
+              }
             }
 
             /* Create a new list */
@@ -1118,7 +1126,9 @@ Please report back to me.\n\
 
             if ( arrayIndex > strlen(text) ) {
               fprintf(stderr, "index error: out of bounds\n");
-              exit(1);
+              if ( !*interactive ) {
+                exit(1);
+              }
             }
 
             newText = ast_emalloc(len+1);
@@ -3177,6 +3187,7 @@ void interpret_statements_(
           /* This is really not support to happen */
           printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
             ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+
           exit(1);
         }
 

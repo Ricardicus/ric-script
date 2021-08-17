@@ -1108,26 +1108,104 @@ Please report back to me.\n\
           evaluate_expression(index, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
 
-          if ( sv.type != INT32TYPE ) {
-            fprintf(stderr, "index error: Must provide an integer as index (%d)\n", sv.type);
+          if ( sv.type != INT32TYPE && sv.type != INDEXER ) {
+            fprintf(stderr, "index error: Must provide a valid expression as indexer, value type: (%d)\n", sv.type);
             exit(1);
           }
 
-          arrayIndex = sv.i;
+          if ( sv.type == INT32TYPE ) {
+            arrayIndex = sv.i;
 
-          if ( arrayIndex > strlen(text) ) {
-            fprintf(stderr, "index error: out of bounds\n");
-            exit(1);
+            if ( arrayIndex > strlen(text) ) {
+              fprintf(stderr, "index error: out of bounds\n");
+              exit(1);
+            }
+
+            newText = ast_emalloc(len+1);
+            newText[0] = text[arrayIndex];
+            newText[1] = 0;
+            sv.type = TEXT;
+            sv.t = newText;
+
+            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            PUSH_STRING(sv.t, sp, sc);
+          } else if ( sv.type == INDEXER ) {
+            indexer_t *indexer = sv.indexer;
+            expr_t *left = indexer->left;
+            expr_t *right = indexer->right;
+            int idxStart = 0;
+            int idxEnd = (int)strlen(text);
+            int idxWalk = 0;
+            int textLen = (int)strlen(text);
+            char *newText = NULL;
+            expr_t *newTextExp = NULL;
+            heapval_t *hpv;
+            int dummy;
+
+            if ( left == NULL ) {
+              idxStart = 0;
+            } else {
+              /* Evaluate the left expression */
+              evaluate_expression(left, EXPRESSION_ARGS());
+              POP_VAL(&sv, sp, sc);
+
+              if ( sv.type != INT32TYPE ) {
+                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+                exit(1);
+              }
+
+              idxStart = (int)sv.i;
+            }
+
+            if ( right == NULL ) {
+              idxEnd = textLen;
+            } else {
+              /* Evaluate the left expression */
+              evaluate_expression(right, EXPRESSION_ARGS());
+              POP_VAL(&sv, sp, sc);
+
+              if ( sv.type != INT32TYPE ) {
+                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+                exit(1);
+              }
+
+              idxEnd = (int)sv.i;
+            }
+
+            if ( idxStart < 0 || idxStart > textLen || idxStart > idxEnd ) {
+              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                idxStart, idxEnd, textLen);
+              exit(1);
+            }
+
+            if ( idxEnd < 0 || idxEnd > textLen || idxEnd < idxStart ) {
+              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                idxStart, idxEnd, textLen);
+              exit(1);
+            }
+
+            /* Create a new string */
+            newText = (char *)ast_ecalloc(idxEnd - idxStart + 2);
+            idxWalk = 0;
+            while ( idxWalk < textLen ) {
+              if ( idxWalk >= idxStart && idxWalk < idxEnd ) {
+                /* Add this expression to the vector */
+                newText[idxWalk-idxStart] = text[idxWalk];
+              }
+              idxWalk++;
+            }
+
+            newTextExp = newExpr_Text(newText);
+            free(newText);
+
+            /* Add space for argN */
+            sv.type = TEXT;
+            sv.t = newTextExp->text;
+            free(newTextExp);
+
+            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+            PUSH_STRING(sv.t, sp, sc);
           }
-
-          newText = ast_emalloc(len+1);
-          newText[0] = text[arrayIndex];
-          newText[1] = 0;
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-          PUSH_STRING(sv.t, sp, sc);
         }
         break;
         case RAWDATATYPE: {
@@ -3004,6 +3082,7 @@ void interpret_statements_(
           sv.dict = dict;
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           PUSH_DICTIONARY(sv.dict, sp, sc);
+          break;
         }
         case DOUBLETYPE:
           /* Pushing the return value as a double */

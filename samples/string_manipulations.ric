@@ -30,3 +30,7 @@ s = "hej " * 3
 print(s)
 s = 7 * "hej "
 print(s)
+
+s = "hejsan hoppsan falleralera"
+print(s[15:])
+print(s[3:12])

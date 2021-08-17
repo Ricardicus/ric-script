@@ -760,6 +760,9 @@ Please report back to me.\n\
     case EXPR_TYPE_FVAL:
     PUSH_DOUBLE(expr->fval, sp, sc);
     break;
+    case EXPR_TYPE_INDEXER:
+    PUSH_INDEXER(expr->indexer, sp, sc);
+    break;
     case EXPR_TYPE_FUNCPTR:
     PUSH_FUNCPTR(expr->func, sp, sc);
     break;
@@ -977,89 +980,121 @@ Please report back to me.\n\
           evaluate_expression(index, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
 
-          if ( sv.type != INT32TYPE ) {
-            fprintf(stderr, "index error: Must provide an integer as index\n");
+          if ( sv.type != INT32TYPE && sv.type != INDEXER ) {
+            fprintf(stderr, "index error: Must provide a correct indexer value as index\n");
             exit(1);
           }
 
-          arrayIndex = sv.i;
+          if ( sv.type == INT32TYPE ) {
+            arrayIndex = sv.i;
 
-          /* check the limits */
-          if ( arrayIndex >= vec->length ) {
-            fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-              arrayIndex,
-              vec->length);
-            exit(1);
-          }
-
-          walk = vec->content;
-          while ( walk != NULL && arrayIndex >= 0 ) {
-            exp = walk->arg;
-            walk = walk->next;
-            --arrayIndex;
-          }
-
-          if ( exp == NULL ) {
-            fprintf(stderr, "Unexpected index error!\n");
-            fprintf(stderr, "Please include the script and file an error report to me here:\n    %s\n\
-    This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERROR_ISSUE_URL);
-            exit(1);
-          }
-
-          /* Evaluate the expression */
-          evaluate_expression(exp, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
-
-          /* Push value to the stack */
-          switch (sv.type) {
-            case INT32TYPE: {
-              PUSH_INT(sv.i, sp, sc);
-              break;
-            }
-            case DOUBLETYPE: {
-              PUSH_DOUBLE(sv.d, sp, sc);
-              break;
-            }
-            case TEXT: {
-              PUSH_STRING(sv.t, sp, sc);
-              break;
-            }
-            case POINTERTYPE: {
-              PUSH_POINTER(sv.p, sp, sc);
-              break;
-            }
-            case VECTORTYPE: {
-              PUSH_VECTOR(sv.vec, sp, sc);
-              break;
-            }
-            case FUNCPTRTYPE: {
-              PUSH_FUNCPTR(sv.func, sp, sc);
-              break;     
-            }
-            case LIBFUNCPTRTYPE: {
-              PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
-              break;
-            }
-            case DICTTYPE: {
-              PUSH_DICTIONARY(sv.dict, sp, sc);
-              break;
-            }
-            case CLASSTYPE: {
-              PUSH_CLASSREF(sv.classObj, sp, sc);
-              break;
-            }
-            case TIMETYPE: {
-              PUSH_TIME(sv.time, sp, sc);
-              break;
-            }
-            case RAWDATATYPE: {
-              PUSH_RAWDATA(sv.rawdata, sp, sc);
-              break;
-            }
-            default:
-              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+            /* check the limits */
+            if ( arrayIndex >= vec->length ) {
+              fprintf(stderr, "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                arrayIndex,
+                vec->length);
               exit(1);
-              break;
+            }
+
+            walk = vec->content;
+            while ( walk != NULL && arrayIndex >= 0 ) {
+              exp = walk->arg;
+              walk = walk->next;
+              --arrayIndex;
+            }
+
+            if ( exp == NULL ) {
+              fprintf(stderr, "Unexpected index error!\n");
+              fprintf(stderr, "Please include the script and file an error report to me here:\n    %s\n\
+      This is not supposed to happen, I hope I can fix the intepreter!\n", GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            /* Evaluate the expression */
+            evaluate_expression(exp, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+            push_stackval(&sv, sp, sc);
+          } else if ( sv.type == INDEXER ) {
+            indexer_t *indexer = sv.indexer;
+            expr_t *left = indexer->left;
+            expr_t *right = indexer->right;
+            int idxStart = 0;
+            int idxEnd = vec->length;
+            int idxWalk = 0;
+            expr_t *newVec = NULL;
+            argsList_t *vecContent = NULL;
+            argsList_t *walk = NULL;
+            heapval_t *hpv;
+            int dummy;
+
+            if ( left == NULL ) {
+              idxStart = 0;
+            } else {
+              /* Evaluate the left expression */
+              evaluate_expression(left, EXPRESSION_ARGS());
+              POP_VAL(&sv, sp, sc);
+
+              if ( sv.type != INT32TYPE ) {
+                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+                exit(1);
+              }
+
+              idxStart = (int)sv.i;
+            }
+
+            if ( right == NULL ) {
+              idxEnd = vec->length;
+            } else {
+              /* Evaluate the left expression */
+              evaluate_expression(right, EXPRESSION_ARGS());
+              POP_VAL(&sv, sp, sc);
+
+              if ( sv.type != INT32TYPE ) {
+                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+                exit(1);
+              }
+
+              idxEnd = (int)sv.i;
+            }
+
+            if ( idxStart < 0 || idxStart > vec->length || idxStart > idxEnd ) {
+              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                idxStart, idxEnd, (int)vec->length);
+              exit(1);
+            }
+
+            if ( idxEnd < 0 || idxEnd > vec->length || idxEnd < idxStart ) {
+              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                idxStart, idxEnd, (int)vec->length);
+              exit(1);
+            }
+
+            /* Create a new list */
+            walk = vec->content;
+            idxWalk = 0;
+            while ( walk != NULL ) {
+              if ( idxWalk >= idxStart && idxWalk < idxEnd ) {
+                /* Add this expression to the vector */
+                argsList_t *a;
+                expr_t *e = walk->arg;
+                e = newExpr_Copy(e);
+                a = newArgument(e, vecContent);
+                vecContent = a;
+              }
+              walk = walk->next;
+              idxWalk++;
+            }
+
+            newVec = newExpr_Vector(vecContent);
+
+            /* Add space for argN */
+            sv.type = VECTORTYPE;
+            sv.vec = newVec->vec;
+
+            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+
+            PUSH_VECTOR(newVec->vec, sp, sc);
+            free(newVec);
           }
         }
         break;

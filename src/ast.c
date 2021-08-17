@@ -104,6 +104,18 @@ expr_t* newExpr_FuncPtr(void *func) {
   return expr;
 }
 
+expr_t* newExpr_Indexer(expr_t *left, expr_t *right) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  indexer_t *indexer = ast_emalloc(sizeof(indexer_t));
+
+  indexer->left = left;
+  indexer->right = right;
+
+  expr->type = EXPR_TYPE_INDEXER;
+  expr->indexer = indexer;
+  return expr;
+}
+
 expr_t* newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   logical_t *logical = ast_emalloc(sizeof(logical_t));
@@ -457,7 +469,11 @@ expr_t* newExpr_Copy(expr_t *expr) {
     break;
   }
   case EXPR_TYPE_FVAL:
+    newExp = newExpr_Ival(expr->fval);
+    break;
   case EXPR_TYPE_IVAL:
+    newExp = newExpr_Ival(expr->ival);
+    break;
   case EXPR_TYPE_UVAL:
     break;
   case EXPR_TYPE_VECTOR_IDX: {

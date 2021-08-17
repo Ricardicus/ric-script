@@ -376,6 +376,38 @@ and can hold any type of expressions.
 	s[0]()
 	s[1]()
 
+	# Testing libstd 'contains' function
+	s = ["foobar", 1337]
+	print(contains(s, 1338))
+	print(contains(s, 1337))
+	print(contains(s, "barfoo"))
+	print(contains(s, "foobar"))
+
+	# Testing libstring 'split' function
+	s = "hejsan hoppsan falleralera"
+	v = split(s, " ")
+	print(v)
+
+	# List multiplication
+	s = ["hejsan", 1, 3, 4]
+	s2 = 2 * s
+	s3 = s * 3
+
+	print(s)
+	print(s2)
+	print(s3)
+
+	# Some indexing with [e]:[e]
+	@ aNumber (a) { -> a }
+	big = [(100 ... i) { i }]
+	small = [(5 ... i) {i}]
+	print(big[40:50])
+	print(big[:aNumber(4)])
+	print(small[:])
+	print(small[2:])
+	print(small[1:2])
+	print(small[:len(small)])
+
 **outputs**:
 
 .. code-block:: bash
@@ -407,6 +439,21 @@ and can hold any type of expressions.
 	[['hejsan'],'hej']
 	foo
 	bar
+	0
+	1
+	0
+	1
+	['hejsan','hoppsan','falleralera']
+	['hejsan',1,3,4]
+	['hejsan',1,3,4,'hejsan',1,3,4]
+	['hejsan',1,3,4,'hejsan',1,3,4,'hejsan',1,3,4]
+	[40,41,42,43,44,45,46,47,48,49]
+	[0,1,2,3]
+	[0,1,2,3,4]
+	[2,3,4]
+	[1]
+	[0,1,2,3,4]
+
 
 Raw data
 ########

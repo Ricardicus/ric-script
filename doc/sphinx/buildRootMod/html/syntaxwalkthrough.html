@@ -520,6 +520,38 @@ print<span class="o">(</span>s<span class="o">)</span>
 <span class="nv">s</span> <span class="o">=</span> <span class="o">[</span>foo, bar<span class="o">]</span>
 s<span class="o">[</span><span class="m">0</span><span class="o">]()</span>
 s<span class="o">[</span><span class="m">1</span><span class="o">]()</span>
+
+<span class="c1"># Testing libstd &#39;contains&#39; function</span>
+<span class="nv">s</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;foobar&quot;</span>, <span class="m">1337</span><span class="o">]</span>
+print<span class="o">(</span>contains<span class="o">(</span>s, <span class="m">1338</span><span class="o">))</span>
+print<span class="o">(</span>contains<span class="o">(</span>s, <span class="m">1337</span><span class="o">))</span>
+print<span class="o">(</span>contains<span class="o">(</span>s, <span class="s2">&quot;barfoo&quot;</span><span class="o">))</span>
+print<span class="o">(</span>contains<span class="o">(</span>s, <span class="s2">&quot;foobar&quot;</span><span class="o">))</span>
+
+<span class="c1"># Testing libstring &#39;split&#39; function</span>
+<span class="nv">s</span> <span class="o">=</span> <span class="s2">&quot;hejsan hoppsan falleralera&quot;</span>
+<span class="nv">v</span> <span class="o">=</span> split<span class="o">(</span>s, <span class="s2">&quot; &quot;</span><span class="o">)</span>
+print<span class="o">(</span>v<span class="o">)</span>
+
+<span class="c1"># List multiplication</span>
+<span class="nv">s</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;hejsan&quot;</span>, <span class="m">1</span>, <span class="m">3</span>, <span class="m">4</span><span class="o">]</span>
+<span class="nv">s2</span> <span class="o">=</span> <span class="m">2</span> * s
+<span class="nv">s3</span> <span class="o">=</span> s * <span class="m">3</span>
+
+print<span class="o">(</span>s<span class="o">)</span>
+print<span class="o">(</span>s2<span class="o">)</span>
+print<span class="o">(</span>s3<span class="o">)</span>
+
+<span class="c1"># Some indexing with [e]:[e]</span>
+@ aNumber <span class="o">(</span>a<span class="o">)</span> <span class="o">{</span> -&gt; a <span class="o">}</span>
+<span class="nv">big</span> <span class="o">=</span> <span class="o">[(</span><span class="m">100</span> ... i<span class="o">)</span> <span class="o">{</span> i <span class="o">}]</span>
+<span class="nv">small</span> <span class="o">=</span> <span class="o">[(</span><span class="m">5</span> ... i<span class="o">)</span> <span class="o">{</span>i<span class="o">}]</span>
+print<span class="o">(</span>big<span class="o">[</span><span class="m">40</span>:50<span class="o">])</span>
+print<span class="o">(</span>big<span class="o">[</span>:aNumber<span class="o">(</span><span class="m">4</span><span class="o">)])</span>
+print<span class="o">(</span>small<span class="o">[</span>:<span class="o">])</span>
+print<span class="o">(</span>small<span class="o">[</span><span class="m">2</span>:<span class="o">])</span>
+print<span class="o">(</span>small<span class="o">[</span><span class="m">1</span>:2<span class="o">])</span>
+print<span class="o">(</span>small<span class="o">[</span>:len<span class="o">(</span>small<span class="o">)])</span>
 </pre></div>
 </div>
 <p><strong>outputs</strong>:</p>
@@ -550,6 +582,20 @@ bar
 <span class="o">[[</span><span class="s1">&#39;hejsan&#39;</span><span class="o">]</span>,<span class="s1">&#39;hej&#39;</span><span class="o">]</span>
 foo
 bar
+<span class="m">0</span>
+<span class="m">1</span>
+<span class="m">0</span>
+<span class="m">1</span>
+<span class="o">[</span><span class="s1">&#39;hejsan&#39;</span>,<span class="s1">&#39;hoppsan&#39;</span>,<span class="s1">&#39;falleralera&#39;</span><span class="o">]</span>
+<span class="o">[</span><span class="s1">&#39;hejsan&#39;</span>,1,3,4<span class="o">]</span>
+<span class="o">[</span><span class="s1">&#39;hejsan&#39;</span>,1,3,4,<span class="s1">&#39;hejsan&#39;</span>,1,3,4<span class="o">]</span>
+<span class="o">[</span><span class="s1">&#39;hejsan&#39;</span>,1,3,4,<span class="s1">&#39;hejsan&#39;</span>,1,3,4,<span class="s1">&#39;hejsan&#39;</span>,1,3,4<span class="o">]</span>
+<span class="o">[</span><span class="m">40</span>,41,42,43,44,45,46,47,48,49<span class="o">]</span>
+<span class="o">[</span><span class="m">0</span>,1,2,3<span class="o">]</span>
+<span class="o">[</span><span class="m">0</span>,1,2,3,4<span class="o">]</span>
+<span class="o">[</span><span class="m">2</span>,3,4<span class="o">]</span>
+<span class="o">[</span><span class="m">1</span><span class="o">]</span>
+<span class="o">[</span><span class="m">0</span>,1,2,3,4<span class="o">]</span>
 </pre></div>
 </div>
 </section>

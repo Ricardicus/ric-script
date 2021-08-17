@@ -74,6 +74,7 @@ statement_t *root = NULL;
 %type<data> parameters_list
 %type<data> body
 %type<data> function
+%type<data> indexer
 %type<data> class
 %type<data> classFunctionCall
 %type<data> functionCall
@@ -581,9 +582,30 @@ indexedVector:
 
         $$ = newExpr_VectorIndex(id, index);
     }
+    | ID '[' indexer ']' {
+        expr_t *id = newExpr_ID($1);
+        expr_t *index = $3;
+
+        $$ = newExpr_VectorIndex(id, index);
+    }
     | indexedVector '[' expressions ']' {
       $$ = newExpr_VectorIndex($1, $3);
     };
+
+indexer:
+  expression ':' expression {
+    $$ = newExpr_Indexer($1, $3);
+  }
+  | ':' expression {
+    $$ = newExpr_Indexer(NULL, $2);
+  }
+  | expression ':' {
+    $$ = newExpr_Indexer($1, NULL);
+  }
+  | ':' {
+    $$ = newExpr_Indexer(NULL, NULL);
+  };
+
 
 mathContentDigit:
     DIGIT {

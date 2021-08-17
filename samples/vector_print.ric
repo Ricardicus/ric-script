@@ -88,3 +88,14 @@ s3 = s * 3
 print(s)
 print(s2)
 print(s3)
+
+# Some indexing with [e]:[e]
+@ aNumber (a) { -> a }
+big = [(100 ... i) { i }]
+small = [(5 ... i) {i}]
+print(big[40:50])
+print(big[:aNumber(4)])
+print(small[:])
+print(small[2:])
+print(small[1:2])
+print(small[:len(small)])

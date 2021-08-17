@@ -36,8 +36,13 @@ def test_vector_print():
 "['hejsan','hoppsan','falleralera']",
 "['hejsan',1,3,4]",
 "['hejsan',1,3,4,'hejsan',1,3,4]",
-"['hejsan',1,3,4,'hejsan',1,3,4,'hejsan',1,3,4]"
-
+"['hejsan',1,3,4,'hejsan',1,3,4,'hejsan',1,3,4]",
+"[40,41,42,43,44,45,46,47,48,49]",
+"[0,1,2,3]",
+"[0,1,2,3,4]",
+"[2,3,4]",
+"[1]",
+"[0,1,2,3,4]"
 ]
 
   lib_script = callSample('vector_print.ric')

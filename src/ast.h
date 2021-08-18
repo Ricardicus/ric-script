@@ -219,20 +219,17 @@ typedef struct expr_s {
 } expr_t;
 
 typedef struct declaration_s {
-	int entity;
 	expr_t *id;
 	expr_t *val;
 } declaration_t;
 
 typedef struct argsList {
-  int entity;
   unsigned int length;
   expr_t *arg;
   struct argsList *next;
 } argsList_t;
 
 typedef struct keyValList {
-  int entity;
   expr_t *key;
   expr_t *val;
   struct keyValList *next;
@@ -247,7 +244,6 @@ typedef struct statement_s {
 } statement_t;
 
 typedef struct class_t {
-  int entity;
   char *id;
   int initialized;
   statement_t *defines;

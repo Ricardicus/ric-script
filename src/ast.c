@@ -400,7 +400,6 @@ expr_t* newConditional(int type, expr_t *left, expr_t *right) {
 declaration_t* newDeclaration(expr_t *id, expr_t *expr) {
   declaration_t *decl = ast_emalloc(sizeof(declaration_t));
 
-  decl->entity = LANG_ENTITY_DECL;
   decl->val = expr;
   decl->id = id;
 
@@ -545,7 +544,6 @@ argsList_t* newArgument(expr_t *expr, void *next) {
   argsList_t *argl = ast_emalloc(sizeof(argsList_t));
   expr_t *copy = expr; //newExpr_Copy(expr);
 
-  argl->entity = LANG_ENTITY_ARGS;
   argl->next = next;
   argl->arg = copy;
   argl->length = 1;

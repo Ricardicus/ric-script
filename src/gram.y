@@ -502,7 +502,6 @@ dictionary_key_val:
     stringContents ':' expressions {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
-      keyVal->entity = EXPR_TYPE_DICT;
       keyVal->key = $1;
       keyVal->val = $3;
       keyVal->next = NULL;
@@ -512,7 +511,6 @@ dictionary_key_val:
     | stringContents ':' stringContents {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
-      keyVal->entity = EXPR_TYPE_DICT;
       keyVal->key = $1;
       keyVal->val = $3;
       keyVal->next = NULL;

@@ -160,6 +160,15 @@ Strings
 	a = 'Hello world!'
 	print(typeInText(a) + " (" + type(a) + ")")
 
+	# Advanced indexing [e (start)]:[e (end)][:[e (offset)]]
+	a = "hejsan"
+	print(a[:])
+	print(a[:3])
+	a = "hheejjssaann"
+	print(a[::2])
+	a = " ddrraakkcciiRR"
+	print(a[1::-2])
+
 **output**:
 
 .. code-block:: bash
@@ -167,6 +176,10 @@ Strings
 	Hello world!
 	Hello world!
 	text (3)
+	"hejsan"
+	"hej"
+	"hejsan",
+	"Rickard"
 
 Function pointers
 #################
@@ -397,7 +410,7 @@ and can hold any type of expressions.
 	print(s2)
 	print(s3)
 
-	# Some indexing with [e]:[e]
+	# Some indexing with [e (start)]:[e (end)]
 	@ aNumber (a) { -> a }
 	big = [(100 ... i) { i }]
 	small = [(5 ... i) {i}]
@@ -408,6 +421,11 @@ and can hold any type of expressions.
 	print(small[1:2])
 	print(small[:len(small)])
 	print(small[1:-2])
+
+	# Some advanced indexing with offset [e (start)]:[e (end)]:[e (offset)]
+	print(small[::1])
+	print(small[::-1])
+	print(big[90:-1:-2])
 
 **outputs**:
 
@@ -455,6 +473,10 @@ and can hold any type of expressions.
 	[1]
 	[0,1,2,3,4]
 	[1,2]
+	[0,1,2,3,4]
+	[4,3,2,1,0]
+	[98,96,94,92,90]
+
 
 Raw data
 ########

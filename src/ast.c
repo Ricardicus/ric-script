@@ -104,12 +104,13 @@ expr_t* newExpr_FuncPtr(void *func) {
   return expr;
 }
 
-expr_t* newExpr_Indexer(expr_t *left, expr_t *right) {
+expr_t* newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   indexer_t *indexer = ast_emalloc(sizeof(indexer_t));
 
   indexer->left = left;
   indexer->right = right;
+  indexer->offset = offset;
 
   expr->type = EXPR_TYPE_INDEXER;
   expr->indexer = indexer;

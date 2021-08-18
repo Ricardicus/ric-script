@@ -35,3 +35,7 @@ s = "hejsan hoppsan falleralera"
 print(s[15:])
 print(s[3:12])
 print(s[15:-4])
+s = "hheejjssaann"
+print(s[::2])
+s = " ddrraakkcciiRR"
+print(s[1::-2])

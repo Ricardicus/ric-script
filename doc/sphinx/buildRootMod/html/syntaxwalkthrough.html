@@ -316,12 +316,25 @@ double <span class="o">(</span><span class="m">2</span><span class="o">)</span>
 print<span class="o">(</span>a<span class="o">)</span>
 <span class="nv">a</span> <span class="o">=</span> <span class="s1">&#39;Hello world!&#39;</span>
 print<span class="o">(</span>typeInText<span class="o">(</span>a<span class="o">)</span> + <span class="s2">&quot; (&quot;</span> + type<span class="o">(</span>a<span class="o">)</span> + <span class="s2">&quot;)&quot;</span><span class="o">)</span>
+
+<span class="c1"># Advanced indexing [e (start)]:[e (end)][:[e (offset)]]</span>
+<span class="nv">a</span> <span class="o">=</span> <span class="s2">&quot;hejsan&quot;</span>
+print<span class="o">(</span>a<span class="o">[</span>:<span class="o">])</span>
+print<span class="o">(</span>a<span class="o">[</span>:3<span class="o">])</span>
+<span class="nv">a</span> <span class="o">=</span> <span class="s2">&quot;hheejjssaann&quot;</span>
+print<span class="o">(</span>a<span class="o">[</span>::2<span class="o">])</span>
+<span class="nv">a</span> <span class="o">=</span> <span class="s2">&quot; ddrraakkcciiRR&quot;</span>
+print<span class="o">(</span>a<span class="o">[</span><span class="m">1</span>::-2<span class="o">])</span>
 </pre></div>
 </div>
 <p><strong>output</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Hello world!
 Hello world!
 text <span class="o">(</span><span class="m">3</span><span class="o">)</span>
+<span class="s2">&quot;hejsan&quot;</span>
+<span class="s2">&quot;hej&quot;</span>
+<span class="s2">&quot;hejsan&quot;</span>,
+<span class="s2">&quot;Rickard&quot;</span>
 </pre></div>
 </div>
 </section>
@@ -542,7 +555,7 @@ print<span class="o">(</span>s<span class="o">)</span>
 print<span class="o">(</span>s2<span class="o">)</span>
 print<span class="o">(</span>s3<span class="o">)</span>
 
-<span class="c1"># Some indexing with [e]:[e]</span>
+<span class="c1"># Some indexing with [e (start)]:[e (end)]</span>
 @ aNumber <span class="o">(</span>a<span class="o">)</span> <span class="o">{</span> -&gt; a <span class="o">}</span>
 <span class="nv">big</span> <span class="o">=</span> <span class="o">[(</span><span class="m">100</span> ... i<span class="o">)</span> <span class="o">{</span> i <span class="o">}]</span>
 <span class="nv">small</span> <span class="o">=</span> <span class="o">[(</span><span class="m">5</span> ... i<span class="o">)</span> <span class="o">{</span>i<span class="o">}]</span>
@@ -553,6 +566,11 @@ print<span class="o">(</span>small<span class="o">[</span><span class="m">2</spa
 print<span class="o">(</span>small<span class="o">[</span><span class="m">1</span>:2<span class="o">])</span>
 print<span class="o">(</span>small<span class="o">[</span>:len<span class="o">(</span>small<span class="o">)])</span>
 print<span class="o">(</span>small<span class="o">[</span><span class="m">1</span>:-2<span class="o">])</span>
+
+<span class="c1"># Some advanced indexing with offset [e (start)]:[e (end)]:[e (offset)]</span>
+print<span class="o">(</span>small<span class="o">[</span>::1<span class="o">])</span>
+print<span class="o">(</span>small<span class="o">[</span>::-1<span class="o">])</span>
+print<span class="o">(</span>big<span class="o">[</span><span class="m">90</span>:-1:-2<span class="o">])</span>
 </pre></div>
 </div>
 <p><strong>outputs</strong>:</p>
@@ -598,6 +616,9 @@ bar
 <span class="o">[</span><span class="m">1</span><span class="o">]</span>
 <span class="o">[</span><span class="m">0</span>,1,2,3,4<span class="o">]</span>
 <span class="o">[</span><span class="m">1</span>,2<span class="o">]</span>
+<span class="o">[</span><span class="m">0</span>,1,2,3,4<span class="o">]</span>
+<span class="o">[</span><span class="m">4</span>,3,2,1,0<span class="o">]</span>
+<span class="o">[</span><span class="m">98</span>,96,94,92,90<span class="o">]</span>
 </pre></div>
 </div>
 </section>

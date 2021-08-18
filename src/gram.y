@@ -592,17 +592,32 @@ indexedVector:
 
 indexer:
   expression ':' expression {
-    $$ = newExpr_Indexer($1, $3);
+    $$ = newExpr_Indexer($1, $3, NULL);
   }
   | ':' expression {
-    $$ = newExpr_Indexer(NULL, $2);
+    $$ = newExpr_Indexer(NULL, $2, NULL);
   }
   | expression ':' {
-    $$ = newExpr_Indexer($1, NULL);
+    $$ = newExpr_Indexer($1, NULL, NULL);
   }
   | ':' {
-    $$ = newExpr_Indexer(NULL, NULL);
-  };
+    $$ = newExpr_Indexer(NULL, NULL, NULL);
+  }
+  | expression ':' expression ':' expression {
+    $$ = newExpr_Indexer($1, $3, $5);
+  }
+  | ':' expression ':' expression {
+    $$ = newExpr_Indexer(NULL, $2, $4);
+  }
+  | expression ':' ':' expression {
+    $$ = newExpr_Indexer($1, NULL, $4);
+  }
+  | ':' ':' expression {
+    $$ = newExpr_Indexer(NULL, NULL, $3);
+  }
+  |  ':' ':' {
+    $$ = newExpr_Indexer(NULL, NULL, NULL);
+  }
 
 
 mathContentDigit:

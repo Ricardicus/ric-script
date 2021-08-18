@@ -122,6 +122,7 @@ int evaluate_indexer(indexer_t *indexer, int max,
   int *interactive = PROVIDE_CONTEXT()->interactive;
   expr_t *left = indexer->left;
   expr_t *right = indexer->right;
+  expr_t *offsetExp = indexer->offset;
   int idxStart = 0;
   int idxEnd = max;
   int offset = 1;
@@ -160,6 +161,22 @@ int evaluate_indexer(indexer_t *indexer, int max,
     }
 
     idxEnd = (int)sv.i;
+  }
+
+  if ( offsetExp != NULL ) {
+    /* Evaluate the left expression */
+    evaluate_expression(offsetExp, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+
+    if ( sv.type != INT32TYPE ) {
+      fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+      if ( !*interactive ) {
+        exit(1);
+      }
+      return -1;
+    }
+
+    offset = (int)sv.i;
   }
 
   if ( idxStart < 0 || idxStart > max || (idxEnd > 0 && idxStart > idxEnd) ) {
@@ -1120,6 +1137,7 @@ Please report back to me.\n\
             walk = vec->content;
             idxWalk = 0;
             while ( walk != NULL ) {
+              int offsetCount;
               if ( idxWalk >= idxStart && idxWalk < idxEnd ) {
                 /* Add this expression to the vector */
                 argsList_t *a;
@@ -1128,11 +1146,32 @@ Please report back to me.\n\
                 a = newArgument(e, vecContent);
                 vecContent = a;
               }
-              walk = walk->next;
-              idxWalk++;
+              offsetCount = 0;
+              while ( walk && offsetCount < abs(offset) ) {
+                walk = walk->next;
+                idxWalk++;
+                offsetCount++;
+              }
             }
 
             newVec = newExpr_Vector(vecContent);
+
+            if ( offset < 0 ) {
+              argsList_t *prevArg;
+              argsList_t *nextArg;
+              argsList_t *currentArg;
+              /* Reverse the args list order */
+              walk = newVec->vec->content;
+              prevArg = NULL;
+              currentArg = walk;
+              while (currentArg != NULL) {
+                nextArg = currentArg->next;
+                currentArg->next = prevArg;
+                prevArg = currentArg;
+                currentArg = nextArg;
+              }
+              newVec->vec->content = prevArg;
+            }
 
             /* Add space for argN */
             sv.type = VECTORTYPE;
@@ -1195,13 +1234,18 @@ Please report back to me.\n\
 
             /* Create a new string */
             newText = (char *)ast_ecalloc(idxEnd - idxStart + 2);
-            idxWalk = 0;
-            while ( idxWalk < textLen ) {
+            idxWalk = offset >= 0 ? 0 : textLen - 1;
+            if ( offset == 0 ) {
+              offset = 1;  // corner case, will correct this.
+            }
+            int idxWritten = 0;
+            while ( idxWalk < textLen && idxWalk >= 0 ) {
               if ( idxWalk >= idxStart && idxWalk < idxEnd ) {
                 /* Add this expression to the vector */
-                newText[idxWalk-idxStart] = text[idxWalk];
+                newText[idxWritten] = text[idxWalk];
+                idxWritten++;
               }
-              idxWalk++;
+              idxWalk += offset;
             }
 
             newTextExp = newExpr_Text(newText);

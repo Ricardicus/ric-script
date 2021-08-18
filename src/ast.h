@@ -175,6 +175,7 @@ typedef struct vectorIndex {
 typedef struct indexer_t {
   expr_t *left;
   expr_t *right;
+  expr_t *offset;
 } indexer_t;
 
 typedef struct logical_t {
@@ -336,7 +337,7 @@ expr_t* newExpr_ClassPtrCopy(class_t *class);
 expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
 expr_t* newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr);
-expr_t* newExpr_Indexer(expr_t *left, expr_t *right);
+expr_t* newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset);
 
 expr_t*         newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(expr_t *id, expr_t *exp);

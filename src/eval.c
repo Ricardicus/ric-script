@@ -113,6 +113,93 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
   }
 }
 
+int evaluate_indexer(indexer_t *indexer, int max,
+  int *idxStart_, int *idxEnd_, int *offset_,
+  EXPRESSION_PARAMS()) {
+  stackval_t sv;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  int *interactive = PROVIDE_CONTEXT()->interactive;
+  expr_t *left = indexer->left;
+  expr_t *right = indexer->right;
+  int idxStart = 0;
+  int idxEnd = max;
+  int offset = 1;
+
+  if ( left == NULL ) {
+    idxStart = 0;
+  } else {
+    /* Evaluate the left expression */
+    evaluate_expression(left, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+
+    if ( sv.type != INT32TYPE ) {
+      fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+      if ( !*interactive ) {
+        exit(1);
+      }
+      return -1;
+    }
+
+    idxStart = (int)sv.i;
+  }
+
+  if ( right == NULL ) {
+    idxEnd = max;
+  } else {
+    /* Evaluate the left expression */
+    evaluate_expression(right, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+
+    if ( sv.type != INT32TYPE ) {
+      fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+      if ( !*interactive ) {
+        exit(1);
+      }
+      return -1;
+    }
+
+    idxEnd = (int)sv.i;
+  }
+
+  if ( idxStart < 0 || idxStart > max || (idxEnd > 0 && idxStart > idxEnd) ) {
+    fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+      idxStart, idxEnd, max);
+    if ( !*interactive ) {
+      exit(1);
+    }
+    return -1;
+  }
+
+  if ( idxEnd > max || (idxEnd > 0 && idxEnd < idxStart) ) {
+    fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+      idxStart, idxEnd, max);
+    if ( !*interactive ) {
+      exit(1);
+    }
+    return -1;
+  }
+
+  if ( idxEnd < 0 ) {
+    int diff = max + idxEnd;
+    if ( diff > idxStart ) {
+      idxEnd = diff;
+    } else {
+      fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+        idxStart, idxEnd, max);
+      if ( !*interactive ) {
+        exit(1);
+      }
+      return -1;
+    }
+  }
+
+  *idxStart_ = idxStart;
+  *idxEnd_ = idxEnd;
+  *offset_ = offset;
+  return 0;
+}
+
 expr_t* stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
   expr_t *newExp = NULL;
 
@@ -1016,79 +1103,18 @@ Please report back to me.\n\
             push_stackval(&sv, sp, sc);
           } else if ( sv.type == INDEXER ) {
             indexer_t *indexer = sv.indexer;
-            expr_t *left = indexer->left;
-            expr_t *right = indexer->right;
             int idxStart = 0;
             int idxEnd = vec->length;
             int idxWalk = 0;
+            int offset = 1;
             expr_t *newVec = NULL;
             argsList_t *vecContent = NULL;
             argsList_t *walk = NULL;
             heapval_t *hpv;
             int dummy;
 
-            if ( left == NULL ) {
-              idxStart = 0;
-            } else {
-              /* Evaluate the left expression */
-              evaluate_expression(left, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
-
-              if ( sv.type != INT32TYPE ) {
-                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
-                if ( !*interactive ) {
-                  exit(1);
-                }
-              }
-
-              idxStart = (int)sv.i;
-            }
-
-            if ( right == NULL ) {
-              idxEnd = vec->length;
-            } else {
-              /* Evaluate the left expression */
-              evaluate_expression(right, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
-
-              if ( sv.type != INT32TYPE ) {
-                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
-                if ( !*interactive ) {
-                  exit(1);
-                }
-              }
-
-              idxEnd = (int)sv.i;
-            }
-
-            if ( idxStart < 0 || idxStart > vec->length || (idxEnd > 0 && idxStart > idxEnd) ) {
-              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-                idxStart, idxEnd, (int)vec->length);
-              if ( !*interactive ) {
-                exit(1);
-              }
-            }
-
-            if ( idxEnd > vec->length || (idxEnd > 0 && idxEnd < idxStart) ) {
-              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-                idxStart, idxEnd, (int)vec->length);
-              if ( !*interactive ) {
-                exit(1);
-              }
-            }
-
-            if ( idxEnd < 0 ) {
-              int diff = vec->length + idxEnd;
-              if ( diff > idxStart ) {
-                idxEnd = diff;
-              } else {
-                fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-                  idxStart, idxEnd, (int)vec->length);
-                if ( !*interactive ) {
-                  exit(1);
-                }
-              }
-            }
+            (void)evaluate_indexer(indexer, vec->length, &idxStart, &idxEnd, &offset,
+              EXPRESSION_ARGS());
 
             /* Create a new list */
             walk = vec->content;
@@ -1154,71 +1180,18 @@ Please report back to me.\n\
             PUSH_STRING(sv.t, sp, sc);
           } else if ( sv.type == INDEXER ) {
             indexer_t *indexer = sv.indexer;
-            expr_t *left = indexer->left;
-            expr_t *right = indexer->right;
             int idxStart = 0;
             int idxEnd = (int)strlen(text);
             int idxWalk = 0;
             int textLen = (int)strlen(text);
+            int offset = 1;
             char *newText = NULL;
             expr_t *newTextExp = NULL;
             heapval_t *hpv;
             int dummy;
 
-            if ( left == NULL ) {
-              idxStart = 0;
-            } else {
-              /* Evaluate the left expression */
-              evaluate_expression(left, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
-
-              if ( sv.type != INT32TYPE ) {
-                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
-                exit(1);
-              }
-
-              idxStart = (int)sv.i;
-            }
-
-            if ( right == NULL ) {
-              idxEnd = textLen;
-            } else {
-              /* Evaluate the left expression */
-              evaluate_expression(right, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
-
-              if ( sv.type != INT32TYPE ) {
-                fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
-                exit(1);
-              }
-
-              idxEnd = (int)sv.i;
-            }
-
-            if ( idxStart < 0 || idxStart > textLen || (idxEnd > 0 && idxStart > idxEnd) ) {
-              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-                idxStart, idxEnd, textLen);
-              exit(1);
-            }
-
-            if ( idxEnd > textLen || (idxEnd > 0 && idxEnd < idxStart) ) {
-              fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-                idxStart, idxEnd, textLen);
-              exit(1);
-            }
-
-            if ( idxEnd < 0 ) {
-              int diff = textLen + idxEnd;
-              if ( diff > idxStart ) {
-                idxEnd = diff;
-              } else {
-                fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-                  idxStart, idxEnd, (int)textLen);
-                if ( !*interactive ) {
-                  exit(1);
-                }
-              }
-            }
+            (void)evaluate_indexer(indexer, textLen, &idxStart, &idxEnd, &offset,
+              EXPRESSION_ARGS());
 
             /* Create a new string */
             newText = (char *)ast_ecalloc(idxEnd - idxStart + 2);

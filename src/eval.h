@@ -30,6 +30,9 @@ int evaluate_id_valid(
   PROVIDE_CONTEXT_ARGS(),
   argsList_t* args,
   hashtable_t *argVals);
+int evaluate_indexer(indexer_t *indexer, int max,
+  int *idxStart, int *idxEnd, int *offset,
+  EXPRESSION_PARAMS());
 
 void print_statements(statement_t *stmt);
 void print_statements_(void *stmt, int indent);

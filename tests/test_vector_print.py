@@ -42,7 +42,8 @@ def test_vector_print():
 "[0,1,2,3,4]",
 "[2,3,4]",
 "[1]",
-"[0,1,2,3,4]"
+"[0,1,2,3,4]",
+"[1,2]"
 ]
 
   lib_script = callSample('vector_print.ric')

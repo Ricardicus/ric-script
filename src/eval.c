@@ -1061,7 +1061,7 @@ Please report back to me.\n\
               idxEnd = (int)sv.i;
             }
 
-            if ( idxStart < 0 || idxStart > vec->length || idxStart > idxEnd ) {
+            if ( idxStart < 0 || idxStart > vec->length || (idxEnd > 0 && idxStart > idxEnd) ) {
               fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
                 idxStart, idxEnd, (int)vec->length);
               if ( !*interactive ) {
@@ -1069,11 +1069,24 @@ Please report back to me.\n\
               }
             }
 
-            if ( idxEnd < 0 || idxEnd > vec->length || idxEnd < idxStart ) {
+            if ( idxEnd > vec->length || (idxEnd > 0 && idxEnd < idxStart) ) {
               fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
                 idxStart, idxEnd, (int)vec->length);
               if ( !*interactive ) {
                 exit(1);
+              }
+            }
+
+            if ( idxEnd < 0 ) {
+              int diff = vec->length + idxEnd;
+              if ( diff > idxStart ) {
+                idxEnd = diff;
+              } else {
+                fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                  idxStart, idxEnd, (int)vec->length);
+                if ( !*interactive ) {
+                  exit(1);
+                }
               }
             }
 

@@ -407,6 +407,7 @@ and can hold any type of expressions.
 	print(small[2:])
 	print(small[1:2])
 	print(small[:len(small)])
+	print(small[1:-2])
 
 **outputs**:
 
@@ -453,7 +454,7 @@ and can hold any type of expressions.
 	[2,3,4]
 	[1]
 	[0,1,2,3,4]
-
+	[1,2]
 
 Raw data
 ########

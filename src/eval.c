@@ -1195,16 +1195,29 @@ Please report back to me.\n\
               idxEnd = (int)sv.i;
             }
 
-            if ( idxStart < 0 || idxStart > textLen || idxStart > idxEnd ) {
+            if ( idxStart < 0 || idxStart > textLen || (idxEnd > 0 && idxStart > idxEnd) ) {
               fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
                 idxStart, idxEnd, textLen);
               exit(1);
             }
 
-            if ( idxEnd < 0 || idxEnd > textLen || idxEnd < idxStart ) {
+            if ( idxEnd > textLen || (idxEnd > 0 && idxEnd < idxStart) ) {
               fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
                 idxStart, idxEnd, textLen);
               exit(1);
+            }
+
+            if ( idxEnd < 0 ) {
+              int diff = textLen + idxEnd;
+              if ( diff > idxStart ) {
+                idxEnd = diff;
+              } else {
+                fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                  idxStart, idxEnd, (int)textLen);
+                if ( !*interactive ) {
+                  exit(1);
+                }
+              }
             }
 
             /* Create a new string */

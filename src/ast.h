@@ -109,32 +109,32 @@
 #define INTERACTIVE_STACK      BIT(2)
 
 typedef struct ID_s {
-	char *id;
+  char *id;
 } ID_t;
 
 typedef struct addOP {
-	void* left;
-	void* right;
+  void* left;
+  void* right;
 } addOP_t;
 
 typedef struct subOP {
-	void* left;
-	void* right;
+  void* left;
+  void* right;
 } subOP_t;
 
 typedef struct mulOP {
-	void* left;
-	void* right;
+  void* left;
+  void* right;
 } mulOP_t;
 
 typedef struct divOP {
-	void* left;
-	void* right;
+  void* left;
+  void* right;
 } divOP_t;
 
 typedef struct modOP {
-	void* left;
-	void* right;
+  void* left;
+  void* right;
 } modOP_t;
 
 typedef struct ifCondition {
@@ -236,11 +236,11 @@ typedef struct keyValList {
 } keyValList_t;
 
 typedef struct statement_s {
-	int entity;
+  int entity;
   int line;
   char file[25];
-	void *content;
-	struct statement_s *next;
+  void *content;
+  struct statement_s *next;
 } statement_t;
 
 typedef struct class_t {
@@ -252,15 +252,15 @@ typedef struct class_t {
 } class_t;
 
 typedef struct body_s {
-	int entity;
-	struct statement_s *content;
+  int entity;
+  struct statement_s *content;
 } body_t;
 
 typedef struct functionDef {
-	int entity;
-	ID_t id;
-	argsList_t *params;
-	statement_t *body;
+  int entity;
+  ID_t id;
+  argsList_t *params;
+  statement_t *body;
 } functionDef_t;
 
 typedef struct forEachStmt {
@@ -272,9 +272,9 @@ typedef struct forEachStmt {
 } forEachStmt_t;
 
 typedef struct functionCall_t {
-	int entity;
-	expr_t *id;
-	argsList_t *args;
+  int entity;
+  expr_t *id;
+  argsList_t *args;
 } functionCall_t;
 
 typedef struct rawdata_t {
@@ -297,15 +297,15 @@ typedef struct functionCallContainer {
 } functionCallContainer_t;
 
 typedef struct ifStmt {
-	int ifType;
-	void *elif;
-	void *endif;
-	body_t *body;
-	expr_t *cond;
+  int ifType;
+  void *elif;
+  void *endif;
+  body_t *body;
+  expr_t *cond;
 } ifStmt_t;
 
 typedef struct entity_eval {
-	int entity;
+  int entity;
 } entity_eval_t;
 
 void* ast_emalloc(size_t size);
@@ -373,8 +373,8 @@ typedef enum stackvaltypes {
 } stackvaltypes_t;
 
 typedef struct stackval {
-	stackvaltypes_t type;
-	union {
+  stackvaltypes_t type;
+  union {
     double d;
     int32_t i;
     char *t;
@@ -387,13 +387,13 @@ typedef struct stackval {
     time_t time;
     rawdata_t *rawdata;
     indexer_t *indexer;
-	};
+  };
 } stackval_t;
 
 typedef struct heapval {
-	stackval_t sv;
-	bool occupied;
-	bool toFree;
+  stackval_t sv;
+  bool occupied;
+  bool toFree;
   uint32_t mark;
 } heapval_t;
 
@@ -496,30 +496,30 @@ typedef struct libFunction {
 } libFunction_t;
 
 #define SETUP_STACK(sp, sb, sz, sc) do {\
-	intptr_t p;\
-	*sb = calloc(sz+1, sizeof(stackval_t));\
-	assert(*sb != NULL);\
-	p = ((intptr_t)*sb) % sizeof(stackval_t);\
-	if ( p != 0 ) {\
-		p = (sizeof(stackval_t) - ( p % sizeof(stackval_t) ));\
-	}\
-	*(intptr_t*)sp = *(intptr_t*)sb + p;\
+  intptr_t p;\
+  *sb = calloc(sz+1, sizeof(stackval_t));\
+  assert(*sb != NULL);\
+  p = ((intptr_t)*sb) % sizeof(stackval_t);\
+  if ( p != 0 ) {\
+    p = (sizeof(stackval_t) - ( p % sizeof(stackval_t) ));\
+  }\
+  *(intptr_t*)sp = *(intptr_t*)sb + p;\
   *(size_t*)sc = 0;\
 } while ( 0 )
 
 #define SETUP_HEAP(hp, hb, hz) do {\
-	intptr_t p;\
-	heapval_t hpbv;\
-	*hb = calloc(hz+2, sizeof(heapval_t));\
-	assert(*hb != NULL);\
-	p = ((intptr_t)*hb) % sizeof(heapval_t);\
-	p = (sizeof(heapval_t) - ( p % sizeof(heapval_t) ));\
-	hpbv.sv.type = INT32TYPE;\
-	hpbv.sv.i = (int32_t)hz;\
-	hpbv.occupied = true;\
-	hpbv.toFree = false;\
-	*(intptr_t*)hp = *(intptr_t*)hb + p;\
-	**(heapval_t**) hp = hpbv;\
+  intptr_t p;\
+  heapval_t hpbv;\
+  *hb = calloc(hz+2, sizeof(heapval_t));\
+  assert(*hb != NULL);\
+  p = ((intptr_t)*hb) % sizeof(heapval_t);\
+  p = (sizeof(heapval_t) - ( p % sizeof(heapval_t) ));\
+  hpbv.sv.type = INT32TYPE;\
+  hpbv.sv.i = (int32_t)hz;\
+  hpbv.occupied = true;\
+  hpbv.toFree = false;\
+  *(intptr_t*)hp = *(intptr_t*)hb + p;\
+  **(heapval_t**) hp = hpbv;\
 } while ( 0 )
 
 #define PUSH_DOUBLE(a, sp, sc) do {\
@@ -529,7 +529,7 @@ if ( *sc >= RIC_STACKSIZE ) {\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix it!\n",\
 GENERAL_ERROR_ISSUE_URL);\
-	exit(1);\
+  exit(1);\
 }\
 stackval.type = DOUBLETYPE;\
 stackval.d = a;\
@@ -544,7 +544,7 @@ if ( *sc >= RIC_STACKSIZE ) {\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n",\
 GENERAL_ERROR_ISSUE_URL);\
-	exit(1);\
+  exit(1);\
 }\
 stackval.type = INT32TYPE;\
 stackval.i = a;\
@@ -570,11 +570,11 @@ stackval.vec = a;\
 #define PUSH_STRING(a, sp, sc) do {\
 stackval_t stackval;\
 if ( *sc >= RIC_STACKSIZE ) {\
-	fprintf(stderr, "Error: Intepreter stack overflow\n\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n",\
 GENERAL_ERROR_ISSUE_URL);\
-	exit(1);\
+  exit(1);\
 }\
 stackval.type = TEXT;\
 stackval.t = a;\
@@ -589,7 +589,7 @@ if ( *sc >= RIC_STACKSIZE ) {\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n",\
 GENERAL_ERROR_ISSUE_URL);\
-	exit(1);\
+  exit(1);\
 }\
 stackval.type = POINTERTYPE;\
 stackval.p = a;\
@@ -716,7 +716,7 @@ if ( *sc == 0 ) {\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n",\
 GENERAL_ERROR_ISSUE_URL);\
-	exit(1);\
+  exit(1);\
 }\
 *((stackval_t**) sp) -= 1;\
 *a = **((stackval_t**) sp);\
@@ -739,22 +739,22 @@ hv.sv = *a;\
 if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || \
      hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ||\
      hv.sv.type == RAWDATATYPE ) {\
-	hv.toFree = true;\
+  hv.toFree = true;\
 } else {\
   hv.toFree = false;\
 }\
 hv.occupied = true;\
 while ( i < size ) {\
-	if ( !((heapval_t*) hp)[i].occupied ) {\
-		((heapval_t*) hp)[i] = hv;\
-		*hpv = &((heapval_t*) hp)[i];\
-		break;\
-	}\
-	++i;\
+  if ( !((heapval_t*) hp)[i].occupied ) {\
+    ((heapval_t*) hp)[i] = hv;\
+    *hpv = &((heapval_t*) hp)[i];\
+    break;\
+  }\
+  ++i;\
 }\
 if ( i == size ) {\
-	fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
-	exit(1);\
+  fprintf(stderr, "Error: Heap full (size: %d)\n", size);\
+  exit(1);\
 }\
 releaseContext(PROVIDE_CONTEXT()->syncCtx);\
 } while (0);

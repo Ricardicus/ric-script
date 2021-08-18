@@ -191,9 +191,9 @@ typedef struct dictionary {
 } dictionary_t;
 
 typedef struct expr_s {
-	int type;
+  int type;
 
-	union {
+  union {
     ID_t          id;
     char          *text;
     double        fval;
@@ -215,7 +215,7 @@ typedef struct expr_s {
     rawdata_t     *rawdata;
     logical_t     *logical;
     indexer_t     *indexer;
-	};
+  };
 } expr_t;
 
 typedef struct declaration_s {

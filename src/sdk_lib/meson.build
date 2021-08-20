@@ -10,6 +10,7 @@ ric_links = []
 ext_c_args = []
 
 target_os = target_machine.system()
+ric_c_args += [''.join(['-DTARGET_OS="',target_os,'"'])]
 
 includes = [
   include_directories('.'),

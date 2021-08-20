@@ -19,6 +19,7 @@ def test_directory_print():
 "socketServer.ric",
 "socketClient.ric",
 "threads_test.ric",
+"data_print.ric",
 " a",
 "  a",
 "   c.txt",

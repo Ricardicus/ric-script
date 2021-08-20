@@ -53,3 +53,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/threads.ric
     - name: Run valgrind on forEaching.ric
       run: valgrind --leak-check=full ./ric samples/forEaching.ric
+    - name: Run valgrind on raw data data_print.ric
+      run: valgrind --leak-check=full ./ric samples/data_print.ric

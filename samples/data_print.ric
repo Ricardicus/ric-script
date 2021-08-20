@@ -1,0 +1,16 @@
+# Use the raw data datatype
+s = [(25 ... i) { 65 + i }]
+d = data(s)
+print(d)
+print(d[::-1])
+print(d[5:20:2])
+print(d[5:20:-2])
+
+(ls (".") ... file ) {
+  ? [ file == "requirements.txt" ] {
+    fp = fileOpen(file)
+    d = fileRead(fp, 100)
+    print(list(d))
+    fileClose(fp)
+  }
+}

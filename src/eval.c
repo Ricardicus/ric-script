@@ -1267,22 +1267,66 @@ Please report back to me.\n\
           evaluate_expression(index, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
 
-          if ( sv.type != INT32TYPE ) {
-            fprintf(stderr, "index error: Must provide an integer as index (%d)\n", sv.type);
+          if ( sv.type != INT32TYPE && sv.type != INDEXER ) {
+            fprintf(stderr, "index error: Must provide a valid expression as indexer, value type: (%d)\n", sv.type);
             exit(1);
           }
 
-          arrayIndex = sv.i;
+          if ( sv.type == INT32TYPE ) {
+            arrayIndex = sv.i;
 
-          if ( arrayIndex > rawdata->size ) {
-            fprintf(stderr, "index error: out of bounds\n");
-            exit(1);
+            if ( arrayIndex > rawdata->size ) {
+              fprintf(stderr, "index error: out of bounds\n");
+              exit(1);
+            }
+
+            sv.type = INT32TYPE;
+            sv.i = ((unsigned char*)rawdata->data)[arrayIndex];
+
+            PUSH_INT(sv.i, sp, sc);
+          } else if ( sv.type == INDEXER ) {
+            indexer_t *indexer = sv.indexer;
+            int idxStart = 0;
+            int idxEnd = (int)rawdata->size;
+            int idxWalk = 0;
+            int dataLen = (int)rawdata->size;
+            int offset = 1;
+            char *newData = NULL;
+            expr_t *newDataExp = NULL;
+            heapval_t *hvp;
+            int dummy;
+
+            (void)evaluate_indexer(indexer, dataLen, &idxStart, &idxEnd, &offset,
+              EXPRESSION_ARGS());
+
+            /* Create a new data allocation */
+            newData = (char *)ast_ecalloc(idxEnd - idxStart + 2);
+            idxWalk = offset >= 0 ? 0 : dataLen - 1;
+            if ( offset == 0 ) {
+              offset = 1;  // corner case, will correct this.
+            }
+            int idxWritten = 0;
+            while ( idxWalk < dataLen && idxWalk >= 0 ) {
+              if ( idxWalk >= idxStart && idxWalk < idxEnd ) {
+                /* Add this expression to the vector */
+                newData[idxWritten] = ((char*)rawdata->data)[idxWalk];
+                idxWritten++;
+              }
+              idxWalk += offset;
+            }
+
+            newDataExp = newExpr_RawData(idxWritten);
+            free(newDataExp->rawdata->data);
+            newDataExp->rawdata->data = newData;
+
+            sv.type = RAWDATATYPE;
+            sv.rawdata = newDataExp->rawdata;
+            free(newDataExp);
+
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+            PUSH_RAWDATA(sv.rawdata, sp, sc);
           }
-
-          sv.type = INT32TYPE;
-          sv.i = ((unsigned char*)rawdata->data)[arrayIndex];
-
-          PUSH_INT(sv.i, sp, sc);
         }
         break;
         default:

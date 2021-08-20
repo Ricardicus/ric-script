@@ -8,9 +8,11 @@ def test_file_exist():
 "ABCDEFGHIJKLMNOPQRSTUVWXY",
 "YXWVUTSRQPONMLKJIHGFEDCBA",
 "GIKMOQS",
-"SQOMKIG",
-"[119,104,101,101,108,10,112,121,116,101,115,116,10,10,10]"
-  ]
+"SQOMKIG"]
+
+  if ( os.name != 'nt' ):
+    output_lines.append(
+      "[119,104,101,101,108,10,112,121,116,101,115,116,10,10,10]")
 
   lib_script = callSample('data_print.ric')
 

@@ -99,6 +99,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("mkdir", 1, ric_mkdir),
   DECLARE_LIB_FUNCTION("find", 1, ric_find_files),
   DECLARE_LIB_FUNCTION("cd", 1, ric_cd),
+  DECLARE_LIB_FUNCTION("osName", 0, ric_os_name),
   // libctx
   DECLARE_LIB_FUNCTION("setTimeout", 2, ric_set_timeout),
   DECLARE_LIB_FUNCTION("setInterval", 2, ric_set_interval),

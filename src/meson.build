@@ -29,6 +29,9 @@ links = []
 thread_dep = dependency('threads')
 deps += [thread_dep]
 
+target_os = target_machine.system()
+ric_c_args += [''.join(['-DTARGET_OS="',target_os,'"'])]
+message(ric_c_args)
 if ( target_os == 'windows' )
 	# Make lex not use unistd
   ric_c_args += ['-DYY_NO_UNISTD_H']

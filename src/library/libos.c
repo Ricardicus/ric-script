@@ -445,4 +445,54 @@ int ric_find_files(LIBRARY_PARAMS()) {
   return 0;
 }
 
+int ric_os_name(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  size_t resultTextLen = strlen(TARGET_OS) + 2;
+  char *resultText = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  char *fixer = NULL;
+  int dummy;
+  heapval_t *hpv = NULL;
+
+  resultText = ast_ecalloc(resultTextLen);
+  snprintf(resultText, resultTextLen, "%s", TARGET_OS);
+
+  fixer = resultText;
+  if ( *fixer == '"' ) {
+    /*
+    * Build required -DTARGET_OS="linux",
+    * i.e. a stringified define. Otherwise I just get '1'.
+    * I will take care of that here...
+    */
+    int fixIt = 0;
+    fixer = resultText;
+    while ( *fixer ) {
+      ++fixer;
+      if ( *fixer == '"' && resultText[0] == '"' ) {
+        // Avoid this problem
+        fixIt = 1;
+        *fixer = 0;
+      }
+    }
+    if ( fixIt ) {
+      int idx = 0;
+      fixer = resultText;
+      while ( *fixer ) {
+        fixer[idx] = fixer[idx+1];
+        ++fixer;
+      }
+    }
+  }
+
+  stv.type = TEXT;
+  stv.t = resultText;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the value */
+  PUSH_STRING(stv.t, sp, sc);
+  return 0;
+}
 

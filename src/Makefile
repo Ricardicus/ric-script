@@ -54,7 +54,7 @@ endif
 
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
-DEFINES = YYERROR_VERBOSE
+DEFINES = YYERROR_VERBOSE 'TARGET_OS="linux"'
 
 LIBS = m pthread dl
 

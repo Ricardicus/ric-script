@@ -390,17 +390,11 @@ int ric_print(LIBRARY_PARAMS())
           printf("\\");
           break;
           case 't':
-#ifdef _WIN32
-          printf("\\t");
-#else
           // print a tab
           printf("\t");
-#endif
           break;
           default:
-#ifdef _WIN32
-          printf("%c", *c);
-#endif
+          printf("\\%c", *c);
           break;
           }
         } else {

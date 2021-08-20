@@ -108,7 +108,7 @@ int ric_ls(LIBRARY_PARAMS())
   } else {
     do {
       if (strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0) {
-        snprintf(sPath, sizeof(sPath), "%s\\%s", argText, fdFile.cFileName);
+        snprintf(sPath, sizeof(sPath), "%s\\\\%s", argText, fdFile.cFileName);
         expr_t *e;
         argsList_t *a;
         e = newExpr_Text(sPath);
@@ -318,7 +318,7 @@ void DirectoryWalkAndMatch(const char *sDir,
   if ( level > maxDepth )
     return;
 
-  snprintf(sPath, sizeof(sPath), "%s\\*.*", sDir);
+  snprintf(sPath, sizeof(sPath), "%s\\\\*.*", sDir);
 
   if ( (hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE ) {
     return;
@@ -326,7 +326,7 @@ void DirectoryWalkAndMatch(const char *sDir,
 
   do {
     if (strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0) {
-      snprintf(sPath, sizeof(sPath), "%s\\%s", sDir, fdFile.cFileName);
+      snprintf(sPath, sizeof(sPath), "%s\\\\%s", sDir, fdFile.cFileName);
 
       /* Execute regular expression matching */
       rc = pcre_exec(

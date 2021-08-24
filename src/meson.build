@@ -6,15 +6,16 @@ cc = meson.get_compiler('c')
 
 # Adding flags for the parser to be more verbose
 ric_c_args = ['-DYYERROR_VERBOSE']
-ric_links = []
 
 # Getting external projects
+external_links = []
+external_inc = []
 subdir('external')
 
 # Fetching the library sources
 subdir('library')
 
-includes = [include_directories('.'), library_inc]
+includes = [include_directories('.'), library_inc, external_inc]
 
 sources = ['main.c','hashtable.c','lib.c', 'garbage.c',
   'ast.c','hooks.c','eval.c',
@@ -44,9 +45,6 @@ if ( target_os == 'windows' )
   dep = compiler.find_library('wsock32', required: true)
 
   deps += [dep]
-  # Regexp
-  ric_links += [pcre_lib]
-  includes += [pcre_inc]
 
   # Adding windows specific translation units 
   sources += ['sync_nt.c', 'dl_nt.c']
@@ -70,8 +68,8 @@ interpreter = executable('ric',
   sources: [sources],
   dependencies: deps,
   c_args: [ric_c_args],
-  link_with: [ric_links],
-  include_directories: [includes],
+  link_with: [external_links],
+  include_directories: [includes, external_inc],
   install: true
 )
 

@@ -35,11 +35,11 @@ pcre_lib = shared_library('pcre',
 	include_directories : [pcre_inc],
   install: true)
 
-ric_links += [pcre_lib]
-
 pcre_demo = executable('pcre_demo',
 	sources: 'pcredemo.c',
 	link_with: pcre_lib,
   install: true,
 	include_directories : [pcre_inc])
 
+external_inc += [pcre_inc]
+external_links += [pcre_lib]

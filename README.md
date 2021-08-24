@@ -101,39 +101,7 @@ This is a work in progress and the first time I am developing a language.
 I expect there are things one can easily solve during the interpretation
 that is harder to compile, but I don't bother too much with that at the moment.
 I am developing the interpreter and while doing so I decide what features
-this language should have. Here is a list of steps I have implemented as
-well as haven't implemented:
-
-- [x] Function declarations
-- [x] Function calls
-- [x] Function pointer
-- [x] Variable declarations
-- [x] Variable usage
-- [x] The '+' operator on strings with string as well as non-string expressions
-- [x] Function delaration overloads
-- [x] Function delarations as statements
-- [x] Function argument passing
-- [x] Standard library for print and exit
-- [x] Standard library for file output
-- [x] Basic test suite (using pytest atm)
-- [x] Passing arguments
-- [x] Meson build (beside make, for increased portability)
-- [x] Vector expressions
-- [x] Garbage collector (mark & sweep)
-- [x] Passing arguments as vector instead of variables
-- [x] Dictionary expressions
-- [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
-- [x] Local scope for variables (distinction between global and local)
-- [x] Classes
-- [x] Better error reporting (always include at least line number)
-- [x] Socket interface
-- [x] Support for at least swedish UTF-8 characters å, ä and ö. 
-- [x] Threading interface
-- [x] Dynamic library support
-- [ ] Support for function declarations with different number of parameters but same id without overload
-- [ ] Built in support for using xattr-tags instead of file paths when browsing files
-- [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).
-- [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
+this language should have.
 
 I will be using **javascript syntax highlighting** for the examples provided below, for the sake of making it look pretty
 Therefore, I have to add an additional '//' etc. before comments, since it does not do well with the '#' comment symbol. 
@@ -727,6 +695,44 @@ Use **load** to import function and class definitions from other ric-scripts:
 load("another-script.ric")
 # Now all functions in 'another-script.ric' is usable here
 ```
+
+# Todo list
+
+Here is a list of steps taken, and
+aims to take in the future:
+
+- [x] Function declarations
+- [x] Function calls
+- [x] Function pointer
+- [x] Variable declarations
+- [x] Variable usage
+- [x] The '+' operator on strings with string as well as non-string expressions
+- [x] Function delaration overloads
+- [x] Function delarations as statements
+- [x] Function argument passing
+- [x] Standard library for print and exit
+- [x] Standard library for file output
+- [x] Basic test suite (using pytest atm)
+- [x] Passing arguments
+- [x] Meson build (beside make, for increased portability)
+- [x] Vector expressions
+- [x] Garbage collector (mark & sweep)
+- [x] Passing arguments as vector instead of variables
+- [x] Dictionary expressions
+- [x] Loading external scripts declarations into script namespace (maybe like pythons \_\_name\_\_)
+- [x] Local scope for variables (distinction between global and local)
+- [x] Classes
+- [x] Better error reporting (always include at least line number)
+- [x] Socket interface
+- [x] Support for at least swedish UTF-8 characters å, ä and ö. 
+- [x] Threading interface
+- [x] Dynamic library support
+- [ ] Built in JSON <-> ric-script dictionary mapping (like Pythons 'json' module)
+- [ ] Possibility to define classes, with functions, in C (this far classes are only implemented in ric-script).
+- [ ] Support for function declarations with different number of parameters but same id without overload
+- [ ] Built in support for using xattr-tags instead of file paths when browsing files
+- [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).
+- [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
 
 # Interactive prompt
 

@@ -7,7 +7,10 @@ print(d[5:20:2])
 print(d[5:20:-2])
 
 (ls (".") ... file ) {
-  ? [ file == "requirements.txt" ] {
+  # on Windows, .\\ is prefixed to the file lists,
+  # I make sure it works on both
+  ? [ file == "requirements.txt" ||
+      file == ".\\requirements.txt" ] {
     fp = fileOpen(file)
     d = fileRead(fp, 100)
     print(list(d))

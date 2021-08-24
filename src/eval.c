@@ -3346,8 +3346,8 @@ void interpret_statements_(
           if ( sv.type == TEXT ) {
             /* Special case */
             char *c = sv.t;
-            size_t len = strlen(c)+1;
-            char *newText = ast_emalloc(len);
+            size_t len = strlen(c)+2;
+            char *newText = ast_ecalloc(len);
             snprintf(newText,len,"%s",c);
             sv.t = newText;
           } else if ( sv.type == VECTORTYPE ) {

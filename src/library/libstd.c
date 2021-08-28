@@ -991,3 +991,56 @@ int ric_help(LIBRARY_PARAMS())
   return 0;
 }
 
+int ric_json_load(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  cJSON *json = NULL;
+  FILE *fp = NULL;
+  char *argText = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    argText = stv.t;
+    break;
+    case POINTERTYPE:
+    fp = (FILE*)stv.p;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string or file.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  if ( fp != NULL ) {
+    size_t sz = 0;
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    argText = ast_ecalloc(sz + 2);
+    fread(argText, 1, sz, fp);
+    printf("parse (%zu):\n%s\n", sz, argText);
+    json = cJSON_Parse(argText);
+    free(argText);
+  } else if ( argText != NULL ) {
+    json = cJSON_Parse(argText);
+  }
+
+  if (json == NULL) {
+    /* Pushing result, failed to parse */
+    PUSH_INT(0, sp, sc);
+    return 0;
+  }
+
+  /* Pushing result */
+  PUSH_INT(json == NULL, sp, sc);
+
+  return 0;
+}
+

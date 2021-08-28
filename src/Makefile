@@ -68,6 +68,11 @@ CFLAGS = Wall \
 
 .PHONY: lex yacc test
 
+EXTERNAL_INCS = $(addprefix external/, \
+	cjson-1.7.14)
+EXTERNAL_SRCS = $(addprefix external/, \
+	cjson-1.7.14/cJSON.c)
+
 RULES = $(RIC_OBJS:.o=.d)
 
 all: ric
@@ -75,15 +80,19 @@ all: ric
 -include $(RULES)
 
 %.d: %.c
-	@$(CC) -M -I. -I$(LIB_DIR) $< > $@
+	@$(CC) -M -I. $(addprefix -I./, $(EXTERNAL_INCS)) \
+	  -I$(LIB_DIR) $< > $@
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(addprefix -, $(CFLAGS)) $(addprefix -I, . $(LIB_DIR)) \
-$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS) $(addprefix -D, $(DEFINES))
+	$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS) $(addprefix -D, $(DEFINES)) \
+	$(addprefix -I./, $(EXTERNAL_INCS))
 
 ric: lex yacc $(RIC_OBJS) $(RULES)
-	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
-$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS) $(addprefix -D, $(DEFINES))
+	$(CC) -o $(@) $(YACCSOURCES) $(FLEXSOURCES) $(EXTERNAL_SRCS) \
+	$(RIC_OBJS) $(addprefix -I, . $(LIB_DIR)) \
+	$(addprefix -I./, $(EXTERNAL_INCS)) \
+	$(addprefix -l, $(LIBS)) $(DEBUG_FLAGS) $(addprefix -D, $(DEFINES))
 
 lex: $(FLEXSPEC)
 ifeq (, $(shell which flex))

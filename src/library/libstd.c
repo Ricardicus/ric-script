@@ -991,6 +991,56 @@ int ric_help(LIBRARY_PARAMS())
   return 0;
 }
 
+static void printCJSON(cJSON *json, int indent) {
+  cJSON *walk = json;
+  int count = 0;
+  while ( walk != NULL ) {
+    
+    if ( walk->string ) {
+      printf("%s%*s\"%s\" : ", (count > 0 ? ",\n" : ""),
+        indent + 1, " ", walk->string);
+    }
+    switch ( walk->type ) {
+      case cJSON_False:
+      printf("false");
+      break;
+      case cJSON_True:
+      printf("true");
+      break; 
+      case cJSON_NULL:
+      printf("NULL");
+      break;
+      case cJSON_Number :
+      printf("%lf", walk->valuedouble);
+      break; 
+      case cJSON_String :
+      printf("\"%s\"", walk->valuestring);
+      break;
+      case cJSON_Array  :
+      printf("[");
+      printCJSON(walk->child, indent + 1);
+      printf("]\n");
+      break;
+      case cJSON_Object :
+      printf("{\n");
+      printCJSON(walk->child, indent + 1);
+      if ( walk->string ) {
+        printf("\n%*s}\n", indent + 1, " ");
+      } else {
+        printf("}\n");
+      }
+      break;
+      case cJSON_Raw    :
+      printf("\"%s\"", walk->valuestring);
+      break; /* raw json */
+      default:
+      break;
+    }
+    walk = walk->next;
+    count++;
+  }
+}
+
 int ric_json_load(LIBRARY_PARAMS())
 {
   stackval_t stv;
@@ -1036,6 +1086,9 @@ int ric_json_load(LIBRARY_PARAMS())
     /* Pushing result, failed to parse */
     PUSH_INT(0, sp, sc);
     return 0;
+  } else {
+    /* Print the cJSON object */
+    printCJSON(json, 0);
   }
 
   /* Pushing result */

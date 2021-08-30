@@ -991,64 +991,126 @@ int ric_help(LIBRARY_PARAMS())
   return 0;
 }
 
-static void printCJSON(cJSON *json, int indent) {
+static void loadCJSON(cJSON *json, int indent,
+  expr_t **out, EXPRESSION_PARAMS()) {
   cJSON *walk = json;
   int count = 0;
+  int i = 0;
+  keyValList_t *keyVals = NULL;
+  int isArray = 0;
+
+  /* Get number of elements */
   while ( walk != NULL ) {
-    
+    walk = walk->next;
+    count++;
+  }
+
+  keyVals = ast_ecalloc(sizeof(keyValList_t)*(count+1));
+
+  /* Set the "next" ones */
+  walk = json;
+  i = 0;
+  while ( walk != NULL ) {
+    if ( i < count - 1 ) {
+      keyVals[i].next = &keyVals[i+1];
+    } else {
+      keyVals[i].next = NULL;
+    }
+    walk = walk->next;
+    i++;
+  }
+
+  count = 0;
+  walk = json;
+  i = 0;
+  while ( walk != NULL ) {
+    expr_t *val = NULL;
+
     if ( walk->string ) {
-      printf("%s%*s\"%s\" : ", (count > 0 ? ",\n" : ""),
-        indent + 1, " ", walk->string);
+      keyVals[i].key = newExpr_Text(walk->string);
     }
     switch ( walk->type ) {
       case cJSON_False:
-      printf("false");
+      val = newExpr_Ival(0);
       break;
       case cJSON_True:
-      printf("true");
+      val = newExpr_Ival(1);
       break; 
       case cJSON_NULL:
-      printf("NULL");
+      val = newExpr_Ival(0);
       break;
       case cJSON_Number :
-      printf("%lf", walk->valuedouble);
-      break; 
+      val = newExpr_Float(walk->valuedouble);
+      break;
       case cJSON_String :
-      printf("\"%s\"", walk->valuestring);
+      val = newExpr_Text(walk->valuestring);
       break;
       case cJSON_Array  :
-      printf("[");
-      printCJSON(walk->child, indent + 1);
-      printf("]\n");
+      loadCJSON(walk->child, indent + 1, &val, EXPRESSION_ARGS());
       break;
-      case cJSON_Object :
-      printf("{\n");
-      printCJSON(walk->child, indent + 1);
-      if ( walk->string ) {
-        printf("\n%*s}\n", indent + 1, " ");
-      } else {
-        printf("}\n");
+      case cJSON_Object : {
+        loadCJSON(walk->child, indent + 1, &val, EXPRESSION_ARGS());
+        if (indent == 0 ) {
+          *out = val;
+          return;
+        }
       }
       break;
       case cJSON_Raw    :
-      printf("\"%s\"", walk->valuestring);
+      val = newExpr_Text(walk->valuestring);
       break; /* raw json */
       default:
       break;
     }
+
+    if ( val ) {
+      keyVals[i].val = val;
+    }
+
+    if ( val && keyVals[i].key == NULL ) {
+      /* This is an array */
+      isArray = 1;
+    }
+
     walk = walk->next;
-    count++;
+    i++;
   }
+
+  if ( isArray && out != NULL ) {
+    argsList_t *args = ast_ecalloc(sizeof(argsList_t)*(count+1));
+    keyValList_t *keyValsWalk = keyVals;
+
+    i = 0;
+    while ( keyValsWalk ) {
+      args[i].arg = keyValsWalk->val;
+      if ( i < count - 1) {
+        args[i].next = &args[i+1];
+      } else {
+        args[i].next = NULL;
+      }
+      keyValsWalk = keyValsWalk->next;
+      i++;
+    }
+
+    *out = newExpr_Vector(args);
+  } else if ( out != NULL ) {
+    *out = newExpr_Dictionary(keyVals);
+  }
+
 }
 
 int ric_json_load(LIBRARY_PARAMS())
 {
   stackval_t stv;
+ // heapval_t *hpv = NULL;
+  expr_t *result = NULL;
   cJSON *json = NULL;
   FILE *fp = NULL;
   char *argText = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
+ // void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
+//  int dummy;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -1086,13 +1148,16 @@ int ric_json_load(LIBRARY_PARAMS())
     /* Pushing result, failed to parse */
     PUSH_INT(0, sp, sc);
     return 0;
-  } else {
-    /* Print the cJSON object */
-    printCJSON(json, 0);
   }
+  
+  /* Print the cJSON object */
+  result = NULL;
+  loadCJSON(json, 0, &result, EXPRESSION_ARGS());
+  stv.type = DICTTYPE;
+  stv.dict = result->dict;
 
-  /* Pushing result */
-  PUSH_INT(json == NULL, sp, sc);
+  PUSH_DICTIONARY(result->dict, sp, sc);
+  free(result);
 
   return 0;
 }

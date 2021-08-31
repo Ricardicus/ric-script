@@ -24,8 +24,6 @@ Not sure what target there will be (if so).
 The samples folder contains ric scripts with OK syntax; but many of these sample scripts are used
 in continous testing and not very "pedagogical" or even commented. I 
 will provide some samples here in the README further below that walks through some concepts.
-Many of the scripts there are made for and used in the test suite,
-so not all of them explicitly show the beauty of this language.
 
 The entire thing has a working title of 'ric-script'. I want to stress that
 it is a scripting language, and I think 'ric' sounds cool (even if it is a bit self-congratulatory).

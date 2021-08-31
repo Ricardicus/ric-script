@@ -11,6 +11,8 @@
 
 I am developing a programming language!
 
+It resembles Python and Javascript. Imagine Python without the pedantic indentation and Javascript without the semicolons.
+
 It is an interpreted language and I draw a lot of inspiration from Python and Javascript.
 The AST is built using yacc and I implement everything in C. 
 I am continously working on the interpreter for my language, and it is a work

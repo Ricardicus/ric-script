@@ -787,11 +787,6 @@ For example, you can do this:
 
 .. code-block:: bash
 
-	# Use the raw data datatype
-	s = [(25 ... i) { 65 + i }]
-	d = data(s)
-	print(d)
-
 	# Showcase the advanced list initialization
 	# Using the raw data datatype
 	s = [(25 ... i) { 65 + i }]

@@ -522,17 +522,6 @@ ric-script comment symbol **#** so it looks alright.
 ```javascript
 #!/usr/bin/ric
 
-//# Conditionals
-? [ 1 == 1 ] {
-  print("True condition")
-}
-
-? [ 1 == 0 ] {
-  # You shall not pass - Gandalf
-} ~ {
-  print("Untrue condition")
-}
-
 //# Placing a dot in front of a condition
 //# makes it a return spot, operator '@' returns there.
 a = 1338
@@ -546,34 +535,6 @@ a = 1338
   print("Re-evaluating")
   @
 }
-
-//# Lists
-h = [ "hej", "hopp" ]
-print("len(h): " + len(h))
-
-append(h, "hejsan")
-
-print("len(h): " + len(h))
-
-h = [h, "hoppsan"]
-
-print("len(h): " + len(h))
-print("h:")
-print(h)
-print("Traversing and printing h: ")
-print("====================")
-
-i = 0
-. [ i < len(h) ] {
-  printf("h[" + i + "]: ")
-  print(h[i])
-  i = i + 1
-  @
-}
-
-print("====================")
-
-//# Function definitions and pointers
 
 //# Defining a function
 @ hej (a, b) {
@@ -597,7 +558,6 @@ hej(willprint, "hej")
 hej(print, "hejsan")
 
 //# Dictionary expressions
-
 s = {"hello": "world", "elit": 1337}
 print(s)
 print(s["hello"])
@@ -626,7 +586,6 @@ l[0]()
 l[1]()
 
 //# Ric-script classes
-
 ;; myClass ;; {
   myMem = "not updated"
   @ myClass () {
@@ -647,28 +606,27 @@ c = myClass()
 print(c::get())
 c::set("updated from the outside")
 print(c::get())
+
+//# Fibbonacci series in an advanced list initialization
+s = [(20 ... i ) {
+  @ fibPos (a) {
+    ? [ a == 0 ] { -> 0 }
+    ? [ a == 1 ] { -> 1 }
+    -> fibPos(a-1) + fibPos(a-2) 
+  }
+  fibPos(i)
+}]
+print(s)
 ```
 
 Outputs:
 
 ```
 $ ./ric samples/demo.ric
-True condition
-Untrue condition
 A variable was not 1337, it was: 1338
 Re-evaluating
 Now the variable is: 1337
 yey!
-len(h): 2
-len(h): 3
-len(h): 2
-h:
-[['hej','hopp','hejsan'],'hoppsan']
-Traversing and printing h: 
-====================
-h[0]: ['hej','hopp','hejsan']
-h[1]: hoppsan
-====================
 hej
 hejsan
 {'elit' : 1337, 'hello' : 'world'}
@@ -686,6 +644,7 @@ I get constructed!
 my memory is: not updated
 not updated
 updated from the outside
+[0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181]
 ```
 
 For more of a walkthrough check [here](https://ricardicus.se/doc/syntaxwalkthrough.html).

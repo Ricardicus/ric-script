@@ -783,7 +783,7 @@ In addition to control flow, you can also use for-each loop
 statements as means to initialize lists. If a statement
 is an empty expression, it will be placed on the stack.
 The stack will later on empty itself into the list that is initialized.
-For example, you can do this: dsdsds
+For example, you can do this:
 
 .. code-block:: bash
 

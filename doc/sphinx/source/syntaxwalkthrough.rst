@@ -705,6 +705,12 @@ As an example, this is interesting, you can write code like this:
 For-each looping
 ~~~~~~~~~~~~~~~~
 
+With for-each loops in this language you can control the flow
+of execution and you can also initialize lists.
+
+Control flow
+############
+
 For looping you can use the control flow structures used above,
 but there is also a for-each structure in the language.
 It works for dictionaries, lists, integers and strings.
@@ -769,3 +775,42 @@ It works for dictionaries, lists, integers and strings.
 	2
 	b
 	4
+
+Advanced list initialization
+############################
+
+In addition to control flow, you can also use for-each loop
+statements as means to initialize lists. If a statement
+is an empty expression, it will be placed on the stack.
+The stack will later on empty itself into the list that is initialized.
+For example, you can do this: dsdsds
+
+.. code-block:: bash
+
+	# Use the raw data datatype
+	s = [(25 ... i) { 65 + i }]
+	d = data(s)
+	print(d)
+
+	# Showcase the advanced list initialization
+	# Using the raw data datatype
+	s = [(25 ... i) { 65 + i }]
+	d = data(s)
+	print(d)
+
+	# Creating fibbonacci series
+	s = [(15 ... i ) {
+		@ fibPos (a) {
+			? [ a == 0 ] { -> 0 }
+			? [ a == 1 ] { -> 1 }
+			-> fibPos(a-1) + fibPos(a-2) 
+		}
+		fibPos(i)
+	}]
+	print(s)
+**outputs**:
+
+.. code-block:: bash
+
+	ABCDEFGHIJKLMNOPQRSTUVWXY
+	[0,1,1,2,3,5,8,13,21,34,55,89,144,233,377]

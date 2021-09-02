@@ -328,7 +328,7 @@ Since I use JavaScript syntax highlighting here on GitHub, I have **added /\*\*/
 ric-script comment symbol **#**.
 
 ```javascript
-#!/usr/bin/ric
+//#!/usr/bin/ric
 /*
 #
 # Ramanujans formula for the number 3
@@ -357,7 +357,7 @@ handling multithreading. Since I use JavaScript syntax highlighting here on GitH
 ric-script comment symbol **#**.
 
 ```javascript
-#!/usr/bin/ric
+//#!/usr/bin/ric
 /*
 # This program shows how you can create
 # different types of thread contexts in
@@ -420,7 +420,7 @@ Since I use other languages syntax highlighting here on GitHub, I have **added /
 ric-script comment symbol **#** so it looks alright.
 
 ```rust
-#!/usr/bin/ric
+//#!/usr/bin/ric
 //# A script to demonstrate how one can list files using ric-script
 
 @ printUsage() {
@@ -520,7 +520,7 @@ Since I use JavaScript syntax highlighting here on GitHub, I have **added //** j
 ric-script comment symbol **#** so it looks alright.
 
 ```javascript
-#!/usr/bin/ric
+//#!/usr/bin/ric
 
 //# Placing a dot in front of a condition
 //# makes it a return spot, operator '@' returns there.
@@ -607,7 +607,8 @@ print(c::get())
 c::set("updated from the outside")
 print(c::get())
 
-//# Fibbonacci series in an advanced list initialization
+//# first 20 values in the Fibbonacci series generated 
+//# using advanced list initialization with a for-each loop.
 s = [(20 ... i ) {
   @ fibPos (a) {
     ? [ a == 0 ] { -> 0 }

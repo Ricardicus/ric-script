@@ -1052,6 +1052,7 @@ static void loadCJSON(cJSON *json, int indent,
         loadCJSON(walk->child, indent + 1, &val, EXPRESSION_ARGS());
         if (indent == 0 ) {
           *out = val;
+          free(keyVals);
           return;
         }
       }
@@ -1095,6 +1096,8 @@ static void loadCJSON(cJSON *json, int indent,
     *out = newExpr_Vector(args);
   } else if ( out != NULL ) {
     *out = newExpr_Dictionary(keyVals);
+  } else {
+    free(keyVals);
   }
 
 }
@@ -1110,7 +1113,7 @@ int ric_json_load(LIBRARY_PARAMS())
   void *sp = PROVIDE_CONTEXT()->sp;
  // void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-//  int dummy;
+ // int dummy;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -1137,7 +1140,6 @@ int ric_json_load(LIBRARY_PARAMS())
     fseek(fp, 0L, SEEK_SET);
     argText = ast_ecalloc(sz + 2);
     fread(argText, 1, sz, fp);
-    printf("parse (%zu):\n%s\n", sz, argText);
     json = cJSON_Parse(argText);
     free(argText);
   } else if ( argText != NULL ) {
@@ -1158,6 +1160,8 @@ int ric_json_load(LIBRARY_PARAMS())
 
   PUSH_DICTIONARY(result->dict, sp, sc);
   free(result);
+
+  cJSON_Delete(json);
 
   return 0;
 }

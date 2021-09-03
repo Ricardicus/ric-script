@@ -1105,15 +1105,15 @@ static void loadCJSON(cJSON *json, int indent,
 int ric_json_load(LIBRARY_PARAMS())
 {
   stackval_t stv;
- // heapval_t *hpv = NULL;
   expr_t *result = NULL;
   cJSON *json = NULL;
   FILE *fp = NULL;
   char *argText = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
- // void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
- // int dummy;
+  /*int dummy;
+  heapval_t *hpv = NULL;
+  void *hp = PROVIDE_CONTEXT()->hp;*/
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);

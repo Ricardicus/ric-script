@@ -1097,6 +1097,23 @@ static void loadCJSON(cJSON *json, int indent,
       walk = walk->next;
     }
 
+    if ( args != NULL ) {
+      /* Reverse the args list order */
+      argsList_t *prev = NULL;
+      argsList_t *current = args;
+      argsList_t *next;
+      while (current != NULL) {
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+      }
+
+      args = prev;
+
+      walk = args;
+    }
+
     *out = newExpr_Vector(args);
   } else if ( out != NULL ) {
     *out = newExpr_Dictionary(keyVals);

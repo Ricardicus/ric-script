@@ -1020,7 +1020,6 @@ static void loadCJSON(cJSON *json, int indent,
     i++;
   }
 
-  count = 0;
   walk = json;
   i = 0;
   while ( walk != NULL ) {
@@ -1091,6 +1090,11 @@ static void loadCJSON(cJSON *json, int indent,
       }
       keyValsWalk = keyValsWalk->next;
       i++;
+    }
+
+    argsList_t *walk = args;
+    while ( walk != NULL ) {
+      walk = walk->next;
     }
 
     *out = newExpr_Vector(args);

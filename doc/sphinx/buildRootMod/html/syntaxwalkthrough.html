@@ -760,7 +760,7 @@ Wanting to <span class="nb">set</span> <span class="s1">&#39;a&#39;</span> to: <
 <span class="o">}</span>
 
 @ isNumber<span class="o">(</span>num<span class="o">)</span> <span class="o">{</span>
-  <span class="nv">numberChars</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;0&#39;</span>,<span class="s1">&#39;1&#39;</span>,<span class="s1">&#39;2&#39;</span>,<span class="s1">&#39;3&#39;</span>,<span class="s1">&#39;4&#39;</span>,<span class="s1">&#39;5&#39;</span>,<span class="s1">&#39;6&#39;</span>,<span class="s1">&#39;7&#39;</span>,<span class="s1">&#39;8&#39;</span>,<span class="s1">&#39;9&#39;</span><span class="o">]</span>
+  <span class="nv">numberChars</span> <span class="o">=</span> <span class="o">[</span> <span class="o">(</span><span class="m">10</span> ... i<span class="o">)</span> <span class="o">{</span> text<span class="o">(</span>i<span class="o">)</span> <span class="o">}</span> <span class="o">]</span>
   <span class="nv">isNr</span> <span class="o">=</span> <span class="m">1</span>
   <span class="nv">i</span> <span class="o">=</span> <span class="m">0</span>
   . <span class="o">[</span> i &lt; len<span class="o">(</span>num<span class="o">)</span> <span class="o">]</span> <span class="o">{</span>

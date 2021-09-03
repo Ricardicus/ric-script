@@ -991,7 +991,7 @@ int ric_help(LIBRARY_PARAMS())
   return 0;
 }
 
-static void loadCJSON(cJSON *json, int indent,
+static void loadCJSON(cJSON *json, int depth,
   expr_t **out, EXPRESSION_PARAMS()) {
   cJSON *walk = json;
   int count = 0;
@@ -1045,11 +1045,11 @@ static void loadCJSON(cJSON *json, int indent,
       val = newExpr_Text(walk->valuestring);
       break;
       case cJSON_Array  :
-      loadCJSON(walk->child, indent + 1, &val, EXPRESSION_ARGS());
+      loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
       break;
       case cJSON_Object : {
-        loadCJSON(walk->child, indent + 1, &val, EXPRESSION_ARGS());
-        if (indent == 0 ) {
+        loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+        if (depth == 0 ) {
           *out = val;
           free(keyVals);
           return;
@@ -1110,15 +1110,14 @@ static void loadCJSON(cJSON *json, int indent,
       }
 
       args = prev;
-
       walk = args;
     }
+
+    free(keyVals);
 
     *out = newExpr_Vector(args);
   } else if ( out != NULL ) {
     *out = newExpr_Dictionary(keyVals);
-  } else {
-    free(keyVals);
   }
 
 }
@@ -1132,9 +1131,9 @@ int ric_json_load(LIBRARY_PARAMS())
   char *argText = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  /*int dummy;
+  int dummy;
   heapval_t *hpv = NULL;
-  void *hp = PROVIDE_CONTEXT()->hp;*/
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -1176,8 +1175,11 @@ int ric_json_load(LIBRARY_PARAMS())
   /* Print the cJSON object */
   result = NULL;
   loadCJSON(json, 0, &result, EXPRESSION_ARGS());
+
   stv.type = DICTTYPE;
   stv.dict = result->dict;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
   PUSH_DICTIONARY(result->dict, sp, sc);
   free(result);

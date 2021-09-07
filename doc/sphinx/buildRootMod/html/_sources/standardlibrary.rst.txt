@@ -15,7 +15,7 @@ List of batteries
 
 Using **help()** you get, as of today, the following output:
 
-.. code-block::
+.. code-block:: text
 
 	>> help()
 	These are the functions I know:

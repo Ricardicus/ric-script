@@ -1016,7 +1016,16 @@ static void loadCJSON(cJSON *json, int depth,
     keyVal->val = NULL;
 
     if ( walk->string ) {
+      stackval_t stv;
+      heapval_t *hpv;
+      int dummy;
+      void *hp = PROVIDE_CONTEXT()->hp;
+
       keyVal->key = newExpr_Text(walk->string);
+
+      stv.type = TEXT;
+      stv.t = keyVal->key->text;
+      ALLOC_HEAP(&stv, hp, &hpv, &dummy);
     }
     switch ( walk->type ) {
       case cJSON_False:
@@ -1031,8 +1040,18 @@ static void loadCJSON(cJSON *json, int depth,
       case cJSON_Number :
       val = newExpr_Float(walk->valuedouble);
       break;
-      case cJSON_String :
-      val = newExpr_Text(walk->valuestring);
+      case cJSON_String : {
+        stackval_t stv;
+        heapval_t *hpv;
+        int dummy;
+        void *hp = PROVIDE_CONTEXT()->hp;
+
+        val = newExpr_Text(walk->valuestring);
+
+        stv.type = TEXT;
+        stv.t = val->text;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+      }
       break;
       case cJSON_Array  :
       loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
@@ -1041,7 +1060,7 @@ static void loadCJSON(cJSON *json, int depth,
         loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
         if (depth == 0 ) {
           *out = val;
-          free(keyVal);
+          //free(keyVal);
           return;
         }
       }

@@ -980,13 +980,12 @@ void free_keyvals(dictionary_t *dict) {
 
   while ( keyVals ) {
     keyValList_t *kv = keyVals;
-    
-    if ( kv->val->type == DICTTYPE ) {
+
+    if ( kv->val->type == EXPR_TYPE_DICT ) {
       free_keyvals(kv->val->dict);
     }
 
     free(kv->val);
-    free(kv->key->text);
     free(kv->key);
 
     keyVals = keyVals->next;

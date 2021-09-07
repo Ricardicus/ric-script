@@ -67,7 +67,7 @@ static void loadCJSON(cJSON *json, int depth,
       break;
       case cJSON_Object : {
         loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
-        if (depth == 0 ) {
+        if ( depth == 0 ) {
           *out = val;
           free(keyVal);
           return;

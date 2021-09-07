@@ -4,17 +4,6 @@
 
 #include "lib.h"
 
-/* Including the library functions */
-#include "libio.h"
-#include "libmath.h"
-#include "libstd.h"
-#include "libstring.h"
-#include "libload.h"
-#include "libos.h"
-#include "libtime.h"
-#include "libnet.h"
-#include "libctx.h"
-
 #ifndef NO_XATTR
 #include "libxattr.h"
 #endif
@@ -40,6 +29,7 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("list", 1, ric_create_list),
   DECLARE_LIB_FUNCTION("data", 1, ric_create_data),
   DECLARE_LIB_FUNCTION("text", 1, ric_create_text),
+  DECLARE_LIB_FUNCTION("jsonLoad", 1, ric_json_load),
   // libstring
   DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
   DECLARE_LIB_FUNCTION("split", 2, ric_split),

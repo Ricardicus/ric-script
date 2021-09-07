@@ -689,7 +689,7 @@ aims to take in the future:
 - [x] Support for at least swedish UTF-8 characters å, ä and ö. 
 - [x] Threading interface
 - [x] Dynamic library support
-- [ ] Built in JSON <-> ric-script dictionary mapping (like Pythons 'json' module)
+- [x] Built in JSON <-> ric-script dictionary mapping (like Pythons 'json' module)
 - [ ] Possibility to define classes, with functions, in C (this far classes are only implemented in ric-script).
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files

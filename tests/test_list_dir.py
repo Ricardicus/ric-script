@@ -20,6 +20,7 @@ def test_directory_print():
 "socketClient.ric",
 "threads_test.ric",
 "data_print.ric",
+"json.ric",
 " a",
 "  a",
 "   c.txt",

@@ -7,6 +7,18 @@
 #include "eval.h"
 #include "ast.h"
 
+/* Including the library functions */
+#include "libio.h"
+#include "libmath.h"
+#include "libstd.h"
+#include "libstring.h"
+#include "libload.h"
+#include "libos.h"
+#include "libtime.h"
+#include "libnet.h"
+#include "libctx.h"
+#include "libjson.h"
+
 #define EXPORT_STR(s) XEXPORT_STR(s)
 #define XEXPORT_STR(s) #s
 

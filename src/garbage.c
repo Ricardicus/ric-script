@@ -106,7 +106,12 @@ static void sweep (
           free_expression(e);
           free(e);
         } else if ( heap[i].sv.type == DICTTYPE ) {
-          hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
+          if ( ((heapval_t*) hp)[i].sv.dict->hash ) {
+            hashtable_free(((heapval_t*) hp)[i].sv.dict->hash);
+          }
+          if ( ((heapval_t*) hp)[i].sv.dict->type == RIC_DICTIONARY_DYN ) {
+            free_keyvals(((heapval_t*) hp)[i].sv.dict);
+          }
           free(heap[i].sv.dict);
         } else if ( heap[i].sv.type == RAWDATATYPE ) {
           free(heap[i].sv.rawdata->data);

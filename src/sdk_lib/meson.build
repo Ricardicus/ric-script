@@ -17,6 +17,9 @@ includes = [
   include_directories('..'),
   include_directories(
     join_paths('..', 'library')
+  ),
+  include_directories(
+    join_paths('..', 'external', 'cjson-1.7.14')
   )
 ]
 
@@ -27,7 +30,10 @@ library_sources = [
   join_paths('..','library','libstring.c'),
   join_paths('..','library','libload.c'),
   join_paths('..','library','libtime.c'),
-  join_paths('..','library','libctx.c')
+  join_paths('..','library','libctx.c'),
+  join_paths('..','library','libjson.c'),
+  join_paths('..','external','cjson-1.7.14',
+    'cJSON.c')
 ]
 
 # Handling windows NT vs. unix POSIX differences
@@ -116,7 +122,9 @@ if ( target_os == 'windows' )
     pcre_sources += [join_paths('..','external','pcre-8.00', pcre_source)]
   endforeach
 
-  pcre_inc = include_directories(join_paths('..','external','pcre-8.00'))
+  pcre_inc = include_directories(
+    join_paths('..','external','pcre-8.00')
+    )
 
   # Adding flags for the parser to be more verbose
   pcre_args = ['-DNEWLINE=-1','-DLINK_SIZE=2','-DMAX_NAME_SIZE=32',

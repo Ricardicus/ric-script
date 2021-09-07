@@ -186,10 +186,14 @@ typedef struct logical_t {
   expr_t **ors;
 } logical_t;
 
+#define RIC_DICTIONARY_AST 0
+#define RIC_DICTIONARY_DYN 1
+
 typedef struct dictionary {
   int initialized;
   keyValList_t *keyVals;
   hashtable_t *hash;
+  int type;
 } dictionary_t;
 
 typedef struct expr_s {
@@ -358,6 +362,7 @@ void print_statements(statement_t *root);
 void interpret_statements(int argc, char *argv[], statement_t *stmt);
 void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown);
 void free_expression(expr_t *expr);
+void free_keyvals(dictionary_t *dict);
 
 typedef enum stackvaltypes {
   INT32TYPE = 1,

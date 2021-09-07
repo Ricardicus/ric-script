@@ -7,7 +7,8 @@ library_source_list = [
   'libstring.c',
   'libload.c',
   'libtime.c',
-  'libctx.c'
+  'libctx.c',
+  'libjson.c'
 ]
 
 target_os = target_machine.system()

@@ -42,7 +42,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libos \
 	$(LIB_DIR)/libtime \
 	$(LIB_DIR)/libnet \
-	$(LIB_DIR)/libctx
+	$(LIB_DIR)/libctx \
+	$(LIB_DIR)/libjson
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)

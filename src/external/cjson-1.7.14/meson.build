@@ -4,7 +4,7 @@ cjson_source_list = [
   'cJSON.c'
 ]
 
-cjson_lib = library('cJSON',
+cjson_lib = static_library('cJSON',
   sources: cjson_source_list, version: '1.7.14', soversion : '0',
   include_directories : cjson_inc)
 

@@ -9,8 +9,6 @@
 *
 */
 
-#include <cJSON.h>
-
 #include "lib.h"
 #include "dl.h"
 #include "hashtable.h"
@@ -31,7 +29,6 @@ int ric_type_text(LIBRARY_PARAMS());
 int ric_create_list(LIBRARY_PARAMS());
 int ric_create_data(LIBRARY_PARAMS());
 int ric_create_text(LIBRARY_PARAMS());
-int ric_json_load(LIBRARY_PARAMS());
 
 #endif
 

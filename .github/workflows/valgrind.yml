@@ -55,3 +55,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/forEaching.ric
     - name: Run valgrind on raw data data_print.ric
       run: valgrind --leak-check=full ./ric samples/data_print.ric
+    - name: Run valgrind on JSON test json.ric
+      run: valgrind --leak-check=full ./ric samples/json.ric

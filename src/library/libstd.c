@@ -1060,7 +1060,7 @@ static void loadCJSON(cJSON *json, int depth,
         loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
         if (depth == 0 ) {
           *out = val;
-          //free(keyVal);
+          free(keyVal);
           return;
         }
       }

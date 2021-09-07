@@ -983,6 +983,15 @@ void free_keyvals(dictionary_t *dict) {
 
     if ( kv->val->type == EXPR_TYPE_DICT ) {
       free_keyvals(kv->val->dict);
+      free(kv->val->dict);
+    } else if ( kv->val->type == EXPR_TYPE_VECTOR ) {
+      argsList_t *args = kv->val->vec->content;
+      while ( args ) {
+        argsList_t *arg = args;
+        args = args->next;
+        free(arg);
+      }
+      free(kv->val->vec);
     }
 
     free(kv->val);

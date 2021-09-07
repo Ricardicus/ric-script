@@ -19,7 +19,7 @@ Using **help()** you get, as of today, the following output:
 
 	>> help()
 	These are the functions I know:
-	function-name (number-of-arguments)
+	function-name ( number-of-arguments)
 	- exit ( 1 )
 	- print ( 1 )
 	- printf ( 1 )
@@ -34,6 +34,7 @@ Using **help()** you get, as of today, the following output:
 	- list ( 1 )
 	- data ( 1 )
 	- text ( 1 )
+	- jsonLoad ( 1 )
 	- parseInt ( 1 )
 	- split ( 2 )
 	- charCode ( 1 )
@@ -84,6 +85,7 @@ Using **help()** you get, as of today, the following output:
 	- mkdir ( 1 )
 	- find ( 1 )
 	- cd ( 1 )
+	- osName ( 0 )
 	- setTimeout ( 2 )
 	- setInterval ( 2 )
 	- socketServer ( 1 )
@@ -92,6 +94,7 @@ Using **help()** you get, as of today, the following output:
 	- socketWrite ( 2 )
 	- socketClose ( 1 )
 	- socketConnect ( 2 )
+
 
 Due to the underlying structure, I have not been able to add function argument
 names to the structure that handles the extended library.

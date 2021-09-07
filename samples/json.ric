@@ -1,0 +1,31 @@
+#!/bin/ric
+
+json = '
+  {
+    "a" : "b",
+    "c" : {
+      "a" : 1337,
+      "b" : "c",
+      "d" : {
+        "a" : "hejsan"
+      }
+    }
+  }'
+
+d = jsonLoad(json)
+
+print(d)
+
+testFile = "test.json"
+rm(testFile)
+fp = fileOpen(testFile)
+fileWrite(fp, json)
+fileClose(fp)
+
+fp = fileOpen(testFile)
+d = jsonLoad(fp)
+fileClose(fp)
+rm(testFile)
+
+print(d)
+

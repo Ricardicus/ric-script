@@ -234,6 +234,7 @@ expr_t* newExpr_Dictionary(keyValList_t *keyVals) {
   expr->dict->initialized = 0;
   expr->dict->keyVals = keyVals;
   expr->dict->hash = NULL;
+  expr->dict->type = RIC_DICTIONARY_AST;
 
   return expr;
 }
@@ -972,5 +973,24 @@ argsList_t* copy_argsList(argsList_t *args) {
   }
 
   return new;
+}
+
+void free_keyvals(dictionary_t *dict) {
+  keyValList_t *keyVals = dict->keyVals;
+
+  while ( keyVals ) {
+    keyValList_t *kv = keyVals;
+    
+    if ( kv->val->type == DICTTYPE ) {
+      free_keyvals(kv->val->dict);
+    }
+
+    free(kv->val);
+    free(kv->key->text);
+    free(kv->key);
+
+    keyVals = keyVals->next;
+    free(kv);
+  }
 }
 

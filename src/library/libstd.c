@@ -997,6 +997,7 @@ static void loadCJSON(cJSON *json, int depth,
   int count = 0;
   int i = 0;
   keyValList_t *keyVals = NULL;
+  keyValList_t *keyValsHead = NULL;
   int isArray = 0;
 
   /* Get number of elements */
@@ -1005,28 +1006,17 @@ static void loadCJSON(cJSON *json, int depth,
     count++;
   }
 
-  keyVals = ast_ecalloc(sizeof(keyValList_t)*(count+1));
-
-  /* Set the "next" ones */
-  walk = json;
-  i = 0;
-  while ( walk != NULL ) {
-    if ( i < count - 1 ) {
-      keyVals[i].next = &keyVals[i+1];
-    } else {
-      keyVals[i].next = NULL;
-    }
-    walk = walk->next;
-    i++;
-  }
-
   walk = json;
   i = 0;
   while ( walk != NULL ) {
     expr_t *val = NULL;
+    keyValList_t *keyVal = ast_ecalloc(sizeof(keyValList_t));
+    keyVal->next = NULL;
+    keyVal->key = NULL;
+    keyVal->val = NULL;
 
     if ( walk->string ) {
-      keyVals[i].key = newExpr_Text(walk->string);
+      keyVal->key = newExpr_Text(walk->string);
     }
     switch ( walk->type ) {
       case cJSON_False:
@@ -1051,7 +1041,7 @@ static void loadCJSON(cJSON *json, int depth,
         loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
         if (depth == 0 ) {
           *out = val;
-          free(keyVals);
+          free(keyVal);
           return;
         }
       }
@@ -1064,39 +1054,56 @@ static void loadCJSON(cJSON *json, int depth,
     }
 
     if ( val ) {
-      keyVals[i].val = val;
+      keyVal->val = val;
     }
 
-    if ( val && keyVals[i].key == NULL ) {
+    if ( val && keyVal->key == NULL ) {
       /* This is an array */
       isArray = 1;
+    }
+
+    if ( keyVals != NULL ) {
+      keyVals->next = keyVal;
+    }
+
+    keyVals = keyVal;
+
+    if ( i == 0 ) {
+      keyValsHead = keyVals;
     }
 
     walk = walk->next;
     i++;
   }
 
+  keyVals = keyValsHead;
+
   if ( isArray && out != NULL ) {
-    argsList_t *args = ast_ecalloc(sizeof(argsList_t)*(count+1));
+    argsList_t *args = NULL;
+    argsList_t *argsHead = NULL;
     keyValList_t *keyValsWalk = keyVals;
 
     i = 0;
     while ( keyValsWalk ) {
-      args[i].arg = keyValsWalk->val;
-      if ( i < count - 1) {
-        args[i].next = &args[i+1];
-      } else {
-        args[i].next = NULL;
+      argsList_t *arg = ast_ecalloc(sizeof(argsList_t));
+      arg->arg = keyValsWalk->val;
+      arg->next = NULL;
+
+      if ( args != NULL ) {
+        args->next = arg;
       }
+
+      args = arg;
+
+      if ( i == 0 ) {
+        argsHead = args;
+      }
+
       keyValsWalk = keyValsWalk->next;
       i++;
     }
 
-    argsList_t *walk = args;
-    while ( walk != NULL ) {
-      walk = walk->next;
-    }
-
+    args = argsHead;
     if ( args != NULL ) {
       /* Reverse the args list order */
       argsList_t *prev = NULL;
@@ -1110,14 +1117,19 @@ static void loadCJSON(cJSON *json, int depth,
       }
 
       args = prev;
-      walk = args;
     }
 
-    free(keyVals);
-
+    keyValsWalk = keyVals;
+    while ( keyValsWalk ) {
+      keyValList_t *kvw = keyValsWalk;
+      keyValsWalk = keyValsWalk->next;
+      free(kvw);
+    }
     *out = newExpr_Vector(args);
   } else if ( out != NULL ) {
-    *out = newExpr_Dictionary(keyVals);
+    expr_t *outE = newExpr_Dictionary(keyVals);
+    outE->dict->type = RIC_DICTIONARY_DYN;
+    *out = outE;
   }
 
 }

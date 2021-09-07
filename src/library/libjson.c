@@ -208,7 +208,7 @@ int ric_json_load(LIBRARY_PARAMS())
 
   if (json == NULL) {
     /* Pushing result, failed to parse */
-    PUSH_INT(0, sp, sc);
+    PUSH_INT(-1, sp, sc);
     return 0;
   }
   

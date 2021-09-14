@@ -166,6 +166,7 @@ int ric_json_convert(LIBRARY_PARAMS())
 {
   stackval_t stv;
   dictionary_t *argDict = NULL;
+  class_t *argClass = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   int dummy;
@@ -182,6 +183,9 @@ int ric_json_convert(LIBRARY_PARAMS())
     case DICTTYPE:
     argDict = stv.dict;
     break;
+    case CLASSTYPE:
+    argClass = stv.classObj;
+    break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string or file.\n",
         LIBRARY_FUNC_NAME());
@@ -190,8 +194,20 @@ int ric_json_convert(LIBRARY_PARAMS())
     break;
   }
 
-  snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
+  if ( argDict != NULL ) {
+
+    snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
     argDict, EXPRESSION_ARGS());
+
+  } else if ( argClass != NULL ) {
+    dictionary_t tmpDict;
+    tmpDict.initialized = 1;
+    tmpDict.hash = argClass->varMembers;
+    tmpDict.keyVals = NULL;
+
+    snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
+    &tmpDict, EXPRESSION_ARGS());
+  }
 
   stv.type = TEXT;
   stv.t = resultBuf;

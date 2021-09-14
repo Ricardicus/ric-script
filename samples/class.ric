@@ -26,3 +26,6 @@ f = s::getA()
 print(f)
 
 print(s::getA())
+
+# Convert class members to json string
+print(jsonConvert(s))

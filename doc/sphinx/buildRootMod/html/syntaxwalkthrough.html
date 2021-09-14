@@ -680,6 +680,9 @@ s::setA<span class="o">(</span><span class="m">100</span><span class="o">)</span
 print<span class="o">(</span>f<span class="o">)</span>
 
 print<span class="o">(</span>s::getA<span class="o">())</span>
+
+<span class="c1"># Convert class members to json string</span>
+print<span class="o">(</span>jsonConvert<span class="o">(</span>s<span class="o">))</span>
 </pre></div>
 </div>
 <p><strong>outputs</strong>:</p>
@@ -693,6 +696,7 @@ hej
 Wanting to <span class="nb">set</span> <span class="s1">&#39;a&#39;</span> to: <span class="m">100</span>
 <span class="m">100</span>
 <span class="m">100</span>
+<span class="o">{</span><span class="s1">&#39;a&#39;</span> : <span class="m">100</span><span class="o">}</span>
 </pre></div>
 </div>
 </section>

@@ -540,6 +540,9 @@ Class pointer
 
 	print(s::getA())
 
+	# Convert class members to json string
+	print(jsonConvert(s))
+
 **outputs**:
 
 .. code-block:: bash
@@ -554,6 +557,8 @@ Class pointer
 	Wanting to set 'a' to: 100
 	100
 	100
+	{'a' : 100}
+
 
 Class declarations
 ~~~~~~~~~~~~~~~~~~

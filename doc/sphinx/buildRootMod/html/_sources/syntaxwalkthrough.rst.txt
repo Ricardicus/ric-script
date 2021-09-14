@@ -262,24 +262,11 @@ A dictionary maps a string to any type of references.
 	  print(s[key])
 	}
 
-	# Constructing lists with a for each loop
-	print([(
-	  10 ... i
-	) {
-	  text(i * 10)
-	}])
+	s = {"a": "b", "c": ["d", "e", "f", {"g": "h"}]}
 
-	# Constructing lists, in a complex fashion
-	# all 'lonely' expressions are put on the stack
-	# and all on the stack is put into the list
-	print([(
-	  5 ... i
-	) {
-	  a = [i+1, i+2, i+3]
-	  text(a[0])
-	  text(a[1])
-	  text(a[2])
-	}])
+	# Convert dictionary to string
+	s_res = jsonConvert(s)
+	print(s_res + " (" + typeInText(s_res) + ")")
 
 
 **outputs**:
@@ -307,8 +294,7 @@ A dictionary maps a string to any type of references.
 	{'b' : {'c' : {'d' : 'e'}}}
 	foobar
 	<Function: 'foobar'>
-	['0','10','20','30','40','50','60','70','80','90']
-	['1','2','3','2','3','4','3','4','5','4','5','6','5','6','7']
+	{'a' : 'b', 'c' : ['d','e','f',{'g' : 'h'}]} (text)
 
 List
 ####
@@ -427,6 +413,18 @@ and can hold any type of expressions.
 	print(small[::-1])
 	print(big[90:-1:-2])
 
+	# Creating fibbonacci series through advanced
+	# list initialization
+	s = [ (15 ... i ) {
+		@ fibPos (a) {
+			? [ a == 0 ] { -> 0 }
+			? [ a == 1 ] { -> 1 }
+			-> fibPos(a-1) + fibPos(a-2) 
+		}
+		fibPos(i)
+	}]
+	print(s)
+
 **outputs**:
 
 .. code-block:: bash
@@ -476,7 +474,7 @@ and can hold any type of expressions.
 	[0,1,2,3,4]
 	[4,3,2,1,0]
 	[98,96,94,92,90]
-
+	[0,1,1,2,3,5,8,13,21,34,55,89,144,233,377]
 
 Raw data
 ########

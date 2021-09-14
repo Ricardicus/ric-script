@@ -23,7 +23,8 @@ def test_dict_print():
 "{'b' : {'c' : {'d' : 'e'}}}",
 "foobar",
 "<Function: 'foobar'>",
-"{'c' : ['d','e','f',{'g' : 'h'}], 'a' : 'b'}"
+"{'a' : 'b', 'c' : ['d','e','f',{'g' : 'h'}]}",
+"{'a' : 'b', 'c' : ['d','e','f',{'g' : 'h'}]} (text)"
 ]
 
   lib_script = callSample('dictionary.ric')
@@ -33,5 +34,5 @@ def test_dict_print():
   assert len(output_lines) == len(ric_result)
 
   for i in range(0,len(ric_result)):
-    assert output_lines[i] == ric_result[i]
+    assert output_lines[i] == ric_result[i], "denna: " + output_lines[i] + ", verkligt: " + ric_result[i]
 

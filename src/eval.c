@@ -4497,6 +4497,365 @@ int print_dictionary(dictionary_t *dict,
   return 0;
 }
 
+void check_buf_size(char **buf,
+  size_t *bufSize, size_t *pos, size_t require) {
+  size_t expandFactor = 2; // Arbitrary
+  while ( *bufSize <= *pos + require ) {
+    size_t newSize = *bufSize * expandFactor;
+    char *newBuf = (char*)ast_remalloc(buf, newSize);
+    *buf = newBuf;
+    *bufSize = newSize;
+  }
+}
+
+int snprint_dictionary(
+  char **buf,
+  size_t *bufSize,
+  size_t *pos,
+  dictionary_t *dict,
+  EXPRESSION_PARAMS()) {
+  hashtable_t *hash = dict->hash;
+  //dictionary_t *newDict = NULL;
+  int size;
+  int i;
+  int keyCount = 0;
+  int keyCountTotal = 0;
+  struct key_val_pair *ptr;
+
+  if ( *buf == NULL ) {
+    const size_t startSize = 128;
+    *buf = ast_emalloc(startSize);
+    *bufSize = startSize;
+    *pos = 0;
+  }
+
+  if ( dict->initialized == 0 ) {
+    //stackval_t sv;
+    keyValList_t *walk = dict->keyVals;
+    i = 0;
+    check_buf_size(buf, bufSize, pos, 1);
+    snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "{");
+    *pos = *pos + 1;
+    while ( walk != NULL ) {
+      char tmpBuf[256];
+      size_t tmpLen;
+      stackval_t sv;
+      void *sp = PROVIDE_CONTEXT()->sp;
+      size_t *sc = PROVIDE_CONTEXT()->sc;
+      /* Dictionary already initialized, evaluate expressions in the key-value list */
+      expr_t *expKey = walk->key;
+      expr_t *expVal = walk->val;
+
+      if ( expKey->type != EXPR_TYPE_TEXT ) {
+        walk = walk->next;
+        continue;
+      }
+
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s'%s' : ", (i == 0 ? "" : ", "), expKey->text);
+      tmpLen = strlen(tmpBuf);
+
+      check_buf_size(buf, bufSize, pos, tmpLen);
+      snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", tmpBuf);
+      *pos += tmpLen;
+
+      evaluate_expression(expVal, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      tmpLen = 0;
+
+      switch ( sv.type ) {
+        case INT32TYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case DOUBLETYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case TEXT: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", sv.t);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case POINTERTYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case VECTORTYPE: {
+          snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        }
+        break;
+        case DICTTYPE: {
+          snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        }
+        break;
+        default:
+        break;
+      }
+
+      if ( tmpLen > 0 ) {
+        check_buf_size(buf, bufSize, pos, tmpLen);
+        snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", tmpBuf);
+
+        *pos += tmpLen;
+      }
+
+      walk = walk->next;
+      ++i;
+    }
+    check_buf_size(buf, bufSize, pos, 1);
+    snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "}");
+    *pos = *pos + 1;
+    return 0;
+  }
+
+  size = hash->size;
+
+  i = 0;
+  while ( i < size ) {
+    ptr = hash->table[i];
+    while (ptr != NULL) {
+      keyCount++;
+      ptr = ptr->next;
+    }
+    i++;
+  }
+
+  keyCountTotal = keyCount;
+
+  if ( keyCountTotal > 0 ) {
+
+    check_buf_size(buf, bufSize, pos, 1);
+    snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "{");
+    *pos = *pos + 1;
+
+    keyCount = 0;
+    i = 0;
+    while ( i < size ) {
+      char tmpBuf[256];
+      size_t tmpLen;
+      heapval_t *hpv;
+      stackval_t sv;
+      ptr = hash->table[i];
+
+      if ( ptr == NULL ) {
+        ++i;
+        continue;
+      }
+
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s'%s' : ", (keyCount > 0 ? ", " : ""), ptr->key);
+      tmpLen = strlen(tmpBuf);
+
+      check_buf_size(buf, bufSize, pos, tmpLen);
+      snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", tmpBuf);
+      *pos += tmpLen;
+
+      hpv = ptr->data;
+      sv = hpv->sv;
+
+      tmpLen = 0;
+
+      switch ( sv.type ) {
+        case INT32TYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case DOUBLETYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case TEXT: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", sv.t);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case POINTERTYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
+          tmpLen = strlen(tmpBuf);
+        }
+        break;
+        case VECTORTYPE: {
+          snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        }
+        break;
+        case DICTTYPE: {
+          snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        }
+        break;
+        default:
+        break;
+      }
+
+      if ( tmpLen > 0 ) {
+        check_buf_size(buf, bufSize, pos, tmpLen);
+        snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", tmpBuf);
+
+        *pos += tmpLen;
+      }
+
+      keyCount++;
+      i++;
+    }
+    check_buf_size(buf, bufSize, pos, 1);
+    snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "}");
+    *pos = *pos + 1;
+  } else {
+    check_buf_size(buf, bufSize, pos, 2);
+    snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "{}");
+    *pos += 2;
+  }
+
+  return 0;
+}
+
+int snprint_vector(
+  char **buf,
+  size_t *bufSize,
+  size_t *pos,
+  vector_t *vec,
+  EXPRESSION_PARAMS())
+{
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  argsList_t *walk = vec->content;
+  expr_t *vec_e = NULL;
+
+  if ( *buf == NULL ) {
+    const size_t startSize = 128;
+    *buf = ast_emalloc(startSize);
+    *bufSize = startSize;
+    *pos = 0;
+  }
+
+  if ( vec->content == NULL && vec->forEach != NULL ) {
+    vec_e = copy_vector(vec, EXPRESSION_ARGS());
+    if ( vec_e != NULL ) {
+      walk = vec_e->vec->content;
+    }
+  }
+
+  check_buf_size(buf, bufSize, pos, 1);
+  snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "[");
+  *pos = *pos + 1;
+  while ( walk != NULL ) {
+    char tmpBuf[256];
+    size_t tmpLen = 0;
+    stackval_t sv;
+    evaluate_expression(walk->arg, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+
+    switch (sv.type) {
+    case INT32TYPE: {
+      snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+      tmpLen = strlen(tmpBuf);
+      break;
+    }
+    case DOUBLETYPE:
+    {
+      snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+      tmpLen = strlen(tmpBuf);
+      break;
+    }
+    case TEXT:
+    {
+      snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", sv.t);
+      tmpLen = strlen(tmpBuf);
+      break;
+    }
+    case TIMETYPE: {
+      struct tm *info;
+      if ( sv.time < 0 ) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + sv.time;
+        info = localtime( &result );
+      } else {
+        info = localtime( &sv.time );
+      }
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s", asctime(info));
+      tmpLen = strlen(tmpBuf);
+      break;
+    }
+    case POINTERTYPE:
+      snprintf(tmpBuf, sizeof(tmpBuf), "<%" PRIuPTR ">", sv.p);
+      tmpLen = strlen(tmpBuf);
+      break;
+    case FUNCPTRTYPE:
+      snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", sv.func->id.id);
+      tmpLen = strlen(tmpBuf);
+      break;
+    case LIBFUNCPTRTYPE:
+      snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", sv.func->id.id);
+      tmpLen = strlen(tmpBuf);
+      break;
+    case VECTORTYPE:
+      snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+      break;
+    case DICTTYPE:
+      snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+      break;
+    default:
+      break;
+    }
+
+    if ( tmpLen > 0 ) {
+      check_buf_size(buf, bufSize, pos, tmpLen);
+      snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", tmpBuf);
+      *pos += tmpLen;
+    }
+
+
+    walk = walk->next;
+    if ( walk != NULL ) {
+      check_buf_size(buf, bufSize, pos, 1);
+      snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", ",");
+      *pos = *pos + 1;
+    }
+  }
+
+  check_buf_size(buf, bufSize, pos, 1);
+  snprintf(&(*buf)[*pos], (*bufSize-*pos), "%s", "]");
+  *pos = *pos + 1;
+
+  if ( vec_e != NULL ) {
+    free_expression(vec_e);
+    free(vec_e);
+  }
+
+  return 0;
+}
+
 int print_vector(
   vector_t *vec,
   EXPRESSION_PARAMS())

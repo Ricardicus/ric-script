@@ -18,5 +18,6 @@
 #include "eval.h"
 
 int ric_json_load(LIBRARY_PARAMS());
+int ric_json_convert(LIBRARY_PARAMS());
 
 #endif

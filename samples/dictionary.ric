@@ -51,4 +51,10 @@ print(keys(d["a"]))
 	print(s[key])
 }
 
-print({"a": "b", "c": ["d", "e", "f", {"g": "h"}]})
+s = {"a": "b", "c": ["d", "e", "f", {"g": "h"}]}
+print(s)
+
+# Convert dictionary to string
+s_res = jsonConvert(s)
+print(s_res + " (" + typeInText(s_res) + ")")
+

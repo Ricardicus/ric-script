@@ -29,7 +29,9 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("list", 1, ric_create_list),
   DECLARE_LIB_FUNCTION("data", 1, ric_create_data),
   DECLARE_LIB_FUNCTION("text", 1, ric_create_text),
+  // libjson
   DECLARE_LIB_FUNCTION("jsonLoad", 1, ric_json_load),
+  DECLARE_LIB_FUNCTION("jsonConvert", 1, ric_json_convert),
   // libstring
   DECLARE_LIB_FUNCTION("parseInt", 1, ric_atoi),
   DECLARE_LIB_FUNCTION("split", 2, ric_split),

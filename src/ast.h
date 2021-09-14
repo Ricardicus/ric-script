@@ -316,6 +316,7 @@ typedef struct entity_eval {
 
 void* ast_emalloc(size_t size);
 void* ast_ecalloc(size_t size);
+void* ast_remalloc(void *mem, size_t size);
 
 expr_t* newExpr_Text(char *text);
 expr_t* newExpr_Ival(int val);

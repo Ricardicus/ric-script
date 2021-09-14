@@ -54,6 +54,12 @@ int  print_vector(
   vector_t *vec,
   EXPRESSION_PARAMS()
 );
+int snprint_vector(
+  char **buf,
+  size_t *bufSize,
+  size_t *pos,
+  vector_t *vec,
+  EXPRESSION_PARAMS());
 void free_vector(vector_t *vec);
 
 expr_t*  copy_vector(
@@ -61,8 +67,16 @@ expr_t*  copy_vector(
   EXPRESSION_PARAMS()
 );
 
+void check_buf_size(char **buf,
+  size_t *bufSize, size_t *pos, size_t require);
 
 int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS());
+int snprint_dictionary(
+  char **buf,
+  size_t *bufSize,
+  size_t *pos,
+  dictionary_t *dict,
+  EXPRESSION_PARAMS());
 void setup_namespaces(PROVIDE_CONTEXT_ARGS());
 void close_namespaces(PROVIDE_CONTEXT_ARGS());
 void flush_arguments(hashtable_t *args);

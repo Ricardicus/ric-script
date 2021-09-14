@@ -162,6 +162,47 @@ static void loadCJSON(cJSON *json, int depth,
 
 }
 
+int ric_json_convert(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  dictionary_t *argDict = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  int dummy;
+  heapval_t *hpv = NULL;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  char *resultBuf = NULL;
+  size_t resultSize = 0;
+  size_t resultEndPos = 0;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case DICTTYPE:
+    argDict = stv.dict;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string or file.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
+    argDict, EXPRESSION_ARGS());
+
+  stv.type = TEXT;
+  stv.t = resultBuf;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
 int ric_json_load(LIBRARY_PARAMS())
 {
   stackval_t stv;

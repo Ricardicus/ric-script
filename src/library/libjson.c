@@ -194,13 +194,13 @@ int ric_json_convert(LIBRARY_PARAMS())
     break;
   }
 
+  /* Convert the object into a JSON formatted string */
   if ( argDict != NULL ) {
-
     snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
     argDict, EXPRESSION_ARGS());
-
   } else if ( argClass != NULL ) {
     dictionary_t tmpDict;
+
     tmpDict.initialized = 1;
     tmpDict.hash = argClass->varMembers;
     tmpDict.keyVals = NULL;
@@ -215,7 +215,6 @@ int ric_json_convert(LIBRARY_PARAMS())
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
   PUSH_STRING(stv.t, sp, sc);
-
   return 0;
 }
 
@@ -269,7 +268,7 @@ int ric_json_load(LIBRARY_PARAMS())
     return 0;
   }
   
-  /* Print the cJSON object */
+  /* Convert the cJSON object */
   result = NULL;
   loadCJSON(json, 0, &result, EXPRESSION_ARGS());
 

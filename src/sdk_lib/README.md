@@ -4,6 +4,15 @@ Using this project, one can create shared libraries
 that can be dynamically included in the language to
 extend the language power and capability.
 
+## Making your own library functions
+
+There is support for compiling your own code and integrating it in the ric-script interpreter. On Windows this is done with .dll files, on Linux .so and on iOSX .dylib.
+
+Study the example code there. Study in particual 'ext_lib.c'. This is a Meson project that can be built like this:
+
+```BASH
+meson builddir && cd builddir && ninja
+```
 ## How it is done
 
 Study the example translation unit 'ext_lib.c'.

@@ -992,8 +992,11 @@ void free_keyvals(dictionary_t *dict) {
         free(arg);
       }
       free(kv->val->vec);
+    } else if ( kv->val->type == EXPR_TYPE_TEXT ) {
+      free(kv->val->text);
     }
 
+    free(kv->key->text);
     free(kv->val);
     free(kv->key);
 

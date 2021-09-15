@@ -58,3 +58,7 @@ print(s)
 s_res = jsonConvert(s)
 print(s_res + " (" + typeInText(s_res) + ")")
 
+# Back to a dictionary
+d = jsonLoad(s_res)
+print(d)
+

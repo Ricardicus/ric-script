@@ -49,6 +49,16 @@ void mark (
         mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
       } else if ( hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized ) {
         mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
+      } else if ( hv->sv.type == VECTORTYPE ) {
+        vector_t *vec = hv->sv.vec;
+        argsList_t *args = vec->content;
+        while ( args != NULL ) {
+          expr_t *e = args->arg;
+          if ( e->type == EXPR_TYPE_DICT && e->dict->type == RIC_DICTIONARY_DYN ) {
+            mark(e->dict->hash, markVal, EXPRESSION_ARGS());
+          }
+          args = args->next;
+        }
       }
 
       ++i;
@@ -77,6 +87,16 @@ void mark (
       mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
     } else if ( hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized ) {
       mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
+    } else if ( hv->sv.type == VECTORTYPE ) {
+      vector_t *vec = hv->sv.vec;
+      argsList_t *args = vec->content;
+      while ( args != NULL ) {
+        expr_t *e = args->arg;
+        if ( e->type == EXPR_TYPE_DICT && e->dict->type == RIC_DICTIONARY_DYN ) {
+          mark(e->dict->hash, markVal, EXPRESSION_ARGS());
+        }
+        args = args->next;
+      }
     }
     ++i;
   }

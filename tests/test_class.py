@@ -12,7 +12,7 @@ def test_class_print():
 "Wanting to set 'a' to: 100",
 "100",
 "100",
-"{'a' : 100}"
+'{"a" : 100}'
 ]
 
   lib_script = callSample('class.ric')

@@ -4551,7 +4551,7 @@ int snprint_dictionary(
         continue;
       }
 
-      snprintf(tmpBuf, sizeof(tmpBuf), "%s'%s' : ", (i == 0 ? "" : ", "), expKey->text);
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s\"%s\" : ", (i == 0 ? "" : ", "), expKey->text);
       tmpLen = strlen(tmpBuf);
 
       check_buf_size(buf, bufSize, pos, tmpLen);
@@ -4575,7 +4575,7 @@ int snprint_dictionary(
         }
         break;
         case TEXT: {
-          snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", sv.t);
+          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
           tmpLen = strlen(tmpBuf);
         }
         break;
@@ -4658,7 +4658,7 @@ int snprint_dictionary(
         continue;
       }
 
-      snprintf(tmpBuf, sizeof(tmpBuf), "%s'%s' : ", (keyCount > 0 ? ", " : ""), ptr->key);
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s\"%s\" : ", (keyCount > 0 ? ", " : ""), ptr->key);
       tmpLen = strlen(tmpBuf);
 
       check_buf_size(buf, bufSize, pos, tmpLen);
@@ -4682,7 +4682,7 @@ int snprint_dictionary(
         }
         break;
         case TEXT: {
-          snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", sv.t);
+          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
           tmpLen = strlen(tmpBuf);
         }
         break;
@@ -4787,7 +4787,7 @@ int snprint_vector(
     }
     case TEXT:
     {
-      snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", sv.t);
+      snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
       tmpLen = strlen(tmpBuf);
       break;
     }

@@ -695,6 +695,7 @@ aims to take in the future:
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).
 - [ ] Bigger standard library, more battery power (for reference, see: [src/library](https://github.com/Ricardicus/ric-script/blob/master/src/library))
+- [ ] Support for huge integers (powered by https://gmplib.org/)
 
 # Interactive prompt
 

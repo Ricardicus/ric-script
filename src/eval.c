@@ -1718,9 +1718,9 @@ Please report back to me.\n\
           leftStr = svLeft.t;
           break;
         }
-        case VECTORTYPE: {
+        case VECTORTYPE:
+        case BIGINT:
           break;
-        }
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
@@ -1745,9 +1745,9 @@ Please report back to me.\n\
           rightStr = svRight.t;
           break;
         }
-        case VECTORTYPE: {
+        case VECTORTYPE:
+        case BIGINT:
           break;
-        }
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
@@ -1762,6 +1762,21 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 * *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 * *r1, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
+        PUSH_BIGINT(n, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == INT32TYPE ) {
         heapval_t *hpv;
         stackval_t stv;

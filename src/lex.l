@@ -28,7 +28,12 @@ RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\{}]
 }
 
 {DIGIT_VAL}+ {
-	yylval.val_int = atoi(yytext);
+  memset(yylval.id,0,sizeof(yylval.id));
+  memcpy(
+    yylval.id, yytext,
+    sizeof(yylval.id) > strlen(yytext) ?
+    strlen(yytext) : sizeof(yylval.id)
+  );
 	return DIGIT;
 }
 {FLOAT_VAL} {

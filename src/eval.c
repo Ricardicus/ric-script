@@ -63,6 +63,10 @@ void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
       PUSH_RAWDATA(sv.rawdata, sp, sc);
       break;
     }
+    case BIGINT: {
+      PUSH_BIGINT(sv.bigInt, sp, sc);
+      break;
+    }
     default:
       fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
@@ -102,6 +106,9 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
       break;
     case RAWDATATYPE:
       PUSH_RAWDATA(hv->sv.rawdata, sp, sc);
+      break;
+    case BIGINT:
+      PUSH_BIGINT(hv->sv.bigInt, sp, sc);
       break;
     case TEXT: {
       PUSH_STRING(hv->sv.t, sp, sc);
@@ -241,6 +248,9 @@ expr_t* stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
   break;
   case LIBFUNCPTRTYPE:
   newExp = newExpr_LibFuncPtr(sv->libfunc);
+  break;
+  case BIGINT:
+  newExp = newExpr_BigInt(sv->bigInt);
   break;
   case VECTORTYPE: {
   newExp = copy_vector(sv->vec, EXPRESSION_ARGS());
@@ -586,6 +596,9 @@ expr_t*  copy_vector(
         newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
         break;
       }
+      case BIGINT:
+        newExp = newExpr_BigInt(sv.bigInt);
+        break;
       default:
         printf("%s.error: unknown type of value on the stack (%d)\n", 
           __func__, sv.type);
@@ -669,6 +682,9 @@ expr_t*  copy_vector(
         newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
         break;
       }
+      case BIGINT:
+        newExp = newExpr_BigInt(sv.bigInt);
+        break;
       default:
         printf("%s.error: unknown type of value on the stack (%d)\n", 
           __func__, sv.type);
@@ -753,6 +769,9 @@ void evaluate_expression(
               break;
             case EXPR_TYPE_DICT:
               PUSH_DICTIONARY(expArg->dict, sp, sc);
+              break;
+            case EXPR_TYPE_BIGINT:
+              PUSH_BIGINT(expArg->bigInt, sp, sc);
               break;
             case EXPR_TYPE_TEXT:
             {
@@ -872,6 +891,9 @@ Please report back to me.\n\
     break;
     case EXPR_TYPE_LIBFUNCPTR:
     PUSH_LIBFUNCPTR(expr->func, sp, sc);
+    break;
+    case EXPR_TYPE_BIGINT:
+    PUSH_BIGINT(expr->bigInt, sp, sc);
     break;
     case EXPR_TYPE_VECTOR:
     PUSH_VECTOR(expr->vec, sp, sc);
@@ -1065,6 +1087,10 @@ Please report back to me.\n\
             }
             case TIMETYPE: {
               PUSH_TIME(sv.time, sp, sc);
+              break;
+            }
+            case BIGINT: {
+              PUSH_BIGINT(sv.bigInt, sp, sc);
               break;
             }
             case RAWDATATYPE: {
@@ -2271,6 +2297,10 @@ void call_func(
                 newArg = newExpr_Time(sv.time);
                 break;
               }
+              case BIGINT: {
+                newArg = newExpr_BigInt(sv.bigInt);
+                break;
+              }
               case LIBFUNCPTRTYPE: {
                 newArg = newExpr_LibFuncPtr(sv.libfunc);
                 break;
@@ -3019,6 +3049,9 @@ void interpret_statements_(
               case DOUBLETYPE:
                 newExp = newExpr_Float(sv.d);
                 break;
+              case BIGINT:
+                newExp = newExpr_BigInt(sv.bigInt);
+                break;
               case TEXT:
                 newExp = newExpr_Text(sv.t);
                 break;
@@ -3149,6 +3182,10 @@ void interpret_statements_(
         case INT32TYPE:
           /* Pushing the return value as an int */
           PUSH_INT(sv.i, sp, sc);
+          break;
+        case BIGINT:
+          /* Pushing the return value as an int */
+          PUSH_BIGINT(sv.bigInt, sp, sc);
           break;
         case TIMETYPE:
           /* Pushing the return value as an int */
@@ -3639,6 +3676,14 @@ void interpret_statements_(
                   printf("%lf\n", sv.d);
                 }
                 break;
+                case BIGINT: {
+                  char buf[128];
+                  char *c = NULL;
+
+                  c = mpz_get_str(buf, 10, *sv.bigInt);
+                  printf("%s\n", c);
+                }
+                break;
                 default:
                 break;
               }
@@ -3687,6 +3732,14 @@ void interpret_statements_(
                   break;
                   case DOUBLETYPE:
                   printf("%lf\n", sv.d);
+                  break;
+                  case BIGINT: {
+                    char buf[128];
+                    char *c = NULL;
+
+                    c = mpz_get_str(buf, 10, *sv.bigInt);
+                    printf("%s\n", c);
+                  }
                   break;
                   default:
                   break;
@@ -3888,6 +3941,14 @@ void print_expr(expr_t *expr)
     break;
     case EXPR_TYPE_TIME:
     printf("TIME");
+    break;
+    case EXPR_TYPE_BIGINT: {
+      char buf[128];
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *expr->bigInt);
+      printf("%s\n", c);
+    }
     break;
     case EXPR_TYPE_IVAL:
     printf("%d", expr->ival);
@@ -4185,39 +4246,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             evaluate_expression(decl->val, EXPRESSION_ARGS());
             POP_VAL(&sv, sp, sc);
 
-            switch (sv.type) {
-            case INT32TYPE:
-              newExp = newExpr_Ival(sv.i);
-              break;
-            case DOUBLETYPE:
-              newExp = newExpr_Float(sv.d);
-              break;
-            case TEXT:
-              newExp = newExpr_Text(sv.t);
-              break;
-            case TIMETYPE:
-              newExp = newExpr_Time(sv.time);
-              break;
-            case POINTERTYPE:
-              newExp = newExpr_Pointer(sv.p);
-              break;
-            case FUNCPTRTYPE:
-              newExp = newExpr_FuncPtr(sv.func);
-              break;
-            case LIBFUNCPTRTYPE:
-              newExp = newExpr_LibFuncPtr(sv.libfunc);
-              break;
-            case VECTORTYPE: {
-              newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-              break;
-            }
-            default:
-              printf("%s.error: unknown type of value on the stack (%d)\n", 
-                __func__, sv.type);
-              GENERAL_REPORT_ISSUE_MSG();
-              break;
-            }
-
+            newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
             *expToSet = newExp;
           }
           break;
@@ -4374,6 +4403,14 @@ int print_dictionary(dictionary_t *dict,
           printf("%" PRIi32 "", sv.i);
         }
         break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          printf("%s\n", c);
+        }
+        break;
         case DOUBLETYPE: {
           printf("%lf", sv.d);
         }
@@ -4454,6 +4491,14 @@ int print_dictionary(dictionary_t *dict,
         break;
         case DOUBLETYPE: {
           printf("%lf", sv.d);
+        }
+        break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          printf("%s\n", c);
         }
         break;
         case TEXT: {
@@ -4569,6 +4614,14 @@ int snprint_dictionary(
           tmpLen = strlen(tmpBuf);
         }
         break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+        }
+        break;
         case DOUBLETYPE: {
           snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
           tmpLen = strlen(tmpBuf);
@@ -4676,6 +4729,14 @@ int snprint_dictionary(
           tmpLen = strlen(tmpBuf);
         }
         break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+        }
+        break;
         case DOUBLETYPE: {
           snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
           tmpLen = strlen(tmpBuf);
@@ -4779,6 +4840,14 @@ int snprint_vector(
       tmpLen = strlen(tmpBuf);
       break;
     }
+    case BIGINT: {
+      char buf[128];
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *sv.bigInt);
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+    }
+    break;
     case DOUBLETYPE:
     {
       snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
@@ -4882,6 +4951,14 @@ int print_vector(
     case INT32TYPE:
       printf("%" PRIi32 "", sv.i);
       break;
+    case BIGINT: {
+      char buf[128];
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *sv.bigInt);
+      printf("%s", c);
+    }
+    break;
     case DOUBLETYPE:
       printf("%lf", sv.d);
       break;
@@ -5571,6 +5648,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       case LIBFUNCPTRTYPE:
       case FUNCPTRTYPE:
       case TIMETYPE:
+      case BIGINT:
         ALLOC_HEAP(&sv, hp, &hvp, &dummy);
         break;
       case VECTORTYPE: {
@@ -5653,6 +5731,7 @@ dictionary_t* allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case LIBFUNCPTRTYPE:
         case FUNCPTRTYPE:
         case TIMETYPE:
+        case BIGINT:
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           break;
         case VECTORTYPE: {

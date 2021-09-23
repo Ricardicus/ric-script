@@ -409,6 +409,14 @@ int ric_print(LIBRARY_PARAMS())
       printf("\n");
     }
     break;
+    case BIGINT: {
+      char buf[128];
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *stv.bigInt);
+      printf("%s\n", c);
+    }
+    break;
     case INT32TYPE:
     printf("%d\n", stv.i);
     break;
@@ -543,6 +551,14 @@ int ric_printf(LIBRARY_PARAMS())
     break;
     case INT32TYPE:
     printf("%d", stv.i);
+    break;
+    case BIGINT: {
+      char buf[128];
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *stv.bigInt);
+      printf("%s", c);
+    }
     break;
     case CLASSTYPE:
     {

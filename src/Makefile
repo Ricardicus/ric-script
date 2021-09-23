@@ -43,7 +43,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libtime \
 	$(LIB_DIR)/libnet \
 	$(LIB_DIR)/libctx \
-	$(LIB_DIR)/libjson
+	$(LIB_DIR)/libjson \
+	$(LIB_DIR)/libbigint
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -70,9 +71,9 @@ CFLAGS = Wall \
 .PHONY: lex yacc test
 
 EXTERNAL_INCS = $(addprefix external/, \
-	cjson-1.7.14)
+	cjson-1.7.14 mini-gmp-6.2.1)
 EXTERNAL_SRCS = $(addprefix external/, \
-	cjson-1.7.14/cJSON.c)
+	cjson-1.7.14/cJSON.c mini-gmp-6.2.1/mini-gmp.c)
 
 RULES = $(RIC_OBJS:.o=.d)
 

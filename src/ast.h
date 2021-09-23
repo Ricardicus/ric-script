@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <time.h>
 
+/* the big integers library, mini-gmp */
+#include <mini-gmp.h>
+
 #include "hashtable.h"
 
 #ifndef BIT
@@ -45,6 +48,7 @@
 #define EXPR_TYPE_RAWDATA        23
 #define EXPR_TYPE_LOGICAL        24
 #define EXPR_TYPE_INDEXER        25
+#define EXPR_TYPE_BIGINT         26
 
 #define LANG_ENTITY_DECL         1
 #define LANG_ENTITY_ARGS         2
@@ -221,6 +225,7 @@ typedef struct expr_s {
     rawdata_t     *rawdata;
     logical_t     *logical;
     indexer_t     *indexer;
+    mpz_t         *bigInt;
   };
 } expr_t;
 
@@ -344,6 +349,9 @@ expr_t* newExpr_VectorIndex(expr_t *id, expr_t *index);
 expr_t* newExpr_Copy(expr_t *exp);
 expr_t* newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr);
 expr_t* newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset);
+expr_t* newExpr_BigIntFromStr(const char *intStr);
+expr_t* newExpr_BigIntFromInt(intptr_t val);
+expr_t* newExpr_BigInt(mpz_t *n);
 
 expr_t*         newConditional(int type, expr_t *left, expr_t *right);
 declaration_t*  newDeclaration(expr_t *id, expr_t *exp);
@@ -377,7 +385,8 @@ typedef enum stackvaltypes {
   CLASSTYPE,
   TIMETYPE,
   RAWDATATYPE,
-  INDEXER
+  INDEXER,
+  BIGINT
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -395,6 +404,7 @@ typedef struct stackval {
     time_t time;
     rawdata_t *rawdata;
     indexer_t *indexer;
+    mpz_t *bigInt;
   };
 } stackval_t;
 
@@ -586,6 +596,21 @@ GENERAL_ERROR_ISSUE_URL);\
 }\
 stackval.type = TEXT;\
 stackval.t = a;\
+**((stackval_t**) sp) = stackval;\
+*((stackval_t**) sp) += 1;\
+*sc = *sc + 1;\
+} while (0)
+#define PUSH_BIGINT(a, sp, sc) do {\
+stackval_t stackval;\
+if ( *sc >= RIC_STACKSIZE ) {\
+  fprintf(stderr, "Error: Intepreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n",\
+GENERAL_ERROR_ISSUE_URL);\
+  exit(1);\
+}\
+stackval.type = BIGINT;\
+stackval.bigInt = a;\
 **((stackval_t**) sp) = stackval;\
 *((stackval_t**) sp) += 1;\
 *sc = *sc + 1;\

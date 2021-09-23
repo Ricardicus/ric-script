@@ -133,6 +133,9 @@ static void sweep (
             free_keyvals(((heapval_t*) hp)[i].sv.dict);
           }
           free(heap[i].sv.dict);
+        } else if ( heap[i].sv.type == BIGINT ) {
+          mpz_clear(*heap[i].sv.bigInt);
+          free(heap[i].sv.bigInt);
         } else if ( heap[i].sv.type == RAWDATATYPE ) {
           free(heap[i].sv.rawdata->data);
           free(heap[i].sv.rawdata);

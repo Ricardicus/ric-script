@@ -4,10 +4,14 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *stringArg = NULL;
   int32_t intArg = 0;
+  int dummy = 0;
   expr_t *e = NULL;
   mpz_t *n = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
+  void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
+  stackval_t sv;
+  heapval_t *hvp = NULL;
 
   POP_VAL(&stv, sp, sc);
 
@@ -36,6 +40,8 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
     free(e);
   }
   
+  ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+
   /* Pushing the parsed value */
   PUSH_BIGINT(n, sp, sc);
 

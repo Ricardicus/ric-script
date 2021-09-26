@@ -1404,6 +1404,7 @@ Please report back to me.\n\
         case VECTORTYPE:
         case POINTERTYPE:
         case TIMETYPE:
+        case BIGINT:
           break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
@@ -1429,6 +1430,7 @@ Please report back to me.\n\
         case VECTORTYPE:
         case POINTERTYPE:
         case TIMETYPE:
+        case BIGINT:
           break;
         default:
           fprintf(stderr, "error %s.%d: Unexpected stackval_t type: %d\n",
@@ -1445,6 +1447,51 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 + *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 + *r1, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+        expr_t *e = newExpr_BigIntFromInt(0);
+        stackval_t sv;
+        int dummy;
+        heapval_t *hvp;
+
+        sv.type = BIGINT;
+        sv.bigInt = e->bigInt;
+
+        mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_BIGINT(sv.bigInt, sp, sc);
+
+        free(e);
+      } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+        expr_t *e = newExpr_BigIntFromInt(svLeft.i);
+        stackval_t sv;
+        int dummy;
+        heapval_t *hvp;
+
+        sv.type = BIGINT;
+        sv.bigInt = e->bigInt;
+
+        mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_BIGINT(sv.bigInt, sp, sc);
+
+        free(e);
+      } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+        expr_t *e = newExpr_BigIntFromInt(svRight.i);
+        stackval_t sv;
+        int dummy;
+        heapval_t *hvp;
+
+        sv.type = BIGINT;
+        sv.bigInt = e->bigInt;
+
+        mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_BIGINT(sv.bigInt, sp, sc);
+
+        free(e);
       } else if ( svLeft.type == TIMETYPE && svRight.type == TIMETYPE ) {
         PUSH_DOUBLE(svLeft.time + svRight.time, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
@@ -1763,19 +1810,48 @@ Please report back to me.\n\
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 * *r1, sp, sc);
       } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
         PUSH_BIGINT(n, sp, sc);
       } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
         PUSH_BIGINT(n, sp, sc);
       } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
         PUSH_BIGINT(n, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == INT32TYPE ) {
         heapval_t *hpv;
@@ -2926,6 +3002,10 @@ void interpret_statements_(
             expr_t *e = newExpr_RawData(sv.rawdata->size);
             memcpy(e->rawdata->data, sv.rawdata->data, sv.rawdata->size);
             sv.rawdata = e->rawdata;
+            free(e);
+          } else if ( sv.type == BIGINT ) {
+            expr_t *e = newExpr_BigInt(sv.bigInt);
+            sv.bigInt = e->bigInt;
             free(e);
           }
 

@@ -38,7 +38,9 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
     n = e->bigInt;
     free(e);
   }
-  
+
+  stv.type = BIGINT;
+  stv.bigInt = n;
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
   /* Pushing the parsed value */

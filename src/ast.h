@@ -771,7 +771,7 @@ if ( upd != NULL ) {\
 hv.sv = *a;\
 if ( hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || \
      hv.sv.type == DICTTYPE || hv.sv.type == CLASSTYPE ||\
-     hv.sv.type == RAWDATATYPE ) {\
+     hv.sv.type == RAWDATATYPE || hv.sv.type == BIGINT ) {\
   hv.toFree = true;\
 } else {\
   hv.toFree = false;\

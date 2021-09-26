@@ -505,6 +505,10 @@ expr_t* newExpr_Copy(expr_t *expr) {
     newExp = newExpr_ID(expr->id.id);
     break;
   }
+  case EXPR_TYPE_BIGINT: {
+    newExp = newExpr_BigInt(expr->bigInt);
+    break;
+  }
   case EXPR_TYPE_FVAL:
     newExp = newExpr_Ival(expr->fval);
     break;
@@ -703,6 +707,11 @@ void free_expression(expr_t *expr) {
   switch (expr->type) {
   case EXPR_TYPE_ID: {
     free(expr->id.id);
+    break;
+  }
+  case EXPR_TYPE_BIGINT: {
+    mpz_clear(*expr->bigInt);
+    free(expr->bigInt);
     break;
   }
   case EXPR_TYPE_LOGICAL: {

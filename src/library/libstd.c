@@ -410,7 +410,7 @@ int ric_print(LIBRARY_PARAMS())
     }
     break;
     case BIGINT: {
-      char *buf = ast_ecalloc(1024);
+      char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
       char *c = NULL;
 
       c = mpz_get_str(buf, 10, *stv.bigInt);
@@ -555,11 +555,13 @@ int ric_printf(LIBRARY_PARAMS())
     printf("%d", stv.i);
     break;
     case BIGINT: {
-      char buf[128];
+      char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
       char *c = NULL;
 
       c = mpz_get_str(buf, 10, *stv.bigInt);
       printf("%s", c);
+
+      free(buf);
     }
     break;
     case CLASSTYPE:

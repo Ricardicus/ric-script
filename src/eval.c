@@ -1608,6 +1608,58 @@ Please report back to me.\n\
         }
 
         PUSH_STRING(sv.t, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == TEXT ) {
+        size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len+1);
+        char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
+        char *bigIntStr = NULL;
+
+        bigIntStr = mpz_get_str(bigIntBuf, 10, *svLeft.bigInt);
+
+        snprintf(newText, len+1, "%s%s", bigIntStr, svRight.t);
+
+        free(bigIntBuf);
+
+        sv.type = TEXT;
+        sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if ( svLeft.type == TEXT && svRight.type == BIGINT ) {
+        size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svLeft.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len+1);
+        char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
+        char *bigIntStr = NULL;
+
+        bigIntStr = mpz_get_str(bigIntBuf, 10, *svRight.bigInt);
+
+        snprintf(newText, len+1, "%s%s", svLeft.t, bigIntStr);
+
+        free(bigIntBuf);
+
+        sv.type = TEXT;
+        sv.t = newText;
+  
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if ( !heapUpdated ) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
       } else if ( svLeft.type == TEXT && svRight.type == POINTERTYPE ) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;

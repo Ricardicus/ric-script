@@ -295,6 +295,7 @@ int ric_abs(LIBRARY_PARAMS())
   stackval_t stv;
   double arg1 = 1;
   double result = 0;
+  mpz_t *arg1BigInt = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -308,12 +309,34 @@ int ric_abs(LIBRARY_PARAMS())
     case DOUBLETYPE:
     arg1 = stv.d;
     break;
+    case BIGINT:
+    arg1BigInt = stv.bigInt;
+    break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
         LIBRARY_FUNC_NAME());
       return 1;
     }
     break;
+  }
+
+  if ( arg1BigInt ) {
+    /* Big integer absolute value */
+    stackval_t stv;
+    void *hp = PROVIDE_CONTEXT()->hp;
+    heapval_t *hpv = NULL;
+    int dummy;
+
+    mpz_t *n = ast_emalloc(sizeof(mpz_t));
+    mpz_init(*n);
+    mpz_abs(*n, *arg1BigInt);
+
+    stv.type = BIGINT;
+    stv.bigInt = n;
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+    PUSH_BIGINT(n, sp, sc);
+    return 0;
   }
 
   result = fabs(arg1);

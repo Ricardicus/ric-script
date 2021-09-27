@@ -1696,6 +1696,7 @@ Please report back to me.\n\
           break;
         }
         case TIMETYPE:
+        case BIGINT:
         break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
@@ -1718,6 +1719,7 @@ Please report back to me.\n\
           break;
         }
         case TIMETYPE:
+        case BIGINT:
         break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
@@ -1735,7 +1737,58 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 - *r1, sp, sc);
       } else if ( svLeft.type == TIMETYPE && svRight.type == TIMETYPE ) {
         PUSH_TIME(svLeft.time - svRight.time, sp, sc);
-      }
+      } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_sub(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
+
+        mpz_sub(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
+
+        mpz_sub(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } 
 
       break;
     }
@@ -2018,6 +2071,8 @@ Please report back to me.\n\
           exit(1);
           break;
         }
+        case BIGINT:
+        break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
@@ -2039,6 +2094,8 @@ Please report back to me.\n\
           exit(1);
           break;
         }
+        case BIGINT:
+        break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
@@ -2047,6 +2104,57 @@ Please report back to me.\n\
 
       if ( svLeft.type == INT32TYPE && svRight.type == INT32TYPE ) {
         PUSH_INT(*r0 % *r1, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mod(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
+
+        mpz_mod(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
+
+        mpz_mod(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
       }
 
       break;
@@ -2077,6 +2185,8 @@ Please report back to me.\n\
           exit(1);
           break;
         }
+        case BIGINT:
+        break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
@@ -2097,6 +2207,8 @@ Please report back to me.\n\
           exit(1);
           break;
         }
+        case BIGINT:
+        break;
         default:
           fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
@@ -2111,6 +2223,57 @@ Please report back to me.\n\
         PUSH_DOUBLE(*f0 / *f1, sp, sc);
       } else if ( svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE ) {
         PUSH_DOUBLE(*f0 / *r1, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_fdiv_q(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
+
+        mpz_fdiv_q(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
+
+        mpz_fdiv_q(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
       }
 
       break;

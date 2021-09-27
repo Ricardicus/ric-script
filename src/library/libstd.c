@@ -410,11 +410,13 @@ int ric_print(LIBRARY_PARAMS())
     }
     break;
     case BIGINT: {
-      char buf[128];
+      char *buf = ast_ecalloc(1024);
       char *c = NULL;
 
       c = mpz_get_str(buf, 10, *stv.bigInt);
       printf("%s\n", c);
+
+      free(buf);
     }
     break;
     case INT32TYPE:

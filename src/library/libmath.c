@@ -6,6 +6,7 @@ int ric_power(LIBRARY_PARAMS())
   double arg1 = 1;
   double arg2 = 1;
   double result = 0;
+  mpz_t *arg1BigInt = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -18,6 +19,9 @@ int ric_power(LIBRARY_PARAMS())
     break;
     case DOUBLETYPE:
     arg1 = stv.d;
+    break;
+    case BIGINT:
+    arg1BigInt = stv.bigInt;
     break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
@@ -43,6 +47,32 @@ int ric_power(LIBRARY_PARAMS())
       return 1;
     }
     break;
+  }
+
+  if ( arg1BigInt != NULL ) {
+    /* Calculate big integer */
+    int32_t expontent = (double) arg2;
+    stackval_t stv;
+    void *hp = PROVIDE_CONTEXT()->hp;
+    heapval_t *hpv = NULL;
+    int dummy;
+
+    if ( expontent < 0 ) {
+      fprintf(stderr, "error %s: failed to raise a big int type to a negative expontent\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+
+    mpz_t *n = ast_emalloc(sizeof(mpz_t));
+    mpz_init(*n);
+    mpz_pow_ui(*n, *arg1BigInt, (unsigned long)expontent);
+
+    stv.type = BIGINT;
+    stv.bigInt = n;
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+    PUSH_BIGINT(n, sp, sc);
+    return 0;
   }
 
   result = pow(arg1, arg2);

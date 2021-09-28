@@ -192,6 +192,9 @@ void free_heap(void *hp, void *hbp) {
         } else if ( ((heapval_t*) hp)[i].sv.type == RAWDATATYPE ) {
           free(((heapval_t*) hp)[i].sv.rawdata->data);
           free(((heapval_t*) hp)[i].sv.rawdata);
+        } else if ( ((heapval_t*) hp)[i].sv.type == BIGINT ) {
+          mpz_clear(*((heapval_t*) hp)[i].sv.bigInt);
+          free(((heapval_t*) hp)[i].sv.bigInt);
         } else if ( ((heapval_t*) hp)[i].sv.type == CLASSTYPE ) {
           /* References to initialized classes are unique */
           if ( ((heapval_t*) hp)[i].sv.classObj != NULL ) {

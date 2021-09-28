@@ -55,6 +55,7 @@ int ric_type_text(LIBRARY_PARAMS())
 
   switch (stv.type) {
   case INT32TYPE: snprintf(resultText, strSize, "%s", "i32"); break;
+  case BIGINT: snprintf(resultText, strSize, "%s", "bigInt"); break;
   case DOUBLETYPE: snprintf(resultText, strSize, "%s", "double"); break;
   case TEXT: snprintf(resultText, strSize, "%s", "text"); break;
   case POINTERTYPE: snprintf(resultText, strSize, "%s", "pointer"); break;

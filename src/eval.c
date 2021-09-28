@@ -3,7 +3,7 @@
 
 jmp_buf endingJmpBuf;
 
-#if 0
+
 /* I define and use this function during debugging of the interpreter */
 static void debugPrint(char *format, ...) {
   char buffer[100];
@@ -13,7 +13,7 @@ static void debugPrint(char *format, ...) {
   va_end(args);
   printf("-- DEBUG: %s", buffer);
 }
-#endif
+
 
 void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
   stackval_t sv = *stackval;
@@ -1042,6 +1042,10 @@ Please report back to me.\n\
               }
               break;
             }
+            case BIGINT: {
+              result = (mpz_cmp_si(*sv.bigInt, 0) != 0); 
+              break;
+            }
             case DOUBLETYPE: {
               if ( fabs(sv.d) > 0.00000001 ) {
                 result = 1;
@@ -1068,6 +1072,10 @@ Please report back to me.\n\
               if ( sv.i != 0 ) {
                 tmpResult = 1;
               }
+              break;
+            }
+            case BIGINT: {
+              result = (mpz_cmp_si(*sv.bigInt, 0) != 0); 
               break;
             }
             case DOUBLETYPE: {
@@ -1945,6 +1953,8 @@ Please report back to me.\n\
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
@@ -1963,6 +1973,8 @@ Please report back to me.\n\
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
@@ -2312,6 +2324,8 @@ Please report back to me.\n\
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
@@ -2330,6 +2344,8 @@ Please report back to me.\n\
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
@@ -2431,6 +2447,8 @@ Please report back to me.\n\
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
@@ -2449,6 +2467,8 @@ Please report back to me.\n\
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
@@ -2731,6 +2751,7 @@ void call_func(
               }
               case BIGINT: {
                 newArg = newExpr_BigInt(sv.bigInt);
+                debugPrint("newARg is BIGINT\n");
                 break;
               }
               case LIBFUNCPTRTYPE: {
@@ -5477,6 +5498,7 @@ static void flush_arg(void *key, void *val)
   } else if ( e->type == EXPR_TYPE_BIGINT ) {
     mpz_clear(*e->bigInt);
     free(e->bigInt);
+    debugPrint("FLUSH ARG\n");
   }
 }
 

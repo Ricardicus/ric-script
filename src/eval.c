@@ -3,7 +3,7 @@
 
 jmp_buf endingJmpBuf;
 
-
+#if 0
 /* I define and use this function during debugging of the interpreter */
 static void debugPrint(char *format, ...) {
   char buffer[100];
@@ -13,6 +13,7 @@ static void debugPrint(char *format, ...) {
   va_end(args);
   printf("-- DEBUG: %s", buffer);
 }
+#endif
 
 
 void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
@@ -2751,7 +2752,6 @@ void call_func(
               }
               case BIGINT: {
                 newArg = newExpr_BigInt(sv.bigInt);
-                debugPrint("newARg is BIGINT\n");
                 break;
               }
               case LIBFUNCPTRTYPE: {
@@ -5498,7 +5498,6 @@ static void flush_arg(void *key, void *val)
   } else if ( e->type == EXPR_TYPE_BIGINT ) {
     mpz_clear(*e->bigInt);
     free(e->bigInt);
-    debugPrint("FLUSH ARG\n");
   }
 }
 

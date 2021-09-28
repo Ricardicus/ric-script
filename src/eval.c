@@ -327,6 +327,27 @@ int evaluate_condition(ifCondition_t *cond,
       }
     } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
       *ax = strcmp(svLeft.t, svRight.t) == 0;
+    } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+      if ( cmp == 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+      int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+      if ( cmp == 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+      if ( cmp == 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
     }
     break;
   }
@@ -368,6 +389,27 @@ int evaluate_condition(ifCondition_t *cond,
       }
     } else if ( svLeft.type == TEXT && svRight.type == TEXT ) {
       *ax = !(strcmp(svLeft.t, svRight.t) == 0);
+    } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+      if ( cmp != 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+      int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+      if ( cmp != 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+      if ( cmp != 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
     }
     break;
   }
@@ -403,6 +445,27 @@ int evaluate_condition(ifCondition_t *cond,
       *f1 = (double) svRight.i;
 
       if ( svLeft.d - *f1 < -epsilon || fabs(svLeft.d - *f1) < epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+      if ( cmp <= 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+      int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+      if ( cmp <= 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+      if ( cmp >= 0 ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -446,6 +509,27 @@ int evaluate_condition(ifCondition_t *cond,
       } else {
         *ax = 0;
       }
+    } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+      if ( cmp >= 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+      int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+      if ( cmp >= 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+      if ( cmp <= 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
     }
     break;
   }
@@ -485,6 +569,27 @@ int evaluate_condition(ifCondition_t *cond,
       } else {
         *ax = 0;
       }
+    } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+      if ( cmp > 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+      int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+      if ( cmp > 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+      if ( cmp < 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
     }
     break;
   }
@@ -520,6 +625,27 @@ int evaluate_condition(ifCondition_t *cond,
       *f1 = (double) svRight.i;
 
       if ( svLeft.d - *f1 < -epsilon ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+      if ( cmp < 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == BIGINT && svRight.type == INT32TYPE ) {
+      int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+      if ( cmp < 0 ) {
+        *ax = 1;
+      } else {
+        *ax = 0;
+      }
+    } else if ( svLeft.type == INT32TYPE && svRight.type == BIGINT ) {
+      int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+      if ( cmp > 0 ) {
         *ax = 1;
       } else {
         *ax = 0;
@@ -4085,6 +4211,10 @@ void interpret_statements_(
           case INT32TYPE:
           *ax = (sv.i != 0);
           break;
+          case BIGINT: {
+            *ax = (mpz_cmp_si(*sv.bigInt, 0) != 0);
+            break;
+          }
           default:
           fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
           exit(1);
@@ -5344,6 +5474,9 @@ static void flush_arg(void *key, void *val)
     hashtable_free(class->funcDefs);
     hashtable_free(class->varMembers);
     free(class);
+  } else if ( e->type == EXPR_TYPE_BIGINT ) {
+    mpz_clear(*e->bigInt);
+    free(e->bigInt);
   }
 }
 

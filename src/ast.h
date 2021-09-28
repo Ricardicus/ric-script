@@ -102,7 +102,7 @@
 // garbage collector algorithm (making a list of all active)
 #define RIC_MAX_NBR_VARS     4096
 // Big integers max size (in character width base 10)
-#define RIC_BIG_INT_MAX_SIZE 1024
+#define RIC_BIG_INT_MAX_SIZE 4096
 
 #define GENERAL_ERROR_ISSUE_URL  "https://github.com/Ricardicus/ric-script"
 #define GENERAL_REPORT_ISSUE_MSG() do {\

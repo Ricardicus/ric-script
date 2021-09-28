@@ -55,6 +55,7 @@ int ric_type_text(LIBRARY_PARAMS())
 
   switch (stv.type) {
   case INT32TYPE: snprintf(resultText, strSize, "%s", "i32"); break;
+  case BIGINT: snprintf(resultText, strSize, "%s", "bigInt"); break;
   case DOUBLETYPE: snprintf(resultText, strSize, "%s", "double"); break;
   case TEXT: snprintf(resultText, strSize, "%s", "text"); break;
   case POINTERTYPE: snprintf(resultText, strSize, "%s", "pointer"); break;
@@ -409,6 +410,16 @@ int ric_print(LIBRARY_PARAMS())
       printf("\n");
     }
     break;
+    case BIGINT: {
+      char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *stv.bigInt);
+      printf("%s\n", c);
+
+      free(buf);
+    }
+    break;
     case INT32TYPE:
     printf("%d\n", stv.i);
     break;
@@ -543,6 +554,16 @@ int ric_printf(LIBRARY_PARAMS())
     break;
     case INT32TYPE:
     printf("%d", stv.i);
+    break;
+    case BIGINT: {
+      char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *stv.bigInt);
+      printf("%s", c);
+
+      free(buf);
+    }
     break;
     case CLASSTYPE:
     {

@@ -18,6 +18,7 @@
 #include "libnet.h"
 #include "libctx.h"
 #include "libjson.h"
+#include "libbigint.h"
 
 #define EXPORT_STR(s) XEXPORT_STR(s)
 #define XEXPORT_STR(s) #s

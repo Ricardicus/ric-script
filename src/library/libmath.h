@@ -11,6 +11,9 @@
 
 #include <math.h>
 
+/* the big integers library, mini-gmp */
+#include <mini-gmp.h>
+
 #include "hashtable.h"
 #include "ast.h"
 

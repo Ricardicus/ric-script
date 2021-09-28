@@ -104,6 +104,42 @@ expr_t* newExpr_FuncPtr(void *func) {
   return expr;
 }
 
+expr_t* newExpr_BigIntFromStr(const char *intStr) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  mpz_t *n = ast_emalloc(sizeof(mpz_t));
+
+  mpz_init_set_str(*n, intStr, 10);
+
+  expr->type = EXPR_TYPE_BIGINT;
+  expr->bigInt = n;
+
+  return expr;
+}
+
+expr_t* newExpr_BigIntFromInt(intptr_t val) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  mpz_t *n = ast_emalloc(sizeof(mpz_t));
+
+  mpz_init_set_si(*n, (signed long)val);
+
+  expr->type = EXPR_TYPE_BIGINT;
+  expr->bigInt = n;
+
+  return expr;
+}
+
+expr_t* newExpr_BigInt(mpz_t *n_) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  mpz_t *n = ast_emalloc(sizeof(mpz_t));
+
+  mpz_init_set(*n, *n_);
+
+  expr->type = EXPR_TYPE_BIGINT;
+  expr->bigInt = n;
+
+  return expr; 
+}
+
 expr_t* newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   indexer_t *indexer = ast_emalloc(sizeof(indexer_t));
@@ -469,6 +505,10 @@ expr_t* newExpr_Copy(expr_t *expr) {
     newExp = newExpr_ID(expr->id.id);
     break;
   }
+  case EXPR_TYPE_BIGINT: {
+    newExp = newExpr_BigInt(expr->bigInt);
+    break;
+  }
   case EXPR_TYPE_FVAL:
     newExp = newExpr_Ival(expr->fval);
     break;
@@ -667,6 +707,11 @@ void free_expression(expr_t *expr) {
   switch (expr->type) {
   case EXPR_TYPE_ID: {
     free(expr->id.id);
+    break;
+  }
+  case EXPR_TYPE_BIGINT: {
+    mpz_clear(*expr->bigInt);
+    free(expr->bigInt);
     break;
   }
   case EXPR_TYPE_LOGICAL: {

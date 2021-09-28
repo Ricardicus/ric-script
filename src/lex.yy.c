@@ -754,13 +754,18 @@ case 2:
 YY_RULE_SETUP
 #line 30 "lex.l"
 {
-	yylval.val_int = atoi(yytext);
+  memset(yylval.id,0,sizeof(yylval.id));
+  memcpy(
+    yylval.id, yytext,
+    sizeof(yylval.id) > strlen(yytext) ?
+    strlen(yytext) : sizeof(yylval.id)
+  );
 	return DIGIT;
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 34 "lex.l"
+#line 39 "lex.l"
 {
 	if ( double_citation || simple_citation ) {
 		memset(yylval.id,0,sizeof(yylval.id));
@@ -778,7 +783,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 49 "lex.l"
+#line 54 "lex.l"
 {
 	yylval.id[0] = yytext[0];
 	yylval.id[1] = 0;
@@ -793,14 +798,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 61 "lex.l"
+#line 66 "lex.l"
 {
 	return RETURN;
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 65 "lex.l"
+#line 70 "lex.l"
 {
 	// return spaces only if within a citation
 	if ( double_citation|| simple_citation ) {
@@ -810,7 +815,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 72 "lex.l"
+#line 77 "lex.l"
 {
 	memset(yylval.id,0,sizeof(yylval.id));
 	memcpy(
@@ -824,22 +829,22 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 82 "lex.l"
+#line 87 "lex.l"
 {
 	yylinenor++;
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 86 "lex.l"
+#line 91 "lex.l"
 ;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 88 "lex.l"
+#line 93 "lex.l"
 ECHO;
 	YY_BREAK
-#line 843 "lex.yy.c"
+#line 848 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1844,6 +1849,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 88 "lex.l"
+#line 93 "lex.l"
 
 

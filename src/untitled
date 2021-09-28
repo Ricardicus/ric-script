@@ -1,0 +1,145 @@
+
+
+Missionbox -> försök stryka detta koncept. Tala om kö istället (queue).
+  Task list
+  mission queue
+  Task queue
+
+Slogger -> Arbetsnamn; ska inte stå någonstans ö.h.t. Device eller Remote Memorator
+  Logger
+
+System logger -> förvirrande. Ruttet namn.
+  CAN logger
+
+Syslogger -> Repot heter detta fortfarande. Ruttet namn.
+
+Device -> ospecifikt
+  Device kan vara mobil, eller smartklocka, eller vad som helst.
+
+Remote Memorator
+  framtida produkter är inte nödvändigtvis loggrar (t.ex. omflashning enheter)
+  Specifikt till loggning -> logger, logging unit, logging device
+  Generellt -> ej logger
+
+Configuration -> ( vagt; var mer specifika )
+  worker specification
+
+Worker -> låter som Marx. Bra ord. Utför uppdrag. Finns i SW parallell programmering (concurrency).
+  data processing chain
+  Node, Link, Processor (Process)
+  Filter, Nodes (pipe-related)
+
+MCC -> låter som NASA. Låter lite för ospecifikt. Otydligt.
+
+MC -> stryk, tala om device istället.
+
+mission -> tillför detta något? Det låter brett; men vi använder det specifikt.
+  Task
+
+Daisy chain -> något som är mer länkat till EE
+  pipeline (mer SW-ord)
+  
+Charts ...
+
+meta data -> ta bort
+  sample data
+  sample file
+  signal file
+
+Diskussion
+
+  Övergripande
+
+    Daisy chain
+
+      - kedja
+      - pipe line -> antyder att en uppgift tar slut
+      - stream, flöde
+      - data stream
+      - message/event stream
+      - message/event processer
+      - parallella processer
+      - gemensam kommunikationskanal
+      - multiple pipe lines
+
+    Mission
+      ( download file, activate configuration )
+      - uppdrag
+      - task, OS specifikt ord, Worker->task låter bättre
+      - MCC får inte heta något med Kvaser
+      - Mission låter lite högtravande
+      - [Task låter bra]
+      - Work load
+      - Assignment, hemläxa (x)
+      //- Task > Mission
+
+      //-> Task
+
+      * Låna från moln-begräppsvärlden 
+        ( - Synkronisera; uppdatera version av data
+          samma data på båda sidor om staketet
+          ej given riktning (x) )
+
+    Workers
+      - Gillar det
+      - Knyter an till ordet task
+      - Knyter an till parallell programmering
+      - Task manager gör Tasks, ej Workers
+      - Process (i kedjan)
+      - Node, gör inget; bara i en graf
+      - Processing node
+      - User defined process
+
+    MC
+      - Applikation som körs på enheten, sköter all kommunikation med CC
+      - Underordnad, mottagare
+      - Worker kommunicerar med denna
+      - Device, Unit
+      - Eget namn på mjukvaran
+      - Sköter kommunikationen med Control Center (CC)
+      - En del av firmware
+      - Uppdatera firmware (inkludera MC); uppdatera båda två
+      - Controller
+      - Keeper of the Grail
+      - Manager
+      - Task Manager (Windows laddat, "det svider" - Hashem)
+      - Task Executor
+      - Forsete
+      - Odin
+      - Clippy
+
+      -> Task Manager
+
+    MCC; döp ej om till något med "Kvaser" i.
+      - Kommer göra mer än bara "Missions"
+      - Förknippa ej med "back end" endast
+      - Cloud
+      - Förmedlar inte lagringskapacitet, förmedlare
+      - Broker (MQTT smittat)
+      - Task broker
+      - Remotely
+      - Control Center (Hashem gillar denna, Martin, Daniel, David, Andreas, Angelica)
+      - Platform Monitor
+      - Remote Control (Rickard)
+      - Remote Platform Monitor
+      - Platform
+      - Quest giver
+      - Holy Grail (Rickard)
+      - Balder
+      - HQ
+
+      -> Control Center
+    
+    Configuration
+      -> Worker specification (config.json -> spec.json)
+      - "syslogger" configuration
+      - pipe specification
+      - Remote device configuration
+      -> Configuration (kopplad till Task Manager)
+
+
+Pröva dessa ord på folk utanför denna gruppen
+
+
+
+

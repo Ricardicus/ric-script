@@ -13,6 +13,7 @@ def test_directory_print():
 "threads.ric",
 "dictionary.ric",
 "folder",
+"bigIntegers.ric",
 "time_of_day.ric",
 "conditional.ric",
 "xattr.ric",

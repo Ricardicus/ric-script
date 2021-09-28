@@ -57,3 +57,5 @@ jobs:
       run: valgrind --leak-check=full ./ric samples/data_print.ric
     - name: Run valgrind on JSON test json.ric
       run: valgrind --leak-check=full ./ric samples/json.ric
+    - name: Run valgrind on big integer test
+      run: valgrind --leak-check=full ./ric samples/bigIntegers.ric

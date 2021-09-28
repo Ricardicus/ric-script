@@ -622,7 +622,11 @@ indexer:
 
 mathContentDigit:
     DIGIT {
-        $$ = newExpr_Ival(yyval.val_int);
+      if ( strlen(yyval.id) >= 10 ) {
+        $$ = newExpr_BigIntFromStr(yyval.id);
+      } else {
+        $$ = newExpr_Ival(atoi(yyval.id));
+      }
     };
 
 mathContentDouble:
@@ -657,7 +661,15 @@ stringContents:
         expr_t *e1 = (expr_t*)$1;
         expr_t *d = (expr_t*)$3;
         char buffer[256];
-        snprintf(buffer, sizeof(buffer), "%d", d->ival);
+        if ( d->type == EXPR_TYPE_IVAL ) {
+          snprintf(buffer, sizeof(buffer), "%d", d->ival);
+        } else if ( d->type == EXPR_TYPE_BIGINT ) {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *d->bigInt);
+          snprintf(buffer, sizeof(buffer), "%s", c);
+        }
         expr_t *e2 = newExpr_Text(buffer);
         free($3);
 
@@ -741,8 +753,16 @@ stringEdition:
     }
     | mathContentDigit {
         char buffer[256];
-        expr_t *e = (expr_t*)$1;
-        snprintf(buffer, sizeof(buffer), "%d", e->ival);
+        expr_t *d = (expr_t*)$1;
+        if ( d->type == EXPR_TYPE_IVAL ) {
+          snprintf(buffer, sizeof(buffer), "%d", d->ival);
+        } else if ( d->type == EXPR_TYPE_BIGINT ) {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *d->bigInt);
+          snprintf(buffer, sizeof(buffer), "%s", c);
+        }
         $$ = newExpr_Text(buffer);
         free($1);
     }

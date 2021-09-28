@@ -1,0 +1,72 @@
+# Dealing with large numbers
+s = bigInt("9999999999999")
+print(s)
+
+s = bigInt(2)
+print(s)
+
+s = 231321321321321 + 32323232323232
+print(s)
+
+s = s * 1000000
+print(s)
+
+s = 2 + 32132132132132132
+print(s)
+
+s = 231321321321321 + 2
+print(s)
+
+s = 9999999999999 - 8888888888888
+print(s)
+
+s = s - 9999999999999 
+print(s)
+
+s = 88888888888888 % 77777777777777
+print(s)
+
+s = 6666666666666666 / 3
+print(s)
+
+s = 8888888888888881 / 4
+print(s)
+
+s = pow(bigInt(2), 32)
+print(s)
+s = pow(bigInt(2), 128)
+print(s)
+
+# Ridiculously big numbers
+s = pow(bigInt(81), 100)
+print(s)
+s = pow(bigInt(81), 500)
+print(s)
+s = pow(bigInt(99), 50) * -1
+print(s)
+print(abs(s))
+
+print("Ett stort tal: " + pow(bigInt(81), 1000))
+
+# In conditions
+? [ 9999999999999999999 ] {
+  print("hej")
+}
+
+? [ 9999999999999999999 > 0 ] {
+  print("hejsan")
+}
+
+? [ 9999999999999999999 < 10 ] {
+  print("inget hej")
+}
+
+? [ 10 < 9999999999999999999 ] {
+  print("hej igen")
+}
+
+? [ 9999999999999999999 <= 9999999999999999999 ] {
+  print("hejsan igen")
+}
+
+

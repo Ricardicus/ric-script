@@ -20,6 +20,9 @@ includes = [
   ),
   include_directories(
     join_paths('..', 'external', 'cjson-1.7.14')
+  ),
+  include_directories(
+    join_paths('..', 'external', 'mini-gmp-6.2.1')
   )
 ]
 
@@ -32,8 +35,11 @@ library_sources = [
   join_paths('..','library','libtime.c'),
   join_paths('..','library','libctx.c'),
   join_paths('..','library','libjson.c'),
+  join_paths('..','library','libbigint.c'),
   join_paths('..','external','cjson-1.7.14',
-    'cJSON.c')
+    'cJSON.c'),
+  join_paths('..','external','mini-gmp-6.2.1',
+    'mini-gmp.c')
 ]
 
 # Handling windows NT vs. unix POSIX differences

@@ -69,4 +69,5 @@ print("Ett stort tal: " + pow(bigInt(81), 1000))
   print("hejsan igen")
 }
 
+print(textBase(321321321312, 2))
 

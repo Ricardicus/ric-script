@@ -482,3 +482,96 @@ int ric_random_uniform(LIBRARY_PARAMS())
 
   return 0;
 }
+
+int ric_print_nbr_base(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  int32_t arg1 = 1;
+  int32_t arg2 = 10;
+  mpz_t *arg1BigInt = NULL;
+  expr_t *newText = NULL;
+  heapval_t *hpv = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  int dummy;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    arg1 = (int32_t) stv.i;
+    break;
+    case BIGINT:
+    arg1BigInt = stv.bigInt;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  // Pop arg2
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+    arg2 = (int32_t) stv.i;
+    break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+        LIBRARY_FUNC_NAME());
+      return 1;
+    }
+    break;
+  }
+
+  if ( arg2 < 2 || arg2 > 16 ) {
+    fprintf(stderr, "error: function '%s' only supports bases [2, 16] (%" PRIi32 " given)\n",
+      LIBRARY_FUNC_NAME(), arg2);
+    return 1;
+  }
+
+  if ( arg1BigInt ) {
+    /* Big integer absolute value */
+    char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+    char *c = NULL;
+
+    c = mpz_get_str(buf, (int)arg2, *arg1BigInt);
+
+    newText = newExpr_Text(c);
+
+    free(buf);
+  } else {
+    char base_digits[16] =
+      {'0', '1', '2', '3', '4', '5', '6', '7',
+      '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    char *converted_number = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+    int32_t index=0;
+
+    /* convert to the indicated base */
+    while (arg1 != 0 && index < RIC_BIG_INT_MAX_SIZE) {
+      converted_number[index] = base_digits[arg1 % arg2];
+      arg1 = arg1 / arg2;
+      ++index;
+    }
+
+    newText = newExpr_Text(converted_number);
+    free(converted_number);
+  }
+
+  stv.type = TEXT;
+  stv.t = newText->text;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(newText);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}

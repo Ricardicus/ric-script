@@ -24,7 +24,8 @@ def test_dict_print():
 "hej",
 "hejsan",
 "hej igen",
-"hejsan igen"
+"hejsan igen",
+"100101011010000001111100100001101100000"
 ]
 
   lib_script = callSample('bigIntegers.ric')

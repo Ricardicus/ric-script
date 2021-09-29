@@ -263,6 +263,7 @@ int ric_create_text(LIBRARY_PARAMS())
   vector_t *vec = NULL;
   rawdata_t *rawData = NULL;
   expr_t *newText = NULL;
+  mpz_t *bigIntArg = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -281,6 +282,9 @@ int ric_create_text(LIBRARY_PARAMS())
   case VECTORTYPE:
   vec = stv.vec;
   break;
+  case BIGINT:
+  bigIntArg = stv.bigInt;
+  break;
   case RAWDATATYPE:
   rawData = stv.rawdata;
   break;
@@ -295,6 +299,14 @@ int ric_create_text(LIBRARY_PARAMS())
     newText = newExpr_Text(inText);
   } else if ( rawData != NULL ) {
     newText = newExpr_Text(rawData->data);
+  } else if ( bigIntArg != NULL ) {
+    char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+    char *c = NULL;
+
+    c = mpz_get_str(buf, 10, *stv.bigInt);
+    newText = newExpr_Text(c);
+
+    free(buf);
   } else if ( isInt ) {
     char intCharBuf[100];
     memset(intCharBuf, 0, sizeof(intCharBuf));

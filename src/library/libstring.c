@@ -158,3 +158,100 @@ int ric_char_code(LIBRARY_PARAMS())
 
   return 0;
 }
+
+int ric_to_upper(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  char *string = NULL;
+  expr_t *e = NULL;
+  int dummy;
+  size_t strLen = 0;
+  size_t i = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  heapval_t *hpv = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    string = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  strLen = strlen(string);
+  e = newExpr_Text(string);
+
+  while ( i < strLen ) {
+    e->text[i] = (char)toupper(string[i]);
+    ++i;
+  }
+
+  stv.type = TEXT;
+  stv.t = e->text;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(e);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
+int ric_to_lower(LIBRARY_PARAMS())
+{
+  stackval_t stv;
+  char *string = NULL;
+  expr_t *e = NULL;
+  int dummy;
+  size_t strLen = 0;
+  size_t i = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  heapval_t *hpv = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+    string = stv.t;
+    break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+        LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    break;
+  }
+
+  strLen = strlen(string);
+  e = newExpr_Text(string);
+
+  while ( i < strLen ) {
+    e->text[i] = (char)tolower(string[i]);
+    ++i;
+  }
+
+  stv.type = TEXT;
+  stv.t = e->text;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(e);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+

@@ -9,6 +9,8 @@
 *
 */
 
+#include <ctype.h> 
+
 #include "lib.h"
 #include "hashtable.h"
 #include "ast.h"
@@ -16,5 +18,7 @@
 int ric_atoi(LIBRARY_PARAMS());
 int ric_char_code(LIBRARY_PARAMS());
 int ric_split(LIBRARY_PARAMS());
+int ric_to_upper(LIBRARY_PARAMS());
+int ric_to_lower(LIBRARY_PARAMS());
 
 #endif

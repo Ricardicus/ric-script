@@ -548,7 +548,7 @@ int ric_print_nbr_base(LIBRARY_PARAMS())
   } else {
     char base_digits[16] =
       {'0', '1', '2', '3', '4', '5', '6', '7',
-      '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+      '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     char *converted_number = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
     int32_t index=0;
 

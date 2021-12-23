@@ -32,7 +32,7 @@ i = 0
   }
   socketClose(s)
   sleep(1)
-  i = i + i
+  i += 1
   @
 }
 

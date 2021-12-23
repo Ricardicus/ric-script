@@ -29,7 +29,7 @@ i = 0
     socketWrite(t, in)
     socketClose(t)
   }
-  i = i + 1
+  i += 1
   @
 }
 

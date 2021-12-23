@@ -230,7 +230,7 @@ Here is an example of how you can create a web server in ric-script:
 	    socketWrite(t, in)
 	    socketClose(t)
 	  }
-	  i = i + 1
+	  i += 1
 	  @
 	}
 
@@ -333,7 +333,7 @@ Here is an example of how to set, get and list x-attributes in ric-script:
 	. [ i < len(s) ] {
 	  val = xattrGet(file, s[i])
 	  print("    - '" + s[i] + "': '" + val + "'")
-	  i = i + 1
+	  i += 1
 	  @
 	}
 
@@ -342,7 +342,7 @@ Here is an example of how to set, get and list x-attributes in ric-script:
 	i = 0
 	. [ i < len(s) ] {
 	  print(s[i])
-	  i = i + 1
+	  i += 1
 	  @
 	}
 
@@ -351,7 +351,7 @@ Here is an example of how to set, get and list x-attributes in ric-script:
 	i = 0
 	. [ i < len(s) ] {
 	  xattrRm(file, s[i])
-	  i = i + 1
+	  i += 1
 	  @
 	}
 
@@ -437,7 +437,7 @@ Here is an example of how they can be used, for demonstration:
 	  ? [ a > 10 ] {
 	    -> 1
 	  }
-	  a = a + 1
+	  a += 1
 	}
 
 	@ end () {

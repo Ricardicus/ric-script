@@ -63,7 +63,7 @@
   i = 0
   . [ i < len(num) ] {
     ? [ contains( numberChars, num[i] ) ] {
-      i = i + 1
+      i += 1
       @
     } ~ {
       isNr = 0

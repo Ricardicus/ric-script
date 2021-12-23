@@ -6,7 +6,7 @@ samples = find("\.py$")
 i = 0
 . [ i < len(samples) ] {
   print(samples[i])
-  i = i + 1
+  i += 1
   @
 }
 

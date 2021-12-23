@@ -14,7 +14,7 @@ i = 0
 . [ i < len(s) ] {
   val = xattrGet(file, s[i])
   print("    - '" + s[i] + "': '" + val + "'")
-  i = i + 1
+  i += 1
   @
 }
 
@@ -23,7 +23,7 @@ s = xattrFindKey("user\.*")
 i = 0
 . [ i < len(s) ] {
   print(s[i])
-  i = i + 1
+  i += 1
   @
 }
 
@@ -32,7 +32,7 @@ s = xattrList(file)
 i = 0
 . [ i < len(s) ] {
   xattrRm(file, s[i])
-  i = i + 1
+  i += 1
   @
 }
 

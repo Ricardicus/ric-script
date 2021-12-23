@@ -97,9 +97,8 @@ foobar()
 # A while loop
 
 i = 0
-
 . [ i < 5 ] {
-  i = i + 1
+  i += 1
   print(i)
   @
 }
@@ -129,13 +128,13 @@ a = 0
     c = 0
     . [ c < 2 ] {
       print ( "a: " + a + ", b: " + b + ", c: " + c )
-      c = c + 1
+      c += 1
       @
     }
-    b = b + 1
+    b += 1
     @
   }
-  a = a + 1
+  a += 1
   @
 }
 
@@ -158,7 +157,7 @@ $ "echo 'hello from the shell directly, the variable a has the value: " + a + "'
 
 a = 0
 . [ a < 4 ] {
-  a = a + 1
+  a += 1
   print( a )
   # Deciding on wether or not to continue the loop
   ? [ a >= 2 ] {
@@ -255,7 +254,7 @@ print( len(h) )
 i = 0
 . [ i < len(h) ] {
   print(h[i])
-  i = i + 1
+  i += 1
   @
 }
 
@@ -269,7 +268,7 @@ print(h[0])
 i = 0
 . [ i < len(h) ] {
   print(h[i])
-  i = i + 1
+  i += 1
   @
 }
 

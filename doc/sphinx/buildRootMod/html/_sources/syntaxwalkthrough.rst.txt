@@ -36,7 +36,7 @@ declaration of a **map** and two of the **list** sort.
 	  i = 0
 	  . [ i < len(num) ] {
 	    ? [ contains( numberChars, num[i] ) ] {
-	      i = i + 1
+	      i += 1
 	      @
 	    } ~ {
 	      isNr = 0
@@ -514,7 +514,7 @@ Class pointer
 		@ hej () {
 		  print("hello")
 		  print("my member 'a' has value: " + a)
-		  a = a + 1
+		  a += 1
 		  print("Now 'a' is: " + a)
 		}
 		@ setA(newA) {
@@ -630,7 +630,7 @@ Below is an implementation of an RPN calculator implemented using a class.
 	  i = 0
 	  . [ i < len(num) ] {
 	    ? [ contains( numberChars, num[i] ) ] {
-	      i = i + 1
+	      i += 1
 	      @
 	    } ~ {
 	      isNr = 0

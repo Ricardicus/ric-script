@@ -62,7 +62,7 @@ i = 0
     print("Error random!")
   }
 
-  i = i + 1
+  i += 1
   @
 }
 

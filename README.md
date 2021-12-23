@@ -124,7 +124,7 @@ numberChars = [ (10 ... i) { text(i) } ]
   i = 0
   . [ i < len(num) ] {
     ? [ contains( numberChars, num[i] ) ] {
-      i = i + 1
+      i += 1
       @
     } ~ {
       isNr = 0
@@ -277,7 +277,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
   i = 0
   . [ i < len(num) ] {
     ? [ contains( numberChars, num[i] ) ] {
-      i = i + 1
+      i += 1
       @
     } ~ {
       isNr = 0
@@ -373,7 +373,7 @@ a = 1
   ? [ a > 10 ] {
     -> 1
   }
-  a = a + 1
+  a += 1
 }
 
 @ end () {
@@ -482,7 +482,7 @@ i = 0
 . [ i < len(s) ] {
   val = xattrGet(file, s[i])
   print("    - '" + s[i] + "': '" + val + "'")
-  i = i + 1
+  i += 1
   @
 }
 
@@ -491,7 +491,7 @@ s = xattrList(file)
 i = 0
 . [ i < len(s) ] {
   xattrRm(file, s[i])
-  i = i + 1
+  i += 1
   @
 }
 

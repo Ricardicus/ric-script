@@ -466,6 +466,34 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
+    | ID '+' '=' expressions {
+        expr_t *idexpr = newExpr_ID($1);
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPAdd(idexpr, valexpr);
+
+        $$ = newDeclaration(idexpr,opadd);
+    }
+    | ID '-' '=' expressions {
+        expr_t *idexpr = newExpr_ID($1);
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPSub(idexpr, valexpr);
+
+        $$ = newDeclaration(idexpr,opadd);
+    }
+    | ID '*' '=' expressions {
+        expr_t *idexpr = newExpr_ID($1);
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPMul(idexpr, valexpr);
+
+        $$ = newDeclaration(idexpr,opadd);
+    }
+    | ID '/' '=' expressions {
+        expr_t *idexpr = newExpr_ID($1);
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPDiv(idexpr, valexpr);
+
+        $$ = newDeclaration(idexpr,opadd);
+    }
     | ID '=' condition {
         expr_t *idexpr = newExpr_ID($1);
 

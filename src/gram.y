@@ -170,15 +170,15 @@ systemStatement: '$' ID {
 forEachStatement: 
     '(' expressions '.' '.' '.' ID ')' body {
     body_t *bd = $8;
-    statement_t *stmt = bd->content;
+    /*statement_t *stmt = bd->content;
 
     while ( stmt != NULL ) {
         if ( stmt->entity == LANG_ENTITY_BODY_END ) {
-            /* Set entity to continue */
+            // Set entity to continue
             stmt->entity = LANG_ENTITY_CONTINUE;
         }
         stmt = stmt->next;
-    }
+    }*/
 
     $$ = newForEach($2, $6, bd);
 };

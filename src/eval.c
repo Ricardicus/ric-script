@@ -757,8 +757,8 @@ expr_t*  copy_vector(
     void *sp;
     size_t *sc = PROVIDE_CONTEXT()->sc;
     locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
-    size_t stackCount = *sc;
     stackval_t sv;
+    size_t stackCount = *sc;
     int *interactive = PROVIDE_CONTEXT()->interactive;
     int interactiveTmp = *interactive;
 
@@ -770,7 +770,7 @@ expr_t*  copy_vector(
     *interactive = INTERACTIVE_STACK;
 
     interpret_statements_(forEach, PROVIDE_CONTEXT(), NULL, NULL);
-    
+
     varLocals->sb = localsStackSb;
     varLocals->sp = localsStackSp;
 
@@ -778,50 +778,17 @@ expr_t*  copy_vector(
     sc = PROVIDE_CONTEXT()->sc;
     *interactive = interactiveTmp;
 
-    /* Printing result of computation */
-    while ( *sc > stackCount ) {
-      expr_t *newExp;
+    if ( *sc > stackCount ) {
+      /* Get the stack dump vector */
       POP_VAL(&sv, sp, sc);
-
-      switch (sv.type) {
-      case INT32TYPE:
-        newExp = newExpr_Ival(sv.i);
-        break;
-      case DOUBLETYPE:
-        newExp = newExpr_Float(sv.d);
-        break;
-      case TEXT:
-        newExp = newExpr_Text(sv.t);
-        break;
-      case TIMETYPE:
-        newExp = newExpr_Time(sv.time);
-        break;
-      case POINTERTYPE:
-        newExp = newExpr_Pointer(sv.p);
-        break;
-      case FUNCPTRTYPE:
-        newExp = newExpr_FuncPtr(sv.func);
-        break;
-      case LIBFUNCPTRTYPE:
-        newExp = newExpr_LibFuncPtr(sv.libfunc);
-        break;
-      case VECTORTYPE: {
-        newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-        break;
-      }
-      case BIGINT:
-        newExp = newExpr_BigInt(sv.bigInt);
-        break;
-      default:
-        printf("%s.error: unknown type of value on the stack (%d)\n", 
-          __func__, sv.type);
-        GENERAL_REPORT_ISSUE_MSG();
-        break;
+      if ( sv.type != VECTORTYPE ) {
+        fprintf(stderr, "%s.%d Unfold foreach expression\n", 
+          ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
+        exit(1);
       }
 
-      newContent = newArgument(newExp, newContent);
-      newVec->vec->length++;
-      newVec->vec->content = newContent;
+      free(newVec->vec);
+      newVec->vec = sv.vec;
     }
   }
 
@@ -3710,6 +3677,15 @@ void interpret_statements_(
         forEachStmt_t *festmt = ((statement_t*)stmt)->content;
         expr_t *root = festmt->root;
         expr_t *entry = festmt->entry;
+        int localsStackSp = varLocals->sp;
+        int localsStackSb = varLocals->sb;
+        size_t stackCount = *sc;
+        size_t *sc = PROVIDE_CONTEXT()->sc;
+        void *sp = PROVIDE_CONTEXT()->sp;
+        argsList_t *vecContent = NULL;
+        class_t *tmp = NULL;
+        class_t *classObj = NULL;
+        int *depth = PROVIDE_CONTEXT()->depth;
         vector_t *rootVec = NULL;
         char *rootChars = NULL;
         int32_t rootInt = -1;
@@ -3720,278 +3696,341 @@ void interpret_statements_(
         int dummy;
         int32_t arrayIndex;
         int32_t festmtIndex;
+        int32_t endIteration = 0;
         char *entryId = NULL;
         stackval_t sv;
+        expr_t *newVec = NULL;
+        int *interactive = PROVIDE_CONTEXT()->interactive;
 
-        evaluate_expression(root, EXPRESSION_ARGS());
-        POP_VAL(&sv, sp, sc);
-        switch ( sv.type ) {
-        case VECTORTYPE:
-        rootVec = sv.vec;
-        break;
-        case DICTTYPE:
-        rootDict = sv.dict;
-        break;
-        case TEXT:
-        rootChars = sv.t;
-        break;
-        case INT32TYPE:
-        rootInt = sv.i;
-        break;
-        default:
-          printf("%s.%d error: '%s' isn't an indexable array\n", 
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, root->id.id);
-        break;
-        }
+        // Just to start the complex iteration
+        arrayIndex = -1;
+        endIteration = 0;
 
-        if ( entry->type != EXPR_TYPE_ID ) {
-          printf("%s.%d error: '%s' isn't a correct variable\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, entry->id.id);
-        } else {
-          entryId = entry->id.id;
-        }
+        while ( arrayIndex < endIteration ) {
+          evaluate_expression(root, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch ( sv.type ) {
+          case VECTORTYPE:
+          rootVec = sv.vec;
+          break;
+          case DICTTYPE:
+          rootDict = sv.dict;
+          break;
+          case TEXT:
+          rootChars = sv.t;
+          break;
+          case INT32TYPE:
+          rootInt = sv.i;
+          break;
+          default:
+            printf("%s.%d error: '%s' isn't an indexable array\n", 
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, root->id.id);
+          break;
+          }
 
-        /* Get for-each unfold variable value */
-        hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-        if ( hvp == NULL ) {
-          /* Create the variable with the value to be used for indexing, start with 0 */
-          sv.type = INT32TYPE;
-          sv.i = 0;
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
-        }
+          if ( entry->type != EXPR_TYPE_ID ) {
+            printf("%s.%d error: '%s' isn't a correct variable\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, entry->id.id);
+          } else {
+            entryId = entry->id.id;
+          }
 
-        /* Get the index value */
-        hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+          if ( rootVec != NULL ) {
+            endIteration = rootVec->length;
+          } else if ( rootDict != NULL ) {
+            /* traverse the dictionary keys */
+            hashtable_t *hash = rootDict->hash;
+            int hashSize = hash->size;
+            struct key_val_pair *ptr;
+            int i = 0;
+            int keyCount = 0;
+            /* Check limits */
+            while ( i < hashSize ) {
+              ptr = hash->table[i];
+              while (ptr != NULL) {
+                /* Here is a key.. */
+                ptr = ptr->next;
+                keyCount++;
+              }
+              i++;
+            }
+            endIteration = keyCount;
+          } else if ( rootChars != NULL ) {
+            endIteration = strlen(rootChars);
+          } else if ( rootInt > 0 ) {
+            endIteration = rootInt;
+          } else {
+            /* This is really not supposed to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1);
+          }
+          /* Get´or set for-each unfold variable value */
+          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+          if ( hvp == NULL ) {
+            /* Create the variable with the value to be used for indexing, start with 0 */
+            sv.type = INT32TYPE;
+            sv.i = 0;
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+          }
+          /* Get the index value */
+          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+            /* This is really not supposed to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1);
+          }
 
-        if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-          /* This is really not support to happen */
-          printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-            ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+          festmtIndex = hvp->sv.i;
+          arrayIndex = festmtIndex;
 
-          exit(1);
-        }
-
-        festmtIndex = hvp->sv.i;
-
-        if ( festmtIndex == 0 ) {
-          /* Set starting */
-          ctx->start[ctx->depth] = stmt;
-          ctx->end[ctx->depth] = next;
-          ctx->ctxDepth[ctx->depth] = ctx->depth;
-          ctx->bodyEnd[ctx->depth] = next;
-        }
-
-        arrayIndex = festmtIndex;
-
-        if ( rootVec != NULL ) {
-
-          /* check the limits */
-          if ( festmtIndex >= rootVec->length ) {
-            /* End this iteration */
-            stmt = next;
-            /* Set the variable to 0 */
-            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+          if ( rootVec != NULL ) {
+            int arrayIndexWalk = arrayIndex;
+            /* Increase the value of the unfolded variable */
+            festmtIndex++;
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
 
             if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-              /* This is really not support to happen */
+              /* This is really not supposed to happen */
               printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                 ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
-            hvp->sv.i = 0;
-            locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
-            continue;
-          }
+            hvp->sv.i = festmtIndex;
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);        
 
-          /* Increase the value of the unfolded variable */
-          festmtIndex++;
-          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-
-          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-            /* This is really not support to happen */
-            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-            exit(1);
-          }
-
-          hvp->sv.i = festmtIndex;
-          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);        
-
-          walk = rootVec->content;
-          while ( walk != NULL && arrayIndex >= 0 ) {
-            expToSet = walk->arg;
-            walk = walk->next;
-            --arrayIndex;
-          }
-
-          if ( expToSet == NULL ) {
-            fprintf(stderr, "%s.%d error: Unexpected index error!\n",
-              ((statement_t*) stmt)->file, ((statement_t*) stmt)->line);
-            GENERAL_REPORT_ISSUE_MSG();
-            exit(1);
-          }
-
-          evaluate_expression(expToSet, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
-
-          /* Placing value on the heap */
-          if ( sv.type == TEXT ) {
-            /* Special case */
-            char *c = sv.t;
-            size_t len = strlen(c)+2;
-            char *newText = ast_ecalloc(len);
-            snprintf(newText,len,"%s",c);
-            sv.t = newText;
-          } else if ( sv.type == VECTORTYPE ) {
-            expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
-            sv.vec = e->vec;
-            free(e);
-          } else if ( sv.type == DICTTYPE ) {
-            dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-            sv.dict = dict;
-          }
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-
-          locals_push(varLocals, entryId, hvp);
-        } else if ( rootDict != NULL ) {
-          /* traverse the dictionary keys */
-          hashtable_t *hash = rootDict->hash;
-          int hashSize = hash->size;
-          struct key_val_pair *ptr;
-          int i = 0;
-          int keyCount = 0;
-
-          /* Check limits */
-          while ( i < hashSize ) {
-            ptr = hash->table[i];
-            while (ptr != NULL) {
-              /* Here is a key.. */
-              ptr = ptr->next;
-              keyCount++;
+            walk = rootVec->content;
+            while ( walk != NULL && arrayIndexWalk >= 0 ) {
+              expToSet = walk->arg;
+              walk = walk->next;
+              --arrayIndexWalk;
             }
-            i++;
-          }
 
-          if ( arrayIndex >= keyCount ) {
-            /* We are out of here */
-            stmt = next;
-            /* Remove unique unfold from locals */
-            locals_remove(varLocals, festmt->uniqueUnfoldID);
-            /* remove entry from locals */
-            locals_remove(varLocals, entryId);
-            continue;
-          }
+            if ( expToSet == NULL ) {
+              fprintf(stderr, "%s.%d error: Unexpected index error!\n",
+                ((statement_t*) stmt)->file, ((statement_t*) stmt)->line);
+              GENERAL_REPORT_ISSUE_MSG();
+              exit(1);
+            }
 
-          keyCount = 0;
-          i = 0;
-          while ( i < hashSize ) {
-            ptr = hash->table[i];
-            while (ptr != NULL) {
-              /* Add this key to the list */
-              char *c = (char*)ptr->key;
+            evaluate_expression(expToSet, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
 
-              if ( keyCount == arrayIndex ) {
-                size_t len = strlen(c)+1;
-                char *newText = ast_emalloc(len);
-                snprintf(newText,len,"%s",c);
-                sv.type = TEXT;
-                sv.t = newText;
-                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-                locals_push(varLocals, entryId, hvp);
-                /* Increase the value of the unfolded variable */
-                festmtIndex++;
-                hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
+            /* Placing value on the heap */
+            if ( sv.type == TEXT ) {
+              /* Special case */
+              char *c = sv.t;
+              size_t len = strlen(c)+2;
+              char *newText = ast_ecalloc(len);
+              snprintf(newText,len,"%s",c);
+              sv.t = newText;
+            } else if ( sv.type == VECTORTYPE ) {
+              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              sv.vec = e->vec;
+              free(e);
+            } else if ( sv.type == DICTTYPE ) {
+              dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              sv.dict = dict;
+            }
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
 
-                if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-                  /* This is really not support to happen */
-                  printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                    ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-                  exit(1);
+            locals_push(varLocals, entryId, hvp);
+          } else if ( rootDict != NULL ) {
+            /* traverse the dictionary keys */
+            hashtable_t *hash = rootDict->hash;
+            int hashSize = hash->size;
+            struct key_val_pair *ptr;
+            int i = 0;
+            int keyCount = 0;
+            i = 0;
+            while ( i < hashSize ) {
+              ptr = hash->table[i];
+              while (ptr != NULL) {
+                /* Add this key to the list */
+                char *c = (char*)ptr->key;
+                if ( keyCount == arrayIndex ) {
+                  size_t len = strlen(c)+1;
+                  char *newText = ast_emalloc(len);
+                  snprintf(newText,len,"%s",c);
+                  sv.type = TEXT;
+                  sv.t = newText;
+                  ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+                  locals_push(varLocals, entryId, hvp);
+                  /* Increase the value of the unfolded variable */
+                  festmtIndex++;
+                  hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+
+                  if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+                    /* This is really not supposed to happen */
+                    printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                      ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+                    exit(1);
+                  }
+
+                  hvp->sv.i = festmtIndex;
+                  locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
                 }
 
-                hvp->sv.i = festmtIndex;
-                locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
+                ptr = ptr->next;
+                keyCount++;
+              }
+              i++;
+            }
+          } else if ( rootChars != NULL ) {
+            /* traverse the string chars */
+            stackval_t sv;
+            size_t len;
+            char *newText;
+
+            len = 2;
+            newText = ast_emalloc(len);
+            snprintf(newText, 2, "%c", rootChars[arrayIndex]);
+            sv.type = TEXT;
+            sv.t = newText;
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, entryId, hvp);
+            /* Increase the value of the unfolded variable */
+            festmtIndex++;
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+
+            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+              /* This is really not supposed to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            hvp->sv.i = festmtIndex;
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+          } else if ( rootInt > 0 ) {
+            /* traverse the integer, start from zero */
+            stackval_t sv;
+
+            sv.type = INT32TYPE;
+            sv.i = festmtIndex;
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, entryId, hvp);
+            /* Increase the value of the unfolded variable */
+            festmtIndex++;
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+
+            if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+              /* This is really not supposed to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            hvp->sv.i = festmtIndex;
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+          } else {
+            /* This is really not supposed to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1); 
+          }
+
+          /* Moving along, interpreting body */
+          localsStackSp = varLocals->sp;
+          localsStackSb = varLocals->sb;
+          (void)depth;(void)tmp;(void)classObj;(void)localsStackSp;(void)localsStackSb;
+          interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
+          varLocals->sb = localsStackSb;
+          varLocals->sp = localsStackSp;
+
+          /* Get the index value */
+          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+            /* This is really not supposed to happen */
+            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            exit(1);
+          }
+
+          festmtIndex = hvp->sv.i;
+          arrayIndex = festmtIndex;
+
+          if ( *interactive == INTERACTIVE_STACK ) {
+            if ( newVec == NULL ) {
+              newVec = newExpr_Vector(NULL);
+            }
+            /* Empty stack and append to array */
+            while ( *sc > stackCount ) {
+              expr_t *newExp;
+              POP_VAL(&sv, sp, sc);
+
+              switch (sv.type) {
+              case INT32TYPE:
+                newExp = newExpr_Ival(sv.i);
+                break;
+              case DOUBLETYPE:
+                newExp = newExpr_Float(sv.d);
+                break;
+              case TEXT:
+                newExp = newExpr_Text(sv.t);
+                break;
+              case TIMETYPE:
+                newExp = newExpr_Time(sv.time);
+                break;
+              case POINTERTYPE:
+                newExp = newExpr_Pointer(sv.p);
+                break;
+              case FUNCPTRTYPE:
+                newExp = newExpr_FuncPtr(sv.func);
+                break;
+              case LIBFUNCPTRTYPE:
+                newExp = newExpr_LibFuncPtr(sv.libfunc);
+                break;
+              case VECTORTYPE: {
+                newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+                break;
+              }
+              case BIGINT:
+                newExp = newExpr_BigInt(sv.bigInt);
+                break;
+              default:
+                printf("%s.error: unknown type of value on the stack (%d)\n", 
+                  __func__, sv.type);
+                GENERAL_REPORT_ISSUE_MSG();
+                break;
               }
 
-              ptr = ptr->next;
-              keyCount++;
+              vecContent = newArgument(newExp, vecContent);
+              newVec->vec->length++;
+              newVec->vec->content = vecContent;
             }
-            i++;
           }
-        } else if ( rootChars != NULL ) {
-          /* traverse the string chars */
-          stackval_t sv;
-          size_t len;
-          char *newText;
-
-          /* Check limits */
-          if ( arrayIndex >= strlen(rootChars) ) {
-            /* We are out of here */
-            stmt = next;
-            /* Remove unique unfold from locals */
-            locals_remove(varLocals, festmt->uniqueUnfoldID);
-            /* remove entry from locals */
-            locals_remove(varLocals, entryId);
-            continue;
-          }
-
-          len = 2;
-          newText = ast_emalloc(len);
-          snprintf(newText, 2, "%c", rootChars[arrayIndex]);
-          sv.type = TEXT;
-          sv.t = newText;
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          locals_push(varLocals, entryId, hvp);
-          /* Increase the value of the unfolded variable */
-          festmtIndex++;
-          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-
-          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-            /* This is really not support to happen */
-            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-            exit(1);
-          }
-
-          hvp->sv.i = festmtIndex;
-          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
-        } else if ( rootInt > 0 ) {
-          /* traverse the integer, start from zero */
-          stackval_t sv;
-
-          /* Check limits */
-          if ( festmtIndex >= rootInt ) {
-            /* We are out of here */
-            stmt = next;
-            /* Remove unique unfold from locals */
-            locals_remove(varLocals, festmt->uniqueUnfoldID);
-            /* remove entry from locals */
-            locals_remove(varLocals, entryId);
-            continue;
-          }
-
-          sv.type = INT32TYPE;
-          sv.i = festmtIndex;
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          locals_push(varLocals, entryId, hvp);
-          /* Increase the value of the unfolded variable */
-          festmtIndex++;
-          hvp = locals_lookup(varLocals, festmt->uniqueUnfoldID);
-
-          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
-            /* This is really not support to happen */
-            printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-            exit(1);
-          }
-
-          hvp->sv.i = festmtIndex;
-          locals_push(varLocals, festmt->uniqueUnfoldID, hvp);
         }
 
-        next = festmt->body;
+        /* We are out of here */
+        stmt = next;
+        /* Remove unique unfold from locals */
+        locals_remove(varLocals, festmt->uniqueUnfoldIncID);
+        /* remove entry from locals */
+        locals_remove(varLocals, entryId);
+
+        if ( *interactive == INTERACTIVE_STACK ) {
+          argsList_t *prevArg;
+          argsList_t *nextArg;
+          argsList_t *currentArg;
+          argsList_t *walk;
+          /* Reverse the args list order */
+          walk = newVec->vec->content;
+          prevArg = NULL;
+          currentArg = walk;
+          while (currentArg != NULL) {
+            nextArg = currentArg->next;
+            currentArg->next = prevArg;
+            prevArg = currentArg;
+            currentArg = nextArg;
+          }
+          newVec->vec->content = prevArg;
+          PUSH_VECTOR(newVec->vec, sp, sc);
+          free(newVec);
+        }
       }
       break;
       case LANG_ENTITY_CONTINUE:
@@ -4293,6 +4332,15 @@ void interpret_statements_(
   }
 
   free(ctx);
+}
+
+void locals_print(locals_stack_t *stack) {
+  int i = stack->sb;
+  while ( i < stack->sp && i < MAX_NBR_LOCALS ) {
+    local_t local = stack->stack[i];
+    printf("locals[%d]: %s\n", i, local.id);
+    ++i;
+  }
 }
 
 heapval_t* locals_lookup(locals_stack_t *stack, char *id) {

@@ -35,9 +35,9 @@ print([(
   5 ... i
 ) {
   a = [i+1, i+2, i+3]
-  text(a[0])
-  text(a[1])
   text(a[2])
+  text(a[1])
+  text(a[0])
 }])
 
 # Check that for-each locals overwrite globals

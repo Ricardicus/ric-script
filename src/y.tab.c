@@ -1799,15 +1799,15 @@ yyreduce:
 #line 171 "gram.y"
                                             {
     body_t *bd = (yyvsp[0].data);
-    statement_t *stmt = bd->content;
+    /*statement_t *stmt = bd->content;
 
     while ( stmt != NULL ) {
         if ( stmt->entity == LANG_ENTITY_BODY_END ) {
-            /* Set entity to continue */
+            // Set entity to continue
             stmt->entity = LANG_ENTITY_CONTINUE;
         }
         stmt = stmt->next;
-    }
+    }*/
 
     (yyval.data) = newForEach((yyvsp[-6].data), (yyvsp[-2].id), bd);
 }

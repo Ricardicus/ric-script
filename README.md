@@ -27,8 +27,7 @@ in continous testing and not very "pedagogical" or even commented. I
 will provide some samples here in the README further below that walks through some concepts.
 
 The entire thing has a working title of 'ric-script'. I want to stress that
-it is a scripting language, and I think 'ric' sounds cool (even if it is a bit self-congratulatory).
-But I might change it if someone inspires me to.. 
+it is a scripting language and my first three letters sound cool according to me.
 
 <a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is a link to more of the language documentation</a>
 

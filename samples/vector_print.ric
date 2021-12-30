@@ -115,3 +115,13 @@ s = [(15 ... i ) {
   fibPos(i)
 }]
 print(s)
+
+# Popping
+s = [(10 ... i) { i }]
+print(s)
+print(pop(s) + " " + pop(s) + " " + pop(s))
+print(s)
+
+# Pushing
+( 10 ... i ) { push(s, i) }
+print(s)

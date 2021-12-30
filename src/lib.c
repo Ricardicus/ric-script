@@ -19,6 +19,8 @@ libFunction_t ric_library[] = {
   DECLARE_LIB_FUNCTION("print", 1, ric_print),
   DECLARE_LIB_FUNCTION("printf", 1, ric_printf),
   DECLARE_LIB_FUNCTION("append", 2, ric_append),
+  DECLARE_LIB_FUNCTION("push", 2, ric_push),
+  DECLARE_LIB_FUNCTION("pop", 1, ric_pop),
   DECLARE_LIB_FUNCTION("len", 1, ric_len),
   DECLARE_LIB_FUNCTION("contains", 2, ric_contains),
   DECLARE_LIB_FUNCTION("keys", 1, ric_keys),

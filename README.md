@@ -7,11 +7,9 @@
 ![Style linter](https://github.com/Ricardicus/ric-script/workflows/Style%20linter/badge.svg)
 ![Memory leakage detection](https://github.com/Ricardicus/ric-script/workflows/Memory%20leakage%20detection/badge.svg)
 
-# Work in progress
+# Welcome to ric-script
 
-I am developing a programming language!
-
-It resembles Python and Javascript. Imagine Python without the pedantic indentation and Javascript without the semicolons.
+I am developing a programming language that resembles Python and Javascript. Imagine Python without the pedantic indentation and Javascript without the semicolons.
 In fact, ric-script has zero contrainst regarding line breaks, spaces or tabs. You can do what you want in regards to that.
 
 It is an interpreted language and I draw a lot of inspiration from Python and Javascript.

@@ -51,7 +51,7 @@ declaration of a **map** and two of the **list** sort.
 	    print("Too few arguments on the stack. Goodbye!")
 	    exit(2)
 	  }
-	  head = head - 1
+	  head -= 1
 	  val = stack["data"][head]
 	  stack["head"] = head
 	  -> val
@@ -64,7 +64,7 @@ declaration of a **map** and two of the **list** sort.
 	  } ~ {
 	    stack["data"][head] = val
 	  }
-	  stack["head"] = head + 1
+	  stack["head"] += 1
 	}
 
 	@ eval (op) {
@@ -577,7 +577,7 @@ Below is an implementation of an RPN calculator implemented using a class.
 	      print("Too few arguments on the stack. Goodbye!")
 	      exit(2)
 	    }
-	    head = head - 1
+	    head -= 1
 	    val = stack["data"][head]
 	    stack["head"] = head
 	    -> val
@@ -590,7 +590,7 @@ Below is an implementation of an RPN calculator implemented using a class.
 	    } ~ {
 	      stack["data"][head] = val
 	    }
-	    stack["head"] = head + 1
+	    stack["head"] += 1
 	  }
 
 	  @ eval (op) {

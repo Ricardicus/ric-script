@@ -494,6 +494,30 @@ declaration:
 
         $$ = newDeclaration(idexpr,opadd);
     }
+    | indexedVector '+' '=' expressions {
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPAdd($1, valexpr);
+
+        $$ = newDeclaration($1,opadd);
+    }
+    | indexedVector '-' '=' expressions {
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPSub($1, valexpr);
+
+        $$ = newDeclaration($1,opadd);
+    }
+    | indexedVector '*' '=' expressions {
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPMul($1, valexpr);
+
+        $$ = newDeclaration($1,opadd);
+    }
+    | indexedVector '/' '=' expressions {
+        expr_t *valexpr = $4;
+        expr_t *opadd = newExpr_OPDiv($1, valexpr);
+
+        $$ = newDeclaration($1,opadd);
+    }
     | ID '=' condition {
         expr_t *idexpr = newExpr_ID($1);
 

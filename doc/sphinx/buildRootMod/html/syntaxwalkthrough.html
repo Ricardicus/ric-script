@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Syntax walkthrough &mdash; RicScript documentation 0.1 documentation</title>
@@ -131,7 +131,7 @@ declaration of a <strong>map</strong> and two of the <strong>list</strong> sort.
     print<span class="o">(</span><span class="s2">&quot;Too few arguments on the stack. Goodbye!&quot;</span><span class="o">)</span>
     exit<span class="o">(</span><span class="m">2</span><span class="o">)</span>
   <span class="o">}</span>
-  <span class="nv">head</span> <span class="o">=</span> head - <span class="m">1</span>
+  head -<span class="o">=</span> <span class="m">1</span>
   <span class="nv">val</span> <span class="o">=</span> stack<span class="o">[</span><span class="s2">&quot;data&quot;</span><span class="o">][</span>head<span class="o">]</span>
   stack<span class="o">[</span><span class="s2">&quot;head&quot;</span><span class="o">]</span> <span class="o">=</span> head
   -&gt; val
@@ -144,7 +144,7 @@ declaration of a <strong>map</strong> and two of the <strong>list</strong> sort.
   <span class="o">}</span> ~ <span class="o">{</span>
     stack<span class="o">[</span><span class="s2">&quot;data&quot;</span><span class="o">][</span>head<span class="o">]</span> <span class="o">=</span> val
   <span class="o">}</span>
-  stack<span class="o">[</span><span class="s2">&quot;head&quot;</span><span class="o">]</span> <span class="o">=</span> head + <span class="m">1</span>
+  stack<span class="o">[</span><span class="s2">&quot;head&quot;</span><span class="o">]</span> +<span class="o">=</span> <span class="m">1</span>
 <span class="o">}</span>
 
 @ <span class="nb">eval</span> <span class="o">(</span>op<span class="o">)</span> <span class="o">{</span>
@@ -623,7 +623,7 @@ Wanting to <span class="nb">set</span> <span class="s1">&#39;a&#39;</span> to: <
       print<span class="o">(</span><span class="s2">&quot;Too few arguments on the stack. Goodbye!&quot;</span><span class="o">)</span>
       exit<span class="o">(</span><span class="m">2</span><span class="o">)</span>
     <span class="o">}</span>
-    <span class="nv">head</span> <span class="o">=</span> head - <span class="m">1</span>
+    head -<span class="o">=</span> <span class="m">1</span>
     <span class="nv">val</span> <span class="o">=</span> stack<span class="o">[</span><span class="s2">&quot;data&quot;</span><span class="o">][</span>head<span class="o">]</span>
     stack<span class="o">[</span><span class="s2">&quot;head&quot;</span><span class="o">]</span> <span class="o">=</span> head
     -&gt; val
@@ -636,7 +636,7 @@ Wanting to <span class="nb">set</span> <span class="s1">&#39;a&#39;</span> to: <
     <span class="o">}</span> ~ <span class="o">{</span>
       stack<span class="o">[</span><span class="s2">&quot;data&quot;</span><span class="o">][</span>head<span class="o">]</span> <span class="o">=</span> val
     <span class="o">}</span>
-    stack<span class="o">[</span><span class="s2">&quot;head&quot;</span><span class="o">]</span> <span class="o">=</span> head + <span class="m">1</span>
+    stack<span class="o">[</span><span class="s2">&quot;head&quot;</span><span class="o">]</span> +<span class="o">=</span> <span class="m">1</span>
   <span class="o">}</span>
 
   @ <span class="nb">eval</span> <span class="o">(</span>op<span class="o">)</span> <span class="o">{</span>
@@ -716,6 +716,10 @@ print<span class="o">(</span><span class="s2">&quot;RPN Calculator (quit by typi
 <h2>Control flow<a class="headerlink" href="#control-flow" title="Permalink to this headline"></a></h2>
 <p>In this language, the symbols <strong>?</strong>, <strong>.</strong>, <strong>~</strong> and <strong>&#64;</strong> are of importance for control flow.</p>
 <table class="docutils align-default">
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 93%" />
+</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Symbol</p></th>
 <th class="head"><p>Description</p></th>

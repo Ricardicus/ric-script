@@ -136,7 +136,7 @@ numberChars = [ (10 ... i) { text(i) } ]
     print("Too few arguments on the stack. Goodbye!")
     exit(2)
   }
-  head = head - 1
+  head -= 1
   val = stack["data"][head]
   stack["head"] = head
   -> val
@@ -149,7 +149,7 @@ numberChars = [ (10 ... i) { text(i) } ]
   } ~ {
     stack["data"][head] = val
   }
-  stack["head"] = head + 1
+  stack["head"] += 1
 }
 
 @ eval (op) {
@@ -221,7 +221,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
       print("Too few arguments on the stack. Goodbye!")
       exit(2)
     }
-    head = head - 1
+    head -= 1
     val = stack["data"][head]
     stack["head"] = head
     -> val
@@ -234,7 +234,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
     } ~ {
       stack["data"][head] = val
     }
-    stack["head"] = head + 1
+    stack["head"] += 1
   }
 
   @ eval (op) {

@@ -3689,24 +3689,24 @@ void interpret_statements_(
         vector_t *rootVec = NULL;
         char *rootChars = NULL;
         int32_t rootInt = -1;
+        mpz_t *rootBigInt = NULL;
         dictionary_t *rootDict = NULL;
         argsList_t *walk = NULL;
         expr_t *expToSet = NULL;
         heapval_t *hvp = NULL;
         int dummy;
-        int32_t arrayIndex;
+        int32_t arrayIndex = 0;
         int32_t festmtIndex;
+        mpz_t   festmtBigIndex;
         int32_t endIteration = 0;
+        mpz_t endIterationBigInt;
         char *entryId = NULL;
         stackval_t sv;
         expr_t *newVec = NULL;
         int *interactive = PROVIDE_CONTEXT()->interactive;
+        int continueLoop = 1; 
 
-        // Just to start the complex iteration
-        arrayIndex = -1;
-        endIteration = 0;
-
-        while ( arrayIndex < endIteration ) {
+        while ( continueLoop ) {
           evaluate_expression(root, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
           switch ( sv.type ) {
@@ -3722,9 +3722,12 @@ void interpret_statements_(
           case INT32TYPE:
           rootInt = sv.i;
           break;
+          case BIGINT:
+          rootBigInt = sv.bigInt;
+          break;
           default:
-            printf("%s.%d error: '%s' isn't an indexable array\n", 
-              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, root->id.id);
+            printf("%s.%d error: expression isn't an indexable\n", 
+              ((statement_t*)stmt)->file, ((statement_t*)stmt)->line);
           break;
           }
 
@@ -3759,6 +3762,10 @@ void interpret_statements_(
             endIteration = strlen(rootChars);
           } else if ( rootInt > 0 ) {
             endIteration = rootInt;
+          } else if ( rootBigInt != NULL ) {
+            mpz_init(endIterationBigInt);
+            mpz_init(festmtBigIndex);
+            mpz_add(endIterationBigInt, *rootBigInt, festmtBigIndex);
           } else {
             /* This is really not supposed to happen */
             printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
@@ -3769,22 +3776,40 @@ void interpret_statements_(
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
           if ( hvp == NULL ) {
             /* Create the variable with the value to be used for indexing, start with 0 */
-            sv.type = INT32TYPE;
-            sv.i = 0;
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            if ( rootBigInt != NULL ) {
+              stackval_t sv;
+              expr_t *e = newExpr_BigIntFromInt(0);
+              heapval_t *hvp;
+
+              sv.type = BIGINT;
+              sv.bigInt = e->bigInt;
+              free(e);
+
+              mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
+
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            } else {
+              sv.type = INT32TYPE;
+              sv.i = 0;
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            }
           }
           /* Get the index value */
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
-          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+          if ( hvp == NULL || (hvp->sv.type != INT32TYPE && hvp->sv.type != BIGINT) ) {
             /* This is really not supposed to happen */
             printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
               ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
             exit(1);
           }
-
-          festmtIndex = hvp->sv.i;
-          arrayIndex = festmtIndex;
+          if ( hvp->sv.type == INT32TYPE ) {
+            festmtIndex = hvp->sv.i;
+            arrayIndex = festmtIndex;
+          } else if ( hvp->sv.type == BIGINT ) {
+            mpz_add_ui(festmtBigIndex, *hvp->sv.bigInt, 0);
+          }
 
           if ( rootVec != NULL ) {
             int arrayIndexWalk = arrayIndex;
@@ -3926,6 +3951,34 @@ void interpret_statements_(
 
             hvp->sv.i = festmtIndex;
             locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+          } else if ( rootBigInt != NULL ) {
+            /* traverse the big integer, start from zero */
+            stackval_t sv;
+            expr_t *e = newExpr_BigIntFromInt(0);
+            heapval_t *hvp;
+
+            sv.type = BIGINT;
+            sv.bigInt = e->bigInt;
+            free(e);
+
+            mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
+
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, entryId, hvp);
+
+            /* Increase the value of the unfolded variable */
+            mpz_add_ui(festmtBigIndex, festmtBigIndex, 1);
+            hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
+
+            if ( hvp == NULL || hvp->sv.type != BIGINT ) {
+              /* This is really not supposed to happen */
+              printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+              exit(1);
+            }
+
+            mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
           } else {
             /* This is really not supposed to happen */
             printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
@@ -3943,15 +3996,18 @@ void interpret_statements_(
 
           /* Get the index value */
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
-          if ( hvp == NULL || hvp->sv.type != INT32TYPE ) {
+          if ( hvp == NULL || (hvp->sv.type != INT32TYPE && hvp->sv.type != BIGINT) ) {
             /* This is really not supposed to happen */
             printf("%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
               ((statement_t*)stmt)->file, ((statement_t*)stmt)->line, GENERAL_ERROR_ISSUE_URL);
             exit(1);
           }
-
-          festmtIndex = hvp->sv.i;
-          arrayIndex = festmtIndex;
+          if ( hvp->sv.type == INT32TYPE ) {
+            festmtIndex = hvp->sv.i;
+            arrayIndex = festmtIndex;
+          } else if ( hvp->sv.type == BIGINT ) {
+            mpz_add_ui(festmtBigIndex, *hvp->sv.bigInt, 0);
+          }
 
           if ( *interactive == INTERACTIVE_STACK ) {
             if ( newVec == NULL ) {
@@ -4002,6 +4058,11 @@ void interpret_statements_(
               newVec->vec->length++;
               newVec->vec->content = vecContent;
             }
+          }
+          continueLoop = arrayIndex < endIteration;
+          if ( rootBigInt != NULL ) {
+            // Special case, big looping
+            continueLoop = (mpz_cmp(endIterationBigInt, festmtBigIndex) != 0);
           }
         }
 

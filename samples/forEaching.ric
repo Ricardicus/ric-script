@@ -59,3 +59,11 @@ s = [(15 ... i ) {
   fibPos(i)
 }]
 print(s)
+
+# Big ints can be used to make extremely long loops
+s = ""
+( bigInt(10) ... i ) {
+  ? [ i > 0 ] { s += ", " }
+  s += i 
+}
+print(s)

@@ -3696,7 +3696,7 @@ void interpret_statements_(
         heapval_t *hvp = NULL;
         int dummy;
         int32_t arrayIndex = 0;
-        int32_t festmtIndex;
+        int32_t festmtIndex = 0;
         mpz_t   festmtBigIndex;
         int32_t endIteration = 0;
         mpz_t endIterationBigInt;
@@ -3779,7 +3779,7 @@ void interpret_statements_(
             if ( rootBigInt != NULL ) {
               stackval_t sv;
               expr_t *e = newExpr_BigIntFromInt(0);
-              heapval_t *hvp;
+              heapval_t *hvp = NULL;
 
               sv.type = BIGINT;
               sv.bigInt = e->bigInt;
@@ -3955,7 +3955,7 @@ void interpret_statements_(
             /* traverse the big integer, start from zero */
             stackval_t sv;
             expr_t *e = newExpr_BigIntFromInt(0);
-            heapval_t *hvp;
+            heapval_t *hvp = NULL;
 
             sv.type = BIGINT;
             sv.bigInt = e->bigInt;

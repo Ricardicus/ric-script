@@ -4073,6 +4073,11 @@ void interpret_statements_(
         /* remove entry from locals */
         locals_remove(varLocals, entryId);
 
+        if ( rootBigInt != NULL ) {
+          mpz_clear(endIterationBigInt);
+          mpz_clear(festmtBigIndex);
+        }
+
         if ( *interactive == INTERACTIVE_STACK ) {
           argsList_t *prevArg;
           argsList_t *nextArg;

@@ -8,9 +8,6 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
   mpz_t *n = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  void *hp = PROVIDE_CONTEXT()->hp;
-  int dummy = 0;
-  heapval_t *hpv = NULL;
 
   POP_VAL(&stv, sp, sc);
 
@@ -41,7 +38,6 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
 
   stv.type = BIGINT;
   stv.bigInt = n;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
   /* Pushing the parsed value */
   PUSH_BIGINT(n, sp, sc);

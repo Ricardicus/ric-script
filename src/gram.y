@@ -42,6 +42,7 @@ statement_t *root = NULL;
 %token<val_double> DOUBLE
 %token<id> ID
 %token RETURN
+%token FOREACH
 %token COMMENT
 %token NEWLINE
 %token KEY_FLOAT
@@ -57,7 +58,6 @@ statement_t *root = NULL;
 %type<data> mathContentDigit
 %type<data> mathContentDouble
 %type<data> indexedVector
-%type<data> stringContents
 %type<data> stringContent
 %type<data> stringEditions
 %type<data> stringEdition
@@ -133,6 +133,9 @@ statement:
     | function {
         $$ = newStatement(LANG_ENTITY_FUNCDECL, $1);
     }
+    | forEachStatement {
+        $$ = newStatement(LANG_ENTITY_FOREACH, $1);
+    }
     | expressions {
         $$ = newStatement(LANG_ENTITY_EXPR, $1);
     }
@@ -141,9 +144,6 @@ statement:
     }
     | loopStatement {
         $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
-    }
-    | forEachStatement {
-        $$ = newStatement(LANG_ENTITY_FOREACH, $1);
     }
     | continueStatement {
         $$ = newStatement(LANG_ENTITY_CONTINUE, $1);
@@ -163,24 +163,13 @@ statement:
 
 systemStatement: '$' ID {
     $$ = newExpr_ID($2);
-} | '$' stringContents {
+} | '$' stringContent {
     $$ = $2;
 };
 
 forEachStatement: 
-    '(' expressions '.' '.' '.' ID ')' body {
-    body_t *bd = $8;
-    /*statement_t *stmt = bd->content;
-
-    while ( stmt != NULL ) {
-        if ( stmt->entity == LANG_ENTITY_BODY_END ) {
-            // Set entity to continue
-            stmt->entity = LANG_ENTITY_CONTINUE;
-        }
-        stmt = stmt->next;
-    }*/
-
-    $$ = newForEach($2, $6, bd);
+    '(' expressions FOREACH ID ')' body {
+    $$ = newForEach($2, $4, $6);
 };
 
 returnStatement: RETURN expressions {
@@ -551,16 +540,7 @@ dictionary_keys_vals:
     }
 
 dictionary_key_val:
-    stringContents ':' expressions {
-      keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
-
-      keyVal->key = $1;
-      keyVal->val = $3;
-      keyVal->next = NULL;
-
-      $$ = keyVal;
-    }
-    | stringContents ':' stringContents {
+    stringContent ':' expressions {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
       keyVal->key = $1;
@@ -626,14 +606,14 @@ mathContent:
     };
 
 indexedVector:
-    ID '[' expressions ']' {
-        expr_t *id = newExpr_ID($1);
+    expression '[' expressions ']' {
+        expr_t *id = $1;
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
     }
-    | ID '[' indexer ']' {
-        expr_t *id = newExpr_ID($1);
+    | expression '[' indexer ']' {
+        expr_t *id = $1;
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
@@ -671,7 +651,6 @@ indexer:
     $$ = newExpr_Indexer(NULL, NULL, NULL);
   }
 
-
 mathContentDigit:
     DIGIT {
       if ( strlen(yyval.id) >= 10 ) {
@@ -684,63 +663,6 @@ mathContentDigit:
 mathContentDouble:
     DOUBLE {
         $$ = newExpr_Float(yyval.val_double);
-    };
-
-stringContents:
-    stringContents '+' stringContent {
-        expr_t *e1 = (expr_t*)$1;
-        expr_t *e2 = (expr_t*)$3;
-
-        $$ = newExpr_OPAdd(e1,e2);
-    }
-    | stringContents '+' ID  {
-        expr_t *e1 = (expr_t*)$1;
-        expr_t *e2 = newExpr_ID($3);
-
-        $$ = newExpr_OPAdd(e1,e2);
-    }
-    | stringContents '+' mathContentDouble  {
-        expr_t *e1 = (expr_t*)$1;
-        expr_t *d = (expr_t*)$3;
-        char buffer[256];
-        snprintf(buffer, sizeof(buffer), "%.4f", d->fval);
-        expr_t *e2 = newExpr_Text(buffer);
-        free($3);
-
-        $$ = newExpr_OPAdd(e1,e2);
-    }
-    | stringContents '+' mathContentDigit  {
-        expr_t *e1 = (expr_t*)$1;
-        expr_t *d = (expr_t*)$3;
-        char buffer[256];
-        if ( d->type == EXPR_TYPE_IVAL ) {
-          snprintf(buffer, sizeof(buffer), "%d", d->ival);
-        } else if ( d->type == EXPR_TYPE_BIGINT ) {
-          char buf[128];
-          char *c = NULL;
-
-          c = mpz_get_str(buf, 10, *d->bigInt);
-          snprintf(buffer, sizeof(buffer), "%s", c);
-        }
-        expr_t *e2 = newExpr_Text(buffer);
-        free($3);
-
-        $$ = newExpr_OPAdd(e1,e2);
-    }
-    | stringContents '*' mathContentDigit  {
-        expr_t *e1 = (expr_t*)$1;
-        expr_t *e2 = (expr_t*)$3;
-
-        $$ = newExpr_OPMul(e1,e2);
-    }
-    | stringContents '*' indexedVector  {
-        expr_t *e1 = (expr_t*)$1;
-        expr_t *e2 = (expr_t*)$3;
-
-        $$ = newExpr_OPMul(e1,e2);
-    }
-    | stringContent {
-        $$ = $1;
     };
 
 stringContent:
@@ -821,6 +743,11 @@ stringEdition:
     | RETURN {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "->");
+        $$ = newExpr_Text(buffer);
+    }
+    | FOREACH {
+        char buffer[10];
+        snprintf(buffer, sizeof(buffer), "%s", "...");
         $$ = newExpr_Text(buffer);
     }
     | otherChar {

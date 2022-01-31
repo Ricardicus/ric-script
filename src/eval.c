@@ -18,7 +18,7 @@ static void debugPrint(char *format, ...) {
 
 void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
   stackval_t sv = *stackval;
-    /* Push value to the stack */
+  /* Push value to the stack */
   switch (sv.type) {
     case INT32TYPE: {
       PUSH_INT(sv.i, sp, sc);
@@ -3760,7 +3760,7 @@ void interpret_statements_(
             endIteration = keyCount;
           } else if ( rootChars != NULL ) {
             endIteration = strlen(rootChars);
-          } else if ( rootInt > 0 ) {
+          } else if ( rootInt >= 0 ) {
             endIteration = rootInt;
           } else if ( rootBigInt != NULL ) {
             mpz_init(endIterationBigInt);
@@ -3910,13 +3910,21 @@ void interpret_statements_(
             size_t len;
             char *newText;
 
-            len = 2;
-            newText = ast_emalloc(len);
-            snprintf(newText, 2, "%c", rootChars[arrayIndex]);
-            sv.type = TEXT;
-            sv.t = newText;
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
+            hvp = locals_lookup(varLocals, entryId);
+            if ( hvp == NULL ) {
+              len = 2;
+              newText = ast_emalloc(len);
+              snprintf(newText, 2, "%c", rootChars[arrayIndex]);
+
+              sv.type = TEXT;
+              sv.t = newText;
+
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, entryId, hvp);
+            } else {
+              /* Update with new text */
+              snprintf(hvp->sv.t, 2, "%c", rootChars[arrayIndex]);
+            }
             /* Increase the value of the unfolded variable */
             festmtIndex++;
             hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
@@ -3930,14 +3938,20 @@ void interpret_statements_(
 
             hvp->sv.i = festmtIndex;
             locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
-          } else if ( rootInt > 0 ) {
+          } else if ( rootInt >= 0 ) {
             /* traverse the integer, start from zero */
-            stackval_t sv;
+            hvp = locals_lookup(varLocals, entryId);
+            if ( hvp == NULL ) {
+              stackval_t sv;
 
-            sv.type = INT32TYPE;
-            sv.i = festmtIndex;
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
+              sv.type = INT32TYPE;
+              sv.i = festmtIndex;
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, entryId, hvp);
+            } else {
+              /* Update value on the heap */
+              hvp->sv.i = festmtIndex;
+            }
             /* Increase the value of the unfolded variable */
             festmtIndex++;
             hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
@@ -3954,17 +3968,24 @@ void interpret_statements_(
           } else if ( rootBigInt != NULL ) {
             /* traverse the big integer, start from zero */
             stackval_t sv;
-            expr_t *e = newExpr_BigIntFromInt(0);
+            expr_t *e = NULL;
             heapval_t *hvp = NULL;
 
-            sv.type = BIGINT;
-            sv.bigInt = e->bigInt;
-            free(e);
+            hvp = locals_lookup(varLocals, entryId);
+            if ( hvp == NULL ) {
+              e = newExpr_BigIntFromInt(0);
 
-            mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
+              sv.type = BIGINT;
+              sv.bigInt = e->bigInt;
+              free(e);
 
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
+              mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
+
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, entryId, hvp);
+            } else {
+              mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
+            }
 
             /* Increase the value of the unfolded variable */
             mpz_add_ui(festmtBigIndex, festmtBigIndex, 1);
@@ -3986,13 +4007,21 @@ void interpret_statements_(
             exit(1); 
           }
 
-          /* Moving along, interpreting body */
-          localsStackSp = varLocals->sp;
-          localsStackSb = varLocals->sb;
-          (void)depth;(void)tmp;(void)classObj;(void)localsStackSp;(void)localsStackSb;
-          interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
-          varLocals->sb = localsStackSb;
-          varLocals->sp = localsStackSp;
+          continueLoop = endIteration != 0;
+          if ( rootBigInt != NULL ) {
+            // Special case, big looping
+            continueLoop = (mpz_cmp_ui(endIterationBigInt, 0) != 0);
+          }
+
+          if ( continueLoop ) {
+            /* Moving along, interpreting body */
+            localsStackSp = varLocals->sp;
+            localsStackSb = varLocals->sb;
+            (void)depth;(void)tmp;(void)classObj;(void)localsStackSp;(void)localsStackSb;
+            interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
+            varLocals->sb = localsStackSb;
+            varLocals->sp = localsStackSp;
+          }
 
           /* Get the index value */
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);

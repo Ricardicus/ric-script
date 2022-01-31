@@ -18,6 +18,7 @@ FLOAT_VAL        [0-9]+"."[0-9]*
 KEYWORD_PROCESS  process
 HASHTAG          [#]
 RETURN_TOKEN     "->"
+FOREACH_TOKEN    "..."
 ID_TOKEN         [_[:alnum:]åäöÅÄÖ]
 RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\{}]
 
@@ -65,6 +66,10 @@ RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\{}]
 
 {RETURN_TOKEN} {
 	return RETURN;
+}
+
+{FOREACH_TOKEN} {
+	return FOREACH;
 }
 
 [ ] {

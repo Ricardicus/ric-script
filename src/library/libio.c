@@ -1,7 +1,6 @@
 #include "libio.h"
 
-int ric_open_file(LIBRARY_PARAMS())
-{
+int ric_open_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   FILE *fp;
   char *filename = NULL;
@@ -12,26 +11,29 @@ int ric_open_file(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    filename = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      filename = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   /* Check if file exist, if it doesn't create it */
   fp = fopen(filename, "r");
-  if ( fp == NULL ) {
+  if (fp == NULL) {
     fp = fopen(filename, "w");
   } else {
     fclose(fp);
     fp = fopen(filename, "r+");
   }
 
-  if ( fp == NULL ) {
+  if (fp == NULL) {
     // Failed to open such a file
     // Pushing the result 1
     PUSH_INT(1, sp, sc);
@@ -44,8 +46,7 @@ int ric_open_file(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_close_file(LIBRARY_PARAMS())
-{
+int ric_close_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   FILE *fp;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -55,14 +56,17 @@ int ric_close_file(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case POINTERTYPE:
-    fp = (FILE*)stv.p;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      fp = (FILE *)stv.p;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   fclose(fp);
@@ -73,8 +77,7 @@ int ric_close_file(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_read_file(LIBRARY_PARAMS())
-{
+int ric_read_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   FILE *fp;
   size_t datasize = 0;
@@ -90,35 +93,41 @@ int ric_read_file(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case POINTERTYPE:
-    fp = (FILE*)stv.p;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      fp = (FILE *)stv.p;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
     case INT32TYPE:
-    datasize = (size_t) stv.i;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, integer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      datasize = (size_t)stv.i;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, integer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   e = newExpr_RawData(datasize);
 
   readBytes = fread(e->rawdata->data, 1, e->rawdata->size, fp);
 
-  if ( readBytes != e->rawdata->size ) {
+  if (readBytes != e->rawdata->size) {
     e->rawdata->size = readBytes;
   }
 
@@ -134,8 +143,7 @@ int ric_read_file(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_write_file(LIBRARY_PARAMS())
-{
+int ric_write_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   FILE *fp;
   char *text = NULL;
@@ -149,65 +157,71 @@ int ric_write_file(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case POINTERTYPE:
-    fp = (FILE*)stv.p;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      fp = (FILE *)stv.p;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
     case TEXT:
-    text = stv.t;
-    break;
+      text = stv.t;
+      break;
     case RAWDATATYPE:
-    rawdata = stv.rawdata;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      rawdata = stv.rawdata;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
-  if ( text != NULL ) {
+  if (text != NULL) {
     /* Parsing the string, some character combos: '\r', '\n' should be interpreted disctincly */
     c = text;
-    while ( *c ) {
+    while (*c) {
 
-      if ( !backslash && *c == '\\' ) {
+      if (!backslash && *c == '\\') {
         backslash = 1;
         ++c;
         continue;
       }
 
-      if ( backslash ) {
+      if (backslash) {
         switch (*c) {
-        case 'n':
-        // Print a new line
-        fprintf(fp, "\n");
-        break;
-        case 'r':
-        // print the other one windows likes
-        fprintf(fp, "\r");
-        break;
-        case '\\':
-        // print a backslash
-        fprintf(fp, "\\");
-        break;
-        case 't':
-        // print a tab
-        fprintf(fp, "\t");
-        break;
-        default:
-        // Ignoring this backslashed one, since I don't understand it..
-        break;
+          case 'n':
+            // Print a new line
+            fprintf(fp, "\n");
+            break;
+          case 'r':
+            // print the other one windows likes
+            fprintf(fp, "\r");
+            break;
+          case '\\':
+            // print a backslash
+            fprintf(fp, "\\");
+            break;
+          case 't':
+            // print a tab
+            fprintf(fp, "\t");
+            break;
+          default:
+            // Ignoring this backslashed one, since I don't understand it..
+            break;
         }
       } else {
         fputc(*c, fp);
@@ -216,7 +230,7 @@ int ric_write_file(LIBRARY_PARAMS())
       ++c;
       backslash = 0;
     }
-  } else if ( rawdata != NULL ) {
+  } else if (rawdata != NULL) {
     /* Write raw data to file */
     fwrite(rawdata->data, 1, rawdata->size, fp);
   }
@@ -227,8 +241,7 @@ int ric_write_file(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_read_lines_file(LIBRARY_PARAMS())
-{
+int ric_read_lines_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   expr_t *vec = NULL;
   argsList_t *vecContent = NULL;
@@ -244,23 +257,26 @@ int ric_read_lines_file(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case POINTERTYPE:
-    fp = (FILE*)stv.p;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      fp = (FILE *)stv.p;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   buffer = calloc(MAX_LINE_LENGTH, 1);
-  if ( buffer == NULL ) {
+  if (buffer == NULL) {
     fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
-  while ( fgets(buffer, MAX_LINE_LENGTH, fp) != NULL ) {
+  while (fgets(buffer, MAX_LINE_LENGTH, fp) != NULL) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
@@ -288,8 +304,7 @@ int ric_read_lines_file(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_read_input(LIBRARY_PARAMS())
-{
+int ric_read_input(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *t = NULL;
   char *inputText = NULL;
@@ -305,41 +320,44 @@ int ric_read_input(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    inputText = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      inputText = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   buffer = calloc(MAX_LINE_LENGTH, 1);
-  if ( buffer == NULL ) {
+  if (buffer == NULL) {
     fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
   printf("%s", inputText);
 
-  if ( fgets(buffer, MAX_LINE_LENGTH, stdin) != NULL ) {
+  if (fgets(buffer, MAX_LINE_LENGTH, stdin) != NULL) {
     /* Take the remaining part also */
     c = strchr(buffer, '\r');
-    if ( c != NULL ) {
+    if (c != NULL) {
       *c = 0;
     }
     c = strchr(buffer, '\n');
-    if ( c != NULL ) {
+    if (c != NULL) {
       *c = 0;
     }
 
-    t = calloc(strlen(buffer)+1, 1);
-    if ( t == NULL ) {
+    t = calloc(strlen(buffer) + 1, 1);
+    if (t == NULL) {
       fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
       exit(1);
     }
-    snprintf(t, strlen(buffer)+1, "%s", buffer);
+    snprintf(t, strlen(buffer) + 1, "%s", buffer);
   }
 
   free(buffer);
@@ -353,4 +371,3 @@ int ric_read_input(LIBRARY_PARAMS())
 
   return 0;
 }
-

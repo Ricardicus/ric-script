@@ -23,27 +23,30 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg1 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   buffer = calloc(bufferSize, 1);
-  if ( buffer == NULL ) {
+  if (buffer == NULL) {
     fprintf(stderr, "error: Memory error, failed to list xattr.\n");
     exit(1);
   }
 
   ret = listxattr(arg1, buffer, bufferSize, 0);
 
-  if ( ret >= 0 ) {
+  if (ret >= 0) {
     offset = 0;
-    while ( offset < ret ) {
+    while (offset < ret) {
       expr_t *e;
       argsList_t *a;
 
@@ -83,14 +86,17 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg1 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   // pop arg 2 - xattr key
@@ -98,14 +104,17 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg2 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg2 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   // pop arg 3 - xattr value
@@ -113,16 +122,19 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg3 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg3 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
- 
+
   result = setxattr(arg1, arg2, arg3, strlen(arg3), 0, 0);
 
   /* Pushing result */
@@ -148,14 +160,17 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg1 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   // pop arg 2 - xattr key
@@ -163,21 +178,25 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg2 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg2 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
- 
-  resultValue = calloc(valueMaxLen+1, 1);
-  if ( resultValue == NULL ) {
-      fprintf(stderr, "error: calloc memory error during function call '%s', sorry I will terminate.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
+
+  resultValue = calloc(valueMaxLen + 1, 1);
+  if (resultValue == NULL) {
+    fprintf(stderr,
+            "error: calloc memory error during function call '%s', sorry I will terminate.\n",
+            LIBRARY_FUNC_NAME());
+    exit(1);
   }
 
   (void)getxattr(arg1, arg2, resultValue, valueMaxLen, 0, 0);
@@ -205,14 +224,17 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg1 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   // pop arg 2 - xattr key
@@ -220,14 +242,17 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg2 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg2 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   result = removexattr(arg1, arg2, 0);
@@ -238,9 +263,8 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
   return 0;
 }
 
-static void DirectoryWalkAndMatchXattrKey(const char *name,
-  regex_t *re, argsList_t **vecContent, int level, int maxDepth)
-{
+static void DirectoryWalkAndMatchXattrKey(const char *name, regex_t *re, argsList_t **vecContent,
+                                          int level, int maxDepth) {
   char path[1024];
   DIR *dir;
   int ret;
@@ -251,12 +275,12 @@ static void DirectoryWalkAndMatchXattrKey(const char *name,
   size_t bufferSize = 1024;
 
   buffer = calloc(bufferSize, 1);
-  if ( buffer == NULL ) {
+  if (buffer == NULL) {
     fprintf(stderr, "error: Memory error, allocate\n");
     exit(1);
   }
 
-  if ( level > maxDepth ) {
+  if (level > maxDepth) {
     free(buffer);
     return;
   }
@@ -267,22 +291,21 @@ static void DirectoryWalkAndMatchXattrKey(const char *name,
   }
 
   while ((entry = readdir(dir)) != NULL) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
     snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
 
     /* List and walk through all the xattr-keys of this file */
     ret = listxattr(path, buffer, bufferSize, 0);
-    if ( ret >= 0 ) {
+    if (ret >= 0) {
       offset = 0;
-      while ( offset < ret ) {
+      while (offset < ret) {
         /* Check if we have regex match */
         char *key = &buffer[offset];
 
         /* Execute regular expression matching */
         rc = regexec(re, key, 0, NULL, 0);
 
-        if ( rc == 0 ) {
+        if (rc == 0) {
           /* We had a match! */
           expr_t *e;
           argsList_t *a;
@@ -325,19 +348,23 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    arg1 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
-  rc = regcomp(&re, arg1, REG_EXTENDED|REG_NOSUB);
-  if ( rc != 0 ) {
-    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n", LIBRARY_FUNC_NAME(), arg1);
+  rc = regcomp(&re, arg1, REG_EXTENDED | REG_NOSUB);
+  if (rc != 0) {
+    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
+            LIBRARY_FUNC_NAME(), arg1);
 
     vec = newExpr_Vector(NULL);
 
@@ -368,4 +395,3 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
 
   return 0;
 }
-

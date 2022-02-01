@@ -28,7 +28,7 @@ typedef struct dl_handle dl_handle_t;
 
 void initialize_ric_lib();
 size_t ric_lib_calls();
-libFunction_t* look_up_lib(char *id);
+libFunction_t *look_up_lib(char *id);
 void ric_get_dynamic_libraries(dl_handle_t **hnds, int *nbrLibs);
 
 /* Exported modules fileds */
@@ -43,4 +43,3 @@ void ric_get_dynamic_libraries(dl_handle_t **hnds, int *nbrLibs);
 typedef size_t (*exportModSizeFunc_t)(void);
 
 #endif
-

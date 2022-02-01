@@ -1,7 +1,6 @@
 #include "libstring.h"
 
-int ric_atoi(LIBRARY_PARAMS())
-{
+int ric_atoi(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   rawdata_t *rawdata = NULL;
@@ -13,33 +12,35 @@ int ric_atoi(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    string = stv.t;
-    break;
+      string = stv.t;
+      break;
     case RAWDATATYPE:
-    rawdata = stv.rawdata;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      rawdata = stv.rawdata;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
-  if ( string != NULL ) {
+  if (string != NULL) {
     result = atoi(string);
-  } else if ( rawdata != NULL ) {
-    result = (int)((unsigned char*) rawdata->data)[0];
+  } else if (rawdata != NULL) {
+    result = (int)((unsigned char *)rawdata->data)[0];
   }
-  
+
   /* Pushing the parsed value */
   PUSH_INT(result, sp, sc);
 
   return 0;
 }
 
-int ric_split(LIBRARY_PARAMS())
-{
+int ric_split(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *arg1 = NULL;
   char *arg2 = NULL;
@@ -59,14 +60,17 @@ int ric_split(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    arg1 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   // pop arg 2 - string to split by (delimiter)
@@ -74,42 +78,45 @@ int ric_split(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    arg2 = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      arg2 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
-  buffer = calloc(strlen(arg1)+2, 1);
-  if ( buffer == NULL ) {
+  buffer = calloc(strlen(arg1) + 2, 1);
+  if (buffer == NULL) {
     fprintf(stderr, "error: Memory error, failed to split.\n");
     exit(1);
   }
 
-  snprintf(buffer, strlen(arg1)+2, "%s", arg1);
+  snprintf(buffer, strlen(arg1) + 2, "%s", arg1);
 
   offset = 0;
-  while ( (c = strstr(buffer+offset, arg2)) != NULL ) {
+  while ((c = strstr(buffer + offset, arg2)) != NULL) {
     expr_t *e;
     argsList_t *a;
 
     *c = 0;
-    e = newExpr_Text(buffer+offset);
+    e = newExpr_Text(buffer + offset);
     a = newArgument(e, vecContent);
     vecContent = a;
 
-    offset += strlen(buffer+offset) + strlen(arg2);
+    offset += strlen(buffer + offset) + strlen(arg2);
   }
 
-  if ( offset != 0 || (strstr(buffer, arg2) == NULL) ) {
+  if (offset != 0 || (strstr(buffer, arg2) == NULL)) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
-    e = newExpr_Text(buffer+offset);
+    e = newExpr_Text(buffer + offset);
     a = newArgument(e, vecContent);
     vecContent = a;
   }
@@ -129,8 +136,7 @@ int ric_split(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_char_code(LIBRARY_PARAMS())
-{
+int ric_char_code(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   int result = 0;
@@ -141,26 +147,28 @@ int ric_char_code(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    string = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      string = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   result = (int)string[0];
-  
+
   /* Pushing the parsed value */
   PUSH_INT(result, sp, sc);
 
   return 0;
 }
 
-int ric_to_upper(LIBRARY_PARAMS())
-{
+int ric_to_upper(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   expr_t *e = NULL;
@@ -176,20 +184,23 @@ int ric_to_upper(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    string = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      string = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   strLen = strlen(string);
   e = newExpr_Text(string);
 
-  while ( i < strLen ) {
+  while (i < strLen) {
     e->text[i] = (char)toupper(string[i]);
     ++i;
   }
@@ -207,8 +218,7 @@ int ric_to_upper(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_to_lower(LIBRARY_PARAMS())
-{
+int ric_to_lower(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   expr_t *e = NULL;
@@ -224,20 +234,23 @@ int ric_to_lower(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    string = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      string = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   strLen = strlen(string);
   e = newExpr_Text(string);
 
-  while ( i < strLen ) {
+  while (i < strLen) {
     e->text[i] = (char)tolower(string[i]);
     ++i;
   }
@@ -254,4 +267,3 @@ int ric_to_lower(LIBRARY_PARAMS())
 
   return 0;
 }
-

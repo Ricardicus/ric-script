@@ -6,10 +6,9 @@
 
 #include "libos.h"
 
-int ric_sleep(LIBRARY_PARAMS())
-{
+int ric_sleep(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int32_t sleepTime = 0;  // Sleep time is seconds
+  int32_t sleepTime = 0; // Sleep time is seconds
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -17,14 +16,17 @@ int ric_sleep(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case INT32TYPE:
-    sleepTime = stv.i;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, integer expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      sleepTime = stv.i;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, integer expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   (void)sleep((unsigned int)sleepTime);
@@ -35,8 +37,7 @@ int ric_sleep(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_is_directory(LIBRARY_PARAMS())
-{
+int ric_is_directory(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   int result = 0;
@@ -48,18 +49,21 @@ int ric_is_directory(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    string = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      string = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   stat(string, &path_stat);
-  if ( S_ISDIR(path_stat.st_mode) ) {
+  if (S_ISDIR(path_stat.st_mode)) {
     result = 1;
   } else {
     result = 0;
@@ -71,7 +75,6 @@ int ric_is_directory(LIBRARY_PARAMS())
   return 0;
 }
 
-
 static int recursive_delete(const char *path) {
   DIR *d = opendir(path);
   size_t path_len = strlen(path);
@@ -81,16 +84,15 @@ static int recursive_delete(const char *path) {
     struct dirent *p;
 
     r = 0;
-    while (!r && (p=readdir(d))) {
+    while (!r && (p = readdir(d))) {
       int r2 = -1;
       char *buf;
       size_t len;
 
       /* Skip the names "." and ".." as we don't want to recurse on them. */
-      if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, ".."))
-        continue;
+      if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) continue;
 
-      len = path_len + strlen(p->d_name) + 2; 
+      len = path_len + strlen(p->d_name) + 2;
       buf = malloc(len);
 
       if (buf) {
@@ -108,16 +110,14 @@ static int recursive_delete(const char *path) {
       r = r2;
     }
     closedir(d);
-   }
+  }
 
-  if (!r)
-    r = rmdir(path);
+  if (!r) r = rmdir(path);
 
   return r;
 }
 
-int ric_rm(LIBRARY_PARAMS())
-{
+int ric_rm(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *file = NULL;
   int result = 0;
@@ -129,18 +129,21 @@ int ric_rm(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    file = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      file = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   stat(file, &path_stat);
-  if ( S_ISDIR(path_stat.st_mode) ) {
+  if (S_ISDIR(path_stat.st_mode)) {
     result = recursive_delete(file);
   } else {
     result = remove(file);
@@ -152,9 +155,7 @@ int ric_rm(LIBRARY_PARAMS())
   return 0;
 }
 
-
-int ric_ls(LIBRARY_PARAMS())
-{
+int ric_ls(LIBRARY_PARAMS()) {
   DIR *d;
   struct dirent *dir;
   expr_t *vec = NULL;
@@ -171,14 +172,17 @@ int ric_ls(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    argText = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      argText = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   d = opendir(argText);
@@ -205,8 +209,7 @@ int ric_ls(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_cd(LIBRARY_PARAMS())
-{
+int ric_cd(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *argText;
   int result = 0;
@@ -218,14 +221,17 @@ int ric_cd(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    argText = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      argText = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   result = chdir(argText);
@@ -235,8 +241,7 @@ int ric_cd(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_is_file(LIBRARY_PARAMS())
-{
+int ric_is_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *filename = NULL;
   struct stat path_stat;
@@ -248,18 +253,21 @@ int ric_is_file(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    filename = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      filename = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
   stat(filename, &path_stat);
-  if ( S_ISREG(path_stat.st_mode) ) {
+  if (S_ISREG(path_stat.st_mode)) {
     result = 1;
   } else {
     result = 0;
@@ -270,8 +278,7 @@ int ric_is_file(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_mkdir(LIBRARY_PARAMS())
-{
+int ric_mkdir(LIBRARY_PARAMS()) {
   stackval_t stv;
   int32_t result;
   char *dir = NULL;
@@ -283,14 +290,16 @@ int ric_mkdir(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    dir = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      dir = stv.t;
+      break;
+    default:
+      {
+        fprintf(stderr,
+                "error: function '%s' got unexpected data type as argument, expected string.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   result = mkdir(dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -302,34 +311,32 @@ int ric_mkdir(LIBRARY_PARAMS())
 }
 
 static int file_recursion_max_depth(char *pattern) {
-  /* 
-  * On windows, the match we be of two in a row '\\', not the most
-  * beautiful, but the important thing is that it works if you are
-  * informed on what to do! :)
-  */
+  /*
+   * On windows, the match we be of two in a row '\\', not the most
+   * beautiful, but the important thing is that it works if you are
+   * informed on what to do! :)
+   */
   int ret = 1;
   char *walker = pattern;
   int justFoundSlash = 0;
   int dot = 0;
   int addDepth = 0;
 
-  while ( *walker ) {
-    if ( *walker == '/' ) {
-      if ( justFoundSlash ) {
-        if ( !dot )
-          addDepth++; // Descend an additional level
+  while (*walker) {
+    if (*walker == '/') {
+      if (justFoundSlash) {
+        if (!dot) addDepth++; // Descend an additional level
         dot = 0;
       }
       justFoundSlash = 1;
     } else {
       justFoundSlash = 0;
     }
-    if ( *walker == '.' )
-      dot = 1;
+    if (*walker == '.') dot = 1;
     ++walker;
   }
 
-  if ( addDepth == 0 ) {
+  if (addDepth == 0) {
     /* Go through all levels, limit to 100 */
     ret = 100;
   } else {
@@ -339,36 +346,32 @@ static int file_recursion_max_depth(char *pattern) {
   return ret;
 }
 
-void DirectoryWalkAndMatch(const char *name,
-  regex_t *re, argsList_t **vecContent, int level, int maxDepth)
-{
+void DirectoryWalkAndMatch(const char *name, regex_t *re, argsList_t **vecContent, int level,
+                           int maxDepth) {
   char path[1024];
   DIR *dir;
   int rc;
   struct dirent *entry;
 
-  if ( level > maxDepth )
-    return;
+  if (level > maxDepth) return;
 
-  if (!(dir = opendir(name)))
-    return;
+  if (!(dir = opendir(name))) return;
 
   while ((entry = readdir(dir)) != NULL) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
     snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
 
     /* Execute regular expression matching */
     rc = regexec(re, path, 0, NULL, 0);
 
-    if ( rc == 0 ) {
+    if (rc == 0) {
       /* We had a match! */
       expr_t *e;
       argsList_t *a;
       e = newExpr_Text(path);
       a = newArgument(e, *vecContent);
       *vecContent = a;
-    } 
+    }
 
     if (entry->d_type == DT_DIR) {
       DirectoryWalkAndMatch(path, re, vecContent, level + 1, maxDepth);
@@ -398,19 +401,22 @@ int ric_find_files(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    pattern = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      pattern = stv.t;
+      break;
+    default:
+      {
+        fprintf(stderr,
+                "error: function '%s' got unexpected data type as argument, expected string.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
-  rc = regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB);
-  if ( rc != 0 ) {
-    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n", LIBRARY_FUNC_NAME(), pattern);
+  rc = regcomp(&re, pattern, REG_EXTENDED | REG_NOSUB);
+  if (rc != 0) {
+    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
+            LIBRARY_FUNC_NAME(), pattern);
 
     vec = newExpr_Vector(NULL);
 
@@ -445,8 +451,7 @@ int ric_find_files(LIBRARY_PARAMS()) {
   return 0;
 }
 
-int ric_os_name(LIBRARY_PARAMS())
-{
+int ric_os_name(LIBRARY_PARAMS()) {
   stackval_t stv;
   size_t resultTextLen = strlen(TARGET_OS) + 2;
   char *resultText = NULL;
@@ -461,27 +466,27 @@ int ric_os_name(LIBRARY_PARAMS())
   snprintf(resultText, resultTextLen, "%s", TARGET_OS);
 
   fixer = resultText;
-  if ( *fixer == '"' ) {
+  if (*fixer == '"') {
     /*
-    * Build required -DTARGET_OS="linux",
-    * i.e. a stringified define. Otherwise I just get '1'.
-    * I will take care of that here...
-    */
+     * Build required -DTARGET_OS="linux",
+     * i.e. a stringified define. Otherwise I just get '1'.
+     * I will take care of that here...
+     */
     int fixIt = 0;
     fixer = resultText;
-    while ( *fixer ) {
+    while (*fixer) {
       ++fixer;
-      if ( *fixer == '"' && resultText[0] == '"' ) {
+      if (*fixer == '"' && resultText[0] == '"') {
         // Avoid this problem
         fixIt = 1;
         *fixer = 0;
       }
     }
-    if ( fixIt ) {
+    if (fixIt) {
       int idx = 0;
       fixer = resultText;
-      while ( *fixer ) {
-        fixer[idx] = fixer[idx+1];
+      while (*fixer) {
+        fixer[idx] = fixer[idx + 1];
         ++fixer;
       }
     }
@@ -495,4 +500,3 @@ int ric_os_name(LIBRARY_PARAMS())
   PUSH_STRING(stv.t, sp, sc);
   return 0;
 }
-

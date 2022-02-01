@@ -2,12 +2,12 @@
 #define LIBJSON_H
 
 /*
-*
-* The idea of this libjson translation unit is
-* adding some basic JSON parsing to support this
-* data format in the standard library
-*
-*/
+ *
+ * The idea of this libjson translation unit is
+ * adding some basic JSON parsing to support this
+ * data format in the standard library
+ *
+ */
 
 #include <cJSON.h>
 

@@ -1,0 +1,6 @@
+# All files in interpreter
+src/*
+src/library/*
+
+# All files in SDK 
+src/sdk_lib/*

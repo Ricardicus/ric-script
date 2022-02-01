@@ -2,12 +2,12 @@
 #define LIBMATH_H
 
 /*
-*
-* The idea of this libmath translation unit is
-* adding  math functions to the standard included library
-* of my scripting language
-*
-*/
+ *
+ * The idea of this libmath translation unit is
+ * adding  math functions to the standard included library
+ * of my scripting language
+ *
+ */
 
 #include <math.h>
 
@@ -32,4 +32,3 @@ int ric_random_uniform(LIBRARY_PARAMS());
 int ric_random_uniform_int(LIBRARY_PARAMS());
 
 #endif
-

@@ -27,15 +27,16 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    port = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      port = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -49,9 +50,7 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
   svr_addr.sin_addr.s_addr = INADDR_ANY;
   svr_addr.sin_port = htons(port);
 
-  if (bind(serverSocket,
-    (struct sockaddr *) &svr_addr,
-    sizeof(svr_addr)) == -1) {
+  if (bind(serverSocket, (struct sockaddr *)&svr_addr, sizeof(svr_addr)) == -1) {
     close(serverSocket);
     serverSocket = -1;
     fprintf(stderr, "error: function '%s' failed to setup the socket\n", LIBRARY_FUNC_NAME());
@@ -59,7 +58,7 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
   }
 
   int ret = listen(serverSocket, 3);
-  if ( ret != 0 ) {
+  if (ret != 0) {
     fprintf(stderr, "error: function '%s' failed to setup the socket\n", LIBRARY_FUNC_NAME());
     return 1;
   }
@@ -84,40 +83,56 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    serverSocket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      serverSocket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
-  clientSocket = accept(serverSocket,
-    (struct sockaddr *) &cliAddr,
-    &sinLen);
+  clientSocket = accept(serverSocket, (struct sockaddr *)&cliAddr, &sinLen);
 
-  if ( clientSocket < 0 ) {
+  if (clientSocket < 0) {
     int errorStatus = errno;
 
     fprintf(stderr, "error: function '%s' failed to accept connection", LIBRARY_FUNC_NAME());
-    switch ( errorStatus ) {
-      case EAGAIN: break;
-      case EBADF: printf("EBADF\r\n"); break;
-      case ECONNABORTED: printf("ECONNABORTED\r\n"); break;
-      case EFAULT: printf("EFAULT\r\n"); break;
-      case EINTR: printf("EINTR\r\n"); break;
-      case EINVAL: printf("EINVAL\r\n"); break;
-      case EMFILE: printf("EMFILE\r\n"); break;
-      case ENFILE: printf("ENFILE\r\n"); break;
-      case ENOTSOCK: printf("ENOTSOCK\r\n"); break;
+    switch (errorStatus) {
+      case EAGAIN:
+        break;
+      case EBADF:
+        printf("EBADF\r\n");
+        break;
+      case ECONNABORTED:
+        printf("ECONNABORTED\r\n");
+        break;
+      case EFAULT:
+        printf("EFAULT\r\n");
+        break;
+      case EINTR:
+        printf("EINTR\r\n");
+        break;
+      case EINVAL:
+        printf("EINVAL\r\n");
+        break;
+      case EMFILE:
+        printf("EMFILE\r\n");
+        break;
+      case ENFILE:
+        printf("ENFILE\r\n");
+        break;
+      case ENOTSOCK:
+        printf("ENOTSOCK\r\n");
+        break;
       default:
-      {
-        printf("Unknown error\r\n");
-      }
-      break;
+        {
+          printf("Unknown error\r\n");
+        }
+        break;
     }
 
     close(serverSocket);
@@ -140,21 +155,22 @@ int ric_read_socket(LIBRARY_PARAMS()) {
   size_t maxReadSize;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  void *hp = PROVIDE_CONTEXT()->hp; 
+  void *hp = PROVIDE_CONTEXT()->hp;
   /* Read first argument, socket */
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* Read second argument, how much to read */
@@ -162,22 +178,23 @@ int ric_read_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    maxReadSize = (size_t) stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      maxReadSize = (size_t)stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   e = newExpr_RawData(maxReadSize);
 
   readBytes = read(socket, e->rawdata->data, maxReadSize);
 
-  if ( readBytes != maxReadSize ) {
+  if (readBytes != maxReadSize) {
     e->rawdata->size = readBytes;
   }
 
@@ -205,15 +222,16 @@ int ric_write_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* Read second argument, text to send */
@@ -221,22 +239,23 @@ int ric_write_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    t = stv.t;
-    break;
+      t = stv.t;
+      break;
     case RAWDATATYPE:
-    rawdata = stv.rawdata;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      rawdata = stv.rawdata;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
-  if ( t != NULL ) {
+  if (t != NULL) {
     ret = write(socket, t, strlen(t));
-  } else if ( rawdata != NULL ) {
+  } else if (rawdata != NULL) {
     ret = write(socket, rawdata->data, rawdata->size);
   }
 
@@ -257,15 +276,16 @@ int ric_close_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   ret = close(socket);
@@ -292,14 +312,15 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    address = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      address = stv.t;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* Read second argument, port */
@@ -307,14 +328,15 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    portNo = stv.i;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      portNo = stv.i;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* a socket is created through call to socket() function */
@@ -331,9 +353,7 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
 
   serv_addr.sin_family = AF_INET;
 
-  bcopy((char *)server->h_addr, 
-       (char *)&serv_addr.sin_addr.s_addr,
-       server->h_length);
+  bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portNo);
 
   if (connect(socketFd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
@@ -347,4 +367,3 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
   PUSH_INT(socketFd, sp, sc);
   return 0;
 }
-

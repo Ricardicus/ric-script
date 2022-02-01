@@ -2,12 +2,12 @@
 #define LIBIO_H
 
 /*
-*
-* The idea of this libio translation unit is
-* adding FILE IO to the standard included library
-* of my scripting language
-*
-*/
+ *
+ * The idea of this libio translation unit is
+ * adding FILE IO to the standard included library
+ * of my scripting language
+ *
+ */
 
 #include "hashtable.h"
 #include "ast.h"
@@ -22,4 +22,3 @@ int ric_read_lines_file(LIBRARY_PARAMS());
 int ric_read_input(LIBRARY_PARAMS());
 
 #endif
-

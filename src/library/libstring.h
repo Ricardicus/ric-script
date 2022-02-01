@@ -2,14 +2,14 @@
 #define LIBSTRING_H
 
 /*
-*
-* The idea of this libstd translation unit is
-* adding some basic string functions included
-* in the library of my scripting language
-*
-*/
+ *
+ * The idea of this libstd translation unit is
+ * adding some basic string functions included
+ * in the library of my scripting language
+ *
+ */
 
-#include <ctype.h> 
+#include <ctype.h>
 
 #include "lib.h"
 #include "hashtable.h"

@@ -1,0 +1,21 @@
+---
+BasedOnStyle: LLVM
+AlignEscapedNewlines: Left
+AllowShortIfStatementsOnASingleLine: WithoutElse
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterFunction: true
+  BeforeCatch: true
+  BeforeElse: true
+BreakStringLiterals: false
+ColumnLimit: 99
+IndentCaseLabels: true
+IndentCaseBlocks: true
+MaxEmptyLinesToKeep: 1
+SortIncludes: false
+...
+

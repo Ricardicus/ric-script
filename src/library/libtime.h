@@ -21,6 +21,4 @@ int ric_time_week(LIBRARY_PARAMS());
 int ric_time_month(LIBRARY_PARAMS());
 int ric_time_year(LIBRARY_PARAMS());
 
-
 #endif
-

@@ -2,12 +2,12 @@
 #define LIBSTD_H
 
 /*
-*
-* The idea of this libstd translation unit is
-* adding some basic standard functions included
-* in the library of my scripting language
-*
-*/
+ *
+ * The idea of this libstd translation unit is
+ * adding some basic standard functions included
+ * in the library of my scripting language
+ *
+ */
 
 #include "lib.h"
 #include "dl.h"
@@ -33,4 +33,3 @@ int ric_create_data(LIBRARY_PARAMS());
 int ric_create_text(LIBRARY_PARAMS());
 
 #endif
-

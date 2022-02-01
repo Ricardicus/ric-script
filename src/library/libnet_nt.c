@@ -15,8 +15,7 @@ static void initializeWSA() {
   static bool wsaInitialized = false;
   static WSADATA wsa;
 
-  if ( wsaInitialized )
-    return;
+  if (wsaInitialized) return;
 
   if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
     printf("WSAStartup failed. Error Code : %d", WSAGetLastError());
@@ -47,15 +46,16 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    port = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      port = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   memset(portToUse, 0, sizeof(portToUse));
@@ -71,17 +71,14 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
 
   // Resolve the server address and port
   iResult = getaddrinfo(NULL, portToUse, &hints, &result);
-  if ( iResult != 0 ) {
+  if (iResult != 0) {
     WSACleanup();
     fprintf(stderr, "error: function '%s' failed to create socket\n", LIBRARY_FUNC_NAME());
     return 1;
   }
 
   // Create a SOCKET for connecting to server
-  serverSocket = socket(
-    result->ai_family,
-    result->ai_socktype,
-    result->ai_protocol);
+  serverSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
   if (serverSocket == INVALID_SOCKET) {
     freeaddrinfo(result);
@@ -140,15 +137,16 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   timeout.tv_sec = 1000;
@@ -161,28 +159,30 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
   // 0: timed out
   // > 0: data ready to be read
   selectRet = select(0, &fds, 0, 0, &timeout);
-  if ( selectRet == 0 ) {
+  if (selectRet == 0) {
     // Timeout
     PUSH_INT(-1, sp, sc);
     return 0;
   }
 
-  if ( selectRet < 0 ) {
-    fprintf(stderr, "error: function '%s' failed to accept incoming connection\n", LIBRARY_FUNC_NAME());
+  if (selectRet < 0) {
+    fprintf(stderr, "error: function '%s' failed to accept incoming connection\n",
+            LIBRARY_FUNC_NAME());
     return 1;
   }
 
   clientSocket = WSAAccept(socket, NULL, NULL, NULL, NULL);
 
-  if ( clientSocket < 0 ) {
+  if (clientSocket < 0) {
     int errorStatus = WSAGetLastError();
 
-    if ( errorStatus == WSAEWOULDBLOCK ) {
+    if (errorStatus == WSAEWOULDBLOCK) {
       // Timeout
       PUSH_INT(-1, sp, sc);
       return 0;
     } else {
-      fprintf(stderr, "error: function '%s' failed to accept incoming connection\n", LIBRARY_FUNC_NAME());
+      fprintf(stderr, "error: function '%s' failed to accept incoming connection\n",
+              LIBRARY_FUNC_NAME());
       return 1;
     }
   }
@@ -209,51 +209,82 @@ int ric_read_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   t = calloc(maxReadSize, 1);
-  if ( t == NULL ) {
-    fprintf(stderr, "error: function '%s' allocate enough memory.\n",
-      LIBRARY_FUNC_NAME());
+  if (t == NULL) {
+    fprintf(stderr, "error: function '%s' allocate enough memory.\n", LIBRARY_FUNC_NAME());
     return 1;
   }
 
   ret = recv(socket, t, maxReadSize, 0);
 
-  if ( ret < 0 ) {
-      int code = WSAGetLastError();
-      switch ( code ) {
-        case WSANOTINITIALISED: printf("WSANOTINITIALISED"); break;
-        case WSAENETDOWN: printf("WSAENETDOWN"); break;
-        case WSAEFAULT: printf("WSAEFAULT"); break;
-        case WSAENOTCONN: printf("WSAENOTCONN"); break;
-        case WSAEINTR: printf("WSAEINTR"); break;
-        case WSAEINPROGRESS: printf("WSAEINPROGRESS"); break;
-        case WSAENETRESET: printf("WSAENETRESET"); break;
-        case WSAENOTSOCK: printf("WSAENOTSOCK"); break;
-        case WSAEOPNOTSUPP: printf("WSAEOPNOTSUPP"); break;
-        case WSAESHUTDOWN: printf("WSAESHUTDOWN"); break;
-        case WSAEWOULDBLOCK: printf("WSAEWOULDBLOCK"); break;
-        case WSAEMSGSIZE: printf("WSAEMSGSIZE"); break;
-        case WSAEINVAL: printf("WSAEINVAL"); break;
-        case WSAECONNABORTED: printf("WSAECONNABORTED"); break;
-        case WSAETIMEDOUT: printf("WSAETIMEDOUT"); break;
-        case WSAECONNRESET: printf("WSAECONNRESET"); break;
-        default:
+  if (ret < 0) {
+    int code = WSAGetLastError();
+    switch (code) {
+      case WSANOTINITIALISED:
+        printf("WSANOTINITIALISED");
         break;
-      }
+      case WSAENETDOWN:
+        printf("WSAENETDOWN");
+        break;
+      case WSAEFAULT:
+        printf("WSAEFAULT");
+        break;
+      case WSAENOTCONN:
+        printf("WSAENOTCONN");
+        break;
+      case WSAEINTR:
+        printf("WSAEINTR");
+        break;
+      case WSAEINPROGRESS:
+        printf("WSAEINPROGRESS");
+        break;
+      case WSAENETRESET:
+        printf("WSAENETRESET");
+        break;
+      case WSAENOTSOCK:
+        printf("WSAENOTSOCK");
+        break;
+      case WSAEOPNOTSUPP:
+        printf("WSAEOPNOTSUPP");
+        break;
+      case WSAESHUTDOWN:
+        printf("WSAESHUTDOWN");
+        break;
+      case WSAEWOULDBLOCK:
+        printf("WSAEWOULDBLOCK");
+        break;
+      case WSAEMSGSIZE:
+        printf("WSAEMSGSIZE");
+        break;
+      case WSAEINVAL:
+        printf("WSAEINVAL");
+        break;
+      case WSAECONNABORTED:
+        printf("WSAECONNABORTED");
+        break;
+      case WSAETIMEDOUT:
+        printf("WSAETIMEDOUT");
+        break;
+      case WSAECONNRESET:
+        printf("WSAECONNRESET");
+        break;
+      default:
+        break;
+    }
 
-      printf("\n");
-
+    printf("\n");
   }
 
   stv.type = TEXT;
@@ -278,15 +309,16 @@ int ric_write_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* Read second argument, text to send */
@@ -294,15 +326,16 @@ int ric_write_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    t = stv.t;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      t = stv.t;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   ret = send(socket, t, strlen(t), 0);
@@ -324,15 +357,16 @@ int ric_close_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    socket = stv.i;
-    break;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      socket = stv.i;
+      break;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   ret = shutdown(socket, SD_SEND);
@@ -365,14 +399,15 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    address = stv.t;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      address = stv.t;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* Read second argument, port */
@@ -380,20 +415,21 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case INT32TYPE:
-    portNo = stv.i;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      portNo = stv.i;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
-  WSAStartup(MAKEWORD(2,2),&wsa);
-  
-  //Create a socket
-  if ((s = socket(AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET) {
+  WSAStartup(MAKEWORD(2, 2), &wsa);
+
+  // Create a socket
+  if ((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
     /* Pushing result */
     ret = -1;
     PUSH_INT(ret, sp, sc);
@@ -406,22 +442,22 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
     PUSH_INT(ret, sp, sc);
     return 0;
   }
-  
-  //Cast the h_addr_list to in_addr , since h_addr_list also has the ip address in long format only
-  addr_list = (struct in_addr **) he->h_addr_list;
-  
+
+  // Cast the h_addr_list to in_addr , since h_addr_list also has the ip address in long format
+  // only
+  addr_list = (struct in_addr **)he->h_addr_list;
+
   for (i = 0; addr_list[i] != NULL; i++) {
-    //Return the first one;
-    strcpy(ip , inet_ntoa(*addr_list[i]) );
-  }  
+    // Return the first one;
+    strcpy(ip, inet_ntoa(*addr_list[i]));
+  }
 
   server.sin_addr.s_addr = inet_addr(ip);
   server.sin_family = AF_INET;
   server.sin_port = htons(portNo);
 
-  //Connect to remote server
-  if (connect(s , (struct sockaddr *)&server , sizeof(server)) < 0)
-  {
+  // Connect to remote server
+  if (connect(s, (struct sockaddr *)&server, sizeof(server)) < 0) {
     /* Pushing result */
     ret = -1;
     PUSH_INT(ret, sp, sc);
@@ -432,4 +468,3 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
   PUSH_INT(s, sp, sc);
   return 0;
 }
-

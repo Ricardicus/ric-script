@@ -1,7 +1,6 @@
 #include "libjson.h"
 
-static void loadCJSON(cJSON *json, int depth,
-  expr_t **out, EXPRESSION_PARAMS()) {
+static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS()) {
   cJSON *walk = json;
   int count = 0;
   int i = 0;
@@ -10,74 +9,75 @@ static void loadCJSON(cJSON *json, int depth,
   int isArray = 0;
 
   /* Get number of elements */
-  while ( walk != NULL ) {
+  while (walk != NULL) {
     walk = walk->next;
     count++;
   }
 
   walk = json;
   i = 0;
-  while ( walk != NULL ) {
+  while (walk != NULL) {
     expr_t *val = NULL;
     keyValList_t *keyVal = ast_ecalloc(sizeof(keyValList_t));
     keyVal->next = NULL;
     keyVal->key = NULL;
     keyVal->val = NULL;
 
-    if ( walk->string ) {
+    if (walk->string) {
       keyVal->key = newExpr_Text(walk->string);
     }
-    switch ( walk->type ) {
+    switch (walk->type) {
       case cJSON_False:
-      val = newExpr_Ival(0);
-      break;
+        val = newExpr_Ival(0);
+        break;
       case cJSON_True:
-      val = newExpr_Ival(1);
-      break; 
+        val = newExpr_Ival(1);
+        break;
       case cJSON_NULL:
-      val = newExpr_Ival(0);
-      break;
-      case cJSON_Number :
-      val = newExpr_Float(walk->valuedouble);
-      break;
-      case cJSON_String :
-      val = newExpr_Text(walk->valuestring);
-      break;
-      case cJSON_Array  :
-      loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
-      break;
-      case cJSON_Object : {
+        val = newExpr_Ival(0);
+        break;
+      case cJSON_Number:
+        val = newExpr_Float(walk->valuedouble);
+        break;
+      case cJSON_String:
+        val = newExpr_Text(walk->valuestring);
+        break;
+      case cJSON_Array:
         loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
-        if ( depth == 0 ) {
-          *out = val;
-          free(keyVal);
-          return;
+        break;
+      case cJSON_Object:
+        {
+          loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+          if (depth == 0) {
+            *out = val;
+            free(keyVal);
+            return;
+          }
         }
-      }
-      break;
-      case cJSON_Raw    :
-      val = newExpr_Text(walk->valuestring);
-      break; /* raw json */
+        break;
+      case cJSON_Raw:
+        val = newExpr_Text(walk->valuestring);
+        break; /* raw json */
       default:
-      break;
+        break;
     }
 
-    if ( val ) {
+    if (val) {
       keyVal->val = val;
     }
 
-    if ( val && keyVal->key == NULL ) {
+    if (val && keyVal->key == NULL) {
       /* This is an array */
       isArray = 1;
     }
 
-    if ( keyVals != NULL ) {
+    if (keyVals != NULL) {
       keyVals->next = keyVal;
     }
 
     keyVals = keyVal;
 
-    if ( i == 0 ) {
+    if (i == 0) {
       keyValsHead = keyVals;
     }
 
@@ -87,24 +87,24 @@ static void loadCJSON(cJSON *json, int depth,
 
   keyVals = keyValsHead;
 
-  if ( isArray && out != NULL ) {
+  if (isArray && out != NULL) {
     argsList_t *args = NULL;
     argsList_t *argsHead = NULL;
     keyValList_t *keyValsWalk = keyVals;
 
     i = 0;
-    while ( keyValsWalk ) {
+    while (keyValsWalk) {
       argsList_t *arg = ast_ecalloc(sizeof(argsList_t));
       arg->arg = keyValsWalk->val;
       arg->next = NULL;
 
-      if ( args != NULL ) {
+      if (args != NULL) {
         args->next = arg;
       }
 
       args = arg;
 
-      if ( i == 0 ) {
+      if (i == 0) {
         argsHead = args;
       }
 
@@ -113,7 +113,7 @@ static void loadCJSON(cJSON *json, int depth,
     }
 
     args = argsHead;
-    if ( args != NULL ) {
+    if (args != NULL) {
       /* Reverse the args list order */
       argsList_t *prev = NULL;
       argsList_t *current = args;
@@ -129,22 +129,20 @@ static void loadCJSON(cJSON *json, int depth,
     }
 
     keyValsWalk = keyVals;
-    while ( keyValsWalk ) {
+    while (keyValsWalk) {
       keyValList_t *kvw = keyValsWalk;
       keyValsWalk = keyValsWalk->next;
       free(kvw);
     }
     *out = newExpr_Vector(args);
-  } else if ( out != NULL ) {
+  } else if (out != NULL) {
     expr_t *outE = newExpr_Dictionary(keyVals);
     outE->dict->type = RIC_DICTIONARY_DYN;
     *out = outE;
   }
-
 }
 
-int ric_json_convert(LIBRARY_PARAMS())
-{
+int ric_json_convert(LIBRARY_PARAMS()) {
   stackval_t stv;
   dictionary_t *argDict = NULL;
   class_t *argClass = NULL;
@@ -162,32 +160,33 @@ int ric_json_convert(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case DICTTYPE:
-    argDict = stv.dict;
-    break;
+      argDict = stv.dict;
+      break;
     case CLASSTYPE:
-    argClass = stv.classObj;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string or file.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      argClass = stv.classObj;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function '%s' got unexpected data type as argument, expected string or file.\n",
+            LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   /* Convert the object into a JSON formatted string */
-  if ( argDict != NULL ) {
-    snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
-    argDict, EXPRESSION_ARGS());
-  } else if ( argClass != NULL ) {
+  if (argDict != NULL) {
+    snprint_dictionary(&resultBuf, &resultSize, &resultEndPos, argDict, EXPRESSION_ARGS());
+  } else if (argClass != NULL) {
     dictionary_t tmpDict;
 
     tmpDict.initialized = 1;
     tmpDict.hash = argClass->varMembers;
     tmpDict.keyVals = NULL;
 
-    snprint_dictionary(&resultBuf, &resultSize, &resultEndPos,
-    &tmpDict, EXPRESSION_ARGS());
+    snprint_dictionary(&resultBuf, &resultSize, &resultEndPos, &tmpDict, EXPRESSION_ARGS());
   }
 
   stv.type = TEXT;
@@ -199,8 +198,7 @@ int ric_json_convert(LIBRARY_PARAMS())
   return 0;
 }
 
-int ric_json_load(LIBRARY_PARAMS())
-{
+int ric_json_load(LIBRARY_PARAMS()) {
   stackval_t stv;
   expr_t *result = NULL;
   cJSON *json = NULL;
@@ -217,20 +215,23 @@ int ric_json_load(LIBRARY_PARAMS())
 
   switch (stv.type) {
     case TEXT:
-    argText = stv.t;
-    break;
+      argText = stv.t;
+      break;
     case POINTERTYPE:
-    fp = (FILE*)stv.p;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument, expected string or file.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      fp = (FILE *)stv.p;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function '%s' got unexpected data type as argument, expected string or file.\n",
+            LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
-  if ( fp != NULL ) {
+  if (fp != NULL) {
     size_t sz = 0;
     fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
@@ -239,7 +240,7 @@ int ric_json_load(LIBRARY_PARAMS())
     fread(argText, 1, sz, fp);
     json = cJSON_Parse(argText);
     free(argText);
-  } else if ( argText != NULL ) {
+  } else if (argText != NULL) {
     json = cJSON_Parse(argText);
   }
 
@@ -248,7 +249,7 @@ int ric_json_load(LIBRARY_PARAMS())
     PUSH_INT(-1, sp, sc);
     return 0;
   }
-  
+
   /* Convert the cJSON object */
   result = NULL;
   loadCJSON(json, 0, &result, EXPRESSION_ARGS());
@@ -265,4 +266,3 @@ int ric_json_load(LIBRARY_PARAMS())
 
   return 0;
 }
-

@@ -5,9 +5,9 @@
 #include "ast.h"
 
 typedef int (*MainParserFunc)(void);
-typedef void (*interactiveInterpreterFunc)(int, char**, statement_t *, int);
+typedef void (*interactiveInterpreterFunc)(int, char **, statement_t *, int);
 
-void setParser( MainParserFunc func );
+void setParser(MainParserFunc func);
 void setRoot(statement_t **newRoot);
 MainParserFunc getParser();
 statement_t *getRoot();
@@ -18,4 +18,3 @@ statement_t *getMainRoot();
 void initParser();
 void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func);
 #endif
-

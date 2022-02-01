@@ -13,20 +13,23 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TEXT:
-    stringArg = stv.t;
-    break;
+      stringArg = stv.t;
+      break;
     case INT32TYPE:
-    intArg = stv.i;
-    break;
-    default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
-        LIBRARY_FUNC_NAME());
-      exit(1);
-    }
-    break;
+      intArg = stv.i;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
   }
 
-  if ( stringArg != NULL ) {
+  if (stringArg != NULL) {
     e = newExpr_BigIntFromStr(stringArg);
     n = e->bigInt;
     free(e);

@@ -6,7 +6,7 @@ int ric_new_time(LIBRARY_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
   /* Current time */
-  time( &now );
+  time(&now);
 
   /* Pushing result */
   PUSH_TIME(now, sp, sc);
@@ -26,16 +26,17 @@ int ric_time_seconds(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
-  result = (int32_t) arg1;
+  result = (int32_t)arg1;
   PUSH_INT(result, sp, sc);
   return 0;
 }
@@ -52,16 +53,17 @@ int ric_time_minutes(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
-  result = (int32_t) arg1 / 60;
+  result = (int32_t)arg1 / 60;
   PUSH_INT(result, sp, sc);
   return 0;
 }
@@ -78,16 +80,17 @@ int ric_time_hours(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
-  result = arg1 / (60*60);
+  result = arg1 / (60 * 60);
   PUSH_INT(result, sp, sc);
   return 0;
 }
@@ -104,16 +107,17 @@ int ric_time_days(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
-  result = (int32_t) arg1 / (60*60*24);
+  result = (int32_t)arg1 / (60 * 60 * 24);
   PUSH_INT(result, sp, sc);
   return 0;
 }
@@ -130,16 +134,17 @@ int ric_time_weeks(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
-  result = (int32_t) arg1 / (60*60*24*7);
+  result = (int32_t)arg1 / (60 * 60 * 24 * 7);
   PUSH_INT(result, sp, sc);
   return 0;
 }
@@ -157,14 +162,15 @@ int ric_time_months(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -188,14 +194,15 @@ int ric_time_years(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -219,14 +226,15 @@ int ric_time_second(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -250,14 +258,15 @@ int ric_time_minute(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -281,14 +290,15 @@ int ric_time_hour(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -312,14 +322,15 @@ int ric_time_day(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -331,12 +342,12 @@ int ric_time_day(LIBRARY_PARAMS()) {
 }
 
 /*
-*
-* Instead of relying on strftime for ISO 8601, I found
-* this big brain energy function off the internet:
-* https://stackoverflow.com/questions/42568215/iso-8601-week-number-in-c
-*
-*/
+ *
+ * Instead of relying on strftime for ISO 8601, I found
+ * this big brain energy function off the internet:
+ * https://stackoverflow.com/questions/42568215/iso-8601-week-number-in-c
+ *
+ */
 
 static int tm_YearWeek(const struct tm *tmptr, int32_t *week) {
   // work with local copy
@@ -378,14 +389,15 @@ int ric_time_week(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -409,14 +421,15 @@ int ric_time_month(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
@@ -440,23 +453,21 @@ int ric_time_year(LIBRARY_PARAMS()) {
 
   switch (stv.type) {
     case TIMETYPE:
-    arg1 = stv.time;
-    break;
-    default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-        LIBRARY_FUNC_NAME());
-      return 1;
-    }
-    break;
+      arg1 = stv.time;
+      break;
+    default:
+      {
+        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+                LIBRARY_FUNC_NAME());
+        return 1;
+      }
+      break;
   }
 
   info = localtime(&arg1);
 
-  result = (int32_t) info->tm_year + 1900;
+  result = (int32_t)info->tm_year + 1900;
 
   PUSH_INT(result, sp, sc);
   return 0;
 }
-
-
-

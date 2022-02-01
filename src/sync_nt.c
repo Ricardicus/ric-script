@@ -20,13 +20,12 @@ void markContext(void *ctx, uint32_t markval) {
   ricSyncCtx_t *ricCtx;
   int i;
 
-  if ( ctx == NULL )
-    return;
+  if (ctx == NULL) return;
 
-  ricCtx = (ricSyncCtx_t*)ctx;
+  ricCtx = (ricSyncCtx_t *)ctx;
   i = 0;
-  while ( i < RICSCRIPT_MAX_THREADS ) {
-    if ( ricCtx->threadTaken[i] == true ) {
+  while (i < RICSCRIPT_MAX_THREADS) {
+    if (ricCtx->threadTaken[i] == true) {
       context_full_t *c = ricCtx->ctxs[i];
       mark(NULL, markval, NULL, NULL, c, NULL, NULL);
     }
@@ -34,9 +33,9 @@ void markContext(void *ctx, uint32_t markval) {
   }
 }
 
-DWORD WINAPI initiateRicCallTimeout(void* ctx) {
+DWORD WINAPI initiateRicCallTimeout(void *ctx) {
   context_full_t *newCtx = ast_emalloc(sizeof(context_full_t));
-  ricSyncCtx_t *ricCtx = ((context_full_t*)ctx)->syncCtx;
+  ricSyncCtx_t *ricCtx = ((context_full_t *)ctx)->syncCtx;
   functionDef_t *func;
   int thisThreadID;
   size_t sc;
@@ -44,7 +43,7 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   void *sb;
   int timeout;
 
-  *newCtx = *((context_full_t*)ctx);
+  *newCtx = *((context_full_t *)ctx);
 
   newCtx->sc = &sc;
 
@@ -53,24 +52,24 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   newCtx->sp = &sp;
   newCtx->sb = &sb;
 
-  // Setup a set of locals 
+  // Setup a set of locals
   newCtx->varLocals = ast_emalloc(sizeof(locals_stack_t));
   newCtx->varLocals->sp = 0;
   newCtx->varLocals->sb = 0;
   getContext(ricCtx);
-  func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
+  func = (functionDef_t *)ricCtx->threadFuncs[ricCtx->threadIndex];
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
   ricCtx->ctxs[ricCtx->threadIndex] = newCtx;
   timeout = ricCtx->time[ricCtx->threadIndex];
   thisThreadID = ricCtx->threadIndex;
-  ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
+  ricCtx->threadIndex = (ricCtx->threadIndex + 1) % RICSCRIPT_MAX_THREADS;
   releaseContext(ricCtx);
 
   /* Signal that thread has started */
   PulseEvent(ricCtx->event);
 
   /* Sleep */
-  Sleep((unsigned int)timeout*1000);
+  Sleep((unsigned int)timeout * 1000);
 
   interpret_statements_(func->body, newCtx, NULL, NULL);
 
@@ -89,9 +88,9 @@ DWORD WINAPI initiateRicCallTimeout(void* ctx) {
   return 0;
 }
 
-DWORD WINAPI initiateRicCallInterval(void* ctx) {
+DWORD WINAPI initiateRicCallInterval(void *ctx) {
   context_full_t *newCtx = ast_emalloc(sizeof(context_full_t));
-  ricSyncCtx_t *ricCtx = ((context_full_t*)ctx)->syncCtx;
+  ricSyncCtx_t *ricCtx = ((context_full_t *)ctx)->syncCtx;
   functionDef_t *func;
   int thisThreadID;
   stackval_t stv;
@@ -101,7 +100,7 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
   time_t startTime;
   int timeout;
 
-  *newCtx = *((context_full_t*)ctx);
+  *newCtx = *((context_full_t *)ctx);
 
   newCtx->sc = &sc;
 
@@ -110,18 +109,18 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
   newCtx->sp = &sp;
   newCtx->sb = &sb;
 
-  // Setup a set of locals 
+  // Setup a set of locals
   newCtx->varLocals = ast_emalloc(sizeof(locals_stack_t));
   newCtx->varLocals->sp = 0;
   newCtx->varLocals->sb = 0;
 
   getContext(ricCtx);
-  func = (functionDef_t*) ricCtx->threadFuncs[ricCtx->threadIndex];
+  func = (functionDef_t *)ricCtx->threadFuncs[ricCtx->threadIndex];
   timeout = ricCtx->time[ricCtx->threadIndex];
   thisThreadID = ricCtx->threadIndex;
   ricCtx->threadTaken[ricCtx->threadIndex] = true;
   ricCtx->ctxs[ricCtx->threadIndex] = newCtx;
-  ricCtx->threadIndex = ( ricCtx->threadIndex + 1 ) % RICSCRIPT_MAX_THREADS;
+  ricCtx->threadIndex = (ricCtx->threadIndex + 1) % RICSCRIPT_MAX_THREADS;
   releaseContext(ricCtx);
 
   /* Signal that thread has started */
@@ -132,26 +131,26 @@ DWORD WINAPI initiateRicCallInterval(void* ctx) {
     time_t endTime;
 
     /* Current time */
-    time( &startTime );
+    time(&startTime);
 
     interpret_statements_(func->body, newCtx, NULL, NULL);
 
     /* After execution */
-    time( &endTime );
+    time(&endTime);
 
     /* Check return value on the stack, if zero stop execution */
-    if ( *newCtx->sc > 0 ) {
+    if (*newCtx->sc > 0) {
       POP_VAL(&stv, newCtx->sp, newCtx->sc);
 
-      if ( stv.type == INT32TYPE && stv.i != 0 ) {
+      if (stv.type == INT32TYPE && stv.i != 0) {
         /* Stop executing this function now */
         break;
       }
     }
 
-    if ( endTime - startTime < timeout ) {
+    if (endTime - startTime < timeout) {
       /* Sleep some more before going at it again */
-      Sleep((unsigned int)(timeout - (endTime - startTime))*1000);
+      Sleep((unsigned int)(timeout - (endTime - startTime)) * 1000);
     }
   }
 
@@ -173,33 +172,32 @@ void *createContext() {
   int i;
   ricSyncCtx_t *ctx = calloc(1, sizeof(ricSyncCtx_t));
 
-  if ( ctx == NULL ) {
-  	return NULL;
+  if (ctx == NULL) {
+    return NULL;
   }
 
   i = 0;
-  while ( i < RICSCRIPT_MAX_THREADS ) {
-  	ctx->threadTaken[i] = false;
-  	++i;
+  while (i < RICSCRIPT_MAX_THREADS) {
+    ctx->threadTaken[i] = false;
+    ++i;
   }
 
   ctx->threadIndex = 0;
   ctx->mutex = CreateMutex(NULL, FALSE, NULL);
 
-  if ( ctx->mutex == NULL ) {
-  	/* Failed to create mutex */
-  	free(ctx);
-  	return NULL;
+  if (ctx->mutex == NULL) {
+    /* Failed to create mutex */
+    free(ctx);
+    return NULL;
   }
 
-  ctx->event = CreateEvent( 
-        NULL,               // default security attributes
-        TRUE,               // manual-reset event
-        FALSE,              // initial state is nonsignaled
-        TEXT("SyncEvent")   // object name
-        ); 
+  ctx->event = CreateEvent(NULL,             // default security attributes
+                           TRUE,             // manual-reset event
+                           FALSE,            // initial state is nonsignaled
+                           TEXT("SyncEvent") // object name
+  );
 
-  if ( ctx->event == NULL ) {
+  if (ctx->event == NULL) {
     /* Failed to create mutex */
     free(ctx);
     return NULL;
@@ -212,23 +210,20 @@ void getContext(void *ctx) {
   /* Take the mutex */
   ricSyncCtx_t *ricCtx;
 
-  if ( ctx == NULL )
-  	return;
+  if (ctx == NULL) return;
 
-  ricCtx = (ricSyncCtx_t*)ctx;
-  WaitForSingleObject( 
-    ricCtx->mutex,    // handle to mutex
-    INFINITE);  // no time-out interval
+  ricCtx = (ricSyncCtx_t *)ctx;
+  WaitForSingleObject(ricCtx->mutex, // handle to mutex
+                      INFINITE);     // no time-out interval
 }
 
 void releaseContext(void *ctx) {
   /* Release the mutex */
   ricSyncCtx_t *ricCtx;
 
-  if ( ctx == NULL )
-  	return;
+  if (ctx == NULL) return;
 
-  ricCtx = (ricSyncCtx_t*)ctx;
+  ricCtx = (ricSyncCtx_t *)ctx;
   ReleaseMutex(ricCtx->mutex);
 }
 
@@ -236,25 +231,24 @@ void createThreadTimeout(void *ctx, void *func, size_t stacksize, void *arg, int
   ricSyncCtx_t *ricCtx;
   DWORD ThreadID;
 
-  if ( ctx == NULL )
-  	return;
+  if (ctx == NULL) return;
 
-  ricCtx = (ricSyncCtx_t*)ctx;
+  ricCtx = (ricSyncCtx_t *)ctx;
 
-  if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
+  if (ricCtx->threadTaken[ricCtx->threadIndex]) {
     WaitForSingleObject(ricCtx->threads[ricCtx->threadIndex], INFINITE);
   }
 
   getContext(ricCtx);
   ricCtx->threadFuncs[ricCtx->threadIndex] = func;
   ricCtx->time[ricCtx->threadIndex] = time;
-  ricCtx->threads[ricCtx->threadIndex] = CreateThread( 
-    NULL,       // default security attributes
-    stacksize,          // default stack size if 0
-    (LPTHREAD_START_ROUTINE) initiateRicCallTimeout, 
-    arg,        // thread function arguments
-    0,          // default creation flags
-    &ThreadID); // receive thread identifier
+  ricCtx->threads[ricCtx->threadIndex] =
+      CreateThread(NULL,      // default security attributes
+                   stacksize, // default stack size if 0
+                   (LPTHREAD_START_ROUTINE)initiateRicCallTimeout,
+                   arg,        // thread function arguments
+                   0,          // default creation flags
+                   &ThreadID); // receive thread identifier
   releaseContext(ricCtx);
 
   /* Wait for the thread to start */
@@ -265,25 +259,24 @@ void createThreadInterval(void *ctx, void *func, size_t stacksize, void *arg, in
   ricSyncCtx_t *ricCtx;
   DWORD ThreadID;
 
-  if ( ctx == NULL )
-    return;
+  if (ctx == NULL) return;
 
-  ricCtx = (ricSyncCtx_t*)ctx;
+  ricCtx = (ricSyncCtx_t *)ctx;
 
-  if ( ricCtx->threadTaken[ricCtx->threadIndex] ) {
+  if (ricCtx->threadTaken[ricCtx->threadIndex]) {
     WaitForSingleObject(ricCtx->threads[ricCtx->threadIndex], INFINITE);
   }
 
   getContext(ctx);
   ricCtx->threadFuncs[ricCtx->threadIndex] = func;
   ricCtx->time[ricCtx->threadIndex] = time;
-  ricCtx->threads[ricCtx->threadIndex] = CreateThread( 
-    NULL,       // default security attributes
-    stacksize,          // default stack size if 0
-    (LPTHREAD_START_ROUTINE) initiateRicCallInterval, 
-    arg,        // thread function arguments
-    0,          // default creation flags
-    &ThreadID); // receive thread identifier
+  ricCtx->threads[ricCtx->threadIndex] =
+      CreateThread(NULL,      // default security attributes
+                   stacksize, // default stack size if 0
+                   (LPTHREAD_START_ROUTINE)initiateRicCallInterval,
+                   arg,        // thread function arguments
+                   0,          // default creation flags
+                   &ThreadID); // receive thread identifier
   releaseContext(ctx);
 
   /* Wait for the thread to start */
@@ -294,22 +287,20 @@ void freeContext(void *ctx) {
   ricSyncCtx_t *ricCtx;
   int i;
 
-  if ( ctx == NULL )
-    return;
+  if (ctx == NULL) return;
 
-  ricCtx = (ricSyncCtx_t*)ctx;
+  ricCtx = (ricSyncCtx_t *)ctx;
 
   /* Wait for all threads to finish */
   i = 0;
-  while ( i < RICSCRIPT_MAX_THREADS ) {
-    if ( ricCtx->threadTaken[i] == true ) {
+  while (i < RICSCRIPT_MAX_THREADS) {
+    if (ricCtx->threadTaken[i] == true) {
       WaitForSingleObject(ricCtx->threads[i], INFINITE);
     }
     ++i;
   }
 
-
-  ricCtx = (ricSyncCtx_t*)ctx;
+  ricCtx = (ricSyncCtx_t *)ctx;
   CloseHandle(ricCtx->mutex);
   CloseHandle(ricCtx->event);
   free(ricCtx);

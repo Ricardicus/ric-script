@@ -12,4 +12,3 @@ int ric_close_socket(LIBRARY_PARAMS());
 int ric_connect_socket(LIBRARY_PARAMS());
 
 #endif
-

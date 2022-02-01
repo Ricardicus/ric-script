@@ -3803,6 +3803,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
           int dummy;
           int32_t arrayIndex = 0;
           int32_t festmtIndex = 0;
+          int festmtBigIntInitialized = 0;
           mpz_t festmtBigIndex;
           int32_t endIteration = 0;
           mpz_t endIterationBigInt;
@@ -3869,9 +3870,13 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
             } else if (rootInt >= 0) {
               endIteration = rootInt;
             } else if (rootBigInt != NULL) {
-              mpz_init(endIterationBigInt);
-              mpz_init(festmtBigIndex);
-              mpz_add(endIterationBigInt, *rootBigInt, festmtBigIndex);
+              if (!festmtBigIntInitialized) {
+                mpz_init(endIterationBigInt);
+                mpz_init(festmtBigIndex);
+                mpz_add(endIterationBigInt, *rootBigInt, festmtBigIndex);
+
+                festmtBigIntInitialized = 1;
+              }
             } else {
               /* This is really not supposed to happen */
               printf(

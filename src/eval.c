@@ -920,7 +920,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
                 /* Check among the arguments if we have it defined there */
                 expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
-                if ( push_expression(expArg, EXPRESSION_ARGS()) == 0 ) {
+                if (push_expression(expArg, EXPRESSION_ARGS()) == 0) {
                   stop = 1;
                 }
               } else {
@@ -943,8 +943,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             break;
           }
           /* Check among the global variables if we have it defined there */
-          hv =
-              hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+          hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
           if (hv != NULL) {
             push_heapval(hv, sp, sc);
@@ -5757,7 +5756,7 @@ void print_statements_(void *stmt, int indent) {
     case LANG_ENTITY_CLASSDECL:
     case LANG_ENTITY_RETURN:
     case LANG_ENTITY_FOREACH:
-      printf("[0x%lx] %d ", (uintptr_t)stmt, ((statement_t*)stmt)->line);
+      printf("[0x%lx] %d ", (uintptr_t)stmt, ((statement_t *)stmt)->line);
       print_indents(indent);
       next = ((statement_t *)stmt)->next;
       break;

@@ -58,4 +58,13 @@ print("Goin into scope 1 after defining a global")
   exit(1)
 }
 
+@ testFunctionArg ( a ) {
+  print(a)
+  a = 1337
+  print(a)
+}
+
+testFunctionArg(0)
+
 print("Test result is good!")
+

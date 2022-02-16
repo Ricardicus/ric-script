@@ -236,6 +236,61 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
   return 0;
 }
 
+int push_expression(expr_t *expArg, EXPRESSION_PARAMS()) {
+  int ret = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  if (expArg != NULL) {
+    /* This was an argument! */
+    switch (expArg->type) {
+      case EXPR_TYPE_IVAL:
+        PUSH_INT(expArg->ival, sp, sc);
+        break;
+      case EXPR_TYPE_POINTER:
+        PUSH_POINTER(expArg->p, sp, sc);
+        break;
+      case EXPR_TYPE_VECTOR:
+        PUSH_VECTOR(expArg->vec, sp, sc);
+        break;
+      case EXPR_TYPE_CLASSPTR:
+        PUSH_CLASSREF(expArg->classObj, sp, sc);
+        break;
+      case EXPR_TYPE_FVAL:
+        PUSH_DOUBLE(expArg->fval, sp, sc);
+        break;
+      case EXPR_TYPE_FUNCPTR:
+        PUSH_FUNCPTR(expArg->func, sp, sc);
+        break;
+      case EXPR_TYPE_LIBFUNCPTR:
+        PUSH_LIBFUNCPTR(expArg->func, sp, sc);
+        break;
+      case EXPR_TYPE_TIME:
+        PUSH_TIME(expArg->time, sp, sc);
+        break;
+      case EXPR_TYPE_RAWDATA:
+        PUSH_RAWDATA(expArg->rawdata, sp, sc);
+        break;
+      case EXPR_TYPE_DICT:
+        PUSH_DICTIONARY(expArg->dict, sp, sc);
+        break;
+      case EXPR_TYPE_BIGINT:
+        PUSH_BIGINT(expArg->bigInt, sp, sc);
+        break;
+      case EXPR_TYPE_TEXT:
+        {
+          PUSH_STRING(expArg->text, sp, sc);
+          break;
+        }
+      default:
+        ret = -1;
+        break;
+    }
+  } else {
+    ret = -1;
+  }
+  return ret;
+}
+
 expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
   expr_t *newExp = NULL;
 
@@ -264,14 +319,33 @@ expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
     case BIGINT:
       newExp = newExpr_BigInt(sv->bigInt);
       break;
+    case RAWDATATYPE:
+      {
+        newExp = newExpr_RawData(sv->rawdata->size);
+        memcpy(newExp->rawdata->data, sv->rawdata->data, sv->rawdata->size);
+        break;
+      }
     case VECTORTYPE:
       {
         newExp = copy_vector(sv->vec, EXPRESSION_ARGS());
         break;
       }
+    case DICTTYPE:
+      {
+        newExp = ast_emalloc(sizeof(expr_t));
+        newExp->type = EXPR_TYPE_DICT;
+        newExp->dict = allocNewDictionary(sv->dict, EXPRESSION_ARGS());
+        break;
+      }
+    case CLASSTYPE:
+      {
+        newExp = newExpr_ClassPtrCopy(sv->classObj);
+        break;
+      }
     default:
       printf("%s.error: unknown type of value on the stack (%d)\n", __func__, sv->type);
       GENERAL_REPORT_ISSUE_MSG();
+      exit(1);
       break;
   }
 
@@ -669,18 +743,6 @@ int evaluate_condition(ifCondition_t *cond, EXPRESSION_PARAMS()) {
   return 0;
 }
 
-void free_vector(vector_t *vec) {
-  /*argsList_t *walk = vec->content;
-
-  while ( walk != NULL ) {
-    if ( walk->arg != NULL ) {
-      free_expression(walk->arg);
-    }
-    walk->arg = NULL;
-    walk = walk->next;
-  }*/
-}
-
 expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -819,82 +881,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       {
         heapval_t *hv = NULL;
         int stop = 0;
-
-        /* Check if this ID is among the arguments */
-        argsList_t *walk = args;
-
-        while (walk != NULL && !stop) {
-          expr_t *exp = walk->arg;
-          if (exp->type == EXPR_TYPE_ID) {
-            expr_t *expArg;
-
-            /* Check among the arguments if we have it defined there */
-            expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
-
-            if (expArg != NULL) {
-              /* This was an argument! */
-              switch (expArg->type) {
-                case EXPR_TYPE_IVAL:
-                  PUSH_INT(expArg->ival, sp, sc);
-                  break;
-                case EXPR_TYPE_POINTER:
-                  PUSH_POINTER(expArg->p, sp, sc);
-                  break;
-                case EXPR_TYPE_VECTOR:
-                  PUSH_VECTOR(expArg->vec, sp, sc);
-                  break;
-                case EXPR_TYPE_CLASSPTR:
-                  PUSH_CLASSREF(expArg->classObj, sp, sc);
-                  break;
-                case EXPR_TYPE_FVAL:
-                  PUSH_DOUBLE(expArg->fval, sp, sc);
-                  break;
-                case EXPR_TYPE_FUNCPTR:
-                  PUSH_FUNCPTR(expArg->func, sp, sc);
-                  break;
-                case EXPR_TYPE_LIBFUNCPTR:
-                  PUSH_LIBFUNCPTR(expArg->func, sp, sc);
-                  break;
-                case EXPR_TYPE_TIME:
-                  PUSH_TIME(expArg->time, sp, sc);
-                  break;
-                case EXPR_TYPE_RAWDATA:
-                  PUSH_RAWDATA(expArg->rawdata, sp, sc);
-                  break;
-                case EXPR_TYPE_DICT:
-                  PUSH_DICTIONARY(expArg->dict, sp, sc);
-                  break;
-                case EXPR_TYPE_BIGINT:
-                  PUSH_BIGINT(expArg->bigInt, sp, sc);
-                  break;
-                case EXPR_TYPE_TEXT:
-                  {
-                    PUSH_STRING(expArg->text, sp, sc);
-                    break;
-                  }
-                default:
-                  fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expr->id.id);
-                  exit(1);
-                  break;
-              }
-
-              stop = 1;
-            }
-          } else {
-            fprintf(stderr,
-                    "error: unknown, this is crazy. The interpreter is broken or something.\n\
-Please report back to me.\n\
-- %s\n",
-                    GENERAL_ERROR_ISSUE_URL);
-            exit(1);
-          }
-
-          walk = walk->next;
-        }
-
-        if (stop) {
-          break;
-        }
+        argsList_t *walk = NULL;
 
         /* Check if it is among the class context members */
         if (classCtx != NULL) {
@@ -914,7 +901,7 @@ Please report back to me.\n\
           }
         }
 
-        if (!stop && walk == NULL) {
+        if (!stop) {
           class_t *classDef;      // if it is a class construction reference
           functionDef_t *funcDef; // if it is a function pointer
 
@@ -922,10 +909,42 @@ Please report back to me.\n\
           hv = locals_lookup(varLocals, expr->id.id);
 
           if (hv == NULL) {
-            /* Check among the global variables if we have it defined there */
-            hv =
-                hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+            /* Check if this ID is among the arguments */
+            walk = args;
+
+            while (walk != NULL && !stop) {
+              expr_t *exp = walk->arg;
+              if (exp->type == EXPR_TYPE_ID) {
+                expr_t *expArg;
+
+                /* Check among the arguments if we have it defined there */
+                expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+
+                if ( push_expression(expArg, EXPRESSION_ARGS()) == 0 ) {
+                  stop = 1;
+                }
+              } else {
+                fprintf(stderr,
+                        "error: unknown, this is crazy. The interpreter is broken or something.\n\
+    Please report back to me.\n\
+    - %s\n",
+                        GENERAL_ERROR_ISSUE_URL);
+                exit(1);
+              }
+
+              walk = walk->next;
+            }
+          } else {
+            push_heapval(hv, sp, sc);
+            stop = 1;
           }
+
+          if (stop) {
+            break;
+          }
+          /* Check among the global variables if we have it defined there */
+          hv =
+              hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
           if (hv != NULL) {
             push_heapval(hv, sp, sc);
@@ -961,13 +980,15 @@ Please report back to me.\n\
             if (libFunc != NULL) {
               PUSH_LIBFUNCPTR(libFunc, sp, sc);
               stop = 1;
-            } else {
-              fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", ((statement_t *)stmt)->file,
-                      ((statement_t *)stmt)->line, expr->id.id);
-              if (!*interactive) {
-                exit(1);
-              }
             }
+          }
+        }
+
+        if (!stop) {
+          fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", ((statement_t *)stmt)->file,
+                  ((statement_t *)stmt)->line, expr->id.id);
+          if (!*interactive) {
+            exit(1);
           }
         }
 
@@ -2747,81 +2768,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             /* Fetch the evaluated expression to the arguments table */
             POP_VAL(&sv, sp, sc);
-
-            switch (sv.type) {
-              case INT32TYPE:
-                {
-                  newArg = newExpr_Ival(sv.i);
-                  break;
-                }
-              case DOUBLETYPE:
-                {
-                  newArg = newExpr_Float(sv.d);
-                  break;
-                }
-              case TEXT:
-                {
-                  newArg = newExpr_Text(sv.t);
-                  break;
-                }
-              case POINTERTYPE:
-                {
-                  newArg = newExpr_Pointer(sv.p);
-                  break;
-                }
-              case VECTORTYPE:
-                {
-                  newArg = newExpr_Vector(sv.vec->content);
-                  break;
-                }
-              case FUNCPTRTYPE:
-                {
-                  newArg = newExpr_FuncPtr(sv.func);
-                  break;
-                }
-              case TIMETYPE:
-                {
-                  newArg = newExpr_Time(sv.time);
-                  break;
-                }
-              case BIGINT:
-                {
-                  newArg = newExpr_BigInt(sv.bigInt);
-                  break;
-                }
-              case LIBFUNCPTRTYPE:
-                {
-                  newArg = newExpr_LibFuncPtr(sv.libfunc);
-                  break;
-                }
-              case RAWDATATYPE:
-                {
-                  expr_t *e = newExpr_RawData(sv.rawdata->size);
-                  memcpy(e->rawdata->data, sv.rawdata->data, sv.rawdata->size);
-                  newArg = e;
-                  break;
-                }
-              case DICTTYPE:
-                {
-                  expr_t *e = ast_emalloc(sizeof(expr_t));
-                  e->type = EXPR_TYPE_DICT;
-                  e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-                  newArg = e;
-                  break;
-                }
-              case CLASSTYPE:
-                {
-                  newArg = newExpr_ClassPtrCopy(sv.classObj);
-                  break;
-                }
-              default:
-                fprintf(
-                    stderr,
-                    "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
-                    ERROR_PRINT_LOCATION, sv.type);
-                exit(1);
-                break;
-            }
+            newArg = stackval_to_expression(&sv, EXPRESSION_ARGS());
 
             /* Adding expression to argument table */
             hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id,
@@ -2890,8 +2837,6 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
           hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, funcID);
 
           if (hv == NULL) {
-            // Check among the arguments
-
             /* Check among the arguments if we have it defined there */
             expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, funcID);
 
@@ -3564,43 +3509,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                       evaluate_expression(decl->val, EXPRESSION_ARGS());
                       POP_VAL(&sv, sp, sc);
 
-                      switch (sv.type) {
-                        case INT32TYPE:
-                          newExp = newExpr_Ival(sv.i);
-                          break;
-                        case DOUBLETYPE:
-                          newExp = newExpr_Float(sv.d);
-                          break;
-                        case BIGINT:
-                          newExp = newExpr_BigInt(sv.bigInt);
-                          break;
-                        case TEXT:
-                          newExp = newExpr_Text(sv.t);
-                          break;
-                        case TIMETYPE:
-                          newExp = newExpr_Time(sv.time);
-                          break;
-                        case POINTERTYPE:
-                          newExp = newExpr_Pointer(sv.p);
-                          break;
-                        case FUNCPTRTYPE:
-                          newExp = newExpr_FuncPtr(sv.func);
-                          break;
-                        case LIBFUNCPTRTYPE:
-                          newExp = newExpr_LibFuncPtr(sv.libfunc);
-                          break;
-                        case VECTORTYPE:
-                          {
-                            newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-                            break;
-                          }
-                        default:
-                          printf("%s.error: unknown type of value on the stack (%d)\n", __func__,
-                                 sv.type);
-                          GENERAL_REPORT_ISSUE_MSG();
-                          break;
-                      }
-
+                      newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
                       *expToSet = newExp;
                     }
                     break;
@@ -3885,7 +3794,8 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                   GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
-            /* Get´or set for-each unfold variable value */
+
+            /* Get or set for-each unfold variable value */
             hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
             if (hvp == NULL) {
               /* Create the variable with the value to be used for indexing, start with 0 */
@@ -3919,6 +3829,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                   GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
+
             if (hvp->sv.type == INT32TYPE) {
               festmtIndex = hvp->sv.i;
               arrayIndex = festmtIndex;
@@ -3978,8 +3889,8 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                 sv.dict = dict;
               }
               ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-
               locals_push(varLocals, entryId, hvp);
+
             } else if (rootDict != NULL) {
               /* traverse the dictionary keys */
               hashtable_t *hash = rootDict->hash;
@@ -5846,7 +5757,7 @@ void print_statements_(void *stmt, int indent) {
     case LANG_ENTITY_CLASSDECL:
     case LANG_ENTITY_RETURN:
     case LANG_ENTITY_FOREACH:
-      printf("[0x%lx] ", (uintptr_t)stmt);
+      printf("[0x%lx] %d ", (uintptr_t)stmt, ((statement_t*)stmt)->line);
       print_indents(indent);
       next = ((statement_t *)stmt)->next;
       break;

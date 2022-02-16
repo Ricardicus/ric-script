@@ -16,6 +16,8 @@ def test_vector_print():
 "Local has the value in scope 1 that it was assigned in scope 2, which is right",
 "Going out of scope 1",
 "Global still defined in scope 0",
+"0",
+"1337",
 "Test result is good!"
 ]
 

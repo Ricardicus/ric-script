@@ -32,17 +32,12 @@ declaration of a **map** and two of the **list** sort.
 	numberChars = [ (10 ... i) { text(i) } ]
 
 	@ isNumber(num) {
-	  isNr = 1
-	  i = 0
-	  . [ i < len(num) ] {
-	    ? [ contains( numberChars, num[i] ) ] {
-	      i += 1
-	      @
-	    } ~ {
-	      isNr = 0
+	  (num ... c) {
+	    ? [ !contains( numberChars, c ) ] {
+	      -> 0
 	    }
 	  }
-	  -> isNr
+	  -> 1
 	}
 
 	@ pop() {
@@ -626,17 +621,12 @@ Below is an implementation of an RPN calculator implemented using a class.
 
 	@ isNumber(num) {
 	  numberChars = [ (10 ... i) { text(i) } ]
-	  isNr = 1
-	  i = 0
-	  . [ i < len(num) ] {
-	    ? [ contains( numberChars, num[i] ) ] {
-	      i += 1
-	      @
-	    } ~ {
-	      isNr = 0
+	  (num ... c) {
+	    ? [ !contains( numberChars, c ) ] {
+	      -> 0
 	    }
 	  }
-	  -> isNr
+	  -> 1
 	}
 
 	print("RPN Calculator (quit by typing 'q'):")

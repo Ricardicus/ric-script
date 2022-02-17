@@ -3257,7 +3257,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
   }
 }
 
-void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
+interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                            hashtable_t *argVals) {
   locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -3665,7 +3665,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
           }
           /* Returning now from this function */
           free(ctx);
-          return;
+          return RETURN;
         }
         break;
       case LANG_ENTITY_CLASSDECL:
@@ -3720,6 +3720,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
           expr_t *newVec = NULL;
           int *interactive = PROVIDE_CONTEXT()->interactive;
           int continueLoop = 1;
+          interpret_state_t interpret_state = CONTINUE;
 
           while (continueLoop) {
             evaluate_expression(root, EXPRESSION_ARGS());
@@ -4059,7 +4060,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
               (void)classObj;
               (void)localsStackSp;
               (void)localsStackSb;
-              interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
+              interpret_state = interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
               varLocals->sb = localsStackSb;
               varLocals->sp = localsStackSp;
             }
@@ -4137,6 +4138,10 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
               // Special case, big looping
               continueLoop = (mpz_cmp(endIterationBigInt, festmtBigIndex) != 0);
             }
+            if ( interpret_state == RETURN ) {
+              /* A return was made, stop iterations */
+              continueLoop = false;
+            }
           }
 
           /* We are out of here */
@@ -4169,6 +4174,11 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
             newVec->vec->content = prevArg;
             PUSH_VECTOR(newVec->vec, sp, sc);
             free(newVec);
+          }
+          if ( interpret_state == RETURN ) {
+            /* Returning now from this function */
+            free(ctx);
+            return RETURN;
           }
         }
         break;
@@ -4470,6 +4480,7 @@ void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
   }
 
   free(ctx);
+  return CONTINUE;
 }
 
 void locals_print(locals_stack_t *stack) {

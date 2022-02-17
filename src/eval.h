@@ -13,6 +13,11 @@
 #define JMP_CODE_CONTINUE 1
 #define JMP_CODE_TEARDOWN 2
 
+typedef enum {
+  CONTINUE,
+  RETURN
+} interpret_state_t;
+
 int evaluate_condition(ifCondition_t *cond, void *stmt, void *next, PROVIDE_CONTEXT_ARGS(),
                        argsList_t *args, hashtable_t *argVals);
 void evaluate_expression(expr_t *expr, void *stmt, void *next, PROVIDE_CONTEXT_ARGS(),
@@ -25,7 +30,7 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart, int *idxEnd, in
 void print_statements(statement_t *stmt);
 void print_statements_(void *stmt, int indent);
 
-void interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
+interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                            hashtable_t *argVals);
 
 void interpret_statements(int argc, char *argv[], statement_t *stmt);

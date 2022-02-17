@@ -10,7 +10,7 @@
 # ric-script
 
 I am developing a programming language that resembles Python and Javascript. Imagine Python without the pedantic indentation and Javascript without the semicolons.
-In fact, ric-script has zero contrainst regarding line breaks, spaces or tabs. You can do what you want in regards to that.
+In fact, ric-script has zero contrainst regarding line breaks, spaces, tabs or semicolons and you can do what you want in regards to formatting.
 
 It is an interpreted language and I draw a lot of inspiration from Python and Javascript.
 The AST is built using yacc and I implement everything in C. 

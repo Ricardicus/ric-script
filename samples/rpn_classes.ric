@@ -59,7 +59,7 @@
 
 @ isNumber(num) {
   numberChars = [ (10 ... i) { text(i) } ]
-  (num ... c) {
+  . (num ... c) {
     ? [ !contains( numberChars, c ) ] {
       -> 0
     }
@@ -75,7 +75,7 @@ run = 1
 . [ run ] {
   in = input(">> ")
   expr = split(in, " ")
-  ( expr ... e ) {
+  . ( expr ... e ) {
     ? [ isNumber(e) ] {
       calc::push( parseInt(e) )
     } ~[ contains(operators, e) ] {

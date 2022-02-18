@@ -117,7 +117,7 @@ operators = ["+", "*", "-", "/"]
 numberChars = [ (10 ... i) { text(i) } ]
 
 @ isNumber(num) {
-  (num ... c) {
+  . (num ... c) {
     ? [ !contains( numberChars, c ) ] {
       -> 0
     }
@@ -169,7 +169,7 @@ run = 1
 . [ run ] {
   in = input(">> ")
   expr = split(in, " ")
-  ( expr ... e ) {
+  . ( expr ... e ) {
     ? [ isNumber(e) ] {
       push( parseInt(e) )
     } ~[ contains(operators, e) ] {
@@ -265,7 +265,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
 
 @ isNumber(num) {
   numberChars = [ (10 ... i) { text(i) } ]
-  (num ... c) {
+  . (num ... c) {
     ? [ !contains( numberChars, c ) ] {
       -> 0
     }
@@ -281,7 +281,7 @@ run = 1
 . [ run ] {
   in = input(">> ")
   expr = split(in, " ")
-  ( expr ... e ) {
+  . ( expr ... e ) {
     ? [ isNumber(e) ] {
       calc::push( parseInt(e) )
     } ~[ contains(operators, e) ] {

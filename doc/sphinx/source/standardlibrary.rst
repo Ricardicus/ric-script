@@ -136,7 +136,7 @@ this:
 	}
 
 	@ listFiles(folder, indent) {
-	  ( ls(folder) ... file ) {
+	  . ( ls(folder) ... file ) {
 	    fullfile = folder + "/" + file
 	    ? [ isFile(fullfile) ] {
 	      printf(" " * indent)

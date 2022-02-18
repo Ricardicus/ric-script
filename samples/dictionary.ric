@@ -46,7 +46,7 @@ print(keys(d))
 print(keys(d["a"]))
 
 # For each loop, iterating over the keys
-( s ... key ) {
+. ( s ... key ) {
 	print(key)
 	print(s[key])
 }

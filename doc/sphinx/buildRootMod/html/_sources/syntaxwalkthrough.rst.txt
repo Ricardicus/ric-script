@@ -32,7 +32,7 @@ declaration of a **map** and two of the **list** sort.
 	numberChars = [ (10 ... i) { text(i) } ]
 
 	@ isNumber(num) {
-	  (num ... c) {
+	  . (num ... c) {
 	    ? [ !contains( numberChars, c ) ] {
 	      -> 0
 	    }
@@ -84,7 +84,7 @@ declaration of a **map** and two of the **list** sort.
 	. [ run ] {
 	  in = input(">> ")
 	  expr = split(in, " ")
-	  ( expr ... e ) {
+	  . ( expr ... e ) {
 	    ? [ isNumber(e) ] {
 	      push( parseInt(e) )
 	    } ~[ contains(operators, e) ] {
@@ -252,7 +252,7 @@ A dictionary maps a string to any type of references.
 	print(keys(d["a"]))
 
 	# For each loop, iterating over the keys
-	( s ... key ) {
+	. ( s ... key ) {
 	  print(key)
 	  print(s[key])
 	}
@@ -336,7 +336,7 @@ and can hold any type of expressions.
 	print( len(h) )
 
 	# For each loop
-	( h ... entry ) {
+	. ( h ... entry ) {
 		print(entry)
 	}
 
@@ -348,7 +348,7 @@ and can hold any type of expressions.
 	print(h[0])
 
 	# For each loop
-	( h ... entry ) {
+	. ( h ... entry ) {
 		print(entry)
 	}
 
@@ -621,7 +621,7 @@ Below is an implementation of an RPN calculator implemented using a class.
 
 	@ isNumber(num) {
 	  numberChars = [ (10 ... i) { text(i) } ]
-	  (num ... c) {
+	  . (num ... c) {
 	    ? [ !contains( numberChars, c ) ] {
 	      -> 0
 	    }
@@ -637,7 +637,7 @@ Below is an implementation of an RPN calculator implemented using a class.
 	. [ run ] {
 	  in = input(">> ")
 	  expr = split(in, " ")
-	  ( expr ... e ) {
+	  . ( expr ... e ) {
 	    ? [ isNumber(e) ] {
 	      calc::push( parseInt(e) )
 	    } ~[ contains(operators, e) ] {
@@ -713,25 +713,25 @@ It works for dictionaries, lists, integers and strings.
 	# For-eaching
 	# Integers
 	limit = 10
-	( limit ... i ) {
+	. ( limit ... i ) {
 	  print(i)
 	}
 
 	# Dictionary
 	dict = {"a" : 1, "b" : 2, "c" : 3}
-	( dict ... key ) {
+	. ( dict ... key ) {
 	  print(key + ": " + dict[key])
 	}
 
 	# Strings
 	string = "Hello world!"
-	( string ... c ) {
+	. ( string ... c ) {
 	  print(c)
 	}
 
 	# Lists
 	list = ["a", 2, "b", 4]
-	( list ... entry ) {
+	. ( list ... entry ) {
 	  print(entry)
 	}
 

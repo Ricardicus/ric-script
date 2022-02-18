@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Standard library &mdash; RicScript documentation 0.1 documentation</title>
@@ -201,7 +201,7 @@ this:</p>
 }
 
 @ listFiles(folder, indent) {
-  ( ls(folder) ... file ) {
+  . ( ls(folder) ... file ) {
     fullfile = folder + &quot;/&quot; + file
     ? [ isFile(fullfile) ] {
       printf(&quot; &quot; * indent)

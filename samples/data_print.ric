@@ -6,7 +6,7 @@ print(d[::-1])
 print(d[5:20:2])
 print(d[5:20:-2])
 
-(ls (".") ... file ) {
+. (ls (".") ... file ) {
   # on Windows, .\\ is prefixed to the file lists,
   # I make sure it works on both
   ? [ file == "requirements.txt" ||

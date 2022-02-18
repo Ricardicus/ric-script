@@ -5,7 +5,7 @@ operators = ["+", "*", "-", "/"]
 numberChars = [ (10 ... i) { text(i) } ]
 
 @ isNumber(num) {
-  (num ... c) {
+  . (num ... c) {
     ? [ !contains( numberChars, c ) ] {
       -> 0
     }
@@ -57,7 +57,7 @@ run = 1
 . [ run ] {
   in = input(">> ")
   expr = split(in, " ")
-  ( expr ... e ) {
+  . ( expr ... e ) {
     ? [ isNumber(e) ] {
       push( parseInt(e) )
     } ~[ contains(operators, e) ] {

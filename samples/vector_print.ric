@@ -34,7 +34,7 @@ print(h)
 print( len(h) )
 
 # For each loop
-( h ... entry ) {
+. ( h ... entry ) {
 	print(entry)
 }
 
@@ -46,7 +46,7 @@ h[0] = "Foobar! foo "
 print(h[0])
 
 # For each loop
-( h ... entry ) {
+. ( h ... entry ) {
 	print(entry)
 }
 
@@ -123,5 +123,5 @@ print(pop(s) + " " + pop(s) + " " + pop(s))
 print(s)
 
 # Pushing
-( 10 ... i ) { push(s, i) }
+. ( 10 ... i ) { push(s, i) }
 print(s)

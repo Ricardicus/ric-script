@@ -83,6 +83,7 @@ statement_t *root = NULL;
 %type<data> ifStatement
 %type<data> loopStatement
 %type<data> forEachStatement
+%type<data> forEachStatementFull
 %type<data> continueStatement
 %type<data> returnStatement
 %type<data> breakStatement
@@ -133,7 +134,7 @@ statement:
     | function {
         $$ = newStatement(LANG_ENTITY_FUNCDECL, $1);
     }
-    | forEachStatement {
+    | forEachStatementFull {
         $$ = newStatement(LANG_ENTITY_FOREACH, $1);
     }
     | expressions {
@@ -164,6 +165,11 @@ statement:
 systemStatement: '$' ID {
     $$ = newExpr_ID($2);
 } | '$' stringContent {
+    $$ = $2;
+};
+
+forEachStatementFull:
+  '.' forEachStatement {
     $$ = $2;
 };
 

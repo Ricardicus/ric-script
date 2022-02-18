@@ -21,7 +21,7 @@ print(s)
 	-> "Hello world!"
 }
 
-( getString() ... c ) {
+. ( getString() ... c ) {
 	print(c)
 }
 

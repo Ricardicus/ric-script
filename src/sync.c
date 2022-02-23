@@ -310,3 +310,10 @@ void freeContext(void *ctx) {
   pthread_mutex_destroy(&ricCtx->mutex);
   free(ricCtx);
 }
+
+/* Used in interactive mode, no buffering */
+void setUnbufferedOutput() {
+  /* Unbuffered mode */
+  setvbuf(stdout, NULL, _IONBF, 0);
+}
+

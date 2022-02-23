@@ -14,8 +14,8 @@
 #define JMP_CODE_TEARDOWN 2
 
 typedef enum {
-  CONTINUE,
-  RETURN
+  INTEPRET_CONTINUE,
+  INTEPRET_RETURN
 } interpret_state_t;
 
 int evaluate_condition(ifCondition_t *cond, void *stmt, void *next, PROVIDE_CONTEXT_ARGS(),

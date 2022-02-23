@@ -888,7 +888,7 @@ void initParser() {
     setRoot(&root);
 }
 
-void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func) {
+void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, const char *prompt) {
     char lineBuffer[256];
 
     ParsedFile = "stdin";
@@ -897,7 +897,7 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func) {
 
     PRINT_INTERACTIVE_BANNER();
 
-    printf(">> ");
+    printf("%s", prompt);
     while ( fgets(lineBuffer, sizeof(lineBuffer), stdin) != NULL ) {
         YY_BUFFER_STATE buffer;
 
@@ -916,7 +916,7 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func) {
             func(argc, argv, root, 0);
         }
 
-        printf(">> ");
+        printf("%s", prompt);
         memset(lineBuffer, 0, sizeof(lineBuffer));
     }
 }

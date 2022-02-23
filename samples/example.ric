@@ -153,7 +153,7 @@ syscall = "echo 'hello from the shell via variable, the variable a has the value
 $ syscall
 
 # system call directly, not via variable
-$ "echo 'hello from the shell directly, the variable a has the value: " + a + "'"
+#$ "echo 'hello from the shell directly, the variable a has the value: " + a + "'"
 
 a = 0
 . [ a < 4 ] {

@@ -57,6 +57,9 @@ endif
 RIC_OBJS = $(addsuffix .o, $(RIC_SOURCES))
 
 DEFINES = YYERROR_VERBOSE 'TARGET_OS="linux"'
+ifneq ($(DOCKER_MODE), )
+	DEFINES += DOCKER_MODE
+endif
 
 LIBS = m pthread dl
 

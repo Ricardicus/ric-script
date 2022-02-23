@@ -1,168 +1,83 @@
-<!doctype html>
-  <html>
-    <head>
-      <script src="js/jqeury.v3.5.1.js"></script>
-      <style>
-        textarea {
-          border: 1px solid #888;
-          outline: none;
-          resize: none;
-          font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
-          background-color: #888888;
-          border-radius: 5px;
-          color:white;
-        }
-
-        div.btn, div.sample-btn {
-          color: black;
-          background-color: #888888;
-          padding: 0px;
-          border-radius: 20px;
-          width: 200px;
-          height: 80px;
-          text-align: center;
-          vertical-align: middle;
-          line-height: 80px;
-        }
-
-        div.btn-link {
-          color: blue;
-        }
-
-        span.stdout {
-          color: blue;
-        }
-        span.stderr {
-          color: blue;
-        }
-      </style>
-    </head>
-    <body>
-      <div id="terminal"></div>
-      <script type="text/javascript">
-
-function openInNewTab(url) {
-  var win = window.open(url, '_blank');
-  win.focus();
+<!DOCTYPE html>
+<html>
+<head>
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="css/jquery.terminal.min.css"/>
+</head>
+<style>
+body {
+  background: black
 }
+.full-display {
+  height: 100%;
+  width: 100%;
+}
+</style>
+<body class="full-display">
+<div id="terminal-div" class="full-display"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+</script>
+<script>
+var s = io();
+var d = new Date();
 
-$(document).ready(function(){
-
-$("div.btn").hover(function () {
-  $(this).fadeTo("fast", 0.6);
-}, function () {
-  $(this).fadeTo("fast", 1.0);
-});
-
-$("div.sample-btn").hover(function () {
-  $(this).fadeTo("fast", 0.6);
-}, function () {
-  $(this).fadeTo("fast", 1.0);
-});
-
-$("div.sample-btn").click(function () {
-  var sample = $(this).attr("value");
-  $.ajax({
-    type: "GET",
-    url: "/samples/" + sample,
-    success: function(res) {
-      /* Sample will be collected */
+var term = $('#terminal-div').terminal(
+    function(command) {
+        s.emit("input", command);
     },
-    error: function(err) {
-      alert("Error");
-    }
+    {
+      "prompt": '$ ',
+      "greetings": `
+[[gb;teal;black]
+__________.__                        .___.__                     
+\\______   \\__| ____ _____ _______  __| _/|__| ____  __ __  ______
+ |       _/  |/ ___\\\\__  \\\\_  __ \\/ __ | |  |/ ___\\|  |  \\/  ___/
+ |    |   \\  \\  \\___ / __ \\|  | \\/ /_/ | |  \\  \\___|  |  /\\___ \\ 
+ |____|_  /__|\\___  >____  /__|  \\____ | |__|\\___  >____//____  >
+        \\/        \\/     \\/           \\/         \\/           \\/] 
 
-  });
+            [[gb;grey;black]You are using Ricardicus web terminal]
+        https://github.com/Ricardicus/remote-terminal
 
+               [[gb;grey;black]Launch ric-script with 'ric']
+            [[gb;grey;black]See the README here for more info]
+
+        https://github.com/Ricardicus/ric-script
+
+` + d + `
+`
+}
+);
+
+s.on("terminal-output-stdout", (msg) => {
+  $("#output-monitor").css("color", "white");
+  $("#output-monitor").append(msg["message"]);
+  term.echo(msg["message"]);
+});
+s.on("terminal-output-stderr", (msg) => {
+  $("#output-monitor").css("color", "#883333");
+  $("#output-monitor").append(msg["message"]);
+  term.echo("[[gb;red;black]" + msg["message"] + "]");
+});
+s.on("terminal-exit-code", () => {
+  $("#output-monitor").css("color", "#883333");
+  $("#output-monitor").append("Connection closed");
+  term.echo("[[gb;red;black]" + "Connection to terminal closed" + "]");
+});
+s.on("terminal-refresh", (msg) => {
+  document.getElementById("output-monitor").innerHTML = "";
+});
+s.on("terminal-sample", (msg) => {
+  $("#input-script").val(msg["message"])
+});
+s.on("terminal-exit-code", (msg) => {
+  document.getElementById("output-monitor-exit-code").innerHTML = "Exit code: " + msg["message"]
+    + ( msg["message"] == 0 ? " (Success)" : "" );
 });
 
-$("#interpret-btn").click(function(){
-  var content = $("#input-script").val();
-  var args = $("#interpret-args-inpt").val();
+</script>
+</body>
+</html>
 
-  var databdy = {script : content, arguments: args};
-
-  $.ajax({
-    type: "POST",
-    url: "/interpret",
-    data: databdy,
-    success: function(res) {
-      /* Program launched */
-    },
-    error: function(err) {
-      alert("Error");
-    }
-
-  });
-})
-
-});
-
-
-      </script>
-      <script src="/socket.io/socket.io.js"></script>
-      <script>
-        var s = io();
-
-        s.on("terminal-output-stdout", (msg) => {
-          $("#output-monitor").css("color", "white");
-          $("#output-monitor").append(msg["message"]);
-        });
-        s.on("terminal-output-stderr", (msg) => {
-          $("#output-monitor").css("color", "#883333");
-          $("#output-monitor").append(msg["message"]);
-        });
-        s.on("terminal-refresh", (msg) => {
-          document.getElementById("output-monitor").innerHTML = "";
-        });
-        s.on("terminal-sample", (msg) => {
-          $("#input-script").val(msg["message"])
-        });
-        s.on("terminal-exit-code", (msg) => {
-          document.getElementById("output-monitor-exit-code").innerHTML = "Exit code: " + msg["message"]
-            + ( msg["message"] == 0 ? " (Success)" : "" );
-        });
-
-      </script>
-
-      <table>
-        <tbody>
-          <tr>
-            <td><center><h1>Input</h1></center></td>
-            <td><center><h1>Output</h1></center></td>
-            <td><center><h1>Samples</h1></center></td>
-          </tr>
-          <tr>
-            <td>
-              <textarea id="input-script" placeholder="" cols="60" rows="40"></textarea>
-            </td>
-            <td>
-              <textarea id="output-monitor" class="monitor" cols="60" rows="40" readonly></textarea>    
-            </td>
-            <td>
-              <div class="sample-btn" value="gcd.ric">GCD calculation</div><br>
-              <div class="sample-btn" value="dictionary.ric">Dictionary</div><br>
-              <div class="sample-btn" value="string_manipulations.ric">Strings</div><br>
-              <div class="sample-btn" value="vector_print.ric">Lists</div><br>
-              <div class="sample-btn" value="function_within_function.ric">Functions</div><br>
-              <div class="btn btn-link" onclick="window.open('https://github.com/Ricardicus/ric-script/tree/master/samples', '_blank');">Other samples</div>
-            </td>
-
-          </tr>
-          <tr><td style="height:100px;"><center><b>Arguments</b>: <input id="interpret-args-inpt" value="arg1 arg2"></center></td><td></td><td></td></tr>
-          <tr>
-            <td>
-              <center><div class="btn" id="interpret-btn">Interpret</div></center>
-            </td>
-            <td>
-              <center><p id="output-monitor-exit-code"></p></center>
-            </td>
-            <td>
-              <center><div class="btn" onclick="openInNewTab('/doc');">Documentation</div></center>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-    </body>
-  </html>

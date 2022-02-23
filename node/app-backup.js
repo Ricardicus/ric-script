@@ -48,9 +48,8 @@ child = null;
 // Create Interface
 function initializeInterface(socket) {
   var interface = {
-      terminal: spawn("/bin/sh"),
-      handler: function(command) {},
-      active: true,
+      terminal: spawn("./ric"),
+      handler: console.log,
       send: (data) => {
           interface.terminal.stdin.write(data + '\n');
       },
@@ -75,7 +74,6 @@ function initializeInterface(socket) {
   // Handle Closure
   interface.terminal.on('close', () => {
       interface.handler({ type: 'closure', data: null });
-      interface.active = false;
       socket.emit("terminal-exit-code", {message: 1337});
   });
 
@@ -95,18 +93,11 @@ io.on('connection', (socket) => {
   if ( startDir ) {
     process.chdir(startDir);
   }
-  var address = socket.handshake.address;
-
-  var d = new Date();
-
-  console.log(d + ': Connection established: ' + address);
 
   var interface = initializeInterface(socket);
 
   socket.on('disconnect', () => {
     /* User disconnected */
-    console.log(d + ': Connection closed: ' + address);
-
     closeInterface(interface);
   });
 
@@ -116,5 +107,5 @@ io.on('connection', (socket) => {
 });
 
 http.listen(3000, () => {
-  console.log('server listening...');
+  console.log('listening on *:3000');
 });

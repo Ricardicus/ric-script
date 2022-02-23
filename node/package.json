@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "An interactive ric script interpreter",
   "main": "app.js",
-  "scripts": {
-    "install": "cd .. && rm -fr builddir && meson builddir && cd builddir && ninja && cp src/ric ../node",
-    "test": "cd ../tests; pytest"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ricardicus/ric-script.git"

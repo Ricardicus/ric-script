@@ -1,6 +1,9 @@
-#include "y.tab.h"
+
 #include "ast.h"
 #include "hooks.h"
+#include "sync.h"
+#include "y.tab.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -22,7 +25,8 @@ typedef enum mission {
   runAsIntepreter,
   runAsASTPrinter,
   runAsASTPrinterAndInterpreter,
-  runAsInteractive
+  runAsInteractive,
+  runAsInteractiveNoPrompt
 } mission_t;
 
 int main(int argc, char *argv[]) {
@@ -32,6 +36,11 @@ int main(int argc, char *argv[]) {
   int ret = 0;
   FILE *fp = NULL;
 
+#ifdef DOCKER_MODE
+  /* In case this is built for the docker image, the prompt is removed */
+  mission = runAsInteractiveNoPrompt;
+#endif
+
   /* Check inputs */
   if (argc > 1) {
     int i = 1;
@@ -40,6 +49,8 @@ int main(int argc, char *argv[]) {
         mission = runAsASTPrinter;
       } else if (strcmp("-i", argv[i]) == 0) {
         mission = runAsIntepreter;
+      } else if (strcmp("-np", argv[i]) == 0) {
+        mission = runAsInteractiveNoPrompt;
       } else if (strcmp("-pi", argv[i]) == 0) {
         mission = runAsASTPrinterAndInterpreter;
       } else if (strcmp("-h", argv[i]) == 0) {
@@ -70,8 +81,18 @@ int main(int argc, char *argv[]) {
   switch (mission) {
     case runAsInteractive:
       {
+        /* Unbuffered mode */
+        setUnbufferedOutput();
         /* Run the interactive mode */
-        runInteractive(argc, argv, interpret_statements_interactive);
+        runInteractive(argc, argv, interpret_statements_interactive, ">> ");
+      }
+      break;
+    case runAsInteractiveNoPrompt:
+      {
+        /* Unbuffered mode */
+        setUnbufferedOutput();
+        /* Run the interactive mode */
+        runInteractive(argc, argv, interpret_statements_interactive, "");
       }
       break;
     case runAsIntepreter:

@@ -880,6 +880,11 @@ void free_ast(statement_t *stmt);
   do {                                                                            \
     printf("You are running in interactive mode. Stop it by typing: 'quit'.\n");  \
     printf("This is in it's very early stage... it only supports one liners!\n"); \
+    printf("\n"); \
+    printf("Some short tips:\nhelp() gives you a list of available functions\n"); \
+    printf("printEnv() lists the names of variables defined in this session\n"); \
+    printf("quit() quits this interpreter interactive mode\n"); \
+    printf("\n"); \
   } while (0)
 
 #endif

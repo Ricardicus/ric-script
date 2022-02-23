@@ -305,3 +305,8 @@ void freeContext(void *ctx) {
   CloseHandle(ricCtx->event);
   free(ricCtx);
 }
+
+/* Used in interactive mode, no buffering */
+void setUnbufferedOutput() {
+  /* Not implemented in Windows */
+}

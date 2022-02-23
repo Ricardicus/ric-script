@@ -3665,7 +3665,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           }
           /* Returning now from this function */
           free(ctx);
-          return RETURN;
+          return INTEPRET_RETURN;
         }
         break;
       case LANG_ENTITY_CLASSDECL:
@@ -3720,7 +3720,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           expr_t *newVec = NULL;
           int *interactive = PROVIDE_CONTEXT()->interactive;
           int continueLoop = 1;
-          interpret_state_t interpret_state = CONTINUE;
+          interpret_state_t interpret_state = INTEPRET_CONTINUE;
 
           while (continueLoop) {
             evaluate_expression(root, EXPRESSION_ARGS());
@@ -4138,7 +4138,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               // Special case, big looping
               continueLoop = (mpz_cmp(endIterationBigInt, festmtBigIndex) != 0);
             }
-            if ( interpret_state == RETURN ) {
+            if ( interpret_state == INTEPRET_RETURN ) {
               /* A return was made, stop iterations */
               continueLoop = false;
             }
@@ -4175,10 +4175,10 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             PUSH_VECTOR(newVec->vec, sp, sc);
             free(newVec);
           }
-          if ( interpret_state == RETURN ) {
+          if ( interpret_state == INTEPRET_RETURN ) {
             /* Returning now from this function */
             free(ctx);
-            return RETURN;
+            return INTEPRET_RETURN;
           }
         }
         break;
@@ -4480,7 +4480,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
   }
 
   free(ctx);
-  return CONTINUE;
+  return INTEPRET_CONTINUE;
 }
 
 void locals_print(locals_stack_t *stack) {

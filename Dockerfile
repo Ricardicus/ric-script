@@ -1,37 +1,44 @@
-# Pull base image, using Ubuntu latest
-FROM ubuntu:20.04
+# Building documentation
+FROM sphinxdoc/sphinx as sphinx-doc
 
-# No interactive shenanigans
-ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y doxygen
 
-# Install Node.js
-RUN apt-get update && apt-get install --yes curl
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install --yes nodejs build-essential cmake bison flex
+WORKDIR /doc
+COPY ./doc/sphinx/ /doc/sphinx/
+RUN cd /doc/sphinx && pip install -r requirements.txt && make html
+
+FROM node:16-buster as remote-terminal
+
+RUN apt-get update -y && apt-get install -y build-essential flex bison
+
+# Building ric-script
+WORKDIR /src/ric-script
 
 # Install meson
-RUN apt install --yes software-properties-common
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get update && apt-get install --yes python3.7 python3-pip python3-setuptools \
-                       python3-wheel ninja-build
-RUN pip3 install --upgrade pip && pip install meson==0.52.0 ninja
+COPY . /src/ric-script
 
-COPY . /src
+RUN DOCKER_MODE=1 make && make install
 
-RUN cp -r /src/doc/sphinx/buildRootMod/html /src/node/doc && cp /src/images/icon_small.png /src/node/favicon.ico && \
-    cp -r /src/images /src/node/doc/images && cp -r /src/images /src/node/images  
+COPY node/ /usr/src/app/
 
-WORKDIR /src/node
+# App directory
+WORKDIR /usr/src/app
 
-# Install app dependencies
-RUN npm install --unsafe-perm
+COPY --from=sphinx-doc /doc/sphinx/build/html /usr/src/app/public/doc
+RUN cp -r /src/ric-script/ric /usr/bin && \
+    cp -r /src/ric-script/images /usr/src/app/public/images
 
-# Place interpreter in PATH
-RUN cp ric /usr/local/bin; cp -r ../samples /src/node;
+RUN npm install
+# If you are building your code for production
+# RUN npm ci --only=production
 
-# Binds to port 3000
 EXPOSE 3000
 
-#  Defines your runtime(define default command)
-# These commands unlike RUN (they are carried out in the construction of the container) are run when the container
-CMD ["node", "/src/node/app.js"]
+RUN mkdir /explore
+
+RUN mv /src/ric-script/samples /explore/samples && mv files/* /explore
+
+RUN groupadd noobz && useradd -rm -d /explore -g noobz -u 1001 noob
+USER noob
+
+CMD [ "node", "app.js", "/explore"]

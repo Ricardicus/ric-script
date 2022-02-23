@@ -1,0 +1,10 @@
+
+# build files
+builddir
+src/*.d
+src/*.o
+ric
+src/library/*.o
+src/library/*.d
+src/sdk_lib/*.o
+

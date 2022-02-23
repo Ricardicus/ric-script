@@ -1,0 +1,24 @@
+
+Welcome esteemed hacker,
+
+I bet you came here to learn more about ric-script.
+You can find proper documentation under this doman with
+the path /doc .
+
+Launch the interpreter with:
+
+$ ric
+
+Under the folder 'samples' you can find ric-script programs
+with valid syntax. List them like this:
+
+$ ls samples
+
+Run them like this:
+
+$ ric samples/demo.ric
+
+Happy hacking!
+
+Best,
+Rickard Hallerbäck

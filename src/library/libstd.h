@@ -31,5 +31,6 @@ int ric_type_text(LIBRARY_PARAMS());
 int ric_create_list(LIBRARY_PARAMS());
 int ric_create_data(LIBRARY_PARAMS());
 int ric_create_text(LIBRARY_PARAMS());
+int ric_print_env(LIBRARY_PARAMS());
 
 #endif

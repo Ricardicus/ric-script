@@ -1190,3 +1190,23 @@ int ric_help(LIBRARY_PARAMS()) {
 
   return 0;
 }
+
+int ric_print_env(LIBRARY_PARAMS()) {
+  hashtable_t *varDecs = PROVIDE_CONTEXT()->varDecs;
+  int i = 0;
+  int size = varDecs->size;
+  struct key_val_pair *ptr;
+
+  while (i < size) {
+    if (varDecs->table[i] != NULL) {
+      ptr = varDecs->table[i];
+      while (ptr != NULL) {
+        printf("%s\n", ptr->key);
+        ptr = ptr->next;
+      }
+    }
+    i++;
+  }
+
+  return 0;
+}

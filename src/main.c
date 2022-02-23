@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
           fp = fopen(argv[i], "r");
           if (fp != NULL) {
             yyin = fp;
-            if (mission == runAsInteractive) mission = runAsIntepreter;
+            if (mission == runAsInteractive || mission == runAsInteractiveNoPrompt) mission = runAsIntepreter;
           }
         }
       }

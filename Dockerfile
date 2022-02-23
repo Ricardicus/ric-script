@@ -17,7 +17,8 @@ WORKDIR /src/ric-script
 # Install meson
 COPY . /src/ric-script
 
-RUN DOCKER_MODE=1 make && make install
+ENV DOCKER_MODE 1
+RUN make && make install
 
 COPY node/ /usr/src/app/
 
@@ -26,7 +27,8 @@ WORKDIR /usr/src/app
 
 COPY --from=sphinx-doc /doc/sphinx/build/html /usr/src/app/public/doc
 RUN cp -r /src/ric-script/ric /usr/bin && \
-    cp -r /src/ric-script/images /usr/src/app/public/images
+    cp -r /src/ric-script/images /usr/src/app/public/images && \
+    cp -r /src/ric-script/images /usr/src/app/public/doc/images
 
 RUN npm install
 # If you are building your code for production

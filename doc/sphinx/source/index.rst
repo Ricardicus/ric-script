@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: images/icon_small.png
+.. image:: /images/icon_small.png
    :width: 30px
    :height: 30px
    :scale: 50 %
@@ -21,7 +21,7 @@ If you want to contribute, or you find something not working properly or whateve
 feel free to contact me; you find `me here <https://github.com/Ricardicus>`_ or you can also send
 me PRs or create issues on the projects public repository `here <https://github.com/Ricardicus/ric-script>`_.
 
-.. image:: images/icon_round.png
+.. image:: /images/icon_round.png
    :width: 200px
    :height: 200px
    :align: center

@@ -3,6 +3,7 @@
 <head>
 <script src="js/jquery-3.3.1.min.js"></script>
 <script src="js/jquery.terminal.min.js"></script>
+<script src="js/echo_newline.js"></script>
 <link rel="stylesheet" href="css/jquery.terminal.min.css"/>
 </head>
 <style>
@@ -54,7 +55,8 @@ __________.__                        .___.__
 s.on("terminal-output-stdout", (msg) => {
   $("#output-monitor").css("color", "white");
   $("#output-monitor").append(msg["message"]);
-  term.echo(msg["message"]);
+  console.log(msg["message"]);
+  term.echo(msg["message"], {newline: false});
 });
 s.on("terminal-output-stderr", (msg) => {
   $("#output-monitor").css("color", "#883333");

@@ -40,6 +40,11 @@ RUN mkdir /explore
 
 RUN mv /src/ric-script/samples /explore/samples && mv files/* /explore
 
+# Some extra precautions
+RUN chmod a-w /tmp && mkdir /tmp/secrets && mkdir /tmp/secrets/super_secrets/ && \
+  echo "https://www.youtube.com/watch?v=dQw4w9WgXcQ" > /tmp/secrets/super_secrets/war_plans.txt && \
+  rm /usr/bin/apt /usr/bin/apt-get /bin/kill /usr/bin/curl /usr/bin/ssh /usr/bin/scp
+
 RUN groupadd noobz && useradd -rm -d /explore -g noobz -u 1001 noob
 USER noob
 

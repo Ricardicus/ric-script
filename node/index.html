@@ -61,7 +61,7 @@ s.on("terminal-output-stdout", (msg) => {
 s.on("terminal-output-stderr", (msg) => {
   $("#output-monitor").css("color", "#883333");
   $("#output-monitor").append(msg["message"]);
-  term.echo("[[gb;red;black]" + msg["message"] + "]");
+  term.echo("[[gb;red;black]" + msg["message"] + "]", {newline: false});
 });
 s.on("terminal-exit-code", () => {
   $("#output-monitor").css("color", "#883333");

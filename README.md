@@ -29,6 +29,8 @@ it is a scripting language and my first three letters sound cool according to me
 
 <a href="https://ric-script-u5ep8.ondigitalocean.app/doc">Here is a link to more of the language documentation</a>
 
+[You can also access a terminal with the ric-script interpreter included here](https://ric-script-u5ep8.ondigitalocean.app/).
+
 # Build
 
 You can build the interpreter from source for this language on multiple platforms.

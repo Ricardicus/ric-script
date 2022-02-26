@@ -88,7 +88,7 @@ docker run --rm -d -p 3002:3000 node-ric-script:1.0
 
 Now go visit localhost:3002! 
 
-The interpreter GUI looks like this:
+The interpreter is shipped in a terminal that looks like this (after cat'ing the README):
 
 <img src="https://raw.githubusercontent.com/Ricardicus/ric-script/master/images/screenshot-docker-app.png"></img>
 

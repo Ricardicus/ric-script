@@ -19,10 +19,7 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIRMOD)" $(SPHINXOPTS) $(O)
-	@cd source && python3 addHrefPrefix.py
 
 clean:
 	rm -rf ../../build/linux/debug/doxygen/ api/
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIRMOD)" $(SPHINXOPTS) $(O)

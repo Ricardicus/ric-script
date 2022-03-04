@@ -3,6 +3,7 @@
 #include "hooks.h"
 #include "sync.h"
 #include "y.tab.h"
+#include "interpret.h"
 
 #include <stdlib.h>
 #include <string.h>

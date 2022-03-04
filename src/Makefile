@@ -34,6 +34,8 @@ RIC_SOURCES = \
 	garbage \
 	sync \
 	dl \
+	interpret \
+	print \
 	$(LIB_DIR)/libio \
 	$(LIB_DIR)/libmath \
 	$(LIB_DIR)/libstd \

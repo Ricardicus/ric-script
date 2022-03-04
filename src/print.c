@@ -186,7 +186,6 @@ void print_statements_(void *stmt, int indent) {
 
 void print_statements(statement_t *stmt) { print_statements_(stmt, 0); }
 
-
 void print_condition(ifCondition_t *cond) {
   if (cond == NULL) return;
 
@@ -425,7 +424,6 @@ int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   return 0;
 }
 
-
 void print_expr(expr_t *expr) {
   if (expr == NULL) return;
 
@@ -582,7 +580,6 @@ void print_expr(expr_t *expr) {
       break;
   }
 }
-
 
 int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *dict,
                        EXPRESSION_PARAMS()) {
@@ -1064,4 +1061,3 @@ void locals_print(locals_stack_t *stack) {
     ++i;
   }
 }
-

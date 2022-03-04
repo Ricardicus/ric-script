@@ -316,4 +316,3 @@ void setUnbufferedOutput() {
   /* Unbuffered mode */
   setvbuf(stdout, NULL, _IONBF, 0);
 }
-

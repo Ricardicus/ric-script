@@ -307,6 +307,4 @@ void freeContext(void *ctx) {
 }
 
 /* Used in interactive mode, no buffering */
-void setUnbufferedOutput() {
-  /* Not implemented in Windows */
-}
+void setUnbufferedOutput() { /* Not implemented in Windows */ }

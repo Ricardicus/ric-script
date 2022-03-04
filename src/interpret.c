@@ -3,7 +3,7 @@
 static jmp_buf endingJmpBuf;
 
 interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
-                           hashtable_t *argVals) {
+                                        hashtable_t *argVals) {
   locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -805,7 +805,8 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               (void)classObj;
               (void)localsStackSp;
               (void)localsStackSb;
-              interpret_state = interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
+              interpret_state =
+                  interpret_statements_(festmt->body, PROVIDE_CONTEXT(), args, argVals);
               varLocals->sb = localsStackSb;
               varLocals->sp = localsStackSp;
             }
@@ -883,7 +884,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               // Special case, big looping
               continueLoop = (mpz_cmp(endIterationBigInt, festmtBigIndex) != 0);
             }
-            if ( interpret_state == INTEPRET_RETURN ) {
+            if (interpret_state == INTEPRET_RETURN) {
               /* A return was made, stop iterations */
               continueLoop = false;
             }
@@ -920,7 +921,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             PUSH_VECTOR(newVec->vec, sp, sc);
             free(newVec);
           }
-          if ( interpret_state == INTEPRET_RETURN ) {
+          if (interpret_state == INTEPRET_RETURN) {
             /* Returning now from this function */
             free(ctx);
             return INTEPRET_RETURN;
@@ -1227,7 +1228,6 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
   free(ctx);
   return INTEPRET_CONTINUE;
 }
-
 
 void interpret_statements(int argc, char *argv[], statement_t *stmt) {
   // "CPU" registers definitions

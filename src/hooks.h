@@ -16,6 +16,5 @@ statement_t *getMainRoot();
 
 /* Implemented in gram.y */
 void initParser();
-void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func,
-  const char *prompt);
+void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, const char *prompt);
 #endif

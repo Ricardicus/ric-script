@@ -18,6 +18,10 @@ Run them like this:
 
 $ ric samples/demo.ric
 
+For more info on ric-script, type:
+
+$ ric --help
+
 Happy hacking!
 
 Best,

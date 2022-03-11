@@ -16,7 +16,12 @@ void usage(char *argv0, int ret) {
   fprintf((ret == 0 ? stdout : stderr), "  -p: print AST\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -i: launch intepreter\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -pi: print AST then launch intepreter\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "  -nb: run in unbuffered mode\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "  -np: lauch interpreter without any prompt symbol\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -h|--help: print this help\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "source code:\r\n  %s\r\n", GENERAL_SOURCE_URL);
+  fprintf((ret == 0 ? stdout : stderr), "docs:\r\n  %s\r\n", GENERAL_DOCS);
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
   fprintf((ret == 0 ? stdout : stderr), "%s compiled: %s %s\r\n", argv0, __DATE__, __TIME__);
   exit(ret);
@@ -52,6 +57,8 @@ int main(int argc, char *argv[]) {
         mission = runAsIntepreter;
       } else if (strcmp("-np", argv[i]) == 0) {
         mission = runAsInteractiveNoPrompt;
+      } else if (strcmp("-nb", argv[i]) == 0) {
+        setUnbufferedOutput();
       } else if (strcmp("-pi", argv[i]) == 0) {
         mission = runAsASTPrinterAndInterpreter;
       } else if (strcmp("-h", argv[i]) == 0) {

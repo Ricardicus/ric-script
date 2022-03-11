@@ -104,6 +104,8 @@
 // Big integers max size (in character width base 10)
 #define RIC_BIG_INT_MAX_SIZE 4096
 
+#define GENERAL_DOCS "https://ricardicus.se/doc"
+#define GENERAL_SOURCE_URL "https://github.com/Ricardicus/ric-script"
 #define GENERAL_ERROR_ISSUE_URL "https://github.com/Ricardicus/ric-script"
 #define GENERAL_REPORT_ISSUE_MSG()                                                       \
   do {                                                                                   \

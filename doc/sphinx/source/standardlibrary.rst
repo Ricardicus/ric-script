@@ -267,10 +267,7 @@ Here is an example of how you can create a client in ric-script:
 
 	  t = socketWrite(s, args[4])
 	  ? [ t > 0 ] {
-	    in = socketRead(s, 50)
-	    print("read " + len(in) + " bytes: " + in)
-	  } ~ {
-	    print("Failed to write to host...")
+	    "Sent " + t + " bytes to server."
 	  }
 	  socketClose(s)
 	  sleep(1)

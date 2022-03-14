@@ -19,6 +19,7 @@ def test_directory_print():
 "xattr.ric",
 "socketServer.ric",
 "socketClient.ric",
+"socketClientServer.ric",
 "threads_test.ric",
 "data_print.ric",
 "json.ric",

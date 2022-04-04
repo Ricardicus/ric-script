@@ -133,7 +133,7 @@ Big Integers
 ############
 
 Integers are signed 32 bit values, big integers don't have a bit limit.
-Instead they are implemented with ma ultiple precision arithmetic library such that they can
+Instead they are implemented with multiple precision arithmetic library such that they can
 compute big numbers.
 
 .. code-block:: bash

@@ -42,7 +42,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, windows-2018]
+        os: [windows-latest, windows-2019]
 
     steps:
     - uses: actions/checkout@v2
@@ -59,7 +59,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, windows-2018]
+        os: [windows-latest, windows-2019]
 
     steps:
     - uses: actions/checkout@v2

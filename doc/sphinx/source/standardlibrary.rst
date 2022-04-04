@@ -192,88 +192,83 @@ You can read and write data to a file like this:
 	','This is a message :)
 	']
 
-Socket
-~~~~~~
+Sockets
+~~~~~~~
 
-Here is an example of how you can create a web server in ric-script:
+Here is an example of how sockets can be used, making a socket server and a socket client for demonstration:
 
-.. code-block:: python
+.. code-block:: bash
 
-	#!/usr/bin/ric
-	# Example of how to use the built in
-	# socket interface in ric script.
-	# This is an echo-server.
+  #!/usr/bin/ric
+  # Example of how to use the built in
+  # socket interface in ric script.
+  # This is an echo-server.
 
-	reads = 10
+  reads = 10
+  sends = 10
 
-	@ usage () {
-	  print("usage: " + args[0] + " " + args[1] + " port")
-	  exit(1) 
-	}
+  @ usage () {
+    print("usage: " + args[0] + " " + args[1] + " host port content-to-write")
+    exit(1) 
+  }
 
-	? [ len(args) < 3 ] {
-	  usage()
-	}
+  ? [ len(args) < 5 ] {
+    usage()
+  }
 
-	s = socketServer(args[2])
-	? [ s < 0 ] {
-	  print("Failed to create the socket, sorry..")
-	  exit(1)
-	}
+  @ clientThread () {
+    i = 0
+    . [ i < sends ] {
+      print("Opening connection to host: " + args[2] + ":" + args[3])
+      s = socketConnect(args[2], args[3])
+      ? [ s < 0 ] {
+        print("Failed to create the socket, sorry.. error code: " + s)
+        exit(1)
+      }
 
-	i = 0
-	. [ i < reads ] {
-	  t = socketAccept(s)
-	  ? [ t > 0 ] {
-	    in = socketRead(t, 50)
-	    print("read " + len(in) + " bytes: " + in)
-	    socketWrite(t, in)
-	    socketClose(t)
-	  }
-	  i += 1
-	  @
-	}
+      t = socketWrite(s, args[4])
+      ? [ t > 0 ] {
+        print("Sent " + t + " bytes to server.")
+      }
+      socketClose(s)
+      sleep(1)
+      i += 1
+      @
+    }
+  }
 
-	socketClose(s)
+  @ serverThread () {
+    s = socketServer(args[3])
+    ? [ s < 0 ] {
+      print("Failed to create the socket, sorry..")
+      exit(1)
+    }
 
-Here is an example of how you can create a client in ric-script:
+    i = 0
+    . [ i < reads ] {
+      t = socketAccept(s)
+      ? [ t > 0 ] {
+        in = socketRead(t, 50)
+        print("read " + len(in) + " bytes: " + in)
+        socketWrite(t, in)
+        socketClose(t)
+      }
+      i += 1
+      @
+    }
 
-.. code-block:: python
+    socketClose(s)
+  }
 
-	#!/usr/bin/ric
-	# Example of how to use the built in
-	# socket interface in ric script.
-	# This is a client program.
+  # Start server thread immediately
+  setTimeout(serverThread, 0)
+  # Start client server one second later
+  setTimeout(clientThread, 1)
 
-	sends = 10
 
-	@ usage () {
-	  print("usage: " + args[0] + " " + args[1] + " host port content-to-write")
-	  exit(1) 
-	}
 
-	? [ len(args) < 5 ] {
-	  usage()
-	}
 
-	i = 0
-	. [ i < sends ] {
-	  print("Opening connection to host: " + args[2] + ":" + args[3])
-	  s = socketConnect(args[2], args[3])
-	  ? [ s < 0 ] {
-	    print("Failed to create the socket, sorry.. error code: " + s)
-	    exit(1)
-	  }
 
-	  t = socketWrite(s, args[4])
-	  ? [ t > 0 ] {
-	    "Sent " + t + " bytes to server."
-	  }
-	  socketClose(s)
-	  sleep(1)
-	  i = i + i
-	  @
-	}
 
 Math
 ~~~~
@@ -431,77 +426,3 @@ Inspired by Javascript, you can create new contexts with the functions
 	- setTimeout ( 2 )
 	- setInterval ( 2 )
 	- sleep ( 1 )
-
-Here is an example of how they can be used, making a socket server and a socket client for demonstration:
-
-.. code-block:: python
-
-	#!/usr/bin/ric
-	# Example of how to use the built in
-	# socket interface in ric script.
-	# This is an echo-server.
-
-	reads = 10
-	sends = 10
-
-	@ usage () {
-	  print("usage: " + args[0] + " " + args[1] + " host port content-to-write")
-	  exit(1) 
-	}
-
-	? [ len(args) < 5 ] {
-	  usage()
-	}
-
-	@ clientThread () {
-	  i = 0
-	  . [ i < sends ] {
-	    print("Opening connection to host: " + args[2] + ":" + args[3])
-	    s = socketConnect(args[2], args[3])
-	    ? [ s < 0 ] {
-	      print("Failed to create the socket, sorry.. error code: " + s)
-	      exit(1)
-	    }
-
-	    t = socketWrite(s, args[4])
-	    ? [ t > 0 ] {
-	      print("Sent " + t + " bytes to server.")
-	    }
-	    socketClose(s)
-	    sleep(1)
-	    i += 1
-	    @
-	  }
-	}
-
-	@ serverThread () {
-	  s = socketServer(args[3])
-	  ? [ s < 0 ] {
-	    print("Failed to create the socket, sorry..")
-	    exit(1)
-	  }
-
-	  i = 0
-	  . [ i < reads ] {
-	    t = socketAccept(s)
-	    ? [ t > 0 ] {
-	      in = socketRead(t, 50)
-	      print("read " + len(in) + " bytes: " + in)
-	      socketWrite(t, in)
-	      socketClose(t)
-	    }
-	    i += 1
-	    @
-	  }
-
-	  socketClose(s)
-	}
-
-	# Start server thread immediately
-	setTimeout(serverThread, 0)
-	# Start client server one second later
-	setTimeout(clientThread, 1)
-
-
-
-

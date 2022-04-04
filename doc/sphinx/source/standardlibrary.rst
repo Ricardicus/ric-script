@@ -106,7 +106,7 @@ File io
 You can do file IO, but only basic things as of today. More to come!
 Here is an example of functions that do file IO:
 
-.. code-block:: javascript
+.. code-block:: python
 
 	- isFile ( 1 )
 	- isDir ( 1 )
@@ -126,7 +126,7 @@ Here is an example of functions that do file IO:
 Using **isFile**, you can for example list all files in a directory like
 this:
 
-.. code-block:: javascript
+.. code-block:: python
 
 	#!/usr/bin/ric
 	# A script to demonstrate how one can list files using ric-script
@@ -168,7 +168,7 @@ this:
 
 You can read and write data to a file like this:
 
-.. code-block:: javascript
+.. code-block:: python
 
 	fp = fileOpen(fileCheck)
 
@@ -186,7 +186,7 @@ You can read and write data to a file like this:
 
 **outputs:**
 
-.. code-block:: bash
+.. code-block:: python
 
 	['Hello World!
 	','This is a message :)
@@ -197,7 +197,7 @@ Socket
 
 Here is an example of how you can create a web server in ric-script:
 
-.. code-block:: bash
+.. code-block:: python
 
 	#!/usr/bin/ric
 	# Example of how to use the built in
@@ -238,7 +238,7 @@ Here is an example of how you can create a web server in ric-script:
 
 Here is an example of how you can create a client in ric-script:
 
-.. code-block:: bash
+.. code-block:: python
 
 	#!/usr/bin/ric
 	# Example of how to use the built in
@@ -267,10 +267,7 @@ Here is an example of how you can create a client in ric-script:
 
 	  t = socketWrite(s, args[4])
 	  ? [ t > 0 ] {
-	    in = socketRead(s, 50)
-	    print("read " + len(in) + " bytes: " + in)
-	  } ~ {
-	    print("Failed to write to host...")
+	    "Sent " + t + " bytes to server."
 	  }
 	  socketClose(s)
 	  sleep(1)
@@ -282,7 +279,6 @@ Math
 ~~~~
 
 You got some math functions at hand and they accept both integers and doubles.
-
 
 .. code-block:: bash
 
@@ -297,12 +293,29 @@ You got some math functions at hand and they accept both integers and doubles.
 	- floor ( 1 )
 	- ceil ( 1 )
 
+
+Big integers
+~~~~~~~~~~~~
+
+One can do math with integers that are larger than 64 bits. These are called big integers and are constructed via the **bigInt** call.
+
+.. code-block:: python
+
+	# Calculate a ridiculously large number ( 81 to the power of 500 ).
+	print( pow(bigInt(81), 500) )
+
+This will output (scroll to the right to see the whole number):
+
+.. code-block:: python
+
+	1747871251722651609659974619164660570529062487435188517811888011810686266227275489291486469864681111075608950696145276588771368435875508647514414202093638481872912380089977179381529628478320523519319142681504424059410890214500500647813935818925701905402605484098137956979368551025825239411318643997916523677044769662628646406540335627975329619264245079750470862462474091105444437355302146151475348090755330153269067933091699479889089824650841795567478606396975664557143737657027080403239977757865296846740093712377915770536094223688049108023244139183027962484411078464439516845227961935221269814753416782576455507316073751985374046064592546796043150737808314501684679758056905948759246368644416151863138085276603595816410945157599742077617618911601185155602080771746785959359879490191933389965271275403127925432247963269675912646103156343954375442792688936047041533537523137941310690833949767764290081333900380310406154723157882112449991673819054110440001
+
 Extended File Attributes (xattr)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 On POSIX systems, let's say not Windows, you can get and set extended file attributes.
 
-.. code-block:: bash
+.. code-block:: python
 
 	- xattrList ( 1 )
 	- xattrGet ( 2 )
@@ -315,7 +328,7 @@ a file that has that key.
 
 Here is an example of how to set, get and list x-attributes in ric-script:
 
-.. code-block:: javascript
+.. code-block:: python
 
 	file = "requirements.txt"
 	s = xattrList(file)
@@ -361,7 +374,7 @@ Here is an example of how to set, get and list x-attributes in ric-script:
 
 **outputs**:
 
-.. code-block:: bash
+.. code-block:: python
 
 	xattr's of 'requirements.txt':
 	[]
@@ -384,7 +397,7 @@ I have added support for handling time-values.
 The main point of entry is **now**:
 
 
-.. code-block:: bash
+.. code-block:: python
 
 	- now ( 0 )
 	- timeSeconds ( 1 )
@@ -413,65 +426,82 @@ Threads
 Inspired by Javascript, you can create new contexts with the functions
 
 
-.. code-block:: bash
+.. code-block:: python
 
 	- setTimeout ( 2 )
 	- setInterval ( 2 )
 	- sleep ( 1 )
 
-Here is an example of how they can be used, for demonstration:
+Here is an example of how they can be used, making a socket server and a socket client for demonstration:
 
-.. code-block:: javascript
+.. code-block:: python
 
 	#!/usr/bin/ric
-	# This program shows how you can create
-	# different types of thread contexts in
-	# ricscript. It is inspired by Javascript.
-	# You can do function calls by timeouts
-	# over intervals.
-	# The interval thread stops if the function
-	# returns a non-zero value.
-	a = 1
+	# Example of how to use the built in
+	# socket interface in ric script.
+	# This is an echo-server.
 
-	@ iterate () {
-	  ? [ a > 10 ] {
-	    -> 1
+	reads = 10
+	sends = 10
+
+	@ usage () {
+	  print("usage: " + args[0] + " " + args[1] + " host port content-to-write")
+	  exit(1) 
+	}
+
+	? [ len(args) < 5 ] {
+	  usage()
+	}
+
+	@ clientThread () {
+	  i = 0
+	  . [ i < sends ] {
+	    print("Opening connection to host: " + args[2] + ":" + args[3])
+	    s = socketConnect(args[2], args[3])
+	    ? [ s < 0 ] {
+	      print("Failed to create the socket, sorry.. error code: " + s)
+	      exit(1)
+	    }
+
+	    t = socketWrite(s, args[4])
+	    ? [ t > 0 ] {
+	      print("Sent " + t + " bytes to server.")
+	    }
+	    socketClose(s)
+	    sleep(1)
+	    i += 1
+	    @
 	  }
-	  a += 1
 	}
 
-	@ end () {
-	  print("Hi, the shared variable now holds value: " + a)
+	@ serverThread () {
+	  s = socketServer(args[3])
+	  ? [ s < 0 ] {
+	    print("Failed to create the socket, sorry..")
+	    exit(1)
+	  }
+
+	  i = 0
+	  . [ i < reads ] {
+	    t = socketAccept(s)
+	    ? [ t > 0 ] {
+	      in = socketRead(t, 50)
+	      print("read " + len(in) + " bytes: " + in)
+	      socketWrite(t, in)
+	      socketClose(t)
+	    }
+	    i += 1
+	    @
+	  }
+
+	  socketClose(s)
 	}
 
-	print("Hi I am gonna start some threads...")
-	print("I have set a variable, named 'a', to: " + a)
-	print("In 10 seconds, I will read its value again.")
-	print("By the time, a thread running with an interval")
-	print("will increment this variables value with each iteration.")
-	print("Let's begin...")
+	# Start server thread immediately
+	setTimeout(serverThread, 0)
+	# Start client server one second later
+	setTimeout(clientThread, 1)
 
-	setTimeout(end, 10)
-	setInterval(iterate, 1)
 
-	print("I have now launched the threads!")
-	print("They are running in a separate context.")
-	print("I will return with an update...")
-	print("...")
 
-**outputs**
-
-.. code-block:: bash
-
-	Hi I am gonna start some threads...
-	I have set a variable, named 'a', to: 1
-	In 10 seconds, I will read its value again.
-	By the time, a thread running with an interval
-	will increment this variables value with each iteration.
-	Let's begin...
-	I have now launched the threads!
-	They are running in a separate context.
-	I will return with an update...
-	...
-	Hi, the shared variable now holds value: 10
 

@@ -25,10 +25,7 @@ i = 0
 
   t = socketWrite(s, args[4])
   ? [ t > 0 ] {
-    in = socketRead(s, 50)
-    print("read " + len(in) + " bytes: " + in)
-  } ~ {
-    print("Failed to write to host...")
+    print("Sent " + t + " bytes to server.")
   }
   socketClose(s)
   sleep(1)

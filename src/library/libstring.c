@@ -267,3 +267,137 @@ int ric_to_lower(LIBRARY_PARAMS()) {
 
   return 0;
 }
+
+int ric_starts_with(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  char *arg1 = NULL;
+  char *arg2 = NULL;
+  int result = 0;
+  char *compareBase = NULL;
+  char *compareWith = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  // pop arg 1 - string to split
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
+  }
+
+  // pop arg 2 - check what it is to end with
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      arg2 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
+  }
+
+  if ( strlen(arg2) <= strlen(arg1) ) {
+    compareBase = arg1;
+    compareWith = arg2;
+
+    while ( *compareWith && *compareBase && *compareWith == *compareBase ) {
+      compareBase++;
+      compareWith++;
+    }
+
+    if ( compareWith != arg2 && !*compareWith ) {
+      result = 1;
+    }
+  }
+
+  /* Pushing the result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
+
+int ric_ends_with(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  char *arg1 = NULL;
+  char *arg2 = NULL;
+  int result = 0;
+  char *compareBase = NULL;
+  char *compareWith = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  // pop arg 1 - string to split
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      arg1 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
+  }
+
+  // pop arg 2 - check what it is to end with
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      arg2 = stv.t;
+      break;
+    default:
+      {
+        fprintf(
+            stderr,
+            "error: function call '%s' got unexpected data type as argument, string expected.\n",
+            LIBRARY_FUNC_NAME());
+        exit(1);
+      }
+      break;
+  }
+
+  if ( strlen(arg2) <= strlen(arg1) ) {
+    char *start = arg2;
+    compareBase = arg1 + (strlen(arg1) - 1);
+    compareWith = arg2 + (strlen(arg2) - 1);
+
+    while ( compareWith != start && *compareBase && *compareWith == *compareBase ) {
+      compareBase--;
+      compareWith--;
+    }
+
+    if ( compareWith == start ) {
+      result = 1;
+    }
+  }
+
+  /* Pushing the result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}

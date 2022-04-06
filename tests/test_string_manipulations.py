@@ -28,7 +28,11 @@ def test_vector_print():
 "san hopps",
 "fallera",
 "hejsan",
-"Rickard"
+"Rickard",
+"japp",
+"japp",
+"japp",
+"japp"
 ]
 
   script = callSample('string_manipulations.ric')

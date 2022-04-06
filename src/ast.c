@@ -402,12 +402,12 @@ expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
   return expr;
 }
 
-expr_t *newExpr_VectorIndex(expr_t *id, expr_t *index) {
+expr_t *newExpr_VectorIndex(expr_t *id_expr, expr_t *index) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   expr->vecIdx = ast_emalloc(sizeof(vectorIndex_t));
 
   expr->type = EXPR_TYPE_VECTOR_IDX;
-  expr->vecIdx->id = id;
+  expr->vecIdx->expr = id_expr;
 
   expr->vecIdx->index = index;
 
@@ -512,7 +512,7 @@ expr_t *newExpr_Copy(expr_t *expr) {
       break;
     case EXPR_TYPE_VECTOR_IDX:
       {
-        expr_t *id = newExpr_Copy(expr->vecIdx->id);
+        expr_t *id = newExpr_Copy(expr->vecIdx->expr);
         expr_t *index = newExpr_Copy(expr->vecIdx->index);
         newExp = newExpr_VectorIndex(id, index);
       }
@@ -771,8 +771,8 @@ void free_expression(expr_t *expr) {
     case EXPR_TYPE_VECTOR_IDX:
       {
         vectorIndex_t *vecIdx = expr->vecIdx;
-        free_expression(vecIdx->id);
-        free(vecIdx->id);
+        free_expression(vecIdx->expr);
+        free(vecIdx->expr);
         free_expression(vecIdx->index);
         free(vecIdx->index);
         free(vecIdx);

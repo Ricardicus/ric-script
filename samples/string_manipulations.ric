@@ -39,3 +39,29 @@ s = "hheejjssaann"
 print(s[::2])
 s = " ddrraakkcciiRR"
 print(s[1::-2])
+
+s = "hejsan japp nepp hoppsan"
+? [ startsWith(s, "hej") ] {
+  print(split(s, " ")[1])
+}
+? [ startsWith(s, "hejsan") ] {
+  print(split(s, " ")[1])
+}
+? [ startsWith(s, "tja") ] {
+  print(split(s, " ")[2])
+}
+? [ startsWith(s, "") ] {
+  print(split(s, " ")[2])
+}
+? [ endsWith(s, "san") ] {
+  print(split(s, " ")[1])
+}
+? [ endsWith(s, "hoppsan") ] {
+  print(split(s, " ")[1])
+}
+? [ endsWith(s, "tja") ] {
+  print(split(s, " ")[2])
+}
+? [ endsWith(s, "") ] {
+  print(split(s, " ")[2])
+}

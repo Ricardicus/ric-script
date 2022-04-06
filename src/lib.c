@@ -35,6 +35,8 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("charCode", 1, ric_char_code),
     DECLARE_LIB_FUNCTION("toUpper", 1, ric_to_upper),
     DECLARE_LIB_FUNCTION("toLower", 1, ric_to_lower),
+    DECLARE_LIB_FUNCTION("startsWith", 2, ric_starts_with),
+    DECLARE_LIB_FUNCTION("endsWith", 2, ric_ends_with),
     // libbigint
     DECLARE_LIB_FUNCTION("bigInt", 1, ric_new_big_int),
     // libio

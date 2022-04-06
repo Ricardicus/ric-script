@@ -178,7 +178,7 @@ typedef struct vector_t {
 } vector_t;
 
 typedef struct vectorIndex {
-  expr_t *id;
+  expr_t *expr;
   expr_t *index;
 } vectorIndex_t;
 
@@ -350,7 +350,7 @@ expr_t *newExpr_Vector(argsList_t *args);
 expr_t *newExpr_VectorFromForEach(statement_t *stmt);
 expr_t *newExpr_ClassPtr(class_t *class);
 expr_t *newExpr_ClassPtrCopy(class_t *class);
-expr_t *newExpr_VectorIndex(expr_t *id, expr_t *index);
+expr_t *newExpr_VectorIndex(expr_t *expr, expr_t *index);
 expr_t *newExpr_Copy(expr_t *exp);
 expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr);
 expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset);

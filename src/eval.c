@@ -1118,12 +1118,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         rawdata_t *rawdata = NULL;
         int typeOfVal = 0;
         expr_t *exp = NULL;
-        expr_t *id = expr->vecIdx->id;
+        expr_t *id = expr->vecIdx->expr;
         expr_t *index = expr->vecIdx->index;
 
         stackval_t sv;
 
-        if (id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX) {
+        if (id->type == EXPR_TYPE_ID
+            || id->type == EXPR_TYPE_VECTOR_IDX
+            || id->type == EXPR_TYPE_FUNCCALL) {
           evaluate_expression(id, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
 
@@ -1148,7 +1150,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             rawdata = sv.rawdata;
           }
         } else {
-          fprintf(stderr, "error: Invalid indexing\n");
+          fprintf(stderr, "error: Invalid indexing %d\n", id->type);
           exit(1);
         }
 
@@ -3397,7 +3399,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 int32_t arrayIndex;
                 argsList_t *walk = NULL;
                 expr_t **expToSet = NULL;
-                expr_t *vecid = id->vecIdx->id;
+                expr_t *vecid = id->vecIdx->expr;
                 expr_t *index = id->vecIdx->index;
 
                 stackval_t sv;

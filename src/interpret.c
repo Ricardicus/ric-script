@@ -154,7 +154,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 int32_t arrayIndex;
                 argsList_t *walk;
                 expr_t **expToSet = NULL;
-                expr_t *vecid = id->vecIdx->id;
+                expr_t *vecid = id->vecIdx->expr;
                 expr_t *index = id->vecIdx->index;
 
                 stackval_t sv;

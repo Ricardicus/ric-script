@@ -20,5 +20,7 @@ int ric_char_code(LIBRARY_PARAMS());
 int ric_split(LIBRARY_PARAMS());
 int ric_to_upper(LIBRARY_PARAMS());
 int ric_to_lower(LIBRARY_PARAMS());
+int ric_ends_with(LIBRARY_PARAMS());
+int ric_starts_with(LIBRARY_PARAMS());
 
 #endif

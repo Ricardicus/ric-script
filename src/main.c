@@ -18,6 +18,7 @@ void usage(char *argv0, int ret) {
   fprintf((ret == 0 ? stdout : stderr), "  -pi: print AST then launch intepreter\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -nb: run in unbuffered mode\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -np: lauch interpreter without any prompt symbol\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "  -c: command passed as string directly\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -h|--help: print this help\r\n");
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
   fprintf((ret == 0 ? stdout : stderr), "source code:\r\n  %s\r\n", GENERAL_SOURCE_URL);
@@ -32,12 +33,14 @@ typedef enum mission {
   runAsASTPrinter,
   runAsASTPrinterAndInterpreter,
   runAsInteractive,
-  runAsInteractiveNoPrompt
+  runAsInteractiveNoPrompt,
+  runAsCommand
 } mission_t;
 
 int main(int argc, char *argv[]) {
   mission_t mission = runAsInteractive;
   statement_t *root = NULL;
+  char *commandString = NULL;
   MainParserFunc parse;
   int ret = 0;
   FILE *fp = NULL;
@@ -61,6 +64,9 @@ int main(int argc, char *argv[]) {
         setUnbufferedOutput();
       } else if (strcmp("-pi", argv[i]) == 0) {
         mission = runAsASTPrinterAndInterpreter;
+      } else if (strcmp("-c", argv[i]) == 0) {
+        mission = runAsCommand;
+        commandString = argv[i+1];
       } else if (strcmp("-h", argv[i]) == 0) {
         usage(argv[0], 0);
       } else if (strcmp("--help", argv[i]) == 0) {
@@ -102,6 +108,12 @@ int main(int argc, char *argv[]) {
         setUnbufferedOutput();
         /* Run the interactive mode */
         runInteractive(argc, argv, interpret_statements_interactive, "");
+      }
+      break;
+    case runAsCommand:
+      {
+        /* Run the interactive mode */
+        runCommand(argc, argv, interpret_statements_interactive, commandString);
       }
       break;
     case runAsIntepreter:

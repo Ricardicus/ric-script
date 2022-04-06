@@ -491,8 +491,8 @@ void print_expr(expr_t *expr) {
     case EXPR_TYPE_VECTOR_IDX:
       {
         vectorIndex_t *vecIdx = expr->vecIdx;
-        printf("ListIdx, ID: ");
-        print_expr(vecIdx->id);
+        printf("ListIdx, Expr: ");
+        print_expr(vecIdx->expr);
         printf(", index: ");
         print_expr(vecIdx->index);
       }

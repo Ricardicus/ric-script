@@ -920,3 +920,18 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, con
         memset(lineBuffer, 0, sizeof(lineBuffer));
     }
 }
+
+
+void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command) {
+    YY_BUFFER_STATE buffer;
+    ParsedFile = "stdin";
+
+    /* Parse from provided command line */
+    buffer = yy_scan_string(command);
+    yyparse();
+    yy_delete_buffer(buffer);
+
+    if ( root != NULL ) {
+        func(argc, argv, root, 0);
+    }
+}

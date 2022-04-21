@@ -19,6 +19,7 @@ void usage(char *argv0, int ret) {
   fprintf((ret == 0 ? stdout : stderr), "  -nb: run in unbuffered mode\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -np: lauch interpreter without any prompt symbol\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -c: command passed as string directly\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "  -v|--version: print interpreter version\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -h|--help: print this help\r\n");
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
   fprintf((ret == 0 ? stdout : stderr), "source code:\r\n  %s\r\n", GENERAL_SOURCE_URL);
@@ -67,10 +68,11 @@ int main(int argc, char *argv[]) {
       } else if (strcmp("-c", argv[i]) == 0) {
         mission = runAsCommand;
         commandString = argv[i+1];
-      } else if (strcmp("-h", argv[i]) == 0) {
+      } else if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
         usage(argv[0], 0);
-      } else if (strcmp("--help", argv[i]) == 0) {
-        usage(argv[0], 0);
+      } else if (strcmp("-v", argv[i]) == 0 || strcmp("--version", argv[i]) == 0) {
+        printf("%s\n", RICSCRIPT_VERSION);
+	return 0;
       } else {
         if (fp == NULL) {
           /* Attempt to open the file */

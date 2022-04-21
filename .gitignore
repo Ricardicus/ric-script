@@ -31,3 +31,5 @@ tests/__pycache__
 src/ric.dSYM
 ric.dSYM
 
+# Vim
+src/*.swp

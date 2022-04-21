@@ -878,10 +878,13 @@ extern void releaseContext(void *);
 
 void free_ast(statement_t *stmt);
 
+#define RICSCRIPT_VERSION "0.9.1"
+
 #define PRINT_INTERACTIVE_BANNER()                                                \
   do {                                                                            \
-    printf("You are running in interactive mode. Stop it by typing: 'quit'.\n");  \
-    printf("This is in it's very early stage... it only supports one liners!\n"); \
+    printf("RicScript %s (%s, %s, %s)\n", RICSCRIPT_VERSION, TARGET_OS, __DATE__, __TIME__); \
+    printf("You are running in interactive mode. stop it by typing: 'quit'.\n");  \
+    printf("this is in it's very early stage... it only supports one liners!\n"); \
     printf("\n");                                                                 \
     printf("Some short tips:\nhelp() gives you a list of available functions\n"); \
     printf("printEnv() lists the names of variables defined in this session\n");  \

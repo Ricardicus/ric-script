@@ -33,3 +33,5 @@ ric.dSYM
 
 # Vim
 src/*.swp
+tags
+cscope.files

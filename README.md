@@ -828,7 +828,7 @@ It is best provided as an absolute path, but relative (containing a slash) also 
 
 You can see if you successfully loaded your dynamic library function by using the _help()_ function available in the interactive mode. It can look like this, after reading a module named 'example_ric':
 
-```BASH
+```
 $ ric
 RicScript 0.9.1 (linux, Apr 22 2022, 18:17:01)
 You are running in interactive mode. Stop it by typing: 'quit'.

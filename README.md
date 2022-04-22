@@ -403,6 +403,89 @@ I will return with an update...
 Hi, the shared variable now holds value: 10
 ```
 
+# syntax snapshot: Multithreading, revisited
+
+Here is an example of how to launch a server and a client thread in ric-script.
+The server is an echo-server.
+
+```javascript
+#!/usr/bin/ric
+# Example of how to use the built in
+# socket interface in ric script.
+# This is an echo-server.
+
+reads = 10
+sends = 10
+
+@ usage () {
+  print("usage: " + args[0] + " " + args[1] + " host port content-to-write")
+  exit(1) 
+}
+
+? [ len(args) < 5 ] {
+  usage()
+}
+
+@ clientThread () {
+  i = 0
+  . [ i < sends ] {
+    print("Opening connection to host: " + args[2] + ":" + args[3])
+    s = socketConnect(args[2], args[3])
+    ? [ s < 0 ] {
+      print("Failed to create the socket, sorry.. error code: " + s)
+      exit(1)
+    }
+
+    t = socketWrite(s, args[4])
+    ? [ t > 0 ] {
+      print("Sent " + t + " bytes to server.")
+    }
+    socketClose(s)
+    sleep(1)
+    i += 1
+    @
+  }
+}
+
+@ serverThread () {
+  s = socketServer(args[3])
+  ? [ s < 0 ] {
+    print("Failed to create the socket, sorry..")
+    exit(1)
+  }
+
+  i = 0
+  . [ i < reads ] {
+    t = socketAccept(s)
+    ? [ t > 0 ] {
+      in = socketRead(t, 50)
+      print("read " + len(in) + " bytes: " + in)
+      socketWrite(t, in)
+      socketClose(t)
+    }
+    i += 1
+    @
+  }
+
+  socketClose(s)
+}
+
+# Start server thread immediately
+setTimeout(serverThread, 0)
+# Start client server one second later
+setTimeout(clientThread, 1)
+```
+
+This would output something like this:
+
+```
+$ ./ric samples/socketClientServer.ric localhost 8083 hejsan
+Opening connection to host: localhost:8083
+Sent 6 bytes to server.
+read 6 bytes: hejsan
+...
+```
+
 # syntax snapshot: File listing
 
 Since I use other languages syntax highlighting here on GitHub, I have **added //** just before the original
@@ -702,8 +785,15 @@ much can be done in one single line.
 
 ```
 $ ./ric
+RicScript 0.9.1 (linux, Apr 22 2022, 18:17:01)
 You are running in interactive mode. Stop it by typing: 'quit'.
 This is in it's very early stage... it only supports one liners!
+
+Some short tips:
+help() gives you a list of available functions
+printEnv() lists the names of variables defined in this session
+quit() quits this interpreter interactive mode
+
 >> a = 1337
 >> print(a)
 1337
@@ -740,8 +830,15 @@ You can see if you successfully loaded your dynamic library function by using th
 
 ```BASH
 $ ric
+RicScript 0.9.1 (linux, Apr 22 2022, 18:17:01)
 You are running in interactive mode. Stop it by typing: 'quit'.
 This is in it's very early stage... it only supports one liners!
+
+Some short tips:
+help() gives you a list of available functions
+printEnv() lists the names of variables defined in this session
+quit() quits this interpreter interactive mode
+
 >> help()
 These are the functions I know:
 function-name ( number-of-arguments)

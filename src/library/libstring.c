@@ -314,16 +314,16 @@ int ric_starts_with(LIBRARY_PARAMS()) {
       break;
   }
 
-  if ( strlen(arg2) <= strlen(arg1) ) {
+  if (strlen(arg2) <= strlen(arg1)) {
     compareBase = arg1;
     compareWith = arg2;
 
-    while ( *compareWith && *compareBase && *compareWith == *compareBase ) {
+    while (*compareWith && *compareBase && *compareWith == *compareBase) {
       compareBase++;
       compareWith++;
     }
 
-    if ( compareWith != arg2 && !*compareWith ) {
+    if (compareWith != arg2 && !*compareWith) {
       result = 1;
     }
   }
@@ -333,7 +333,6 @@ int ric_starts_with(LIBRARY_PARAMS()) {
 
   return 0;
 }
-
 
 int ric_ends_with(LIBRARY_PARAMS()) {
   stackval_t stv;
@@ -381,17 +380,17 @@ int ric_ends_with(LIBRARY_PARAMS()) {
       break;
   }
 
-  if ( strlen(arg2) <= strlen(arg1) ) {
+  if (strlen(arg2) <= strlen(arg1)) {
     char *start = arg2;
     compareBase = arg1 + (strlen(arg1) - 1);
     compareWith = arg2 + (strlen(arg2) - 1);
 
-    while ( compareWith != start && *compareBase && *compareWith == *compareBase ) {
+    while (compareWith != start && *compareBase && *compareWith == *compareBase) {
       compareBase--;
       compareWith--;
     }
 
-    if ( compareWith == start ) {
+    if (compareWith == start) {
       result = 1;
     }
   }

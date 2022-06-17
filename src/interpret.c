@@ -1455,7 +1455,8 @@ static void flush_arg(void *key, void *val) {
     free(e->rawdata);
   } else if (e->type == EXPR_TYPE_CLASSPTR) {
     class_t *class = e->classObj;
-    hashtable_free(class->funcDefs);
+    hashtable_free(class->funcDefsABI);
+    hashtable_free(class->funcDefsScript);
     hashtable_free(class->varMembers);
     free(class);
   } else if (e->type == EXPR_TYPE_BIGINT) {

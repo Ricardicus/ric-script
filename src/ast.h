@@ -263,7 +263,8 @@ typedef struct class_t {
   char *id;
   int initialized;
   statement_t *defines;
-  hashtable_t *funcDefs;
+  hashtable_t *funcDefsScript;
+  hashtable_t *funcDefsABI;
   hashtable_t *varMembers;
 } class_t;
 

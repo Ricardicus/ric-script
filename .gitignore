@@ -25,6 +25,7 @@ node/node_modules
 
 # Python cache
 tests/__pycache__
+src/sdk_lib/tests/__pycache__
 
 # Mac osX 
 .DS_Store

@@ -3,14 +3,10 @@
 
 #if 0
 /* I define and use this function during debugging of the interpreter */
-static void debugPrint(char *format, ...) {
-  char buffer[100];
-  va_list args;
-  va_start(args, format);
-  vsnprintf(buffer, sizeof(buffer), format, args);
-  va_end(args);
-  printf("-- DEBUG: %s", buffer);
-}
+#define debugPrint(format, ...)                                           \
+  do {                                                                    \
+    printf("Debug %s.%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__); \
+  } while (0)
 #endif
 
 void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
@@ -3044,13 +3040,17 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
           fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
                   libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
-          exit(1);
+          if (!*PROVIDE_CONTEXT()->interactive) {
+            exit(1);
+          }
         }
 
         if (argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length) {
           fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
                   libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
-          exit(1);
+          if (!*PROVIDE_CONTEXT()->interactive) {
+            exit(1);
+          }
         }
 
         /* Populate arguments */
@@ -3067,9 +3067,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           argsWalk = argsWalk->next;
         }
-
         libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
-
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
 
@@ -3260,17 +3258,26 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
     } else if (libFunc != NULL) {
       /* This is a library function */
       int libfunc_ret;
+      class_t *tmp;
 
       if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
         fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
                 libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
-        exit(1);
+        if (!*PROVIDE_CONTEXT()->interactive) {
+          exit(1);
+        } else {
+          return;
+        }
       }
 
       if (argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length) {
         fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
                 libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
-        exit(1);
+        if (!*PROVIDE_CONTEXT()->interactive) {
+          exit(1);
+        } else {
+          return;
+        }
       }
 
       /* Populate arguments */
@@ -3287,11 +3294,10 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
         argsWalk = argsWalk->next;
       }
-
+      tmp = PROVIDE_CONTEXT()->classCtx;
+      PROVIDE_CONTEXT()->classCtx = classObj; // Set class context
       libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
-
-      /* Free the argument value table */
-      flush_arguments(newArgumentTable);
+      PROVIDE_CONTEXT()->classCtx = tmp;
 
       if (libfunc_ret != 0) {
         fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",

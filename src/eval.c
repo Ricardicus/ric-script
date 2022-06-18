@@ -2700,22 +2700,20 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       expr_t *classObj = newExpr_ClassPtr(classRef);
       class = classObj->classObj;
       free(classObj); // expression container not needed
-      if (!class->initialized) {
-        /* Run the initializer */
-        initClass(class, EXPRESSION_ARGS());
-        /* Find the constructor hook and run it if so */
-        constructor = hashtable_get(class->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcID);
-        if (constructor != NULL) {
-          exeCtx->classCtx = class;
-          /* Moving along, interpreting function */
-          int localsStackSp = varLocals->sp;
-          int localsStackSb = varLocals->sb;
-          varLocals->sb = varLocals->sp;
-          *depth = 1; // There is only one global scope
-          interpret_statements_(constructor->body, PROVIDE_CONTEXT(), NULL, NULL);
-          varLocals->sb = localsStackSb;
-          varLocals->sp = localsStackSp;
-        }
+      /* Run the initializer */
+      initClass(class, EXPRESSION_ARGS());
+      /* Find the constructor hook and run it if so */
+      constructor = hashtable_get(class->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcID);
+      if (constructor != NULL) {
+        exeCtx->classCtx = class;
+        /* Moving along, interpreting function */
+        int localsStackSp = varLocals->sp;
+        int localsStackSb = varLocals->sb;
+        varLocals->sb = varLocals->sp;
+        *depth = 1; // There is only one global scope
+        interpret_statements_(constructor->body, PROVIDE_CONTEXT(), NULL, NULL);
+        varLocals->sb = localsStackSb;
+        varLocals->sp = localsStackSp;
       }
       PUSH_CLASSREF(class, sp, sc);
       stop = 1;

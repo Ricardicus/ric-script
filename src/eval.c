@@ -3,14 +3,10 @@
 
 #if 0
 /* I define and use this function during debugging of the interpreter */
-static void debugPrint(char *format, ...) {
-  char buffer[100];
-  va_list args;
-  va_start(args, format);
-  vsnprintf(buffer, sizeof(buffer), format, args);
-  va_end(args);
-  printf("-- DEBUG: %s", buffer);
-}
+#define debugPrint(format, ...)                                           \
+  do {                                                                    \
+    printf("Debug %s.%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__); \
+  } while (0)
 #endif
 
 void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
@@ -884,6 +880,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         /* Check if it is among the class context members */
         if (classCtx != NULL) {
           functionDef_t *classFunc = NULL;
+          libFunction_t *classFuncABI = NULL;
           hv = hashtable_get(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
           if (hv != NULL) {
@@ -891,11 +888,22 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             stop = 1;
           }
 
-          classFunc = hashtable_get(classCtx->funcDefs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+          classFunc =
+              hashtable_get(classCtx->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
           if (classFunc != NULL) {
             // Pushing the function definition
             PUSH_FUNCPTR(classFunc, sp, sc);
             stop = 1;
+          }
+
+          if (!stop) {
+            classFuncABI =
+                hashtable_get(classCtx->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+            if (classFuncABI != NULL) {
+              // Pushing the ABI function
+              PUSH_LIBFUNCPTR(classFuncABI, sp, sc);
+              stop = 1;
+            }
           }
         }
 
@@ -1123,8 +1131,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stackval_t sv;
 
-        if (id->type == EXPR_TYPE_ID
-            || id->type == EXPR_TYPE_VECTOR_IDX
+        if (id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX
             || id->type == EXPR_TYPE_FUNCCALL) {
           evaluate_expression(id, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
@@ -2696,7 +2703,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       /* Run the initializer */
       initClass(class, EXPRESSION_ARGS());
       /* Find the constructor hook and run it if so */
-      constructor = hashtable_get(class->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcID);
+      constructor = hashtable_get(class->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcID);
       if (constructor != NULL) {
         exeCtx->classCtx = class;
         /* Moving along, interpreting function */
@@ -2716,7 +2723,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
     if (!stop && classCtx != NULL) {
       /* Check if this is a function member call */
       functionDef_t *classFunc =
-          hashtable_get(classCtx->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcID);
+          hashtable_get(classCtx->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcID);
       /* Call the function */
       if (classFunc) {
         uintptr_t spBefore;
@@ -3031,13 +3038,17 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
           fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
                   libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
-          exit(1);
+          if (!*PROVIDE_CONTEXT()->interactive) {
+            exit(1);
+          }
         }
 
         if (argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length) {
           fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
                   libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
-          exit(1);
+          if (!*PROVIDE_CONTEXT()->interactive) {
+            exit(1);
+          }
         }
 
         /* Populate arguments */
@@ -3054,9 +3065,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           argsWalk = argsWalk->next;
         }
-
         libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
-
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
 
@@ -3073,6 +3082,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
     argsWalk = classCall->args;
     class_t *classObj = NULL;
     functionDef_t *funcDef = NULL;
+    libFunction_t *libFunc = NULL;
     stackval_t sv_ret;
     uintptr_t spBefore;
     char *funcID = NULL;
@@ -3102,9 +3112,10 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
     funcID = classCall->funcID;
 
     /* Find the class function */
-    funcDef = hashtable_get(classObj->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcID);
+    funcDef = hashtable_get(classObj->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcID);
+    libFunc = hashtable_get(classObj->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, funcID);
 
-    if (funcDef == NULL) {
+    if (funcDef == NULL && libFunc == NULL) {
       fprintf(stderr, "error: cannot find function '%s' in class '%s'.\n", funcID, classObj->id);
       exit(1);
     }
@@ -3242,6 +3253,55 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       varLocals->sb = localsStackSb;
       varLocals->sp = localsStackSp;
       PROVIDE_CONTEXT()->classCtx = tmp;
+    } else if (libFunc != NULL) {
+      /* This is a library function */
+      int libfunc_ret;
+      class_t *tmp;
+
+      if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
+        fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
+                libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+        if (!*PROVIDE_CONTEXT()->interactive) {
+          exit(1);
+        } else {
+          return;
+        }
+      }
+
+      if (argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length) {
+        fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
+                libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
+        if (!*PROVIDE_CONTEXT()->interactive) {
+          exit(1);
+        } else {
+          return;
+        }
+      }
+
+      /* Populate arguments */
+      while (argsWalk != NULL) {
+        stackval_t sv;
+
+        /* Evaluate expression */
+        evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
+
+        /* Fetch the evaluated expression to the arguments table */
+        POP_VAL(&sv, sp, sc);
+
+        push_stackval(&sv, sp, sc);
+
+        argsWalk = argsWalk->next;
+      }
+      tmp = PROVIDE_CONTEXT()->classCtx;
+      PROVIDE_CONTEXT()->classCtx = classObj; // Set class context
+      libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
+      PROVIDE_CONTEXT()->classCtx = tmp;
+
+      if (libfunc_ret != 0) {
+        fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
+                funcID, libfunc_ret);
+        exit(libfunc_ret);
+      }
     }
 
     if (*(uintptr_t *)sp != spBefore) {
@@ -3336,7 +3396,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
   statement_t *initWalk = cls->defines;
 
   /* Sanity check */
-  if (cls->funcDefs == NULL || cls->varMembers == NULL) {
+  if (initWalk == NULL || cls->funcDefsScript == NULL || cls->varMembers == NULL) {
     return;
   }
 
@@ -3347,8 +3407,8 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
         {
           functionDef_t *funcDef = initWalk->content;
 
-          /* Placing funciton declaration in global function namespace */
-          hashtable_put(cls->funcDefs, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
+          /* Placing function declaration in global function namespace */
+          hashtable_put(cls->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
         }
         break;
       case LANG_ENTITY_DECL:

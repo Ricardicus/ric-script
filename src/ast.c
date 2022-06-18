@@ -48,7 +48,8 @@ expr_t *newExpr_ClassPtr(class_t *class) {
 
   cls->id = class->id;
   cls->defines = class->defines;
-  cls->funcDefs = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  cls->funcDefsScript = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  cls->funcDefsABI = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   cls->varMembers = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
 
   expr->type = EXPR_TYPE_CLASSPTR;
@@ -62,7 +63,8 @@ expr_t *newExpr_ClassPtrCopy(class_t *class) {
 
   cls->id = class->id;
   cls->defines = class->defines;
-  cls->funcDefs = hashtable_copy(class->funcDefs);
+  cls->funcDefsScript = hashtable_copy(class->funcDefsScript);
+  cls->funcDefsABI = hashtable_copy(class->funcDefsABI);
   cls->varMembers = hashtable_copy(class->varMembers);
   cls->initialized = class->initialized;
 
@@ -479,7 +481,8 @@ class_t *newClass(char *id, body_t *body) {
   class_t *class = ast_emalloc(sizeof(class_t));
   class->id = id;
   class->defines = body->content;
-  class->funcDefs = NULL;
+  class->funcDefsScript = NULL;
+  class->funcDefsABI = NULL;
   class->varMembers = NULL;
   class->initialized = 0;
   free(body);

@@ -1,2 +1,1 @@
-builddir/libric_extended_lib_example.1.dylib
-
+builddir/libric_extended_lib_example.dylib

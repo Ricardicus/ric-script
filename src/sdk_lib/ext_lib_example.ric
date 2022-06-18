@@ -5,3 +5,10 @@
 
 a = "hejsan"
 ric_example_print([a, "hejsan"])
+
+# Creating an example class
+e = example_class()
+# Calling some functions
+e::add(1337)
+e::add(1337)
+e::sub(1337)

@@ -67,12 +67,12 @@ int main(int argc, char *argv[]) {
         mission = runAsASTPrinterAndInterpreter;
       } else if (strcmp("-c", argv[i]) == 0) {
         mission = runAsCommand;
-        commandString = argv[i+1];
+        commandString = argv[i + 1];
       } else if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
         usage(argv[0], 0);
       } else if (strcmp("-v", argv[i]) == 0 || strcmp("--version", argv[i]) == 0) {
         printf("%s\n", RICSCRIPT_VERSION);
-	return 0;
+        return 0;
       } else {
         if (fp == NULL) {
           /* Attempt to open the file */

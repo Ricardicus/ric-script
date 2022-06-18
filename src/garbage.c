@@ -135,7 +135,8 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
         } else if (heap[i].sv.type == CLASSTYPE) {
           if (((heapval_t *)hp)[i].sv.classObj->initialized) {
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->varMembers);
-            hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefs);
+            hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsScript);
+            hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsABI);
           }
           free(((heapval_t *)hp)[i].sv.classObj);
         }
@@ -195,7 +196,9 @@ void free_heap(void *hp, void *hbp) {
           /* Clear this reference, once and for all */
           if (((heapval_t *)hp)[i].sv.classObj->initialized) {
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->varMembers);
-            hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefs);
+            hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsScript);
+            ((heapval_t *)hp)[i].sv.classObj->funcDefsABI->key_also = 1;
+            hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsABI);
           }
           free(((heapval_t *)hp)[i].sv.classObj);
 

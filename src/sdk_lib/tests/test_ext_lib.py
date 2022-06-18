@@ -5,7 +5,11 @@ def test_ext_lib_args():
 
   output_lines = [
   "hejsan",
-  "[hejsan, hejsan]"
+  "[hejsan, hejsan]",
+"example_class_add add::example_class: Added 1337 to member1. Member1: 1337",
+"example_class_add add::example_class: Added 1337 to member1. Member1: 2674",
+"example_class_sub sub::example_class: substitute 1337 to member1. Member1: 1337"
+
   ]
 
   lib_script = callSampleArgs('ext_lib_example.ric', ['hejsan'])

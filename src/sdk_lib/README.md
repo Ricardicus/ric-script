@@ -22,7 +22,7 @@ In particular, these lines are the most important ones:
 ```C
 MARK_EXPORT libFunction_t EXPORT_FUNCTION_LIST[] = {
   DECLARE_LIB_FUNCTION("ric_example_print", 1, ric_example_print)
-};
+  DECLARE_LIB_FUNCTION("example_class", 0, example_class_init)};
 
 EXPORT_MODULE("example_ric");
 ```
@@ -55,10 +55,10 @@ function-name ( number-of-arguments)
 These are the modules and functions I have loaded dynamically:
 function-name ( number-of-arguments)
 Module    : example_ric
-Nbr funcs : 1
+Nbr funcs : 2
 Version   : 0.1
   ric_example_print ( 1 )
-0
+  example_class ( 0 )
 >>
 ```
 
@@ -67,6 +67,11 @@ And the function can be called like this:
 ```BASH
 >> ric_example_print("Hejsan svejsan")
 Hejsan svejsan
+>> e = example_class()
+>> e::add(1338)
+example_class_add add::example_class: Added 1338 to member1. Member1: 1338
+>> e::sub(1)
+example_class_sub sub::example_class: substitute 1 to member1. Member1: 1337
 ```
 
 This, of course, works even when interpreting scripts and not just in the interactive mode.

@@ -48,8 +48,8 @@ You can see if you successfully loaded your dynamic library function by using th
   These are the modules and functions I have loaded dynamically:
   function-name ( number-of-arguments)
   Module    : example_ric
-  Nbr funcs : 1
+  Nbr funcs : 2
   Version   : 0.1
     ric_example_print ( 1 )
-  0
+    example_class ( 0 )
   >>

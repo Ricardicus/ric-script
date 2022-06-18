@@ -1177,7 +1177,7 @@ int ric_help(LIBRARY_PARAMS()) {
   ric_get_dynamic_libraries(&dynLibs, &nbrDynLibs);
   if (nbrDynLibs > 0) {
     printf(
-        "These are the modules and functions I have loaded dynamically:\nfunction-name ( number-of-arguments)\n");
+        "These are the modules and functions loaded dynamically:\nfunction-name ( number-of-arguments)\n");
     walk = 0;
     while (walk < nbrDynLibs) {
       dl_print_mod_info(stdout, &dynLibs[walk]);

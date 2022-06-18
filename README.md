@@ -852,13 +852,13 @@ function-name ( number-of-arguments)
 - socketWrite ( 2 )
 - socketClose ( 1 )
 - socketConnect ( 2 )
-These are the modules and functions I have loaded dynamically:
+These are the modules and functions loaded dynamically:
 function-name ( number-of-arguments)
 Module    : example_ric
-Nbr funcs : 1
+Nbr funcs : 2
 Version   : 0.1
   ric_example_print ( 1 )
-0
+  example_class ( 0 )
 >>
 ```
 

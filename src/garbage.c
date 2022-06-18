@@ -197,6 +197,7 @@ void free_heap(void *hp, void *hbp) {
           if (((heapval_t *)hp)[i].sv.classObj->initialized) {
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->varMembers);
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsScript);
+            ((heapval_t *)hp)[i].sv.classObj->funcDefsABI->key_also = 1;
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsABI);
           }
           free(((heapval_t *)hp)[i].sv.classObj);

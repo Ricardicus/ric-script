@@ -2821,59 +2821,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             /* Fetch the evaluated expression to the arguments table */
             POP_VAL(&sv, sp, sc);
-
-            switch (sv.type) {
-              case INT32TYPE: {
-                newArg = newExpr_Ival(sv.i);
-                break;
-              }
-              case DOUBLETYPE: {
-                newArg = newExpr_Float(sv.d);
-                break;
-              }
-              case TEXT: {
-                newArg = newExpr_Text(sv.t);
-                break;
-              }
-              case TIMETYPE: {
-                newArg = newExpr_Time(sv.time);
-                break;
-              }
-              case POINTERTYPE: {
-                newArg = newExpr_Pointer(sv.p);
-                break;
-              }
-              case VECTORTYPE: {
-                newArg = newExpr_Vector(sv.vec->content);
-                break;
-              }
-              case FUNCPTRTYPE: {
-                newArg = newExpr_FuncPtr(sv.func);
-                break;
-              }
-              case LIBFUNCPTRTYPE: {
-                newArg = newExpr_LibFuncPtr(sv.libfunc);
-                break;
-              }
-              case DICTTYPE: {
-                expr_t *e = ast_emalloc(sizeof(expr_t));
-                e->type = EXPR_TYPE_DICT;
-                e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-                newArg = e;
-                break;
-              }
-              case CLASSTYPE: {
-                newArg = newExpr_ClassPtrCopy(sv.classObj);
-                break;
-              }
-              default:
-                fprintf(
-                    stderr,
-                    "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
-                    ERROR_PRINT_LOCATION, sv.type);
-                exit(1);
-                break;
-            }
+            newArg = stackval_to_expression(&sv, EXPRESSION_ARGS());
 
             /* Adding expression to argument table */
             hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id,
@@ -3052,59 +3000,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
-
-          switch (sv.type) {
-            case INT32TYPE: {
-              newArg = newExpr_Ival(sv.i);
-              break;
-            }
-            case DOUBLETYPE: {
-              newArg = newExpr_Float(sv.d);
-              break;
-            }
-            case TEXT: {
-              newArg = newExpr_Text(sv.t);
-              break;
-            }
-            case TIMETYPE: {
-              newArg = newExpr_Time(sv.time);
-              break;
-            }
-            case POINTERTYPE: {
-              newArg = newExpr_Pointer(sv.p);
-              break;
-            }
-            case VECTORTYPE: {
-              newArg = newExpr_Vector(sv.vec->content);
-              break;
-            }
-            case FUNCPTRTYPE: {
-              newArg = newExpr_FuncPtr(sv.func);
-              break;
-            }
-            case LIBFUNCPTRTYPE: {
-              newArg = newExpr_LibFuncPtr(sv.libfunc);
-              break;
-            }
-            case DICTTYPE: {
-              expr_t *e = ast_emalloc(sizeof(expr_t));
-              e->type = EXPR_TYPE_DICT;
-              e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-              newArg = e;
-              break;
-            }
-            case CLASSTYPE: {
-              newArg = newExpr_ClassPtrCopy(sv.classObj);
-              break;
-            }
-            default:
-              fprintf(
-                  stderr,
-                  "%s.%d error: sorry but argument datatype cannot be passed to a function, type: %d\n",
-                  ERROR_PRINT_LOCATION, sv.type);
-              exit(1);
-              break;
-          }
+          newArg = stackval_to_expression(&sv, EXPRESSION_ARGS());
 
           /* Adding expression to argument table */
           hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id, newArg);

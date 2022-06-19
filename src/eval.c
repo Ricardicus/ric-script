@@ -13,66 +13,54 @@ void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
   stackval_t sv = *stackval;
   /* Push value to the stack */
   switch (sv.type) {
-    case INT32TYPE:
-      {
-        PUSH_INT(sv.i, sp, sc);
-        break;
-      }
-    case DOUBLETYPE:
-      {
-        PUSH_DOUBLE(sv.d, sp, sc);
-        break;
-      }
-    case TEXT:
-      {
-        PUSH_STRING(sv.t, sp, sc);
-        break;
-      }
-    case POINTERTYPE:
-      {
-        PUSH_POINTER(sv.p, sp, sc);
-        break;
-      }
-    case VECTORTYPE:
-      {
-        PUSH_VECTOR(sv.vec, sp, sc);
-        break;
-      }
-    case FUNCPTRTYPE:
-      {
-        PUSH_FUNCPTR(sv.func, sp, sc);
-        break;
-      }
-    case LIBFUNCPTRTYPE:
-      {
-        PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
-        break;
-      }
-    case DICTTYPE:
-      {
-        PUSH_DICTIONARY(sv.dict, sp, sc);
-        break;
-      }
-    case CLASSTYPE:
-      {
-        PUSH_CLASSREF(sv.classObj, sp, sc);
-        break;
-      }
-    case TIMETYPE:
-      {
-        PUSH_TIME(sv.time, sp, sc);
-        break;
-      }
-    case RAWDATATYPE:
-      {
-        PUSH_RAWDATA(sv.rawdata, sp, sc);
-        break;
-      }
-    case BIGINT:
-      {
-        PUSH_BIGINT(sv.bigInt, sp, sc);
-        break;
-      }
+    case INT32TYPE: {
+      PUSH_INT(sv.i, sp, sc);
+      break;
+    }
+    case DOUBLETYPE: {
+      PUSH_DOUBLE(sv.d, sp, sc);
+      break;
+    }
+    case TEXT: {
+      PUSH_STRING(sv.t, sp, sc);
+      break;
+    }
+    case POINTERTYPE: {
+      PUSH_POINTER(sv.p, sp, sc);
+      break;
+    }
+    case VECTORTYPE: {
+      PUSH_VECTOR(sv.vec, sp, sc);
+      break;
+    }
+    case FUNCPTRTYPE: {
+      PUSH_FUNCPTR(sv.func, sp, sc);
+      break;
+    }
+    case LIBFUNCPTRTYPE: {
+      PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
+      break;
+    }
+    case DICTTYPE: {
+      PUSH_DICTIONARY(sv.dict, sp, sc);
+      break;
+    }
+    case CLASSTYPE: {
+      PUSH_CLASSREF(sv.classObj, sp, sc);
+      break;
+    }
+    case TIMETYPE: {
+      PUSH_TIME(sv.time, sp, sc);
+      break;
+    }
+    case RAWDATATYPE: {
+      PUSH_RAWDATA(sv.rawdata, sp, sc);
+      break;
+    }
+    case BIGINT: {
+      PUSH_BIGINT(sv.bigInt, sp, sc);
+      break;
+    }
     default:
       fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
@@ -116,11 +104,10 @@ void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
       case BIGINT:
         PUSH_BIGINT(hv->sv.bigInt, sp, sc);
         break;
-      case TEXT:
-        {
-          PUSH_STRING(hv->sv.t, sp, sc);
-          break;
-        }
+      case TEXT: {
+        PUSH_STRING(hv->sv.t, sp, sc);
+        break;
+      }
       default:
         break;
     }
@@ -270,11 +257,10 @@ int push_expression(expr_t *expArg, EXPRESSION_PARAMS()) {
       case EXPR_TYPE_BIGINT:
         PUSH_BIGINT(expArg->bigInt, sp, sc);
         break;
-      case EXPR_TYPE_TEXT:
-        {
-          PUSH_STRING(expArg->text, sp, sc);
-          break;
-        }
+      case EXPR_TYPE_TEXT: {
+        PUSH_STRING(expArg->text, sp, sc);
+        break;
+      }
       default:
         ret = -1;
         break;
@@ -313,29 +299,25 @@ expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
     case BIGINT:
       newExp = newExpr_BigInt(sv->bigInt);
       break;
-    case RAWDATATYPE:
-      {
-        newExp = newExpr_RawData(sv->rawdata->size);
-        memcpy(newExp->rawdata->data, sv->rawdata->data, sv->rawdata->size);
-        break;
-      }
-    case VECTORTYPE:
-      {
-        newExp = copy_vector(sv->vec, EXPRESSION_ARGS());
-        break;
-      }
-    case DICTTYPE:
-      {
-        newExp = ast_emalloc(sizeof(expr_t));
-        newExp->type = EXPR_TYPE_DICT;
-        newExp->dict = allocNewDictionary(sv->dict, EXPRESSION_ARGS());
-        break;
-      }
-    case CLASSTYPE:
-      {
-        newExp = newExpr_ClassPtrCopy(sv->classObj);
-        break;
-      }
+    case RAWDATATYPE: {
+      newExp = newExpr_RawData(sv->rawdata->size);
+      memcpy(newExp->rawdata->data, sv->rawdata->data, sv->rawdata->size);
+      break;
+    }
+    case VECTORTYPE: {
+      newExp = copy_vector(sv->vec, EXPRESSION_ARGS());
+      break;
+    }
+    case DICTTYPE: {
+      newExp = ast_emalloc(sizeof(expr_t));
+      newExp->type = EXPR_TYPE_DICT;
+      newExp->dict = allocNewDictionary(sv->dict, EXPRESSION_ARGS());
+      break;
+    }
+    case CLASSTYPE: {
+      newExp = newExpr_ClassPtrCopy(sv->classObj);
+      break;
+    }
     default:
       printf("%s.error: unknown type of value on the stack (%d)\n", __func__, sv->type);
       GENERAL_REPORT_ISSUE_MSG();
@@ -366,370 +348,364 @@ int evaluate_condition(ifCondition_t *cond, EXPRESSION_PARAMS()) {
   POP_VAL(&svRight, sp, sc);
 
   switch (cond->type) {
-    case CONDITION_EQ:
-      {
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+    case CONDITION_EQ: {
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
 
-          if (svLeft.i == svRight.i) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          *f0 = (double)svLeft.i;
-
-          if (fabs(*f0 - svRight.d) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          *f0 = svRight.d;
-          *f1 = svLeft.d;
-
-          if (fabs(*f0 - *f1) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          *f0 = (double)svRight.i;
-
-          if (fabs(*f0 - svLeft.d) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == TEXT && svRight.type == TEXT) {
-          *ax = strcmp(svLeft.t, svRight.t) == 0;
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
-          if (cmp == 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
-          if (cmp == 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
-          if (cmp == 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+        if (svLeft.i == svRight.i) {
+          *ax = 1;
+        } else {
+          *ax = 0;
         }
-        break;
-      }
-    case CONDITION_NEQ:
-      {
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
 
-          if (svLeft.i != svRight.i) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        *f0 = (double)svLeft.i;
 
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          *f0 = (double)svLeft.i;
-
-          if (fabs(*f0 - svRight.d) > epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          *f0 = svRight.d;
-          *f1 = svLeft.d;
-
-          if (fabs(*f0 - *f1) > epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          *f0 = (double)svRight.i;
-
-          if (fabs(*f0 - svLeft.d) > epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == TEXT && svRight.type == TEXT) {
-          *ax = !(strcmp(svLeft.t, svRight.t) == 0);
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
-          if (cmp != 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
-          if (cmp != 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
-          if (cmp != 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+        if (fabs(*f0 - svRight.d) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
         }
-        break;
-      }
-    case CONDITION_LEQ:
-      {
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
 
-          if (svLeft.i <= svRight.i) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        *f0 = svRight.d;
+        *f1 = svLeft.d;
 
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          *f0 = (double)svLeft.i;
-
-          if (*f0 - svRight.d < -epsilon || fabs(*f0 - svRight.d) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          *f0 = svLeft.d;
-          *f1 = svRight.d;
-
-          if (*f0 - *f1 < -epsilon || fabs(*f0 - *f1) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          *f1 = (double)svRight.i;
-
-          if (svLeft.d - *f1 < -epsilon || fabs(svLeft.d - *f1) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
-          if (cmp <= 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
-          if (cmp <= 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
-          if (cmp >= 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+        if (fabs(*f0 - *f1) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
         }
-        break;
-      }
-    case CONDITION_GEQ:
-      {
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        *f0 = (double)svRight.i;
 
-          if (svLeft.i >= svRight.i) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          *f0 = (double)svLeft.i;
-
-          if (*f0 - svRight.d > epsilon || fabs(*f0 - svRight.d) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          *f0 = svLeft.d;
-          *f1 = svRight.d;
-
-          if (*f0 - *f1 > epsilon || fabs(*f0 - *f1) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          *f1 = (double)svRight.i;
-
-          if (svLeft.d - *f1 > epsilon || fabs(svLeft.d - *f1) < epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
-          if (cmp >= 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
-          if (cmp >= 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
-          if (cmp <= 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+        if (fabs(*f0 - svLeft.d) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
         }
-        break;
-      }
-    case CONDITION_GE:
-      {
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-
-          if (svLeft.i > svRight.i) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          *f0 = (double)svLeft.i;
-
-          if (*f0 - svRight.d > epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          *f0 = svLeft.d;
-          *f1 = svRight.d;
-
-          if (*f0 - *f1 > epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          *f1 = (double)svRight.i;
-
-          if (svLeft.d - *f1 > epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
-          if (cmp > 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
-          if (cmp > 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
-          if (cmp < 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+      } else if (svLeft.type == TEXT && svRight.type == TEXT) {
+        *ax = strcmp(svLeft.t, svRight.t) == 0;
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+        if (cmp == 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
         }
-        break;
-      }
-    case CONDITION_LE:
-      {
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-
-          if (svLeft.i < svRight.i) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          *f0 = (double)svLeft.i;
-
-          if (*f0 - svRight.d < -epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          *f0 = svLeft.d;
-          *f1 = svRight.d;
-
-          if (*f0 - *f1 < -epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          *f1 = (double)svRight.i;
-
-          if (svLeft.d - *f1 < -epsilon) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
-          if (cmp < 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
-          if (cmp < 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
-          if (cmp > 0) {
-            *ax = 1;
-          } else {
-            *ax = 0;
-          }
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+        if (cmp == 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
         }
-        break;
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+        if (cmp == 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
       }
+      break;
+    }
+    case CONDITION_NEQ: {
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+
+        if (svLeft.i != svRight.i) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        *f0 = (double)svLeft.i;
+
+        if (fabs(*f0 - svRight.d) > epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        *f0 = svRight.d;
+        *f1 = svLeft.d;
+
+        if (fabs(*f0 - *f1) > epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        *f0 = (double)svRight.i;
+
+        if (fabs(*f0 - svLeft.d) > epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == TEXT && svRight.type == TEXT) {
+        *ax = !(strcmp(svLeft.t, svRight.t) == 0);
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+        if (cmp != 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+        if (cmp != 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+        if (cmp != 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      }
+      break;
+    }
+    case CONDITION_LEQ: {
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+
+        if (svLeft.i <= svRight.i) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        *f0 = (double)svLeft.i;
+
+        if (*f0 - svRight.d < -epsilon || fabs(*f0 - svRight.d) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        *f0 = svLeft.d;
+        *f1 = svRight.d;
+
+        if (*f0 - *f1 < -epsilon || fabs(*f0 - *f1) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        *f1 = (double)svRight.i;
+
+        if (svLeft.d - *f1 < -epsilon || fabs(svLeft.d - *f1) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+        if (cmp <= 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+        if (cmp <= 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+        if (cmp >= 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      }
+      break;
+    }
+    case CONDITION_GEQ: {
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+
+        if (svLeft.i >= svRight.i) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        *f0 = (double)svLeft.i;
+
+        if (*f0 - svRight.d > epsilon || fabs(*f0 - svRight.d) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        *f0 = svLeft.d;
+        *f1 = svRight.d;
+
+        if (*f0 - *f1 > epsilon || fabs(*f0 - *f1) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        *f1 = (double)svRight.i;
+
+        if (svLeft.d - *f1 > epsilon || fabs(svLeft.d - *f1) < epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+        if (cmp >= 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+        if (cmp >= 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+        if (cmp <= 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      }
+      break;
+    }
+    case CONDITION_GE: {
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+
+        if (svLeft.i > svRight.i) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        *f0 = (double)svLeft.i;
+
+        if (*f0 - svRight.d > epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        *f0 = svLeft.d;
+        *f1 = svRight.d;
+
+        if (*f0 - *f1 > epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        *f1 = (double)svRight.i;
+
+        if (svLeft.d - *f1 > epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+        if (cmp > 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+        if (cmp > 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+        if (cmp < 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      }
+      break;
+    }
+    case CONDITION_LE: {
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+
+        if (svLeft.i < svRight.i) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        *f0 = (double)svLeft.i;
+
+        if (*f0 - svRight.d < -epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        *f0 = svLeft.d;
+        *f1 = svRight.d;
+
+        if (*f0 - *f1 < -epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        *f1 = (double)svRight.i;
+
+        if (svLeft.d - *f1 < -epsilon) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        int cmp = mpz_cmp(*svLeft.bigInt, *svRight.bigInt);
+        if (cmp < 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        int cmp = mpz_cmp_si(*svLeft.bigInt, (long)svRight.i);
+        if (cmp < 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        int cmp = mpz_cmp_si(*svRight.bigInt, (long)svLeft.i);
+        if (cmp > 0) {
+          *ax = 1;
+        } else {
+          *ax = 0;
+        }
+      }
+      break;
+    }
     default:
       break;
   }
@@ -781,11 +757,10 @@ expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS()) {
         case LIBFUNCPTRTYPE:
           newExp = newExpr_LibFuncPtr(sv.libfunc);
           break;
-        case VECTORTYPE:
-          {
-            newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-            break;
-          }
+        case VECTORTYPE: {
+          newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
+          break;
+        }
         case BIGINT:
           newExp = newExpr_BigInt(sv.bigInt);
           break;
@@ -871,134 +846,133 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
   int32_t *ax = PROVIDE_CONTEXT()->ax;
   if (expr == NULL) return;
   switch (expr->type) {
-    case EXPR_TYPE_ID:
-      {
-        heapval_t *hv = NULL;
-        int stop = 0;
-        argsList_t *walk = NULL;
+    case EXPR_TYPE_ID: {
+      heapval_t *hv = NULL;
+      int stop = 0;
+      argsList_t *walk = NULL;
 
-        /* Check if it is among the class context members */
-        if (classCtx != NULL) {
-          functionDef_t *classFunc = NULL;
-          libFunction_t *classFuncABI = NULL;
-          hv = hashtable_get(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+      /* Check if it is among the class context members */
+      if (classCtx != NULL) {
+        functionDef_t *classFunc = NULL;
+        libFunction_t *classFuncABI = NULL;
+        hv = hashtable_get(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
-          if (hv != NULL) {
-            push_heapval(hv, sp, sc);
-            stop = 1;
-          }
+        if (hv != NULL) {
+          push_heapval(hv, sp, sc);
+          stop = 1;
+        }
 
-          classFunc =
-              hashtable_get(classCtx->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
-          if (classFunc != NULL) {
-            // Pushing the function definition
-            PUSH_FUNCPTR(classFunc, sp, sc);
-            stop = 1;
-          }
-
-          if (!stop) {
-            classFuncABI =
-                hashtable_get(classCtx->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
-            if (classFuncABI != NULL) {
-              // Pushing the ABI function
-              PUSH_LIBFUNCPTR(classFuncABI, sp, sc);
-              stop = 1;
-            }
-          }
+        classFunc =
+            hashtable_get(classCtx->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+        if (classFunc != NULL) {
+          // Pushing the function definition
+          PUSH_FUNCPTR(classFunc, sp, sc);
+          stop = 1;
         }
 
         if (!stop) {
-          class_t *classDef;      // if it is a class construction reference
-          functionDef_t *funcDef; // if it is a function pointer
+          classFuncABI =
+              hashtable_get(classCtx->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+          if (classFuncABI != NULL) {
+            // Pushing the ABI function
+            PUSH_LIBFUNCPTR(classFuncABI, sp, sc);
+            stop = 1;
+          }
+        }
+      }
 
-          /* Check among the locals if we have it defined there */
-          hv = locals_lookup(varLocals, expr->id.id);
+      if (!stop) {
+        class_t *classDef;      // if it is a class construction reference
+        functionDef_t *funcDef; // if it is a function pointer
 
-          if (hv == NULL) {
-            /* Check if this ID is among the arguments */
-            walk = args;
+        /* Check among the locals if we have it defined there */
+        hv = locals_lookup(varLocals, expr->id.id);
 
-            while (walk != NULL && !stop) {
-              expr_t *exp = walk->arg;
-              if (exp->type == EXPR_TYPE_ID) {
-                expr_t *expArg;
+        if (hv == NULL) {
+          /* Check if this ID is among the arguments */
+          walk = args;
 
-                /* Check among the arguments if we have it defined there */
-                expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+          while (walk != NULL && !stop) {
+            expr_t *exp = walk->arg;
+            if (exp->type == EXPR_TYPE_ID) {
+              expr_t *expArg;
 
-                if (push_expression(expArg, EXPRESSION_ARGS()) == 0) {
-                  stop = 1;
-                }
-              } else {
-                fprintf(stderr,
-                        "error: unknown, this is crazy. The interpreter is broken or something.\n\
+              /* Check among the arguments if we have it defined there */
+              expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+
+              if (push_expression(expArg, EXPRESSION_ARGS()) == 0) {
+                stop = 1;
+              }
+            } else {
+              fprintf(stderr,
+                      "error: unknown, this is crazy. The interpreter is broken or something.\n\
     Please report back to me.\n\
     - %s\n",
-                        GENERAL_ERROR_ISSUE_URL);
-                exit(1);
-              }
-
-              walk = walk->next;
+                      GENERAL_ERROR_ISSUE_URL);
+              exit(1);
             }
-          } else {
-            push_heapval(hv, sp, sc);
+
+            walk = walk->next;
+          }
+        } else {
+          push_heapval(hv, sp, sc);
+          stop = 1;
+        }
+
+        if (stop) {
+          break;
+        }
+        /* Check among the global variables if we have it defined there */
+        hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+
+        if (hv != NULL) {
+          push_heapval(hv, sp, sc);
+          stop = 1;
+        }
+
+        if (stop) {
+          break;
+        }
+        /* Check among the class declaration if we have this id defined there */
+        classDef =
+            hashtable_get(PROVIDE_CONTEXT()->classDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+        if (classDef != NULL) {
+          PUSH_CLASSREF(classDef, sp, sc);
+          stop = 1;
+        }
+
+        if (!stop) {
+          /* Check among the function declarations if we have it defined there */
+          funcDef =
+              hashtable_get(PROVIDE_CONTEXT()->funcDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
+          if (funcDef != NULL) {
+            // Pushing the function definition
+            PUSH_FUNCPTR(funcDef, sp, sc);
             stop = 1;
-          }
-
-          if (stop) {
-            break;
-          }
-          /* Check among the global variables if we have it defined there */
-          hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
-
-          if (hv != NULL) {
-            push_heapval(hv, sp, sc);
-            stop = 1;
-          }
-
-          if (stop) {
-            break;
-          }
-          /* Check among the class declaration if we have this id defined there */
-          classDef =
-              hashtable_get(PROVIDE_CONTEXT()->classDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
-          if (classDef != NULL) {
-            PUSH_CLASSREF(classDef, sp, sc);
-            stop = 1;
-          }
-
-          if (!stop) {
-            /* Check among the function declarations if we have it defined there */
-            funcDef = hashtable_get(PROVIDE_CONTEXT()->funcDecs, PROVIDE_CONTEXT()->syncCtx,
-                                    expr->id.id);
-            if (funcDef != NULL) {
-              // Pushing the function definition
-              PUSH_FUNCPTR(funcDef, sp, sc);
-              stop = 1;
-            }
-          }
-
-          if (!stop) {
-            /* Check among the standard lib function declarations if we have it defined there */
-            libFunction_t *libFunc = look_up_lib(expr->id.id);
-
-            if (libFunc != NULL) {
-              PUSH_LIBFUNCPTR(libFunc, sp, sc);
-              stop = 1;
-            }
           }
         }
 
         if (!stop) {
-          fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", ((statement_t *)stmt)->file,
-                  ((statement_t *)stmt)->line, expr->id.id);
-          if (!*interactive) {
-            exit(1);
+          /* Check among the standard lib function declarations if we have it defined there */
+          libFunction_t *libFunc = look_up_lib(expr->id.id);
+
+          if (libFunc != NULL) {
+            PUSH_LIBFUNCPTR(libFunc, sp, sc);
+            stop = 1;
           }
         }
-
-        break;
       }
+
+      if (!stop) {
+        fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", ((statement_t *)stmt)->file,
+                ((statement_t *)stmt)->line, expr->id.id);
+        if (!*interactive) {
+          exit(1);
+        }
+      }
+
+      break;
+    }
     case EXPR_TYPE_POINTER:
       PUSH_POINTER(expr->p, sp, sc);
       break;
@@ -1020,510 +994,473 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
     case EXPR_TYPE_VECTOR:
       PUSH_VECTOR(expr->vec, sp, sc);
       break;
-    case EXPR_TYPE_LOGICAL:
-      {
-        int32_t result = 0;
-        int32_t walk;
-        stackval_t sv;
-        logical_t *logic = expr->logical;
+    case EXPR_TYPE_LOGICAL: {
+      int32_t result = 0;
+      int32_t walk;
+      stackval_t sv;
+      logical_t *logic = expr->logical;
 
-        if (logic->orsLen > 0) {
-          walk = 0;
-          while (walk < logic->orsLen && result == 0) {
-            evaluate_expression(logic->ors[walk], EXPRESSION_ARGS());
-            POP_VAL(&sv, sp, sc);
-            switch (sv.type) {
-              case INT32TYPE:
-                {
-                  if (sv.i != 0) {
-                    result = 1;
-                  }
-                  break;
-                }
-              case BIGINT:
-                {
-                  result = (mpz_cmp_si(*sv.bigInt, 0) != 0);
-                  break;
-                }
-              case DOUBLETYPE:
-                {
-                  if (fabs(sv.d) > 0.00000001) {
-                    result = 1;
-                  }
-                  break;
-                }
-              default:
-                {
-                  fprintf(stderr,
-                          "%s.%d error: Invalid conditional, expected numerical; got type '%d'\n",
-                          ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, sv.type);
-                }
-            }
-            walk++;
-          }
-        }
-        if (result == 0 && logic->andsLen > 0) {
-          walk = 0;
-          result = 1; // True, until proven otherwise..
-          while (walk < logic->andsLen) {
-            int32_t tmpResult = 0;
-            evaluate_expression(logic->ands[walk], EXPRESSION_ARGS());
-            POP_VAL(&sv, sp, sc);
-            switch (sv.type) {
-              case INT32TYPE:
-                {
-                  if (sv.i != 0) {
-                    tmpResult = 1;
-                  }
-                  break;
-                }
-              case BIGINT:
-                {
-                  result = (mpz_cmp_si(*sv.bigInt, 0) != 0);
-                  break;
-                }
-              case DOUBLETYPE:
-                {
-                  if (fabs(sv.d) > 0.00000001) {
-                    tmpResult = 1;
-                  }
-                  break;
-                }
-              default:
-                {
-                  fprintf(stderr,
-                          "%s.%d index error: datatype the does not support conditioning.\n",
-                          ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
-                  if (!*interactive) {
-                    exit(1);
-                  }
-                }
-            }
-            walk++;
-            if (tmpResult == 0) {
-              result = 0;
+      if (logic->orsLen > 0) {
+        walk = 0;
+        while (walk < logic->orsLen && result == 0) {
+          evaluate_expression(logic->ors[walk], EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch (sv.type) {
+            case INT32TYPE: {
+              if (sv.i != 0) {
+                result = 1;
+              }
               break;
             }
+            case BIGINT: {
+              result = (mpz_cmp_si(*sv.bigInt, 0) != 0);
+              break;
+            }
+            case DOUBLETYPE: {
+              if (fabs(sv.d) > 0.00000001) {
+                result = 1;
+              }
+              break;
+            }
+            default: {
+              fprintf(stderr,
+                      "%s.%d error: Invalid conditional, expected numerical; got type '%d'\n",
+                      ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, sv.type);
+            }
+          }
+          walk++;
+        }
+      }
+      if (result == 0 && logic->andsLen > 0) {
+        walk = 0;
+        result = 1; // True, until proven otherwise..
+        while (walk < logic->andsLen) {
+          int32_t tmpResult = 0;
+          evaluate_expression(logic->ands[walk], EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+          switch (sv.type) {
+            case INT32TYPE: {
+              if (sv.i != 0) {
+                tmpResult = 1;
+              }
+              break;
+            }
+            case BIGINT: {
+              result = (mpz_cmp_si(*sv.bigInt, 0) != 0);
+              break;
+            }
+            case DOUBLETYPE: {
+              if (fabs(sv.d) > 0.00000001) {
+                tmpResult = 1;
+              }
+              break;
+            }
+            default: {
+              fprintf(stderr, "%s.%d index error: datatype the does not support conditioning.\n",
+                      ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+              if (!*interactive) {
+                exit(1);
+              }
+            }
+          }
+          walk++;
+          if (tmpResult == 0) {
+            result = 0;
+            break;
           }
         }
-
-        PUSH_INT(result, sp, sc);
-        break;
       }
+
+      PUSH_INT(result, sp, sc);
+      break;
+    }
     case EXPR_TYPE_DICT:
       PUSH_DICTIONARY(expr->dict, sp, sc);
       break;
     case EXPR_TYPE_RAWDATA:
       PUSH_RAWDATA(expr->rawdata, sp, sc);
       break;
-    case EXPR_TYPE_VECTOR_IDX:
-      {
-        int32_t arrayIndex = 0;
-        vector_t *vec = NULL;
-        dictionary_t *dict = NULL;
-        argsList_t *walk;
-        char *text = NULL;
-        rawdata_t *rawdata = NULL;
-        int typeOfVal = 0;
-        expr_t *exp = NULL;
-        expr_t *id = expr->vecIdx->expr;
-        expr_t *index = expr->vecIdx->index;
+    case EXPR_TYPE_VECTOR_IDX: {
+      int32_t arrayIndex = 0;
+      vector_t *vec = NULL;
+      dictionary_t *dict = NULL;
+      argsList_t *walk;
+      char *text = NULL;
+      rawdata_t *rawdata = NULL;
+      int typeOfVal = 0;
+      expr_t *exp = NULL;
+      expr_t *id = expr->vecIdx->expr;
+      expr_t *index = expr->vecIdx->index;
 
-        stackval_t sv;
+      stackval_t sv;
 
-        if (id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX
-            || id->type == EXPR_TYPE_FUNCCALL) {
-          evaluate_expression(id, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
+      if (id->type == EXPR_TYPE_ID || id->type == EXPR_TYPE_VECTOR_IDX
+          || id->type == EXPR_TYPE_FUNCCALL) {
+        evaluate_expression(id, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
 
-          if (sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT
-              && sv.type != RAWDATATYPE) {
-            fprintf(stderr,
-                    "%s.%d index error: '%s' is a datatype the does not support indexing.\n",
-                    ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, id->id.id);
-            if (!*interactive) {
-              exit(1);
-            }
+        if (sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT
+            && sv.type != RAWDATATYPE) {
+          fprintf(stderr, "%s.%d index error: '%s' is a datatype the does not support indexing.\n",
+                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, id->id.id);
+          if (!*interactive) {
+            exit(1);
           }
-
-          typeOfVal = sv.type;
-          if (sv.type == VECTORTYPE) {
-            vec = sv.vec;
-          } else if (sv.type == DICTTYPE) {
-            dict = sv.dict;
-          } else if (sv.type == TEXT) {
-            text = sv.t;
-          } else if (sv.type == RAWDATATYPE) {
-            rawdata = sv.rawdata;
-          }
-        } else {
-          fprintf(stderr, "error: Invalid indexing %d\n", id->type);
-          exit(1);
         }
 
-        switch (typeOfVal) {
-          case DICTTYPE:
-            {
-              /* Dictionary indexing */
-              char *key = NULL;
-              heapval_t *hpv;
+        typeOfVal = sv.type;
+        if (sv.type == VECTORTYPE) {
+          vec = sv.vec;
+        } else if (sv.type == DICTTYPE) {
+          dict = sv.dict;
+        } else if (sv.type == TEXT) {
+          text = sv.t;
+        } else if (sv.type == RAWDATATYPE) {
+          rawdata = sv.rawdata;
+        }
+      } else {
+        fprintf(stderr, "error: Invalid indexing %d\n", id->type);
+        exit(1);
+      }
 
-              evaluate_expression(index, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
+      switch (typeOfVal) {
+        case DICTTYPE: {
+          /* Dictionary indexing */
+          char *key = NULL;
+          heapval_t *hpv;
 
-              if (sv.type != TEXT) {
-                fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
-                exit(1);
-              }
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
 
-              key = sv.t;
+          if (sv.type != TEXT) {
+            fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
+            exit(1);
+          }
 
-              /* find heapval */
-              hpv = hashtable_get(dict->hash, PROVIDE_CONTEXT()->syncCtx, key);
-              if (hpv == NULL) {
-                fprintf(stderr, "error: key '%s' not present in dictionary\n", key);
-                exit(1);
-              }
+          key = sv.t;
 
-              sv = hpv->sv;
+          /* find heapval */
+          hpv = hashtable_get(dict->hash, PROVIDE_CONTEXT()->syncCtx, key);
+          if (hpv == NULL) {
+            fprintf(stderr, "error: key '%s' not present in dictionary\n", key);
+            exit(1);
+          }
 
-              /* Push value to the stack */
-              switch (sv.type) {
-                case INT32TYPE:
-                  {
-                    PUSH_INT(sv.i, sp, sc);
-                    break;
-                  }
-                case DOUBLETYPE:
-                  {
-                    PUSH_DOUBLE(sv.d, sp, sc);
-                    break;
-                  }
-                case TEXT:
-                  {
-                    PUSH_STRING(sv.t, sp, sc);
-                    break;
-                  }
-                case POINTERTYPE:
-                  {
-                    PUSH_POINTER(sv.p, sp, sc);
-                    break;
-                  }
-                case VECTORTYPE:
-                  {
-                    PUSH_VECTOR(sv.vec, sp, sc);
-                    break;
-                  }
-                case FUNCPTRTYPE:
-                  {
-                    PUSH_FUNCPTR(sv.func, sp, sc);
-                    break;
-                  }
-                case LIBFUNCPTRTYPE:
-                  {
-                    PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
-                    break;
-                  }
-                case DICTTYPE:
-                  {
-                    PUSH_DICTIONARY(sv.dict, sp, sc);
-                    break;
-                  }
-                case CLASSTYPE:
-                  {
-                    PUSH_CLASSREF(sv.classObj, sp, sc);
-                    break;
-                  }
-                case TIMETYPE:
-                  {
-                    PUSH_TIME(sv.time, sp, sc);
-                    break;
-                  }
-                case BIGINT:
-                  {
-                    PUSH_BIGINT(sv.bigInt, sp, sc);
-                    break;
-                  }
-                case RAWDATATYPE:
-                  {
-                    PUSH_RAWDATA(sv.rawdata, sp, sc);
-                    break;
-                  }
-                default:
-                  fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-                  exit(1);
-                  break;
-              }
+          sv = hpv->sv;
+
+          /* Push value to the stack */
+          switch (sv.type) {
+            case INT32TYPE: {
+              PUSH_INT(sv.i, sp, sc);
+              break;
             }
-            break;
-          case VECTORTYPE:
-            {
-              /* Array indexing */
-              evaluate_expression(index, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
+            case DOUBLETYPE: {
+              PUSH_DOUBLE(sv.d, sp, sc);
+              break;
+            }
+            case TEXT: {
+              PUSH_STRING(sv.t, sp, sc);
+              break;
+            }
+            case POINTERTYPE: {
+              PUSH_POINTER(sv.p, sp, sc);
+              break;
+            }
+            case VECTORTYPE: {
+              PUSH_VECTOR(sv.vec, sp, sc);
+              break;
+            }
+            case FUNCPTRTYPE: {
+              PUSH_FUNCPTR(sv.func, sp, sc);
+              break;
+            }
+            case LIBFUNCPTRTYPE: {
+              PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
+              break;
+            }
+            case DICTTYPE: {
+              PUSH_DICTIONARY(sv.dict, sp, sc);
+              break;
+            }
+            case CLASSTYPE: {
+              PUSH_CLASSREF(sv.classObj, sp, sc);
+              break;
+            }
+            case TIMETYPE: {
+              PUSH_TIME(sv.time, sp, sc);
+              break;
+            }
+            case BIGINT: {
+              PUSH_BIGINT(sv.bigInt, sp, sc);
+              break;
+            }
+            case RAWDATATYPE: {
+              PUSH_RAWDATA(sv.rawdata, sp, sc);
+              break;
+            }
+            default:
+              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+              exit(1);
+              break;
+          }
+        } break;
+        case VECTORTYPE: {
+          /* Array indexing */
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
 
-              if (sv.type != INT32TYPE && sv.type != INDEXER) {
-                fprintf(stderr, "index error: Must provide a correct indexer value as index\n");
-                exit(1);
-              }
+          if (sv.type != INT32TYPE && sv.type != INDEXER) {
+            fprintf(stderr, "index error: Must provide a correct indexer value as index\n");
+            exit(1);
+          }
 
-              if (sv.type == INT32TYPE) {
-                arrayIndex = sv.i;
+          if (sv.type == INT32TYPE) {
+            arrayIndex = sv.i;
 
-                /* check the limits */
-                if (arrayIndex >= vec->length) {
-                  fprintf(stderr,
-                          "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32
-                          "'\n",
-                          arrayIndex, vec->length);
-                  exit(1);
-                }
+            /* check the limits */
+            if (arrayIndex >= vec->length) {
+              fprintf(stderr,
+                      "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                      arrayIndex, vec->length);
+              exit(1);
+            }
 
-                walk = vec->content;
-                while (walk != NULL && arrayIndex >= 0) {
-                  exp = walk->arg;
-                  walk = walk->next;
-                  --arrayIndex;
-                }
+            walk = vec->content;
+            while (walk != NULL && arrayIndex >= 0) {
+              exp = walk->arg;
+              walk = walk->next;
+              --arrayIndex;
+            }
 
-                if (exp == NULL) {
-                  fprintf(stderr, "Unexpected index error!\n");
-                  fprintf(
-                      stderr,
+            if (exp == NULL) {
+              fprintf(stderr, "Unexpected index error!\n");
+              fprintf(stderr,
                       "Please include the script and file an error report to me here:\n    %s\n\
       This is not supposed to happen, I hope I can fix the intepreter!\n",
                       GENERAL_ERROR_ISSUE_URL);
-                  exit(1);
-                }
+              exit(1);
+            }
 
-                /* Evaluate the expression */
-                evaluate_expression(exp, EXPRESSION_ARGS());
-                POP_VAL(&sv, sp, sc);
-                push_stackval(&sv, sp, sc);
-              } else if (sv.type == INDEXER) {
-                indexer_t *indexer = sv.indexer;
-                int idxStart = 0;
-                int idxEnd = vec->length;
-                int idxWalk = 0;
-                int offset = 1;
-                expr_t *newVec = NULL;
-                argsList_t *vecContent = NULL;
-                argsList_t *walk = NULL;
-                heapval_t *hpv;
-                int dummy;
+            /* Evaluate the expression */
+            evaluate_expression(exp, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+            push_stackval(&sv, sp, sc);
+          } else if (sv.type == INDEXER) {
+            indexer_t *indexer = sv.indexer;
+            int idxStart = 0;
+            int idxEnd = vec->length;
+            int idxWalk = 0;
+            int offset = 1;
+            expr_t *newVec = NULL;
+            argsList_t *vecContent = NULL;
+            argsList_t *walk = NULL;
+            heapval_t *hpv;
+            int dummy;
 
-                (void)evaluate_indexer(indexer, vec->length, &idxStart, &idxEnd, &offset,
-                                       EXPRESSION_ARGS());
+            (void)evaluate_indexer(indexer, vec->length, &idxStart, &idxEnd, &offset,
+                                   EXPRESSION_ARGS());
 
-                /* Create a new list */
-                walk = vec->content;
-                idxWalk = 0;
-                while (walk != NULL) {
-                  int offsetCount;
-                  if (idxWalk >= idxStart && idxWalk < idxEnd) {
-                    /* Add this expression to the vector */
-                    argsList_t *a;
-                    expr_t *e = walk->arg;
-                    e = newExpr_Copy(e);
-                    a = newArgument(e, vecContent);
-                    vecContent = a;
-                  }
-                  offsetCount = 0;
-                  while (walk && offsetCount < abs(offset)) {
-                    walk = walk->next;
-                    idxWalk++;
-                    offsetCount++;
-                  }
-                }
-
-                newVec = newExpr_Vector(vecContent);
-
-                if (offset < 0) {
-                  argsList_t *prevArg;
-                  argsList_t *nextArg;
-                  argsList_t *currentArg;
-                  /* Reverse the args list order */
-                  walk = newVec->vec->content;
-                  prevArg = NULL;
-                  currentArg = walk;
-                  while (currentArg != NULL) {
-                    nextArg = currentArg->next;
-                    currentArg->next = prevArg;
-                    prevArg = currentArg;
-                    currentArg = nextArg;
-                  }
-                  newVec->vec->content = prevArg;
-                }
-
-                /* Add space for argN */
-                sv.type = VECTORTYPE;
-                sv.vec = newVec->vec;
-
-                ALLOC_HEAP(&sv, hp, &hpv, &dummy);
-
-                PUSH_VECTOR(newVec->vec, sp, sc);
-                free(newVec);
+            /* Create a new list */
+            walk = vec->content;
+            idxWalk = 0;
+            while (walk != NULL) {
+              int offsetCount;
+              if (idxWalk >= idxStart && idxWalk < idxEnd) {
+                /* Add this expression to the vector */
+                argsList_t *a;
+                expr_t *e = walk->arg;
+                e = newExpr_Copy(e);
+                a = newArgument(e, vecContent);
+                vecContent = a;
+              }
+              offsetCount = 0;
+              while (walk && offsetCount < abs(offset)) {
+                walk = walk->next;
+                idxWalk++;
+                offsetCount++;
               }
             }
-            break;
-          case TEXT:
-            {
-              size_t len = 1;
-              stackval_t sv;
-              heapval_t *hvp;
-              int heapUpdated;
-              char *newText = NULL;
 
-              evaluate_expression(index, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
+            newVec = newExpr_Vector(vecContent);
 
-              if (sv.type != INT32TYPE && sv.type != INDEXER) {
-                fprintf(
-                    stderr,
+            if (offset < 0) {
+              argsList_t *prevArg;
+              argsList_t *nextArg;
+              argsList_t *currentArg;
+              /* Reverse the args list order */
+              walk = newVec->vec->content;
+              prevArg = NULL;
+              currentArg = walk;
+              while (currentArg != NULL) {
+                nextArg = currentArg->next;
+                currentArg->next = prevArg;
+                prevArg = currentArg;
+                currentArg = nextArg;
+              }
+              newVec->vec->content = prevArg;
+            }
+
+            /* Add space for argN */
+            sv.type = VECTORTYPE;
+            sv.vec = newVec->vec;
+
+            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+
+            PUSH_VECTOR(newVec->vec, sp, sc);
+            free(newVec);
+          }
+        } break;
+        case TEXT: {
+          size_t len = 1;
+          stackval_t sv;
+          heapval_t *hvp;
+          int heapUpdated;
+          char *newText = NULL;
+
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if (sv.type != INT32TYPE && sv.type != INDEXER) {
+            fprintf(stderr,
                     "index error: Must provide a valid expression as indexer, value type: (%d)\n",
                     sv.type);
+            exit(1);
+          }
+
+          if (sv.type == INT32TYPE) {
+            arrayIndex = sv.i;
+
+            if (arrayIndex > strlen(text)) {
+              fprintf(stderr, "index error: out of bounds\n");
+              if (!*interactive) {
                 exit(1);
               }
-
-              if (sv.type == INT32TYPE) {
-                arrayIndex = sv.i;
-
-                if (arrayIndex > strlen(text)) {
-                  fprintf(stderr, "index error: out of bounds\n");
-                  if (!*interactive) {
-                    exit(1);
-                  }
-                }
-
-                newText = ast_emalloc(len + 1);
-                newText[0] = text[arrayIndex];
-                newText[1] = 0;
-                sv.type = TEXT;
-                sv.t = newText;
-
-                ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-                PUSH_STRING(sv.t, sp, sc);
-              } else if (sv.type == INDEXER) {
-                indexer_t *indexer = sv.indexer;
-                int idxStart = 0;
-                int idxEnd = (int)strlen(text);
-                int idxWalk = 0;
-                int textLen = (int)strlen(text);
-                int offset = 1;
-                char *newText = NULL;
-                expr_t *newTextExp = NULL;
-                heapval_t *hpv;
-                int dummy;
-
-                (void)evaluate_indexer(indexer, textLen, &idxStart, &idxEnd, &offset,
-                                       EXPRESSION_ARGS());
-
-                /* Create a new string */
-                newText = (char *)ast_ecalloc(idxEnd - idxStart + 2);
-                idxWalk = offset >= 0 ? 0 : textLen - 1;
-                if (offset == 0) {
-                  offset = 1; // corner case, will correct this.
-                }
-                int idxWritten = 0;
-                while (idxWalk < textLen && idxWalk >= 0) {
-                  if (idxWalk >= idxStart && idxWalk < idxEnd) {
-                    /* Add this expression to the vector */
-                    newText[idxWritten] = text[idxWalk];
-                    idxWritten++;
-                  }
-                  idxWalk += offset;
-                }
-
-                newTextExp = newExpr_Text(newText);
-                free(newText);
-
-                /* Add space for argN */
-                sv.type = TEXT;
-                sv.t = newTextExp->text;
-                free(newTextExp);
-
-                ALLOC_HEAP(&sv, hp, &hpv, &dummy);
-                PUSH_STRING(sv.t, sp, sc);
-              }
             }
-            break;
-          case RAWDATATYPE:
-            {
-              stackval_t sv;
 
-              evaluate_expression(index, EXPRESSION_ARGS());
-              POP_VAL(&sv, sp, sc);
+            newText = ast_emalloc(len + 1);
+            newText[0] = text[arrayIndex];
+            newText[1] = 0;
+            sv.type = TEXT;
+            sv.t = newText;
 
-              if (sv.type != INT32TYPE && sv.type != INDEXER) {
-                fprintf(
-                    stderr,
+            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            PUSH_STRING(sv.t, sp, sc);
+          } else if (sv.type == INDEXER) {
+            indexer_t *indexer = sv.indexer;
+            int idxStart = 0;
+            int idxEnd = (int)strlen(text);
+            int idxWalk = 0;
+            int textLen = (int)strlen(text);
+            int offset = 1;
+            char *newText = NULL;
+            expr_t *newTextExp = NULL;
+            heapval_t *hpv;
+            int dummy;
+
+            (void)evaluate_indexer(indexer, textLen, &idxStart, &idxEnd, &offset,
+                                   EXPRESSION_ARGS());
+
+            /* Create a new string */
+            newText = (char *)ast_ecalloc(idxEnd - idxStart + 2);
+            idxWalk = offset >= 0 ? 0 : textLen - 1;
+            if (offset == 0) {
+              offset = 1; // corner case, will correct this.
+            }
+            int idxWritten = 0;
+            while (idxWalk < textLen && idxWalk >= 0) {
+              if (idxWalk >= idxStart && idxWalk < idxEnd) {
+                /* Add this expression to the vector */
+                newText[idxWritten] = text[idxWalk];
+                idxWritten++;
+              }
+              idxWalk += offset;
+            }
+
+            newTextExp = newExpr_Text(newText);
+            free(newText);
+
+            /* Add space for argN */
+            sv.type = TEXT;
+            sv.t = newTextExp->text;
+            free(newTextExp);
+
+            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+            PUSH_STRING(sv.t, sp, sc);
+          }
+        } break;
+        case RAWDATATYPE: {
+          stackval_t sv;
+
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if (sv.type != INT32TYPE && sv.type != INDEXER) {
+            fprintf(stderr,
                     "index error: Must provide a valid expression as indexer, value type: (%d)\n",
                     sv.type);
-                exit(1);
-              }
+            exit(1);
+          }
 
-              if (sv.type == INT32TYPE) {
-                arrayIndex = sv.i;
+          if (sv.type == INT32TYPE) {
+            arrayIndex = sv.i;
 
-                if (arrayIndex > rawdata->size) {
-                  fprintf(stderr, "index error: out of bounds\n");
-                  exit(1);
-                }
-
-                sv.type = INT32TYPE;
-                sv.i = ((unsigned char *)rawdata->data)[arrayIndex];
-
-                PUSH_INT(sv.i, sp, sc);
-              } else if (sv.type == INDEXER) {
-                indexer_t *indexer = sv.indexer;
-                int idxStart = 0;
-                int idxEnd = (int)rawdata->size;
-                int idxWalk = 0;
-                int dataLen = (int)rawdata->size;
-                int offset = 1;
-                char *newData = NULL;
-                expr_t *newDataExp = NULL;
-                heapval_t *hvp;
-                int dummy;
-
-                (void)evaluate_indexer(indexer, dataLen, &idxStart, &idxEnd, &offset,
-                                       EXPRESSION_ARGS());
-
-                /* Create a new data allocation */
-                newData = (char *)ast_ecalloc(idxEnd - idxStart + 2);
-                idxWalk = offset >= 0 ? 0 : dataLen - 1;
-                if (offset == 0) {
-                  offset = 1; // corner case, will correct this.
-                }
-                int idxWritten = 0;
-                while (idxWalk < dataLen && idxWalk >= 0) {
-                  if (idxWalk >= idxStart && idxWalk < idxEnd) {
-                    /* Add this expression to the vector */
-                    newData[idxWritten] = ((char *)rawdata->data)[idxWalk];
-                    idxWritten++;
-                  }
-                  idxWalk += offset;
-                }
-
-                newDataExp = newExpr_RawData(idxWritten);
-                free(newDataExp->rawdata->data);
-                newDataExp->rawdata->data = newData;
-
-                sv.type = RAWDATATYPE;
-                sv.rawdata = newDataExp->rawdata;
-                free(newDataExp);
-
-                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-
-                PUSH_RAWDATA(sv.rawdata, sp, sc);
-              }
+            if (arrayIndex > rawdata->size) {
+              fprintf(stderr, "index error: out of bounds\n");
+              exit(1);
             }
-            break;
-          default:
-            break;
-        }
+
+            sv.type = INT32TYPE;
+            sv.i = ((unsigned char *)rawdata->data)[arrayIndex];
+
+            PUSH_INT(sv.i, sp, sc);
+          } else if (sv.type == INDEXER) {
+            indexer_t *indexer = sv.indexer;
+            int idxStart = 0;
+            int idxEnd = (int)rawdata->size;
+            int idxWalk = 0;
+            int dataLen = (int)rawdata->size;
+            int offset = 1;
+            char *newData = NULL;
+            expr_t *newDataExp = NULL;
+            heapval_t *hvp;
+            int dummy;
+
+            (void)evaluate_indexer(indexer, dataLen, &idxStart, &idxEnd, &offset,
+                                   EXPRESSION_ARGS());
+
+            /* Create a new data allocation */
+            newData = (char *)ast_ecalloc(idxEnd - idxStart + 2);
+            idxWalk = offset >= 0 ? 0 : dataLen - 1;
+            if (offset == 0) {
+              offset = 1; // corner case, will correct this.
+            }
+            int idxWritten = 0;
+            while (idxWalk < dataLen && idxWalk >= 0) {
+              if (idxWalk >= idxStart && idxWalk < idxEnd) {
+                /* Add this expression to the vector */
+                newData[idxWritten] = ((char *)rawdata->data)[idxWalk];
+                idxWritten++;
+              }
+              idxWalk += offset;
+            }
+
+            newDataExp = newExpr_RawData(idxWritten);
+            free(newDataExp->rawdata->data);
+            newDataExp->rawdata->data = newData;
+
+            sv.type = RAWDATATYPE;
+            sv.rawdata = newDataExp->rawdata;
+            free(newDataExp);
+
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+
+            PUSH_RAWDATA(sv.rawdata, sp, sc);
+          }
+        } break;
+        default:
+          break;
       }
-      break;
+    } break;
     case EXPR_TYPE_IVAL:
       PUSH_INT(expr->ival, sp, sc);
       break;
@@ -1533,1044 +1470,1001 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
     case EXPR_TYPE_TIME:
       PUSH_TIME(expr->time, sp, sc);
       break;
-    case EXPR_TYPE_TEXT:
-      {
-        PUSH_STRING(expr->text, sp, sc);
-        break;
-      }
+    case EXPR_TYPE_TEXT: {
+      PUSH_STRING(expr->text, sp, sc);
       break;
-    case EXPR_TYPE_OPADD:
-      {
-        stackval_t svLeft;
-        stackval_t svRight;
+    } break;
+    case EXPR_TYPE_OPADD: {
+      stackval_t svLeft;
+      stackval_t svRight;
 
-        evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
-        POP_VAL(&svLeft, sp, sc);
+      evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
+      POP_VAL(&svLeft, sp, sc);
 
-        evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
-        POP_VAL(&svRight, sp, sc);
+      evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
+      POP_VAL(&svRight, sp, sc);
 
-        switch (svLeft.type) {
-          case INT32TYPE:
-            {
-              *r0 = svLeft.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f0 = svLeft.d;
-              break;
-            }
-          case RAWDATATYPE:
-            {
-              /* Interpret as text */
-              svLeft.type = TEXT;
-              svLeft.t = svLeft.rawdata->data;
-            }
-          case TEXT:
-          case VECTORTYPE:
-          case POINTERTYPE:
-          case TIMETYPE:
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
-            exit(1);
-            break;
+      switch (svLeft.type) {
+        case INT32TYPE: {
+          *r0 = svLeft.i;
+          break;
         }
-
-        switch (svRight.type) {
-          case INT32TYPE:
-            {
-              *r1 = svRight.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f1 = svRight.d;
-              break;
-            }
-          case RAWDATATYPE:
-            {
-              /* Interpret as text */
-              svRight.type = TEXT;
-              svRight.t = svRight.rawdata->data;
-            }
-          case TEXT:
-          case VECTORTYPE:
-          case POINTERTYPE:
-          case TIMETYPE:
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error %s.%d: Unexpected stackval_t type: %d\n",
-                    ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, svRight.type);
-            exit(1);
-            break;
+        case DOUBLETYPE: {
+          *f0 = svLeft.d;
+          break;
         }
-
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-          PUSH_INT(*r0 + *r1, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*r0 + *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*f0 + *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          PUSH_DOUBLE(*f0 + *r1, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          expr_t *e = newExpr_BigIntFromInt(0);
-          stackval_t sv;
-          int dummy;
-          heapval_t *hvp;
-
-          sv.type = BIGINT;
-          sv.bigInt = e->bigInt;
-
-          mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
-
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          PUSH_BIGINT(sv.bigInt, sp, sc);
-
-          free(e);
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          expr_t *e = newExpr_BigIntFromInt(svLeft.i);
-          stackval_t sv;
-          int dummy;
-          heapval_t *hvp;
-
-          sv.type = BIGINT;
-          sv.bigInt = e->bigInt;
-
-          mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
-
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          PUSH_BIGINT(sv.bigInt, sp, sc);
-
-          free(e);
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          expr_t *e = newExpr_BigIntFromInt(svRight.i);
-          stackval_t sv;
-          int dummy;
-          heapval_t *hvp;
-
-          sv.type = BIGINT;
-          sv.bigInt = e->bigInt;
-
-          mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
-
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-          PUSH_BIGINT(sv.bigInt, sp, sc);
-
-          free(e);
-        } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
-          PUSH_DOUBLE(svLeft.time + svRight.time, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == TEXT) {
-          size_t len = strlen(svLeft.t) + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%s%s", svLeft.t, svRight.t);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == TEXT) {
-          size_t len = 50 + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%.4f%s", svLeft.d, svRight.t);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == DOUBLETYPE) {
-          size_t len = 50 + strlen(svLeft.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%s%.4f", svLeft.t, svRight.d);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
-          size_t len = 50 + strlen(svLeft.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%s%d", svLeft.t, svRight.i);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == TEXT) {
-          size_t len = 50 + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%d%s", svLeft.i, svRight.t);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == POINTERTYPE && svRight.type == TEXT) {
-          size_t len = 50 + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "<%" PRIuPTR ">%s", svLeft.p, svRight.t);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == TEXT) {
-          size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
-          char *bigIntStr = NULL;
-
-          bigIntStr = mpz_get_str(bigIntBuf, 10, *svLeft.bigInt);
-
-          snprintf(newText, len + 1, "%s%s", bigIntStr, svRight.t);
-
-          free(bigIntBuf);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == BIGINT) {
-          size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svLeft.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
-          char *bigIntStr = NULL;
-
-          bigIntStr = mpz_get_str(bigIntBuf, 10, *svRight.bigInt);
-
-          snprintf(newText, len + 1, "%s%s", svLeft.t, bigIntStr);
-
-          free(bigIntBuf);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == POINTERTYPE) {
-          size_t len = 50 + strlen(svLeft.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%s<%" PRIuPTR ">", svLeft.t, svRight.p);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == VECTORTYPE && svRight.type == TEXT) {
-          size_t len = 50 + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "<List:size=%" PRIi32 ">%s", svLeft.vec->length, svRight.t);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == VECTORTYPE) {
-          size_t len = 50 + strlen(svRight.t);
-          stackval_t sv;
-          heapval_t *hvp;
-          int heapUpdated;
-          char *newText = ast_emalloc(len + 1);
-          snprintf(newText, len + 1, "%s<List:size=%" PRIi32 ">", svLeft.t, svRight.vec->length);
-
-          sv.type = TEXT;
-          sv.t = newText;
-
-          ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-          if (!heapUpdated) {
-            free(newText);
-            sv = hvp->sv;
-          }
-
-          PUSH_STRING(sv.t, sp, sc);
+        case RAWDATATYPE: {
+          /* Interpret as text */
+          svLeft.type = TEXT;
+          svLeft.t = svLeft.rawdata->data;
         }
-
-        break;
+        case TEXT:
+        case VECTORTYPE:
+        case POINTERTYPE:
+        case TIMETYPE:
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          exit(1);
+          break;
       }
+
+      switch (svRight.type) {
+        case INT32TYPE: {
+          *r1 = svRight.i;
+          break;
+        }
+        case DOUBLETYPE: {
+          *f1 = svRight.d;
+          break;
+        }
+        case RAWDATATYPE: {
+          /* Interpret as text */
+          svRight.type = TEXT;
+          svRight.t = svRight.rawdata->data;
+        }
+        case TEXT:
+        case VECTORTYPE:
+        case POINTERTYPE:
+        case TIMETYPE:
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error %s.%d: Unexpected stackval_t type: %d\n",
+                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, svRight.type);
+          exit(1);
+          break;
+      }
+
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+        PUSH_INT(*r0 + *r1, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*r0 + *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*f0 + *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        PUSH_DOUBLE(*f0 + *r1, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        expr_t *e = newExpr_BigIntFromInt(0);
+        stackval_t sv;
+        int dummy;
+        heapval_t *hvp;
+
+        sv.type = BIGINT;
+        sv.bigInt = e->bigInt;
+
+        mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_BIGINT(sv.bigInt, sp, sc);
+
+        free(e);
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        expr_t *e = newExpr_BigIntFromInt(svLeft.i);
+        stackval_t sv;
+        int dummy;
+        heapval_t *hvp;
+
+        sv.type = BIGINT;
+        sv.bigInt = e->bigInt;
+
+        mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_BIGINT(sv.bigInt, sp, sc);
+
+        free(e);
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        expr_t *e = newExpr_BigIntFromInt(svRight.i);
+        stackval_t sv;
+        int dummy;
+        heapval_t *hvp;
+
+        sv.type = BIGINT;
+        sv.bigInt = e->bigInt;
+
+        mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_BIGINT(sv.bigInt, sp, sc);
+
+        free(e);
+      } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
+        PUSH_DOUBLE(svLeft.time + svRight.time, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == TEXT) {
+        size_t len = strlen(svLeft.t) + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%s%s", svLeft.t, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == TEXT) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%.4f%s", svLeft.d, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == DOUBLETYPE) {
+        size_t len = 50 + strlen(svLeft.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%s%.4f", svLeft.t, svRight.d);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
+        size_t len = 50 + strlen(svLeft.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%s%d", svLeft.t, svRight.i);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == TEXT) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%d%s", svLeft.i, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == POINTERTYPE && svRight.type == TEXT) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "<%" PRIuPTR ">%s", svLeft.p, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == TEXT) {
+        size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
+        char *bigIntStr = NULL;
+
+        bigIntStr = mpz_get_str(bigIntBuf, 10, *svLeft.bigInt);
+
+        snprintf(newText, len + 1, "%s%s", bigIntStr, svRight.t);
+
+        free(bigIntBuf);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == BIGINT) {
+        size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svLeft.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
+        char *bigIntStr = NULL;
+
+        bigIntStr = mpz_get_str(bigIntBuf, 10, *svRight.bigInt);
+
+        snprintf(newText, len + 1, "%s%s", svLeft.t, bigIntStr);
+
+        free(bigIntBuf);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == POINTERTYPE) {
+        size_t len = 50 + strlen(svLeft.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%s<%" PRIuPTR ">", svLeft.t, svRight.p);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == VECTORTYPE && svRight.type == TEXT) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "<List:size=%" PRIi32 ">%s", svLeft.vec->length, svRight.t);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == VECTORTYPE) {
+        size_t len = 50 + strlen(svRight.t);
+        stackval_t sv;
+        heapval_t *hvp;
+        int heapUpdated;
+        char *newText = ast_emalloc(len + 1);
+        snprintf(newText, len + 1, "%s<List:size=%" PRIi32 ">", svLeft.t, svRight.vec->length);
+
+        sv.type = TEXT;
+        sv.t = newText;
+
+        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+        if (!heapUpdated) {
+          free(newText);
+          sv = hvp->sv;
+        }
+
+        PUSH_STRING(sv.t, sp, sc);
+      }
+
       break;
-    case EXPR_TYPE_OPSUB:
-      {
-        stackval_t svLeft;
-        stackval_t svRight;
+    } break;
+    case EXPR_TYPE_OPSUB: {
+      stackval_t svLeft;
+      stackval_t svRight;
 
-        evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
-        POP_VAL(&svLeft, sp, sc);
+      evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
+      POP_VAL(&svLeft, sp, sc);
 
-        evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
-        POP_VAL(&svRight, sp, sc);
+      evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
+      POP_VAL(&svRight, sp, sc);
 
-        switch (svLeft.type) {
-          case INT32TYPE:
-            {
-              *r0 = svLeft.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f0 = svLeft.d;
-              break;
-            }
-          case TEXT:
-            {
-              fprintf(stderr, "error: Cannot substract strings..\n");
-              exit(1);
-              break;
-            }
-          case TIMETYPE:
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
-            exit(1);
-            break;
+      switch (svLeft.type) {
+        case INT32TYPE: {
+          *r0 = svLeft.i;
+          break;
         }
-
-        switch (svRight.type) {
-          case INT32TYPE:
-            {
-              *r1 = svRight.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f1 = svRight.d;
-              break;
-            }
-          case TEXT:
-            {
-              fprintf(stderr, "error: Cannot substract strings..\n");
-              exit(1);
-              break;
-            }
-          case TIMETYPE:
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
-            exit(1);
-            break;
+        case DOUBLETYPE: {
+          *f0 = svLeft.d;
+          break;
         }
-
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-          PUSH_INT(*r0 - *r1, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*r0 - *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*f0 - *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          PUSH_DOUBLE(*f0 - *r1, sp, sc);
-        } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
-          PUSH_TIME(svLeft.time - svRight.time, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          mpz_sub(*n, *svLeft.bigInt, *svRight.bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
-
-          mpz_sub(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          mpz_clear(*bigIntEtmp->bigInt);
-          free(bigIntEtmp->bigInt);
-          free(bigIntEtmp);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
-
-          mpz_sub(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          mpz_clear(*bigIntEtmp->bigInt);
-          free(bigIntEtmp->bigInt);
-          free(bigIntEtmp);
-
-          PUSH_BIGINT(n, sp, sc);
+        case TEXT: {
+          fprintf(stderr, "error: Cannot substract strings..\n");
+          exit(1);
+          break;
         }
-
-        break;
+        case TIMETYPE:
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          exit(1);
+          break;
       }
-    case EXPR_TYPE_OPMUL:
-      {
-        stackval_t svLeft;
-        stackval_t svRight;
-        char *leftStr = NULL;
-        char *rightStr = NULL;
 
-        evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
-        POP_VAL(&svLeft, sp, sc);
+      switch (svRight.type) {
+        case INT32TYPE: {
+          *r1 = svRight.i;
+          break;
+        }
+        case DOUBLETYPE: {
+          *f1 = svRight.d;
+          break;
+        }
+        case TEXT: {
+          fprintf(stderr, "error: Cannot substract strings..\n");
+          exit(1);
+          break;
+        }
+        case TIMETYPE:
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          exit(1);
+          break;
+      }
 
-        evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
-        POP_VAL(&svRight, sp, sc);
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+        PUSH_INT(*r0 - *r1, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*r0 - *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*f0 - *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        PUSH_DOUBLE(*f0 - *r1, sp, sc);
+      } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
+        PUSH_TIME(svLeft.time - svRight.time, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
 
-        switch (svLeft.type) {
-          case INT32TYPE:
-            {
-              *r0 = svLeft.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f0 = svLeft.d;
-              break;
-            }
-          case TEXT:
-            {
-              leftStr = svLeft.t;
-              break;
-            }
-          case VECTORTYPE:
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_sub(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
+
+        mpz_sub(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
+
+        mpz_sub(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      }
+
+      break;
+    }
+    case EXPR_TYPE_OPMUL: {
+      stackval_t svLeft;
+      stackval_t svRight;
+      char *leftStr = NULL;
+      char *rightStr = NULL;
+
+      evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
+      POP_VAL(&svLeft, sp, sc);
+
+      evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
+      POP_VAL(&svRight, sp, sc);
+
+      switch (svLeft.type) {
+        case INT32TYPE: {
+          *r0 = svLeft.i;
+          break;
+        }
+        case DOUBLETYPE: {
+          *f0 = svLeft.d;
+          break;
+        }
+        case TEXT: {
+          leftStr = svLeft.t;
+          break;
+        }
+        case VECTORTYPE:
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          exit(1);
+          break;
+      }
+
+      switch (svRight.type) {
+        case INT32TYPE: {
+          *r1 = svRight.i;
+          break;
+        }
+        case DOUBLETYPE: {
+          *f1 = svRight.d;
+
+          if (leftStr != NULL) {
+            fprintf(stderr, "error: Cannot multiply string with float\n");
             exit(1);
-            break;
+          }
+          break;
+        }
+        case TEXT: {
+          rightStr = svRight.t;
+          break;
+        }
+        case VECTORTYPE:
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          exit(1);
+          break;
+      }
+
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+        PUSH_INT(*r0 * *r1, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*r0 * *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*f0 * *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        PUSH_DOUBLE(*f0 * *r1, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
+        heapval_t *hpv;
+        stackval_t stv;
+        size_t strLen = strlen(leftStr);
+        int32_t mult = *r1;
+        int32_t i = 0;
+        int dummy;
+        char *newStr = ast_emalloc(strLen * mult + 2);
+
+        while (i < mult) {
+          snprintf(newStr + (i * strLen), strLen + 1, "%s", leftStr);
+          ++i;
         }
 
-        switch (svRight.type) {
-          case INT32TYPE:
-            {
-              *r1 = svRight.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f1 = svRight.d;
+        if (mult == 0) newStr[0] = 0;
 
-              if (leftStr != NULL) {
-                fprintf(stderr, "error: Cannot multiply string with float\n");
-                exit(1);
-              }
-              break;
-            }
-          case TEXT:
-            {
-              rightStr = svRight.t;
-              break;
-            }
-          case VECTORTYPE:
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
-            exit(1);
-            break;
+        newStr[(mult * strLen) + 1] = 0;
+
+        stv.type = TEXT;
+        stv.t = newStr;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_STRING(stv.t, sp, sc);
+      } else if (svRight.type == TEXT && svLeft.type == INT32TYPE) {
+        heapval_t *hpv;
+        stackval_t stv;
+        size_t strLen = strlen(rightStr);
+        int32_t mult = *r0;
+        int32_t i = 0;
+        int dummy;
+        char *newStr = ast_emalloc(strLen * mult + 2);
+
+        while (i < mult) {
+          snprintf(newStr + (i * strLen), strLen + 1, "%s", rightStr);
+          ++i;
         }
 
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-          PUSH_INT(*r0 * *r1, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*r0 * *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*f0 * *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          PUSH_DOUBLE(*f0 * *r1, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
+        if (mult == 0) newStr[0] = 0;
 
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
+        newStr[(mult * strLen) + 1] = 0;
 
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        stv.type = TEXT;
+        stv.t = newStr;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
+        PUSH_STRING(stv.t, sp, sc);
+      } else if ((svRight.type == VECTORTYPE && svLeft.type == INT32TYPE)
+                 || (svLeft.type == VECTORTYPE && svRight.type == INT32TYPE)) {
+        /* Multiply a list by a number; will make it repeat */
+        expr_t *newVec = newExpr_Vector(NULL);
+        void *hp = PROVIDE_CONTEXT()->hp;
+        int32_t mult;
+        expr_t *e = NULL;
+        vector_t *vec = NULL;
+        heapval_t *hvp = NULL;
+        stackval_t stv;
+        int dummy;
 
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
-          heapval_t *hpv;
-          stackval_t stv;
-          size_t strLen = strlen(leftStr);
-          int32_t mult = *r1;
-          int32_t i = 0;
-          int dummy;
-          char *newStr = ast_emalloc(strLen * mult + 2);
-
-          while (i < mult) {
-            snprintf(newStr + (i * strLen), strLen + 1, "%s", leftStr);
-            ++i;
-          }
-
-          if (mult == 0) newStr[0] = 0;
-
-          newStr[(mult * strLen) + 1] = 0;
-
-          stv.type = TEXT;
-          stv.t = newStr;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_STRING(stv.t, sp, sc);
-        } else if (svRight.type == TEXT && svLeft.type == INT32TYPE) {
-          heapval_t *hpv;
-          stackval_t stv;
-          size_t strLen = strlen(rightStr);
-          int32_t mult = *r0;
-          int32_t i = 0;
-          int dummy;
-          char *newStr = ast_emalloc(strLen * mult + 2);
-
-          while (i < mult) {
-            snprintf(newStr + (i * strLen), strLen + 1, "%s", rightStr);
-            ++i;
-          }
-
-          if (mult == 0) newStr[0] = 0;
-
-          newStr[(mult * strLen) + 1] = 0;
-
-          stv.type = TEXT;
-          stv.t = newStr;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_STRING(stv.t, sp, sc);
-        } else if ((svRight.type == VECTORTYPE && svLeft.type == INT32TYPE)
-                   || (svLeft.type == VECTORTYPE && svRight.type == INT32TYPE)) {
-          /* Multiply a list by a number; will make it repeat */
-          expr_t *newVec = newExpr_Vector(NULL);
-          void *hp = PROVIDE_CONTEXT()->hp;
-          int32_t mult;
-          expr_t *e = NULL;
-          vector_t *vec = NULL;
-          heapval_t *hvp = NULL;
-          stackval_t stv;
-          int dummy;
-
-          if (svRight.type == INT32TYPE) {
-            mult = svRight.i;
-            vec = svLeft.vec;
-          } else {
-            mult = svLeft.i;
-            vec = svRight.vec;
-          }
-
-          if (mult > 0) {
-            e = copy_vector(vec, EXPRESSION_ARGS());
-          } else {
-            e = newExpr_Vector(NULL);
-          }
-
-          if (e->vec->length > 0) {
-            int32_t i = 0;
-            argsList_t *newContent = NULL;
-            argsList_t *walk = NULL;
-            argsList_t *prevArg = NULL;
-            argsList_t *currentArg = NULL;
-            argsList_t *nextArg;
-
-            while (i < mult) {
-              walk = e->vec->content;
-              while (walk != NULL) {
-                expr_t *exp = walk->arg;
-                expr_t *newExp = NULL;
-                stackval_t sv;
-                void *sp = PROVIDE_CONTEXT()->sp;
-                size_t *sc = PROVIDE_CONTEXT()->sc;
-
-                /* Evaluate expression */
-                evaluate_expression(exp, EXPRESSION_ARGS());
-
-                /* Fetch the evaluated expression to the arguments table */
-                POP_VAL(&sv, sp, sc);
-
-                newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
-
-                newContent = newArgument(newExp, newContent);
-                newVec->vec->length++;
-                newVec->vec->content = newContent;
-
-                walk = walk->next;
-              }
-
-              i++;
-            }
-
-            walk = newVec->vec->content;
-            /* Reverse the args list order */
-            prevArg = NULL;
-            currentArg = walk;
-            while (currentArg != NULL) {
-              nextArg = currentArg->next;
-              currentArg->next = prevArg;
-              prevArg = currentArg;
-              currentArg = nextArg;
-            }
-            newVec->vec->content = prevArg;
-          }
-
-          /* Allocate this value on the heap, for garbage collection */
-          stv.type = VECTORTYPE;
-          stv.vec = newVec->vec;
-          ALLOC_HEAP(&stv, hp, &hvp, &dummy);
-
-          PUSH_VECTOR(newVec->vec, sp, sc);
-          free(newVec);
-          free_expression(e);
-          free(e);
+        if (svRight.type == INT32TYPE) {
+          mult = svRight.i;
+          vec = svLeft.vec;
         } else {
+          mult = svLeft.i;
+          vec = svRight.vec;
+        }
+
+        if (mult > 0) {
+          e = copy_vector(vec, EXPRESSION_ARGS());
+        } else {
+          e = newExpr_Vector(NULL);
+        }
+
+        if (e->vec->length > 0) {
+          int32_t i = 0;
+          argsList_t *newContent = NULL;
+          argsList_t *walk = NULL;
+          argsList_t *prevArg = NULL;
+          argsList_t *currentArg = NULL;
+          argsList_t *nextArg;
+
+          while (i < mult) {
+            walk = e->vec->content;
+            while (walk != NULL) {
+              expr_t *exp = walk->arg;
+              expr_t *newExp = NULL;
+              stackval_t sv;
+              void *sp = PROVIDE_CONTEXT()->sp;
+              size_t *sc = PROVIDE_CONTEXT()->sc;
+
+              /* Evaluate expression */
+              evaluate_expression(exp, EXPRESSION_ARGS());
+
+              /* Fetch the evaluated expression to the arguments table */
+              POP_VAL(&sv, sp, sc);
+
+              newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+
+              newContent = newArgument(newExp, newContent);
+              newVec->vec->length++;
+              newVec->vec->content = newContent;
+
+              walk = walk->next;
+            }
+
+            i++;
+          }
+
+          walk = newVec->vec->content;
+          /* Reverse the args list order */
+          prevArg = NULL;
+          currentArg = walk;
+          while (currentArg != NULL) {
+            nextArg = currentArg->next;
+            currentArg->next = prevArg;
+            prevArg = currentArg;
+            currentArg = nextArg;
+          }
+          newVec->vec->content = prevArg;
+        }
+
+        /* Allocate this value on the heap, for garbage collection */
+        stv.type = VECTORTYPE;
+        stv.vec = newVec->vec;
+        ALLOC_HEAP(&stv, hp, &hvp, &dummy);
+
+        PUSH_VECTOR(newVec->vec, sp, sc);
+        free(newVec);
+        free_expression(e);
+        free(e);
+      } else {
+        fprintf(stderr,
+                "Error: Invalid operands. Type %d and %d does not fit for multiplication.\n",
+                svRight.type, svLeft.type);
+        exit(2);
+      }
+
+      break;
+    }
+    case EXPR_TYPE_OPMOD: {
+      stackval_t svLeft;
+      stackval_t svRight;
+
+      evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
+      POP_VAL(&svLeft, sp, sc);
+
+      evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
+      POP_VAL(&svRight, sp, sc);
+
+      switch (svLeft.type) {
+        case INT32TYPE: {
+          *r0 = svLeft.i;
+          break;
+        }
+        case DOUBLETYPE: {
           fprintf(stderr,
-                  "Error: Invalid operands. Type %d and %d does not fit for multiplication.\n",
-                  svRight.type, svLeft.type);
-          exit(2);
+                  "error: Invalid expression, cannot calculate modulus on floating point.\n");
+          exit(1);
+          break;
         }
-
-        break;
+        case TEXT: {
+          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
+          exit(1);
+          break;
+        }
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          exit(1);
+          break;
       }
-    case EXPR_TYPE_OPMOD:
-      {
-        stackval_t svLeft;
-        stackval_t svRight;
 
-        evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
-        POP_VAL(&svLeft, sp, sc);
-
-        evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
-        POP_VAL(&svRight, sp, sc);
-
-        switch (svLeft.type) {
-          case INT32TYPE:
-            {
-              *r0 = svLeft.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              fprintf(stderr,
-                      "error: Invalid expression, cannot calculate modulus on floating point.\n");
-              exit(1);
-              break;
-            }
-          case TEXT:
-            {
-              fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
-              exit(1);
-              break;
-            }
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
-            exit(1);
-            break;
+      switch (svRight.type) {
+        case INT32TYPE: {
+          *r1 = svRight.i;
+          break;
         }
-
-        switch (svRight.type) {
-          case INT32TYPE:
-            {
-              *r1 = svRight.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              fprintf(stderr,
-                      "error: Invalid expression, cannot calculate modulus on floating point.\n");
-              exit(1);
-              break;
-            }
-          case TEXT:
-            {
-              fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
-              exit(1);
-              break;
-            }
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
-            exit(1);
-            break;
+        case DOUBLETYPE: {
+          fprintf(stderr,
+                  "error: Invalid expression, cannot calculate modulus on floating point.\n");
+          exit(1);
+          break;
         }
-
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-          PUSH_INT(*r0 % *r1, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          mpz_mod(*n, *svLeft.bigInt, *svRight.bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
-
-          mpz_mod(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          mpz_clear(*bigIntEtmp->bigInt);
-          free(bigIntEtmp->bigInt);
-          free(bigIntEtmp);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
-
-          mpz_mod(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          mpz_clear(*bigIntEtmp->bigInt);
-          free(bigIntEtmp->bigInt);
-          free(bigIntEtmp);
-
-          PUSH_BIGINT(n, sp, sc);
+        case TEXT: {
+          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
+          exit(1);
+          break;
         }
-
-        break;
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          exit(1);
+          break;
       }
+
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+        PUSH_INT(*r0 % *r1, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_mod(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
+
+        mpz_mod(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
+
+        mpz_mod(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      }
+
       break;
-    case EXPR_TYPE_OPDIV:
-      {
-        stackval_t svLeft;
-        stackval_t svRight;
+    } break;
+    case EXPR_TYPE_OPDIV: {
+      stackval_t svLeft;
+      stackval_t svRight;
 
-        evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
-        POP_VAL(&svLeft, sp, sc);
+      evaluate_expression((expr_t *)expr->add.left, EXPRESSION_ARGS());
+      POP_VAL(&svLeft, sp, sc);
 
-        evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
-        POP_VAL(&svRight, sp, sc);
+      evaluate_expression((expr_t *)expr->add.right, EXPRESSION_ARGS());
+      POP_VAL(&svRight, sp, sc);
 
-        switch (svLeft.type) {
-          case INT32TYPE:
-            {
-              *r0 = svLeft.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f0 = svLeft.d;
-              break;
-            }
-          case TEXT:
-            {
-              fprintf(stderr, "error: Not implemented string additions yet..\n");
-              exit(1);
-              break;
-            }
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
-            exit(1);
-            break;
+      switch (svLeft.type) {
+        case INT32TYPE: {
+          *r0 = svLeft.i;
+          break;
         }
-
-        switch (svRight.type) {
-          case INT32TYPE:
-            {
-              *r1 = svRight.i;
-              break;
-            }
-          case DOUBLETYPE:
-            {
-              *f1 = svRight.d;
-              break;
-            }
-          case TEXT:
-            {
-              fprintf(stderr, "error: Not implemented string additions yet..\n");
-              exit(1);
-              break;
-            }
-          case BIGINT:
-            break;
-          default:
-            fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
-            exit(1);
-            break;
+        case DOUBLETYPE: {
+          *f0 = svLeft.d;
+          break;
         }
-
-        if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
-          PUSH_INT(*r0 / *r1, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*r0 / *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
-          PUSH_DOUBLE(*f0 / *f1, sp, sc);
-        } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
-          PUSH_DOUBLE(*f0 / *r1, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          mpz_fdiv_q(*n, *svLeft.bigInt, *svRight.bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
-
-          mpz_fdiv_q(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          mpz_clear(*bigIntEtmp->bigInt);
-          free(bigIntEtmp->bigInt);
-          free(bigIntEtmp);
-
-          PUSH_BIGINT(n, sp, sc);
-        } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
-          stackval_t stv;
-          void *hp = PROVIDE_CONTEXT()->hp;
-          heapval_t *hpv = NULL;
-          int dummy;
-          mpz_t *n = ast_emalloc(sizeof(mpz_t));
-          mpz_init(*n);
-          expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
-
-          mpz_fdiv_q(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
-
-          stv.type = BIGINT;
-          stv.bigInt = n;
-          ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-          mpz_clear(*bigIntEtmp->bigInt);
-          free(bigIntEtmp->bigInt);
-          free(bigIntEtmp);
-
-          PUSH_BIGINT(n, sp, sc);
+        case TEXT: {
+          fprintf(stderr, "error: Not implemented string additions yet..\n");
+          exit(1);
+          break;
         }
-
-        break;
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          exit(1);
+          break;
       }
+
+      switch (svRight.type) {
+        case INT32TYPE: {
+          *r1 = svRight.i;
+          break;
+        }
+        case DOUBLETYPE: {
+          *f1 = svRight.d;
+          break;
+        }
+        case TEXT: {
+          fprintf(stderr, "error: Not implemented string additions yet..\n");
+          exit(1);
+          break;
+        }
+        case BIGINT:
+          break;
+        default:
+          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          exit(1);
+          break;
+      }
+
+      if (svLeft.type == INT32TYPE && svRight.type == INT32TYPE) {
+        PUSH_INT(*r0 / *r1, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*r0 / *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == DOUBLETYPE) {
+        PUSH_DOUBLE(*f0 / *f1, sp, sc);
+      } else if (svLeft.type == DOUBLETYPE && svRight.type == INT32TYPE) {
+        PUSH_DOUBLE(*f0 / *r1, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        mpz_fdiv_q(*n, *svLeft.bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
+
+        mpz_fdiv_q(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
+        stackval_t stv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        heapval_t *hpv = NULL;
+        int dummy;
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        mpz_init(*n);
+        expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
+
+        mpz_fdiv_q(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+        mpz_clear(*bigIntEtmp->bigInt);
+        free(bigIntEtmp->bigInt);
+        free(bigIntEtmp);
+
+        PUSH_BIGINT(n, sp, sc);
+      }
+
       break;
-    case EXPR_TYPE_COND:
-      {
-        evaluate_condition(expr->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
-        /* Push ax to stack */
-        PUSH_INT(*ax, sp, sc);
-        break;
-      }
-    case EXPR_TYPE_FUNCCALL:
-      {
-        stackval_t sv;
-        functionCallContainer_t func;
+    } break;
+    case EXPR_TYPE_COND: {
+      evaluate_condition(expr->cond, stmt, next, PROVIDE_CONTEXT(), args, argVals);
+      /* Push ax to stack */
+      PUSH_INT(*ax, sp, sc);
+      break;
+    }
+    case EXPR_TYPE_FUNCCALL: {
+      stackval_t sv;
+      functionCallContainer_t func;
 
-        func.type = FUNC_CALL_TYPE_GLOBAL;
-        func.globalCall = expr->func;
+      func.type = FUNC_CALL_TYPE_GLOBAL;
+      func.globalCall = expr->func;
 
-        call_func(&func, EXPRESSION_ARGS());
-        POP_VAL(&sv, sp, sc);
-        push_stackval(&sv, sp, sc);
-        break;
-      }
-    case EXPR_TYPE_CLASSFUNCCALL:
-      {
-        stackval_t sv;
-        functionCallContainer_t func;
+      call_func(&func, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+      push_stackval(&sv, sp, sc);
+      break;
+    }
+    case EXPR_TYPE_CLASSFUNCCALL: {
+      stackval_t sv;
+      functionCallContainer_t func;
 
-        func.type = FUNC_CALL_TYPE_CLASS;
-        func.classCall = (classFunctionCall_t *)expr->func;
+      func.type = FUNC_CALL_TYPE_CLASS;
+      func.classCall = (classFunctionCall_t *)expr->func;
 
-        call_func(&func, EXPRESSION_ARGS());
-        POP_VAL(&sv, sp, sc);
-        push_stackval(&sv, sp, sc);
-        break;
-      }
+      call_func(&func, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+      push_stackval(&sv, sp, sc);
+      break;
+    }
     case EXPR_TYPE_EMPTY:
     default:
       break;
@@ -2673,18 +2567,16 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         classRef = sv.classObj;
         funcID = sv.classObj->id;
         break;
-      case FUNCPTRTYPE:
-        {
-          functionDef_t *func = sv.func;
-          funcID = func->id.id;
-          break;
-        }
-      case LIBFUNCPTRTYPE:
-        {
-          libFunction_t *func = sv.libfunc;
-          funcID = func->libFuncName;
-          break;
-        }
+      case FUNCPTRTYPE: {
+        functionDef_t *func = sv.func;
+        funcID = func->id.id;
+        break;
+      }
+      case LIBFUNCPTRTYPE: {
+        libFunction_t *func = sv.libfunc;
+        funcID = func->libFuncName;
+        break;
+      }
       default:
         fprintf(stderr, "error: invalid function call (%d)\n", sv.type);
         exit(1);
@@ -2931,59 +2823,49 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
             POP_VAL(&sv, sp, sc);
 
             switch (sv.type) {
-              case INT32TYPE:
-                {
-                  newArg = newExpr_Ival(sv.i);
-                  break;
-                }
-              case DOUBLETYPE:
-                {
-                  newArg = newExpr_Float(sv.d);
-                  break;
-                }
-              case TEXT:
-                {
-                  newArg = newExpr_Text(sv.t);
-                  break;
-                }
-              case TIMETYPE:
-                {
-                  newArg = newExpr_Time(sv.time);
-                  break;
-                }
-              case POINTERTYPE:
-                {
-                  newArg = newExpr_Pointer(sv.p);
-                  break;
-                }
-              case VECTORTYPE:
-                {
-                  newArg = newExpr_Vector(sv.vec->content);
-                  break;
-                }
-              case FUNCPTRTYPE:
-                {
-                  newArg = newExpr_FuncPtr(sv.func);
-                  break;
-                }
-              case LIBFUNCPTRTYPE:
-                {
-                  newArg = newExpr_LibFuncPtr(sv.libfunc);
-                  break;
-                }
-              case DICTTYPE:
-                {
-                  expr_t *e = ast_emalloc(sizeof(expr_t));
-                  e->type = EXPR_TYPE_DICT;
-                  e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-                  newArg = e;
-                  break;
-                }
-              case CLASSTYPE:
-                {
-                  newArg = newExpr_ClassPtrCopy(sv.classObj);
-                  break;
-                }
+              case INT32TYPE: {
+                newArg = newExpr_Ival(sv.i);
+                break;
+              }
+              case DOUBLETYPE: {
+                newArg = newExpr_Float(sv.d);
+                break;
+              }
+              case TEXT: {
+                newArg = newExpr_Text(sv.t);
+                break;
+              }
+              case TIMETYPE: {
+                newArg = newExpr_Time(sv.time);
+                break;
+              }
+              case POINTERTYPE: {
+                newArg = newExpr_Pointer(sv.p);
+                break;
+              }
+              case VECTORTYPE: {
+                newArg = newExpr_Vector(sv.vec->content);
+                break;
+              }
+              case FUNCPTRTYPE: {
+                newArg = newExpr_FuncPtr(sv.func);
+                break;
+              }
+              case LIBFUNCPTRTYPE: {
+                newArg = newExpr_LibFuncPtr(sv.libfunc);
+                break;
+              }
+              case DICTTYPE: {
+                expr_t *e = ast_emalloc(sizeof(expr_t));
+                e->type = EXPR_TYPE_DICT;
+                e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+                newArg = e;
+                break;
+              }
+              case CLASSTYPE: {
+                newArg = newExpr_ClassPtrCopy(sv.classObj);
+                break;
+              }
               default:
                 fprintf(
                     stderr,
@@ -3172,59 +3054,49 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           switch (sv.type) {
-            case INT32TYPE:
-              {
-                newArg = newExpr_Ival(sv.i);
-                break;
-              }
-            case DOUBLETYPE:
-              {
-                newArg = newExpr_Float(sv.d);
-                break;
-              }
-            case TEXT:
-              {
-                newArg = newExpr_Text(sv.t);
-                break;
-              }
-            case TIMETYPE:
-              {
-                newArg = newExpr_Time(sv.time);
-                break;
-              }
-            case POINTERTYPE:
-              {
-                newArg = newExpr_Pointer(sv.p);
-                break;
-              }
-            case VECTORTYPE:
-              {
-                newArg = newExpr_Vector(sv.vec->content);
-                break;
-              }
-            case FUNCPTRTYPE:
-              {
-                newArg = newExpr_FuncPtr(sv.func);
-                break;
-              }
-            case LIBFUNCPTRTYPE:
-              {
-                newArg = newExpr_LibFuncPtr(sv.libfunc);
-                break;
-              }
-            case DICTTYPE:
-              {
-                expr_t *e = ast_emalloc(sizeof(expr_t));
-                e->type = EXPR_TYPE_DICT;
-                e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-                newArg = e;
-                break;
-              }
-            case CLASSTYPE:
-              {
-                newArg = newExpr_ClassPtrCopy(sv.classObj);
-                break;
-              }
+            case INT32TYPE: {
+              newArg = newExpr_Ival(sv.i);
+              break;
+            }
+            case DOUBLETYPE: {
+              newArg = newExpr_Float(sv.d);
+              break;
+            }
+            case TEXT: {
+              newArg = newExpr_Text(sv.t);
+              break;
+            }
+            case TIMETYPE: {
+              newArg = newExpr_Time(sv.time);
+              break;
+            }
+            case POINTERTYPE: {
+              newArg = newExpr_Pointer(sv.p);
+              break;
+            }
+            case VECTORTYPE: {
+              newArg = newExpr_Vector(sv.vec->content);
+              break;
+            }
+            case FUNCPTRTYPE: {
+              newArg = newExpr_FuncPtr(sv.func);
+              break;
+            }
+            case LIBFUNCPTRTYPE: {
+              newArg = newExpr_LibFuncPtr(sv.libfunc);
+              break;
+            }
+            case DICTTYPE: {
+              expr_t *e = ast_emalloc(sizeof(expr_t));
+              e->type = EXPR_TYPE_DICT;
+              e->dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              newArg = e;
+              break;
+            }
+            case CLASSTYPE: {
+              newArg = newExpr_ClassPtrCopy(sv.classObj);
+              break;
+            }
             default:
               fprintf(
                   stderr,
@@ -3403,27 +3275,82 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
   /* Go through the initializer list and populate the members */
   while (initWalk != NULL) {
     switch (initWalk->entity) {
-      case LANG_ENTITY_FUNCDECL:
-        {
-          functionDef_t *funcDef = initWalk->content;
+      case LANG_ENTITY_FUNCDECL: {
+        functionDef_t *funcDef = initWalk->content;
 
-          /* Placing function declaration in global function namespace */
-          hashtable_put(cls->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
-        }
-        break;
-      case LANG_ENTITY_DECL:
-        {
-          stackval_t sv;
-          expr_t *id;
-          heapval_t *hvp = NULL;
-          declaration_t *decl = initWalk->content;
-          id = decl->id;
+        /* Placing function declaration in global function namespace */
+        hashtable_put(cls->funcDefsScript, PROVIDE_CONTEXT()->syncCtx, funcDef->id.id, funcDef);
+      } break;
+      case LANG_ENTITY_DECL: {
+        stackval_t sv;
+        expr_t *id;
+        heapval_t *hvp = NULL;
+        declaration_t *decl = initWalk->content;
+        id = decl->id;
 
-          switch (id->type) {
-            case EXPR_TYPE_ID:
-              {
-                int heapUpdated;
-                char *idStr = id->id.id;
+        switch (id->type) {
+          case EXPR_TYPE_ID: {
+            int heapUpdated;
+            char *idStr = id->id.id;
+
+            /* Evaluating the expression among global variables */
+            evaluate_expression(decl->val, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            /* Placing value on the heap */
+            if (sv.type == TEXT) {
+              /* Special case */
+              char *c = sv.t;
+              size_t len = strlen(c) + 1;
+              char *newText = ast_emalloc(len);
+              snprintf(newText, len, "%s", c);
+              sv.t = newText;
+            } else if (sv.type == VECTORTYPE) {
+              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              sv.vec = e->vec;
+              free(e);
+            } else if (sv.type == DICTTYPE) {
+              dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+              sv.dict = dict;
+            }
+
+            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+
+            /* Placing variable declaration in class variable member namespace */
+            hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
+          } break;
+          case EXPR_TYPE_VECTOR_IDX: {
+            vector_t *vec = NULL;
+            dictionary_t *dict = NULL;
+            int32_t arrayIndex;
+            argsList_t *walk = NULL;
+            expr_t **expToSet = NULL;
+            expr_t *vecid = id->vecIdx->expr;
+            expr_t *index = id->vecIdx->index;
+
+            stackval_t sv;
+
+            evaluate_expression(vecid, EXPRESSION_ARGS());
+            POP_VAL(&sv, sp, sc);
+
+            switch (sv.type) {
+              case DICTTYPE: {
+                dict = sv.dict;
+                /* Assigning a dictionary */
+                char *key = NULL;
+                heapval_t *hvp = NULL;
+                int dummy;
+
+                evaluate_expression(index, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+
+                if (sv.type != TEXT) {
+                  fprintf(stderr, "index error: Must provide a string as key\n");
+                  exit(1);
+                }
+
+                key = ast_emalloc(strlen(sv.t) + 2);
+                snprintf(key, strlen(sv.t) + 1, "%s", sv.t);
 
                 /* Evaluating the expression among global variables */
                 evaluate_expression(decl->val, EXPRESSION_ARGS());
@@ -3446,185 +3373,114 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                   sv.dict = dict;
                 }
 
-                ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
 
-                /* Placing variable declaration in class variable member namespace */
-                hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
-              }
-              break;
-            case EXPR_TYPE_VECTOR_IDX:
-              {
-                vector_t *vec = NULL;
-                dictionary_t *dict = NULL;
-                int32_t arrayIndex;
-                argsList_t *walk = NULL;
-                expr_t **expToSet = NULL;
-                expr_t *vecid = id->vecIdx->expr;
-                expr_t *index = id->vecIdx->index;
-
-                stackval_t sv;
-
-                evaluate_expression(vecid, EXPRESSION_ARGS());
+                // Check if collision, if so, free key
+                hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
+              } break;
+              case VECTORTYPE: {
+                /* Assigning a vector */
+                expr_t *newExp = NULL;
+                vec = sv.vec;
+                evaluate_expression(index, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);
 
-                switch (sv.type) {
-                  case DICTTYPE:
-                    {
-                      dict = sv.dict;
-                      /* Assigning a dictionary */
-                      char *key = NULL;
-                      heapval_t *hvp = NULL;
-                      int dummy;
-
-                      evaluate_expression(index, EXPRESSION_ARGS());
-                      POP_VAL(&sv, sp, sc);
-
-                      if (sv.type != TEXT) {
-                        fprintf(stderr, "index error: Must provide a string as key\n");
-                        exit(1);
-                      }
-
-                      key = ast_emalloc(strlen(sv.t) + 2);
-                      snprintf(key, strlen(sv.t) + 1, "%s", sv.t);
-
-                      /* Evaluating the expression among global variables */
-                      evaluate_expression(decl->val, EXPRESSION_ARGS());
-                      POP_VAL(&sv, sp, sc);
-
-                      /* Placing value on the heap */
-                      if (sv.type == TEXT) {
-                        /* Special case */
-                        char *c = sv.t;
-                        size_t len = strlen(c) + 1;
-                        char *newText = ast_emalloc(len);
-                        snprintf(newText, len, "%s", c);
-                        sv.t = newText;
-                      } else if (sv.type == VECTORTYPE) {
-                        expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
-                        sv.vec = e->vec;
-                        free(e);
-                      } else if (sv.type == DICTTYPE) {
-                        dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-                        sv.dict = dict;
-                      }
-
-                      ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-
-                      // Check if collision, if so, free key
-                      hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
-                    }
-                    break;
-                  case VECTORTYPE:
-                    {
-                      /* Assigning a vector */
-                      expr_t *newExp = NULL;
-                      vec = sv.vec;
-                      evaluate_expression(index, EXPRESSION_ARGS());
-                      POP_VAL(&sv, sp, sc);
-
-                      if (sv.type != INT32TYPE) {
-                        fprintf(stderr, "index error: Must provide an integer as index\n");
-                        exit(1);
-                      }
-
-                      arrayIndex = sv.i;
-
-                      /* check the limits */
-                      if (arrayIndex >= vec->length) {
-                        fprintf(stderr,
-                                "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32
-                                "'\n",
-                                arrayIndex, vec->length);
-                        exit(1);
-                      }
-
-                      walk = vec->content;
-                      while (walk != NULL && arrayIndex >= 0) {
-                        expToSet = &walk->arg;
-                        walk = walk->next;
-                        --arrayIndex;
-                      }
-
-                      if (*expToSet == NULL) {
-                        fprintf(stderr, "Unexpected index error!\n");
-                        GENERAL_REPORT_ISSUE_MSG();
-                        exit(1);
-                      }
-
-                      /* Placing this expression into the array */
-                      free_expression(*expToSet);
-                      free(*expToSet);
-
-                      evaluate_expression(decl->val, EXPRESSION_ARGS());
-                      POP_VAL(&sv, sp, sc);
-
-                      newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
-                      *expToSet = newExp;
-                    }
-                    break;
-                  case TEXT:
-                    {
-                      char *text = sv.t;
-                      size_t origLen = strlen(text);
-                      size_t additionLen;
-                      size_t diff;
-                      size_t q = 0;
-                      char *newAddition = NULL;
-
-                      evaluate_expression(index, EXPRESSION_ARGS());
-                      POP_VAL(&sv, sp, sc);
-
-                      if (sv.type != INT32TYPE) {
-                        fprintf(stderr, "index error: Must provide an integer as index\n");
-                        exit(1);
-                      }
-
-                      arrayIndex = sv.i;
-
-                      if (arrayIndex >= strlen(text)) {
-                        fprintf(stderr, "index error: index out of bounds\n");
-                        exit(1);
-                      }
-
-                      /* Evaluating the expression among global variables */
-                      evaluate_expression(decl->val, EXPRESSION_ARGS());
-                      POP_VAL(&sv, sp, sc);
-
-                      if (sv.type != TEXT) {
-                        fprintf(stderr, "string index error: Can only assign text to text.\n");
-                        exit(1);
-                      }
-
-                      newAddition = sv.t;
-                      additionLen = strlen(newAddition);
-
-                      diff = origLen - arrayIndex;
-
-                      additionLen = (diff < additionLen ? diff : additionLen);
-                      q = 0;
-                      while (q < additionLen) {
-                        text[arrayIndex + q] = newAddition[q];
-                        q++;
-                      }
-                    }
-                    break;
-                  default:
-                    {
-                      fprintf(stderr, "index error: '%s' is not an indexable object.\n",
-                              id->id.id);
-                      GENERAL_REPORT_ISSUE_MSG();
-                      exit(1);
-                      break;
-                    }
+                if (sv.type != INT32TYPE) {
+                  fprintf(stderr, "index error: Must provide an integer as index\n");
+                  exit(1);
                 }
+
+                arrayIndex = sv.i;
+
+                /* check the limits */
+                if (arrayIndex >= vec->length) {
+                  fprintf(stderr,
+                          "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32
+                          "'\n",
+                          arrayIndex, vec->length);
+                  exit(1);
+                }
+
+                walk = vec->content;
+                while (walk != NULL && arrayIndex >= 0) {
+                  expToSet = &walk->arg;
+                  walk = walk->next;
+                  --arrayIndex;
+                }
+
+                if (*expToSet == NULL) {
+                  fprintf(stderr, "Unexpected index error!\n");
+                  GENERAL_REPORT_ISSUE_MSG();
+                  exit(1);
+                }
+
+                /* Placing this expression into the array */
+                free_expression(*expToSet);
+                free(*expToSet);
+
+                evaluate_expression(decl->val, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+
+                newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+                *expToSet = newExp;
+              } break;
+              case TEXT: {
+                char *text = sv.t;
+                size_t origLen = strlen(text);
+                size_t additionLen;
+                size_t diff;
+                size_t q = 0;
+                char *newAddition = NULL;
+
+                evaluate_expression(index, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+
+                if (sv.type != INT32TYPE) {
+                  fprintf(stderr, "index error: Must provide an integer as index\n");
+                  exit(1);
+                }
+
+                arrayIndex = sv.i;
+
+                if (arrayIndex >= strlen(text)) {
+                  fprintf(stderr, "index error: index out of bounds\n");
+                  exit(1);
+                }
+
+                /* Evaluating the expression among global variables */
+                evaluate_expression(decl->val, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+
+                if (sv.type != TEXT) {
+                  fprintf(stderr, "string index error: Can only assign text to text.\n");
+                  exit(1);
+                }
+
+                newAddition = sv.t;
+                additionLen = strlen(newAddition);
+
+                diff = origLen - arrayIndex;
+
+                additionLen = (diff < additionLen ? diff : additionLen);
+                q = 0;
+                while (q < additionLen) {
+                  text[arrayIndex + q] = newAddition[q];
+                  q++;
+                }
+              } break;
+              default: {
+                fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
+                GENERAL_REPORT_ISSUE_MSG();
+                exit(1);
+                break;
               }
-              break;
-            default:
-              GENERAL_REPORT_ISSUE_MSG();
-              break;
-          }
+            }
+          } break;
+          default:
+            GENERAL_REPORT_ISSUE_MSG();
+            break;
         }
-        break;
+      } break;
       default:
         break;
     }
@@ -3667,13 +3523,12 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       POP_VAL(&sv, sp, sc);
 
       switch (sv.type) {
-        case TEXT:
-          {
-            size_t len = strlen(sv.t);
-            newKeyStr = ast_emalloc(len + 2);
-            snprintf(newKeyStr, len + 2, "%s", sv.t);
-            break;
-          }
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          newKeyStr = ast_emalloc(len + 2);
+          snprintf(newKeyStr, len + 2, "%s", sv.t);
+          break;
+        }
         default:
           fprintf(stderr,
                   "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
@@ -3694,50 +3549,47 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case BIGINT:
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           break;
-        case VECTORTYPE:
-          {
-            expr_t *eTemp = ast_emalloc(sizeof(expr_t));
-            expr_t *newVecExpr = NULL;
-            stackval_t newStackVal;
+        case VECTORTYPE: {
+          expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+          expr_t *newVecExpr = NULL;
+          stackval_t newStackVal;
 
-            eTemp->type = EXPR_TYPE_VECTOR;
-            eTemp->vec = sv.vec;
+          eTemp->type = EXPR_TYPE_VECTOR;
+          eTemp->vec = sv.vec;
 
-            newVecExpr = newExpr_Copy(eTemp);
-            free(eTemp);
+          newVecExpr = newExpr_Copy(eTemp);
+          free(eTemp);
 
-            newStackVal = sv;
-            newStackVal.vec = newVecExpr->vec;
+          newStackVal = sv;
+          newStackVal.vec = newVecExpr->vec;
 
-            free(newVecExpr);
+          free(newVecExpr);
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
-            break;
-          }
-        case TEXT:
-          {
-            size_t len = strlen(sv.t);
-            stackval_t newStackVal;
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          stackval_t newStackVal;
 
-            char *newText = ast_emalloc(len + 1);
-            snprintf(newText, len + 1, "%s", sv.t);
+          char *newText = ast_emalloc(len + 1);
+          snprintf(newText, len + 1, "%s", sv.t);
 
-            newStackVal = sv;
-            newStackVal.t = newText;
+          newStackVal = sv;
+          newStackVal.t = newText;
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
-            break;
-          }
-        case DICTTYPE:
-          {
-            dictionary_t *newDict = allocNewDictionary(expVal->dict, EXPRESSION_ARGS());
-            stackval_t newStackVal = sv;
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
+        case DICTTYPE: {
+          dictionary_t *newDict = allocNewDictionary(expVal->dict, EXPRESSION_ARGS());
+          stackval_t newStackVal = sv;
 
-            newStackVal.dict = newDict;
+          newStackVal.dict = newDict;
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
-            break;
-          }
+          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          break;
+        }
         default:
           fprintf(
               stderr,
@@ -3782,50 +3634,47 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case BIGINT:
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
             break;
-          case VECTORTYPE:
-            {
-              expr_t *eTemp = ast_emalloc(sizeof(expr_t));
-              expr_t *newVecExpr = NULL;
-              stackval_t newStackVal;
+          case VECTORTYPE: {
+            expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+            expr_t *newVecExpr = NULL;
+            stackval_t newStackVal;
 
-              eTemp->type = EXPR_TYPE_VECTOR;
-              eTemp->vec = sv.vec;
+            eTemp->type = EXPR_TYPE_VECTOR;
+            eTemp->vec = sv.vec;
 
-              newVecExpr = newExpr_Copy(eTemp);
-              free(eTemp);
+            newVecExpr = newExpr_Copy(eTemp);
+            free(eTemp);
 
-              newStackVal = sv;
-              newStackVal.vec = newVecExpr->vec;
+            newStackVal = sv;
+            newStackVal.vec = newVecExpr->vec;
 
-              free(newVecExpr);
+            free(newVecExpr);
 
-              ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
-              break;
-            }
-          case TEXT:
-            {
-              size_t len = strlen(sv.t);
-              stackval_t newStackVal;
+            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            break;
+          }
+          case TEXT: {
+            size_t len = strlen(sv.t);
+            stackval_t newStackVal;
 
-              char *newText = ast_emalloc(len + 1);
-              snprintf(newText, len + 1, "%s", sv.t);
+            char *newText = ast_emalloc(len + 1);
+            snprintf(newText, len + 1, "%s", sv.t);
 
-              newStackVal = sv;
-              newStackVal.t = newText;
+            newStackVal = sv;
+            newStackVal.t = newText;
 
-              ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
-              break;
-            }
-          case DICTTYPE:
-            {
-              dictionary_t *newDict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
-              stackval_t newStackVal = sv;
+            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            break;
+          }
+          case DICTTYPE: {
+            dictionary_t *newDict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
+            stackval_t newStackVal = sv;
 
-              newStackVal.dict = newDict;
+            newStackVal.dict = newDict;
 
-              ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
-              break;
-            }
+            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            break;
+          }
           default:
             fprintf(
                 stderr,

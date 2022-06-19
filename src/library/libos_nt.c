@@ -16,15 +16,13 @@ int ric_sleep(LIBRARY_PARAMS()) {
     case INT32TYPE:
       sleepTime = stv.i;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, integer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, integer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   Sleep((unsigned int)sleepTime * 1000);
@@ -49,15 +47,12 @@ int ric_is_directory(LIBRARY_PARAMS()) {
     case TEXT:
       string = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   ftyp = GetFileAttributesA(string);
@@ -96,15 +91,12 @@ int ric_ls(LIBRARY_PARAMS()) {
     case TEXT:
       argText = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   snprintf(sPath, sizeof(sPath), "%s\\*.*", argText);
@@ -152,15 +144,12 @@ int ric_cd(LIBRARY_PARAMS()) {
     case TEXT:
       argText = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   result = SetCurrentDirectory(argText);
@@ -183,15 +172,12 @@ int ric_is_file(LIBRARY_PARAMS()) {
     case TEXT:
       filename = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   fp = fopen(filename, "r+");
@@ -223,15 +209,12 @@ int ric_rm(LIBRARY_PARAMS()) {
     case TEXT:
       file = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   ftyp = GetFileAttributesA(file);
@@ -263,14 +246,12 @@ int ric_mkdir(LIBRARY_PARAMS()) {
     case TEXT:
       dir = stv.t;
       break;
-    default:
-      {
-        fprintf(stderr,
-                "error: function '%s' got unexpected data type as argument, expected string.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function '%s' got unexpected data type as argument, expected string.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = CreateDirectory(dir, NULL);
@@ -383,14 +364,12 @@ int ric_find_files(LIBRARY_PARAMS()) {
     case TEXT:
       pattern = stv.t;
       break;
-    default:
-      {
-        fprintf(stderr,
-                "error: function '%s' got unexpected data type as argument, expected string.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function '%s' got unexpected data type as argument, expected string.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   re = pcre_compile(pattern, 0, &pcre_error, &pcre_erroffset, NULL);

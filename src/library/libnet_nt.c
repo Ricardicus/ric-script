@@ -49,13 +49,11 @@ int ric_setup_server_socket(LIBRARY_PARAMS()) {
       port = stv.i;
       break;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   memset(portToUse, 0, sizeof(portToUse));
@@ -140,13 +138,11 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
       socket = stv.i;
       break;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   timeout.tv_sec = 1000;
@@ -212,13 +208,11 @@ int ric_read_socket(LIBRARY_PARAMS()) {
       socket = stv.i;
       break;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   t = calloc(maxReadSize, 1);
@@ -312,13 +306,11 @@ int ric_write_socket(LIBRARY_PARAMS()) {
       socket = stv.i;
       break;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Read second argument, text to send */
@@ -329,13 +321,11 @@ int ric_write_socket(LIBRARY_PARAMS()) {
       t = stv.t;
       break;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   ret = send(socket, t, strlen(t), 0);
@@ -360,13 +350,11 @@ int ric_close_socket(LIBRARY_PARAMS()) {
       socket = stv.i;
       break;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   ret = shutdown(socket, SD_SEND);
@@ -401,13 +389,11 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
     case TEXT:
       address = stv.t;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Read second argument, port */
@@ -417,13 +403,11 @@ int ric_connect_socket(LIBRARY_PARAMS()) {
     case INT32TYPE:
       portNo = stv.i;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   WSAStartup(MAKEWORD(2, 2), &wsa);

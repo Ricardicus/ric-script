@@ -12,13 +12,11 @@ int ric_exit(LIBRARY_PARAMS()) {
     case INT32TYPE:
       exitCode = (int)stv.i;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' expects a single integer as argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' expects a single integer as argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   exit(exitCode);
@@ -397,135 +395,121 @@ int ric_print(LIBRARY_PARAMS()) {
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
-    case TEXT:
-      {
-        char *c = stv.t;
-        int backslash = 0;
+    case TEXT: {
+      char *c = stv.t;
+      int backslash = 0;
 
-        /*
-         * Parsing the string,
-         * some character combos (such as: '\r','\n)
-         * should be interpreted disctincly
-         */
-        while (*c) {
+      /*
+       * Parsing the string,
+       * some character combos (such as: '\r','\n)
+       * should be interpreted disctincly
+       */
+      while (*c) {
 
-          if (!backslash && *c == '\\') {
-            backslash = 1;
-            ++c;
-            continue;
-          }
-
-          if (backslash) {
-            switch (*c) {
-              case 'n':
-                // Print a new line
-                printf("\n");
-                break;
-              case 'r':
-                // print the other one windows likes
-                printf("\r");
-                break;
-              case '\\':
-                // print a backslash
-                printf("\\");
-                break;
-              case 't':
-                // print a tab
-                printf("\t");
-                break;
-              default:
-                printf("\\%c", *c);
-                break;
-            }
-          } else {
-            printf("%c", *c);
-          }
-
+        if (!backslash && *c == '\\') {
+          backslash = 1;
           ++c;
-          backslash = 0;
+          continue;
         }
 
-        // end with new line
-        printf("\n");
-      }
-      break;
-    case BIGINT:
-      {
-        char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
-        char *c = NULL;
+        if (backslash) {
+          switch (*c) {
+            case 'n':
+              // Print a new line
+              printf("\n");
+              break;
+            case 'r':
+              // print the other one windows likes
+              printf("\r");
+              break;
+            case '\\':
+              // print a backslash
+              printf("\\");
+              break;
+            case 't':
+              // print a tab
+              printf("\t");
+              break;
+            default:
+              printf("\\%c", *c);
+              break;
+          }
+        } else {
+          printf("%c", *c);
+        }
 
-        c = mpz_get_str(buf, 10, *stv.bigInt);
-        printf("%s\n", c);
-
-        free(buf);
+        ++c;
+        backslash = 0;
       }
-      break;
+
+      // end with new line
+      printf("\n");
+    } break;
+    case BIGINT: {
+      char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+      char *c = NULL;
+
+      c = mpz_get_str(buf, 10, *stv.bigInt);
+      printf("%s\n", c);
+
+      free(buf);
+    } break;
     case INT32TYPE:
       printf("%d\n", stv.i);
       break;
-    case TIMETYPE:
-      {
-        struct tm *info;
-        if (stv.time < 0) {
-          /* Relative time to now */
-          time_t nowTime;
-          time_t result;
-          time(&nowTime);
-          result = nowTime + stv.time;
-          info = localtime(&result);
-        } else {
-          info = localtime(&stv.time);
-        }
-        printf("%s\n", asctime(info));
-        break;
+    case TIMETYPE: {
+      struct tm *info;
+      if (stv.time < 0) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + stv.time;
+        info = localtime(&result);
+      } else {
+        info = localtime(&stv.time);
       }
+      printf("%s\n", asctime(info));
+      break;
+    }
     case DOUBLETYPE:
       printf("%lf\n", stv.d);
       break;
-    case CLASSTYPE:
-      {
-        if (!stv.classObj->initialized) {
-          printf("<Class: '%s'>\n", stv.classObj->id);
-        } else {
-          printf("<Class object: '%s'>\n", stv.classObj->id);
-        }
+    case CLASSTYPE: {
+      if (!stv.classObj->initialized) {
+        printf("<Class: '%s'>\n", stv.classObj->id);
+      } else {
+        printf("<Class object: '%s'>\n", stv.classObj->id);
       }
-      break;
+    } break;
     case POINTERTYPE:
       printf("<%" PRIuPTR ">\n", stv.p);
       break;
-    case DICTTYPE:
-      {
-        print_dictionary(stv.dict, EXPRESSION_ARGS());
-        printf("\n");
-        break;
-      }
+    case DICTTYPE: {
+      print_dictionary(stv.dict, EXPRESSION_ARGS());
+      printf("\n");
+      break;
+    }
     case FUNCPTRTYPE:
       printf("<Function: '%s'>\n", stv.func->id.id);
       break;
-    case VECTORTYPE:
-      {
-        print_vector(stv.vec, EXPRESSION_ARGS());
-        printf("\n");
+    case VECTORTYPE: {
+      print_vector(stv.vec, EXPRESSION_ARGS());
+      printf("\n");
+    } break;
+    case RAWDATATYPE: {
+      size_t i = 0;
+      while (i < stv.rawdata->size) {
+        printf("%c", ((char *)stv.rawdata->data)[i]);
+        ++i;
       }
-      break;
-    case RAWDATATYPE:
-      {
-        size_t i = 0;
-        while (i < stv.rawdata->size) {
-          printf("%c", ((char *)stv.rawdata->data)[i]);
-          ++i;
-        }
-        printf("\n");
-      }
-      break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+      printf("\n");
+    } break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   return 0;
@@ -539,100 +523,93 @@ int ric_printf(LIBRARY_PARAMS()) {
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
-    case TEXT:
-      {
-        char *c = stv.t;
-        int backslash = 0;
+    case TEXT: {
+      char *c = stv.t;
+      int backslash = 0;
 
-        /*
-         * Parsing the string,
-         * some character combos (such as: '\r','\n)
-         * should be interpreted disctincly
-         */
-        while (*c) {
+      /*
+       * Parsing the string,
+       * some character combos (such as: '\r','\n)
+       * should be interpreted disctincly
+       */
+      while (*c) {
 
-          if (!backslash && *c == '\\') {
-            backslash = 1;
-            ++c;
-            continue;
-          }
-
-          if (backslash) {
-            switch (*c) {
-              case 'n':
-                // Print a new line
-                printf("\n");
-                break;
-              case 'r':
-                // print the other one windows likes
-                printf("\r");
-                break;
-              case '\\':
-                // print a backslash
-                printf("\\");
-                break;
-              case 't':
-#ifdef _WIN32
-                printf("\\t");
-#else
-                // print a tab
-                printf("\t");
-#endif
-                break;
-              default:
-#ifdef _WIN32
-                printf("%c", *c);
-#endif
-                break;
-            }
-          } else {
-            printf("%c", *c);
-          }
-
+        if (!backslash && *c == '\\') {
+          backslash = 1;
           ++c;
-          backslash = 0;
+          continue;
         }
+
+        if (backslash) {
+          switch (*c) {
+            case 'n':
+              // Print a new line
+              printf("\n");
+              break;
+            case 'r':
+              // print the other one windows likes
+              printf("\r");
+              break;
+            case '\\':
+              // print a backslash
+              printf("\\");
+              break;
+            case 't':
+#ifdef _WIN32
+              printf("\\t");
+#else
+              // print a tab
+              printf("\t");
+#endif
+              break;
+            default:
+#ifdef _WIN32
+              printf("%c", *c);
+#endif
+              break;
+          }
+        } else {
+          printf("%c", *c);
+        }
+
+        ++c;
+        backslash = 0;
       }
-      break;
+    } break;
     case INT32TYPE:
       printf("%d", stv.i);
       break;
-    case BIGINT:
-      {
-        char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
-        char *c = NULL;
+    case BIGINT: {
+      char *buf = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+      char *c = NULL;
 
-        c = mpz_get_str(buf, 10, *stv.bigInt);
-        printf("%s", c);
+      c = mpz_get_str(buf, 10, *stv.bigInt);
+      printf("%s", c);
 
-        free(buf);
+      free(buf);
+    } break;
+    case CLASSTYPE: {
+      if (!stv.classObj->initialized) {
+        printf("<Class: '%s'>", stv.classObj->id);
+      } else {
+        printf("<Class object: '%s'>", stv.classObj->id);
       }
+    } break;
+    case TIMETYPE: {
+      struct tm *info;
+      if (stv.time < 0) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + stv.time;
+        info = localtime(&result);
+      } else {
+        info = localtime(&stv.time);
+      }
+      printf("%s", asctime(info));
       break;
-    case CLASSTYPE:
-      {
-        if (!stv.classObj->initialized) {
-          printf("<Class: '%s'>", stv.classObj->id);
-        } else {
-          printf("<Class object: '%s'>", stv.classObj->id);
-        }
-      }
-      break;
-    case TIMETYPE:
-      {
-        struct tm *info;
-        if (stv.time < 0) {
-          /* Relative time to now */
-          time_t nowTime;
-          time_t result;
-          time(&nowTime);
-          result = nowTime + stv.time;
-          info = localtime(&result);
-        } else {
-          info = localtime(&stv.time);
-        }
-        printf("%s", asctime(info));
-        break;
-      }
+    }
     case DOUBLETYPE:
       printf("%lf", stv.d);
       break;
@@ -642,32 +619,25 @@ int ric_printf(LIBRARY_PARAMS()) {
     case FUNCPTRTYPE:
       printf("<Function: '%s'>", stv.func->id.id);
       break;
-    case DICTTYPE:
-      {
-        print_dictionary(stv.dict, EXPRESSION_ARGS());
-        break;
-      }
-    case VECTORTYPE:
-      {
-        print_vector(stv.vec, EXPRESSION_ARGS());
-      }
+    case DICTTYPE: {
+      print_dictionary(stv.dict, EXPRESSION_ARGS());
       break;
-    case RAWDATATYPE:
-      {
-        size_t i = 0;
-        while (i < stv.rawdata->size) {
-          printf("%c", ((char *)stv.rawdata->data)[i]);
-          ++i;
-        }
+    }
+    case VECTORTYPE: {
+      print_vector(stv.vec, EXPRESSION_ARGS());
+    } break;
+    case RAWDATATYPE: {
+      size_t i = 0;
+      while (i < stv.rawdata->size) {
+        printf("%c", ((char *)stv.rawdata->data)[i]);
+        ++i;
       }
-      break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    } break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   return 0;
@@ -689,13 +659,11 @@ int ric_append(LIBRARY_PARAMS()) {
     case VECTORTYPE:
       vec = stv.vec;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   /* Get what to append */
@@ -720,18 +688,14 @@ int ric_append(LIBRARY_PARAMS()) {
     case LIBFUNCPTRTYPE:
       entry = newExpr_LibFuncPtr((void *)stv.p);
       break;
-    case VECTORTYPE:
-      {
-        entry = copy_vector(stv.vec, EXPRESSION_ARGS());
-      }
-      break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    case VECTORTYPE: {
+      entry = copy_vector(stv.vec, EXPRESSION_ARGS());
+    } break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   addition = newArgument(entry, NULL);
@@ -766,13 +730,11 @@ int ric_push(LIBRARY_PARAMS()) {
     case VECTORTYPE:
       vec = stv.vec;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   /* Get what to push */
@@ -797,18 +759,14 @@ int ric_push(LIBRARY_PARAMS()) {
     case LIBFUNCPTRTYPE:
       entry = newExpr_LibFuncPtr((void *)stv.p);
       break;
-    case VECTORTYPE:
-      {
-        entry = copy_vector(stv.vec, EXPRESSION_ARGS());
-      }
-      break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    case VECTORTYPE: {
+      entry = copy_vector(stv.vec, EXPRESSION_ARGS());
+    } break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   addition = newArgument(entry, vec->content);
@@ -835,13 +793,11 @@ int ric_pop(LIBRARY_PARAMS()) {
     case VECTORTYPE:
       vec = stv.vec;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   if (vec->length == 0) {
@@ -905,14 +861,12 @@ int ric_contains(LIBRARY_PARAMS()) {
     case TEXT:
       argText = stv.t;
       break;
-    default:
-      {
-        fprintf(stderr,
-                "error: function '%s' expected string, dictionary or list as first argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function '%s' expected string, dictionary or list as first argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   // Pop arg2
@@ -927,13 +881,11 @@ int ric_contains(LIBRARY_PARAMS()) {
       containInt = stv.i;
       searchForInt = 1;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' expected text or integer as first argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' expected text or integer as first argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (argVec != NULL) {
@@ -1030,13 +982,11 @@ int ric_len(LIBRARY_PARAMS()) {
     case RAWDATATYPE:
       rawdata = stv.rawdata;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (argVec != NULL) {
@@ -1075,13 +1025,11 @@ int ric_keys(LIBRARY_PARAMS()) {
     case DICTTYPE:
       argDict = stv.dict;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' expected dictionary as first argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' expected dictionary as first argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (argDict != NULL) {
@@ -1137,14 +1085,12 @@ int ric_is_defined(LIBRARY_PARAMS()) {
     case TEXT:
       arg1 = stv.t;
       break;
-    default:
-      {
-        fprintf(stderr,
-                "error: function '%s' got unexpected data type as argument, expected string.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function '%s' got unexpected data type as argument, expected string.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = evaluate_id_valid(arg1, EXPRESSION_ARGS());

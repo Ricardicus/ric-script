@@ -22,13 +22,11 @@ int ric_power(LIBRARY_PARAMS()) {
     case BIGINT:
       arg1BigInt = stv.bigInt;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   // Pop val 2
@@ -41,13 +39,11 @@ int ric_power(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg2 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (arg1BigInt != NULL) {
@@ -101,13 +97,11 @@ int ric_log(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = log(arg1);
@@ -135,13 +129,11 @@ int ric_sqrt(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = sqrt(arg1);
@@ -169,13 +161,11 @@ int ric_sin(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = sin(arg1);
@@ -203,13 +193,11 @@ int ric_cos(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = cos(arg1);
@@ -237,13 +225,11 @@ int ric_tan(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = tan(arg1);
@@ -271,13 +257,11 @@ int ric_exp(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = exp(arg1);
@@ -309,13 +293,11 @@ int ric_abs(LIBRARY_PARAMS()) {
     case BIGINT:
       arg1BigInt = stv.bigInt;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (arg1BigInt) {
@@ -362,13 +344,11 @@ int ric_floor(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = floor(arg1);
@@ -396,13 +376,11 @@ int ric_ceil(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = ceil(arg1);
@@ -431,13 +409,11 @@ int ric_random_uniform_int(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg1 = (int)stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   // Pop arg2
@@ -450,13 +426,11 @@ int ric_random_uniform_int(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       arg2 = (int32_t)stv.d;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   result = (int32_t)((rand() / (double)RAND_MAX) * (arg2 - arg1)) + arg1;
@@ -502,13 +476,11 @@ int ric_print_nbr_base(LIBRARY_PARAMS()) {
     case BIGINT:
       arg1BigInt = stv.bigInt;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   // Pop arg2
@@ -518,13 +490,11 @@ int ric_print_nbr_base(LIBRARY_PARAMS()) {
     case INT32TYPE:
       arg2 = (int32_t)stv.i;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (arg2 < 2 || arg2 > 16) {

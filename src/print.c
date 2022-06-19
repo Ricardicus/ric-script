@@ -46,137 +46,115 @@ void print_statements_(void *stmt, int indent) {
   switch (eval->entity) {
     case LANG_ENTITY_EMPTY_MATH:
     case LANG_ENTITY_EMPTY_STR:
-    case LANG_ENTITY_EXPR:
-      {
-        printf("Expr(");
-        print_expr(((statement_t *)stmt)->content);
-        printf(");\n");
-      }
-      break;
-    case LANG_ENTITY_FOREACH:
-      {
-        forEachStmt_t *festmt = (forEachStmt_t *)((statement_t *)stmt)->content;
-        body_t *bd = festmt->body;
-        printf("For each: Expr(");
-        print_expr(festmt->entry);
-        printf(") <- Expr(");
-        print_expr(festmt->root);
-        printf(")\n");
+    case LANG_ENTITY_EXPR: {
+      printf("Expr(");
+      print_expr(((statement_t *)stmt)->content);
+      printf(");\n");
+    } break;
+    case LANG_ENTITY_FOREACH: {
+      forEachStmt_t *festmt = (forEachStmt_t *)((statement_t *)stmt)->content;
+      body_t *bd = festmt->body;
+      printf("For each: Expr(");
+      print_expr(festmt->entry);
+      printf(") <- Expr(");
+      print_expr(festmt->root);
+      printf(")\n");
 
+      print_indents(indent);
+      print_statements_(bd->content, indent + 1);
+    } break;
+    case LANG_ENTITY_CLASSDECL: {
+      class_t *class = ((statement_t *)stmt)->content;
+      printf("Class('%s')\n", class->id);
+      printf("CLASS DEFINES START\n");
+      print_statements_(class->defines, indent + 1);
+      printf("CLASS DEFINES END\n");
+    } break;
+    case LANG_ENTITY_DECL: {
+      declaration_t *decl = ((statement_t *)stmt)->content;
+      expr_t *declId = decl->id;
+
+      switch (declId->type) {
+        case EXPR_TYPE_ID: {
+          printf("Declaration: ID('%s'), Expr(", declId->id.id);
+          break;
+        }
+        case EXPR_TYPE_VECTOR_IDX: {
+          printf("Declaration: ");
+          print_expr(declId);
+          printf(", Expr(");
+          break;
+        }
+        default:
+          fprintf(stderr, "Unexpected expression in declaration statment\n");
+          GENERAL_REPORT_ISSUE_MSG();
+          break;
+      }
+      print_expr(decl->val);
+      printf(")\n");
+    } break;
+    case LANG_ENTITY_SYSTEM: {
+      expr_t *sys_txt = ((statement_t *)stmt)->content;
+
+      printf("System(");
+      print_expr(sys_txt);
+      printf(");\n");
+    } break;
+    case LANG_ENTITY_CONTINUE: {
+      printf("=== CONTINUE ===\n");
+    } break;
+    case LANG_ENTITY_BREAK: {
+      printf("=== BREAK ===\n");
+    } break;
+    case LANG_ENTITY_RETURN: {
+      expr_t *retVal = (expr_t *)((statement_t *)stmt)->content;
+      printf("RETURN ->");
+      print_expr(retVal);
+      printf("\n");
+    } break;
+    case LANG_ENTITY_FUNCDECL: {
+      functionDef_t *funcDef = ((statement_t *)stmt)->content;
+      printf("Function Declaration: ID('%s') args(", funcDef->id.id);
+      argsList_t *params = funcDef->params;
+      print_args(params);
+      printf(")\n");
+      print_statements_(funcDef->body, indent + 1);
+    } break;
+    case LANG_ENTITY_CONDITIONAL: {
+      ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
+      ifStmt_t *ifstmtWalk;
+      expr_t *cond = ifstmt->cond;
+
+      if (ifstmt->ifType & LANG_CONDITIONAL_CTX) {
+        printf("loop-if-statement - condition: ");
+      } else {
+        printf("if-statement - condition: ");
+      }
+
+      print_expr(cond);
+      printf("\n");
+      print_statements_(ifstmt->body, indent);
+
+      // Walk through the elifs.
+      ifstmtWalk = ifstmt->elif;
+
+      while (ifstmtWalk != NULL) {
         print_indents(indent);
-        print_statements_(bd->content, indent + 1);
-      }
-      break;
-    case LANG_ENTITY_CLASSDECL:
-      {
-        class_t *class = ((statement_t *)stmt)->content;
-        printf("Class('%s')\n", class->id);
-        printf("CLASS DEFINES START\n");
-        print_statements_(class->defines, indent + 1);
-        printf("CLASS DEFINES END\n");
-      }
-      break;
-    case LANG_ENTITY_DECL:
-      {
-        declaration_t *decl = ((statement_t *)stmt)->content;
-        expr_t *declId = decl->id;
-
-        switch (declId->type) {
-          case EXPR_TYPE_ID:
-            {
-              printf("Declaration: ID('%s'), Expr(", declId->id.id);
-              break;
-            }
-          case EXPR_TYPE_VECTOR_IDX:
-            {
-              printf("Declaration: ");
-              print_expr(declId);
-              printf(", Expr(");
-              break;
-            }
-          default:
-            fprintf(stderr, "Unexpected expression in declaration statment\n");
-            GENERAL_REPORT_ISSUE_MSG();
-            break;
-        }
-        print_expr(decl->val);
-        printf(")\n");
-      }
-      break;
-    case LANG_ENTITY_SYSTEM:
-      {
-        expr_t *sys_txt = ((statement_t *)stmt)->content;
-
-        printf("System(");
-        print_expr(sys_txt);
-        printf(");\n");
-      }
-      break;
-    case LANG_ENTITY_CONTINUE:
-      {
-        printf("=== CONTINUE ===\n");
-      }
-      break;
-    case LANG_ENTITY_BREAK:
-      {
-        printf("=== BREAK ===\n");
-      }
-      break;
-    case LANG_ENTITY_RETURN:
-      {
-        expr_t *retVal = (expr_t *)((statement_t *)stmt)->content;
-        printf("RETURN ->");
-        print_expr(retVal);
+        printf("else-if-statement - condition: ");
+        print_expr(ifstmtWalk->cond);
         printf("\n");
+        print_statements_(ifstmtWalk->body, indent + 1);
+        ifstmtWalk = ifstmtWalk->elif;
       }
-      break;
-    case LANG_ENTITY_FUNCDECL:
-      {
-        functionDef_t *funcDef = ((statement_t *)stmt)->content;
-        printf("Function Declaration: ID('%s') args(", funcDef->id.id);
-        argsList_t *params = funcDef->params;
-        print_args(params);
-        printf(")\n");
-        print_statements_(funcDef->body, indent + 1);
+
+      // Print the else if it is not NULL
+      if (ifstmt->endif != NULL) {
+        ifstmtWalk = ifstmt->endif;
+        print_indents(indent);
+        printf("else-statment:\n");
+        print_statements_(ifstmtWalk->body, indent);
       }
-      break;
-    case LANG_ENTITY_CONDITIONAL:
-      {
-        ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
-        ifStmt_t *ifstmtWalk;
-        expr_t *cond = ifstmt->cond;
-
-        if (ifstmt->ifType & LANG_CONDITIONAL_CTX) {
-          printf("loop-if-statement - condition: ");
-        } else {
-          printf("if-statement - condition: ");
-        }
-
-        print_expr(cond);
-        printf("\n");
-        print_statements_(ifstmt->body, indent);
-
-        // Walk through the elifs.
-        ifstmtWalk = ifstmt->elif;
-
-        while (ifstmtWalk != NULL) {
-          print_indents(indent);
-          printf("else-if-statement - condition: ");
-          print_expr(ifstmtWalk->cond);
-          printf("\n");
-          print_statements_(ifstmtWalk->body, indent + 1);
-          ifstmtWalk = ifstmtWalk->elif;
-        }
-
-        // Print the else if it is not NULL
-        if (ifstmt->endif != NULL) {
-          ifstmtWalk = ifstmt->endif;
-          print_indents(indent);
-          printf("else-statment:\n");
-          print_statements_(ifstmtWalk->body, indent);
-        }
-      }
-      break;
+    } break;
     default:
       break;
   }
@@ -263,57 +241,39 @@ int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       POP_VAL(&sv, sp, sc);
 
       switch (sv.type) {
-        case INT32TYPE:
-          {
-            printf("%" PRIi32 "", sv.i);
-          }
-          break;
-        case BIGINT:
-          {
-            char buf[128];
-            char *c = NULL;
+        case INT32TYPE: {
+          printf("%" PRIi32 "", sv.i);
+        } break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
 
-            c = mpz_get_str(buf, 10, *sv.bigInt);
-            printf("%s\n", c);
-          }
-          break;
-        case DOUBLETYPE:
-          {
-            printf("%lf", sv.d);
-          }
-          break;
-        case TEXT:
-          {
-            printf("'%s'", sv.t);
-          }
-          break;
-        case POINTERTYPE:
-          {
-            printf("<Pointer: %" PRIxPTR ">", sv.p);
-          }
-          break;
-        case FUNCPTRTYPE:
-          {
-            functionDef_t *funcDec = sv.func;
-            printf("<FuncPointer: '%s'>", funcDec->id.id);
-          }
-          break;
-        case LIBFUNCPTRTYPE:
-          {
-            libFunction_t *libFunc = sv.libfunc;
-            printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
-          }
-          break;
-        case VECTORTYPE:
-          {
-            print_vector(sv.vec, EXPRESSION_ARGS());
-          }
-          break;
-        case DICTTYPE:
-          {
-            print_dictionary(sv.dict, EXPRESSION_ARGS());
-          }
-          break;
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          printf("%s\n", c);
+        } break;
+        case DOUBLETYPE: {
+          printf("%lf", sv.d);
+        } break;
+        case TEXT: {
+          printf("'%s'", sv.t);
+        } break;
+        case POINTERTYPE: {
+          printf("<Pointer: %" PRIxPTR ">", sv.p);
+        } break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          printf("<FuncPointer: '%s'>", funcDec->id.id);
+        } break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
+        } break;
+        case VECTORTYPE: {
+          print_vector(sv.vec, EXPRESSION_ARGS());
+        } break;
+        case DICTTYPE: {
+          print_dictionary(sv.dict, EXPRESSION_ARGS());
+        } break;
         default:
           break;
       }
@@ -358,57 +318,39 @@ int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       sv = hpv->sv;
 
       switch (sv.type) {
-        case INT32TYPE:
-          {
-            printf("%" PRIi32 "", sv.i);
-          }
-          break;
-        case DOUBLETYPE:
-          {
-            printf("%lf", sv.d);
-          }
-          break;
-        case BIGINT:
-          {
-            char buf[128];
-            char *c = NULL;
+        case INT32TYPE: {
+          printf("%" PRIi32 "", sv.i);
+        } break;
+        case DOUBLETYPE: {
+          printf("%lf", sv.d);
+        } break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
 
-            c = mpz_get_str(buf, 10, *sv.bigInt);
-            printf("%s\n", c);
-          }
-          break;
-        case TEXT:
-          {
-            printf("'%s'", sv.t);
-          }
-          break;
-        case POINTERTYPE:
-          {
-            printf("<Pointer: %" PRIxPTR ">", sv.p);
-          }
-          break;
-        case FUNCPTRTYPE:
-          {
-            functionDef_t *funcDec = sv.func;
-            printf("<FuncPointer: '%s'>", funcDec->id.id);
-          }
-          break;
-        case LIBFUNCPTRTYPE:
-          {
-            libFunction_t *libFunc = sv.libfunc;
-            printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
-          }
-          break;
-        case VECTORTYPE:
-          {
-            print_vector(sv.vec, EXPRESSION_ARGS());
-          }
-          break;
-        case DICTTYPE:
-          {
-            print_dictionary(sv.dict, EXPRESSION_ARGS());
-          }
-          break;
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          printf("%s\n", c);
+        } break;
+        case TEXT: {
+          printf("'%s'", sv.t);
+        } break;
+        case POINTERTYPE: {
+          printf("<Pointer: %" PRIxPTR ">", sv.p);
+        } break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          printf("<FuncPointer: '%s'>", funcDec->id.id);
+        } break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
+        } break;
+        case VECTORTYPE: {
+          print_vector(sv.vec, EXPRESSION_ARGS());
+        } break;
+        case DICTTYPE: {
+          print_dictionary(sv.dict, EXPRESSION_ARGS());
+        } break;
         default:
           break;
       }
@@ -437,15 +379,13 @@ void print_expr(expr_t *expr) {
     case EXPR_TYPE_TIME:
       printf("TIME");
       break;
-    case EXPR_TYPE_BIGINT:
-      {
-        char buf[128];
-        char *c = NULL;
+    case EXPR_TYPE_BIGINT: {
+      char buf[128];
+      char *c = NULL;
 
-        c = mpz_get_str(buf, 10, *expr->bigInt);
-        printf("%s\n", c);
-      }
-      break;
+      c = mpz_get_str(buf, 10, *expr->bigInt);
+      printf("%s\n", c);
+    } break;
     case EXPR_TYPE_IVAL:
       printf("%d", expr->ival);
       break;
@@ -455,48 +395,45 @@ void print_expr(expr_t *expr) {
     case EXPR_TYPE_TEXT:
       printf("'%s'", expr->text);
       break;
-    case EXPR_TYPE_LOGICAL:
-      {
-        int32_t walk;
-        logical_t *logic = expr->logical;
-        if (logic->orsLen > 0) {
-          printf("(");
-          walk = 0;
-          while (walk < logic->orsLen) {
-            if (walk > 0) {
-              printf(" || ");
-            }
-            print_expr(logic->ors[walk]);
-            walk++;
+    case EXPR_TYPE_LOGICAL: {
+      int32_t walk;
+      logical_t *logic = expr->logical;
+      if (logic->orsLen > 0) {
+        printf("(");
+        walk = 0;
+        while (walk < logic->orsLen) {
+          if (walk > 0) {
+            printf(" || ");
           }
-          printf(")");
+          print_expr(logic->ors[walk]);
+          walk++;
         }
-        if (logic->andsLen > 0) {
-          if (logic->orsLen > 0) {
+        printf(")");
+      }
+      if (logic->andsLen > 0) {
+        if (logic->orsLen > 0) {
+          printf(" && ");
+        }
+        printf("(");
+        walk = 0;
+        while (walk < logic->andsLen) {
+          if (walk > 0) {
             printf(" && ");
           }
-          printf("(");
-          walk = 0;
-          while (walk < logic->andsLen) {
-            if (walk > 0) {
-              printf(" && ");
-            }
-            print_expr(logic->ands[walk]);
-            walk++;
-          }
-          printf(")");
+          print_expr(logic->ands[walk]);
+          walk++;
         }
-        break;
-      }
-    case EXPR_TYPE_VECTOR_IDX:
-      {
-        vectorIndex_t *vecIdx = expr->vecIdx;
-        printf("ListIdx, Expr: ");
-        print_expr(vecIdx->expr);
-        printf(", index: ");
-        print_expr(vecIdx->index);
+        printf(")");
       }
       break;
+    }
+    case EXPR_TYPE_VECTOR_IDX: {
+      vectorIndex_t *vecIdx = expr->vecIdx;
+      printf("ListIdx, Expr: ");
+      print_expr(vecIdx->expr);
+      printf(", index: ");
+      print_expr(vecIdx->index);
+    } break;
     case EXPR_TYPE_CLASSPTR:
       printf("Class Object <'%s'>", expr->classObj->id);
       break;
@@ -540,38 +477,32 @@ void print_expr(expr_t *expr) {
       print_condition((ifCondition_t *)expr->cond);
       printf(")");
       break;
-    case EXPR_TYPE_FUNCCALL:
-      {
-        functionCall_t *funcCall = expr->func;
-        printf("Function call: <");
-        print_expr(funcCall->id);
-        printf("> args(");
-        argsList_t *args = funcCall->args;
-        print_args(args);
-        printf(")");
-      }
-      break;
-    case EXPR_TYPE_CLASSFUNCCALL:
-      {
-        classFunctionCall_t *funcCall = expr->func;
-        printf("Class function call: <class: '");
-        print_expr(funcCall->classID);
-        printf("', func: '");
-        print_expr(funcCall->classID);
-        printf("''> args(");
-        argsList_t *args = funcCall->args;
-        print_args(args);
-        printf(")");
-      }
-      break;
-    case EXPR_TYPE_VECTOR:
-      {
-        vector_t *vec = (vector_t *)expr->vec;
-        printf("Vector, content(");
-        print_args(vec->content);
-        printf(")");
-      }
-      break;
+    case EXPR_TYPE_FUNCCALL: {
+      functionCall_t *funcCall = expr->func;
+      printf("Function call: <");
+      print_expr(funcCall->id);
+      printf("> args(");
+      argsList_t *args = funcCall->args;
+      print_args(args);
+      printf(")");
+    } break;
+    case EXPR_TYPE_CLASSFUNCCALL: {
+      classFunctionCall_t *funcCall = expr->func;
+      printf("Class function call: <class: '");
+      print_expr(funcCall->classID);
+      printf("', func: '");
+      print_expr(funcCall->classID);
+      printf("''> args(");
+      argsList_t *args = funcCall->args;
+      print_args(args);
+      printf(")");
+    } break;
+    case EXPR_TYPE_VECTOR: {
+      vector_t *vec = (vector_t *)expr->vec;
+      printf("Vector, content(");
+      print_args(vec->content);
+      printf(")");
+    } break;
     case EXPR_TYPE_DICT:
       printf("<Dictionary>");
       break;
@@ -633,63 +564,45 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
       tmpLen = 0;
 
       switch (sv.type) {
-        case INT32TYPE:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case BIGINT:
-          {
-            char buf[128];
-            char *c = NULL;
+        case INT32TYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
 
-            c = mpz_get_str(buf, 10, *sv.bigInt);
-            snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
-          }
-          break;
-        case DOUBLETYPE:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case TEXT:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case POINTERTYPE:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case FUNCPTRTYPE:
-          {
-            functionDef_t *funcDec = sv.func;
-            snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case LIBFUNCPTRTYPE:
-          {
-            libFunction_t *libFunc = sv.libfunc;
-            snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case VECTORTYPE:
-          {
-            snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
-          }
-          break;
-        case DICTTYPE:
-          {
-            snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
-          }
-          break;
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+        } break;
+        case DOUBLETYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case TEXT: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case POINTERTYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case VECTORTYPE: {
+          snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        } break;
+        case DICTTYPE: {
+          snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        } break;
         default:
           break;
       }
@@ -757,63 +670,45 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
       tmpLen = 0;
 
       switch (sv.type) {
-        case INT32TYPE:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case BIGINT:
-          {
-            char buf[128];
-            char *c = NULL;
+        case INT32TYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
 
-            c = mpz_get_str(buf, 10, *sv.bigInt);
-            snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
-          }
-          break;
-        case DOUBLETYPE:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case TEXT:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case POINTERTYPE:
-          {
-            snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case FUNCPTRTYPE:
-          {
-            functionDef_t *funcDec = sv.func;
-            snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case LIBFUNCPTRTYPE:
-          {
-            libFunction_t *libFunc = sv.libfunc;
-            snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
-            tmpLen = strlen(tmpBuf);
-          }
-          break;
-        case VECTORTYPE:
-          {
-            snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
-          }
-          break;
-        case DICTTYPE:
-          {
-            snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
-          }
-          break;
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+        } break;
+        case DOUBLETYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case TEXT: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case POINTERTYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case VECTORTYPE: {
+          snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        } break;
+        case DICTTYPE: {
+          snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        } break;
         default:
           break;
       }
@@ -871,50 +766,44 @@ int snprint_vector(char **buf, size_t *bufSize, size_t *pos, vector_t *vec, EXPR
     POP_VAL(&sv, sp, sc);
 
     switch (sv.type) {
-      case INT32TYPE:
-        {
-          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
-          tmpLen = strlen(tmpBuf);
-          break;
-        }
-      case BIGINT:
-        {
-          char buf[128];
-          char *c = NULL;
-
-          c = mpz_get_str(buf, 10, *sv.bigInt);
-          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
-        }
+      case INT32TYPE: {
+        snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+        tmpLen = strlen(tmpBuf);
         break;
-      case DOUBLETYPE:
-        {
-          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
-          tmpLen = strlen(tmpBuf);
-          break;
+      }
+      case BIGINT: {
+        char buf[128];
+        char *c = NULL;
+
+        c = mpz_get_str(buf, 10, *sv.bigInt);
+        snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+      } break;
+      case DOUBLETYPE: {
+        snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+        tmpLen = strlen(tmpBuf);
+        break;
+      }
+      case TEXT: {
+        snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
+        tmpLen = strlen(tmpBuf);
+        break;
+      }
+      case TIMETYPE: {
+        struct tm *info;
+        if (sv.time < 0) {
+          /* Relative time to now */
+          time_t nowTime;
+          time_t result;
+          time(&nowTime);
+          result = nowTime + sv.time;
+          info = localtime(&result);
+        } else {
+          info = localtime(&sv.time);
         }
-      case TEXT:
-        {
-          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
-          tmpLen = strlen(tmpBuf);
-          break;
-        }
-      case TIMETYPE:
-        {
-          struct tm *info;
-          if (sv.time < 0) {
-            /* Relative time to now */
-            time_t nowTime;
-            time_t result;
-            time(&nowTime);
-            result = nowTime + sv.time;
-            info = localtime(&result);
-          } else {
-            info = localtime(&sv.time);
-          }
-          snprintf(tmpBuf, sizeof(tmpBuf), "%s", asctime(info));
-          tmpLen = strlen(tmpBuf);
-          break;
-        }
+        snprintf(tmpBuf, sizeof(tmpBuf), "%s", asctime(info));
+        tmpLen = strlen(tmpBuf);
+        break;
+      }
       case POINTERTYPE:
         snprintf(tmpBuf, sizeof(tmpBuf), "<%" PRIuPTR ">", sv.p);
         tmpLen = strlen(tmpBuf);
@@ -986,37 +875,34 @@ int print_vector(vector_t *vec, EXPRESSION_PARAMS()) {
       case INT32TYPE:
         printf("%" PRIi32 "", sv.i);
         break;
-      case BIGINT:
-        {
-          char buf[128];
-          char *c = NULL;
+      case BIGINT: {
+        char buf[128];
+        char *c = NULL;
 
-          c = mpz_get_str(buf, 10, *sv.bigInt);
-          printf("%s", c);
-        }
-        break;
+        c = mpz_get_str(buf, 10, *sv.bigInt);
+        printf("%s", c);
+      } break;
       case DOUBLETYPE:
         printf("%lf", sv.d);
         break;
       case TEXT:
         printf("'%s'", sv.t);
         break;
-      case TIMETYPE:
-        {
-          struct tm *info;
-          if (sv.time < 0) {
-            /* Relative time to now */
-            time_t nowTime;
-            time_t result;
-            time(&nowTime);
-            result = nowTime + sv.time;
-            info = localtime(&result);
-          } else {
-            info = localtime(&sv.time);
-          }
-          printf("%s", asctime(info));
-          break;
+      case TIMETYPE: {
+        struct tm *info;
+        if (sv.time < 0) {
+          /* Relative time to now */
+          time_t nowTime;
+          time_t result;
+          time(&nowTime);
+          result = nowTime + sv.time;
+          info = localtime(&result);
+        } else {
+          info = localtime(&sv.time);
         }
+        printf("%s", asctime(info));
+        break;
+      }
       case POINTERTYPE:
         printf("<%" PRIuPTR ">", sv.p);
         break;

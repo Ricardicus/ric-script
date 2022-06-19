@@ -96,28 +96,22 @@ int main(int argc, char *argv[]) {
   parse = getParser();
 
   switch (mission) {
-    case runAsInteractive:
-      {
-        /* Unbuffered mode */
-        setUnbufferedOutput();
-        /* Run the interactive mode */
-        runInteractive(argc, argv, interpret_statements_interactive, ">> ");
-      }
-      break;
-    case runAsInteractiveNoPrompt:
-      {
-        /* Unbuffered mode */
-        setUnbufferedOutput();
-        /* Run the interactive mode */
-        runInteractive(argc, argv, interpret_statements_interactive, "");
-      }
-      break;
-    case runAsCommand:
-      {
-        /* Run the interactive mode */
-        runCommand(argc, argv, interpret_statements_interactive, commandString);
-      }
-      break;
+    case runAsInteractive: {
+      /* Unbuffered mode */
+      setUnbufferedOutput();
+      /* Run the interactive mode */
+      runInteractive(argc, argv, interpret_statements_interactive, ">> ");
+    } break;
+    case runAsInteractiveNoPrompt: {
+      /* Unbuffered mode */
+      setUnbufferedOutput();
+      /* Run the interactive mode */
+      runInteractive(argc, argv, interpret_statements_interactive, "");
+    } break;
+    case runAsCommand: {
+      /* Run the interactive mode */
+      runCommand(argc, argv, interpret_statements_interactive, commandString);
+    } break;
     case runAsIntepreter:
       /* Parse the program */
       parse();

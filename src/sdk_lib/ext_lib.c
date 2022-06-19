@@ -11,108 +11,96 @@ int ric_example_print(LIBRARY_PARAMS()) {
   POP_VAL(&stv, sp, sc);
 
   switch (stv.type) {
-    case TEXT:
-      {
-        printf("%s\n", stv.t);
-      }
-      break;
+    case TEXT: {
+      printf("%s\n", stv.t);
+    } break;
     case INT32TYPE:
       printf("%d\n", stv.i);
       break;
-    case TIMETYPE:
-      {
-        struct tm *info;
-        if (stv.time < 0) {
-          /* Relative time to now */
-          time_t nowTime;
-          time_t result;
-          time(&nowTime);
-          result = nowTime + stv.time;
-          info = localtime(&result);
-        } else {
-          info = localtime(&stv.time);
-        }
-        printf("%s\n", asctime(info));
-        break;
+    case TIMETYPE: {
+      struct tm *info;
+      if (stv.time < 0) {
+        /* Relative time to now */
+        time_t nowTime;
+        time_t result;
+        time(&nowTime);
+        result = nowTime + stv.time;
+        info = localtime(&result);
+      } else {
+        info = localtime(&stv.time);
       }
+      printf("%s\n", asctime(info));
+      break;
+    }
     case DOUBLETYPE:
       printf("%lf\n", stv.d);
       break;
-    case CLASSTYPE:
-      {
-        if (!stv.classObj->initialized) {
-          printf("<Class: '%s'>\n", stv.classObj->id);
-        } else {
-          printf("<Class object: '%s'>\n", stv.classObj->id);
-        }
+    case CLASSTYPE: {
+      if (!stv.classObj->initialized) {
+        printf("<Class: '%s'>\n", stv.classObj->id);
+      } else {
+        printf("<Class object: '%s'>\n", stv.classObj->id);
       }
-      break;
+    } break;
     case POINTERTYPE:
       printf("<%" PRIuPTR ">\n", stv.p);
       break;
-    case DICTTYPE:
-      {
-        printf("DICTIONARY..\n");
-        break;
-      }
+    case DICTTYPE: {
+      printf("DICTIONARY..\n");
+      break;
+    }
     case FUNCPTRTYPE:
       printf("<Function: '%s'>\n", stv.func->id.id);
       break;
-    case VECTORTYPE:
-      {
-        /* Walking through the vector */
-        vector_t *vec = stv.vec;
-        argsList_t *content = vec->content;
-        size_t i = 0;
+    case VECTORTYPE: {
+      /* Walking through the vector */
+      vector_t *vec = stv.vec;
+      argsList_t *content = vec->content;
+      size_t i = 0;
 
-        i = 0;
-        printf("[");
-        while (content != NULL) {
-          /* Evaluate the expression */
-          EVAL_EXPRESSION(content->arg);
-          POP_VAL(&stv, sp, sc);
+      i = 0;
+      printf("[");
+      while (content != NULL) {
+        /* Evaluate the expression */
+        EVAL_EXPRESSION(content->arg);
+        POP_VAL(&stv, sp, sc);
 
-          if (i > 0) {
-            printf(", ");
-          }
-
-          switch (stv.type) {
-            case TEXT:
-              printf("%s", stv.t);
-              break;
-            case INT32TYPE:
-              printf("%d", stv.i);
-              break;
-            case DOUBLETYPE:
-              printf("%lf", stv.d);
-              break;
-            default:
-              printf("<other>");
-              break;
-          }
-          ++i;
-          content = content->next;
+        if (i > 0) {
+          printf(", ");
         }
-        printf("]\n");
-      }
-      break;
-    case RAWDATATYPE:
-      {
-        size_t i = 0;
-        while (i < stv.rawdata->size) {
-          printf("%c", ((char *)stv.rawdata->data)[i]);
-          ++i;
+
+        switch (stv.type) {
+          case TEXT:
+            printf("%s", stv.t);
+            break;
+          case INT32TYPE:
+            printf("%d", stv.i);
+            break;
+          case DOUBLETYPE:
+            printf("%lf", stv.d);
+            break;
+          default:
+            printf("<other>");
+            break;
         }
-        printf("\n");
+        ++i;
+        content = content->next;
       }
-      break;
-    default:
-      {
-        fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        exit(1);
+      printf("]\n");
+    } break;
+    case RAWDATATYPE: {
+      size_t i = 0;
+      while (i < stv.rawdata->size) {
+        printf("%c", ((char *)stv.rawdata->data)[i]);
+        ++i;
       }
-      break;
+      printf("\n");
+    } break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   /* Return the number 1337 */
@@ -183,8 +171,8 @@ int example_class_sub(LIBRARY_PARAMS()) {
 
   hvp->sv.i = hvp->sv.i - substitute;
 
-  printf("%s %s::%s: substitute %" PRIi32 " to member1. Member1: %" PRIi32 "\n", __func__, func_name,
-         class->id, substitute, hvp->sv.i);
+  printf("%s %s::%s: substitute %" PRIi32 " to member1. Member1: %" PRIi32 "\n", __func__,
+         func_name, class->id, substitute, hvp->sv.i);
 
   return 0;
 }
@@ -235,9 +223,11 @@ int example_class_init(LIBRARY_PARAMS()) {
   hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, class_var_member, hvp);
 
   /* Adding functions to the class ABI function definitions table */
-  hashtable_put(cls->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, class_function_add_name, classFuncABIadd);
-  hashtable_put(cls->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, class_function_sub_name, classFuncABIsub);
-  
+  hashtable_put(cls->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, class_function_add_name,
+                classFuncABIadd);
+  hashtable_put(cls->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, class_function_sub_name,
+                classFuncABIsub);
+
   PUSH_CLASSREF(cls, sp, sc);
   return 0;
 }

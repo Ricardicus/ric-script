@@ -14,13 +14,11 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
     case FUNCPTRTYPE:
       func = stv.func;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Read second argument, timeout */
@@ -30,13 +28,11 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
     case INT32TYPE:
       timeout = stv.i;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Launching the function in another thread */
@@ -61,13 +57,11 @@ int ric_set_interval(LIBRARY_PARAMS()) {
     case FUNCPTRTYPE:
       func = stv.func;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Read second argument, timeout */
@@ -77,13 +71,11 @@ int ric_set_interval(LIBRARY_PARAMS()) {
     case INT32TYPE:
       timeout = stv.i;
       break;
-    default:
-      {
-        fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-                LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Launching the function in another thread */

@@ -13,15 +13,12 @@ int ric_open_file(LIBRARY_PARAMS()) {
     case TEXT:
       filename = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   /* Check if file exist, if it doesn't create it */
@@ -58,15 +55,13 @@ int ric_close_file(LIBRARY_PARAMS()) {
     case POINTERTYPE:
       fp = (FILE *)stv.p;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   fclose(fp);
@@ -95,15 +90,13 @@ int ric_read_file(LIBRARY_PARAMS()) {
     case POINTERTYPE:
       fp = (FILE *)stv.p;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   POP_VAL(&stv, sp, sc);
@@ -112,15 +105,13 @@ int ric_read_file(LIBRARY_PARAMS()) {
     case INT32TYPE:
       datasize = (size_t)stv.i;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, integer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, integer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   e = newExpr_RawData(datasize);
@@ -159,15 +150,13 @@ int ric_write_file(LIBRARY_PARAMS()) {
     case POINTERTYPE:
       fp = (FILE *)stv.p;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   POP_VAL(&stv, sp, sc);
@@ -179,15 +168,12 @@ int ric_write_file(LIBRARY_PARAMS()) {
     case RAWDATATYPE:
       rawdata = stv.rawdata;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   if (text != NULL) {
@@ -259,15 +245,13 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
     case POINTERTYPE:
       fp = (FILE *)stv.p;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   buffer = calloc(MAX_LINE_LENGTH, 1);
@@ -322,15 +306,13 @@ int ric_read_input(LIBRARY_PARAMS()) {
     case TEXT:
       inputText = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   buffer = calloc(MAX_LINE_LENGTH, 1);

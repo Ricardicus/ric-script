@@ -45,16 +45,14 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
       case cJSON_Array:
         loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
         break;
-      case cJSON_Object:
-        {
-          loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
-          if (depth == 0) {
-            *out = val;
-            free(keyVal);
-            return;
-          }
+      case cJSON_Object: {
+        loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+        if (depth == 0) {
+          *out = val;
+          free(keyVal);
+          return;
         }
-        break;
+      } break;
       case cJSON_Raw:
         val = newExpr_Text(walk->valuestring);
         break; /* raw json */
@@ -165,15 +163,13 @@ int ric_json_convert(LIBRARY_PARAMS()) {
     case CLASSTYPE:
       argClass = stv.classObj;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function '%s' got unexpected data type as argument, expected string or file.\n",
-            LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function '%s' got unexpected data type as argument, expected string or file.\n",
+          LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   /* Convert the object into a JSON formatted string */
@@ -220,15 +216,13 @@ int ric_json_load(LIBRARY_PARAMS()) {
     case POINTERTYPE:
       fp = (FILE *)stv.p;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function '%s' got unexpected data type as argument, expected string or file.\n",
-            LIBRARY_FUNC_NAME());
-        return 1;
-      }
-      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function '%s' got unexpected data type as argument, expected string or file.\n",
+          LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
   }
 
   if (fp != NULL) {

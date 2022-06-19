@@ -27,15 +27,12 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg1 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   buffer = calloc(bufferSize, 1);
@@ -90,15 +87,12 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg1 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   // pop arg 2 - xattr key
@@ -108,15 +102,12 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg2 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   // pop arg 3 - xattr value
@@ -126,15 +117,12 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg3 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   result = setxattr(arg1, arg2, arg3, strlen(arg3), 0);
@@ -193,15 +181,12 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg1 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   // pop arg 2 - xattr key
@@ -211,15 +196,12 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg2 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   resultValue = calloc(valueMaxLen + 1, 1);
@@ -257,15 +239,12 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg1 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   // pop arg 2 - xattr key
@@ -275,15 +254,12 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg2 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   result = removexattr(arg1, arg2);
@@ -381,15 +357,12 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
     case TEXT:
       arg1 = stv.t;
       break;
-    default:
-      {
-        fprintf(
-            stderr,
-            "error: function call '%s' got unexpected data type as argument, string expected.\n",
-            LIBRARY_FUNC_NAME());
-        exit(1);
-      }
-      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
   }
 
   rc = regcomp(&re, arg1, REG_EXTENDED | REG_NOSUB);

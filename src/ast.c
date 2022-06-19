@@ -495,16 +495,14 @@ expr_t *newExpr_Copy(expr_t *expr) {
   if (expr == NULL) return NULL;
 
   switch (expr->type) {
-    case EXPR_TYPE_ID:
-      {
-        newExp = newExpr_ID(expr->id.id);
-        break;
-      }
-    case EXPR_TYPE_BIGINT:
-      {
-        newExp = newExpr_BigInt(expr->bigInt);
-        break;
-      }
+    case EXPR_TYPE_ID: {
+      newExp = newExpr_ID(expr->id.id);
+      break;
+    }
+    case EXPR_TYPE_BIGINT: {
+      newExp = newExpr_BigInt(expr->bigInt);
+      break;
+    }
     case EXPR_TYPE_FVAL:
       newExp = newExpr_Ival(expr->fval);
       break;
@@ -513,75 +511,61 @@ expr_t *newExpr_Copy(expr_t *expr) {
       break;
     case EXPR_TYPE_UVAL:
       break;
-    case EXPR_TYPE_VECTOR_IDX:
-      {
-        expr_t *id = newExpr_Copy(expr->vecIdx->expr);
-        expr_t *index = newExpr_Copy(expr->vecIdx->index);
-        newExp = newExpr_VectorIndex(id, index);
-      }
+    case EXPR_TYPE_VECTOR_IDX: {
+      expr_t *id = newExpr_Copy(expr->vecIdx->expr);
+      expr_t *index = newExpr_Copy(expr->vecIdx->index);
+      newExp = newExpr_VectorIndex(id, index);
+    } break;
+    case EXPR_TYPE_TEXT: {
+      newExp = newExpr_Text(expr->text);
       break;
-    case EXPR_TYPE_TEXT:
-      {
-        newExp = newExpr_Text(expr->text);
-        break;
-      }
-    case EXPR_TYPE_OPADD:
-      {
-        expr_t *left = (expr_t *)expr->add.left;
-        expr_t *right = (expr_t *)expr->add.right;
-        newExp = newExpr_OPAdd(left, right);
-        break;
-      }
-    case EXPR_TYPE_OPSUB:
-      {
-        expr_t *left = (expr_t *)expr->add.left;
-        expr_t *right = (expr_t *)expr->add.right;
-        newExp = newExpr_OPSub(left, right);
-        break;
-      }
-    case EXPR_TYPE_OPMUL:
-      {
-        expr_t *left = (expr_t *)expr->add.left;
-        expr_t *right = (expr_t *)expr->add.right;
-        newExp = newExpr_OPMul(left, right);
-        break;
-      }
-    case EXPR_TYPE_OPMOD:
-      {
-        expr_t *left = (expr_t *)expr->add.left;
-        expr_t *right = (expr_t *)expr->add.right;
-        newExp = newExpr_OPMod(left, right);
-        break;
-      }
+    }
+    case EXPR_TYPE_OPADD: {
+      expr_t *left = (expr_t *)expr->add.left;
+      expr_t *right = (expr_t *)expr->add.right;
+      newExp = newExpr_OPAdd(left, right);
       break;
-    case EXPR_TYPE_OPDIV:
-      {
-        expr_t *left = (expr_t *)expr->add.left;
-        expr_t *right = (expr_t *)expr->add.right;
-        newExp = newExpr_OPDiv(left, right);
-        break;
-      }
-    case EXPR_TYPE_COND:
-      {
-        ifCondition_t *cond = expr->cond;
-        ifCondition_t *newCond = ast_emalloc(sizeof(ifCondition_t));
-        newCond->type = cond->type;
-        newCond->left = newExpr_Copy(cond->left);
-        newCond->right = newExpr_Copy(cond->right);
-        newExp = newExpr_Cond(newCond);
-      }
+    }
+    case EXPR_TYPE_OPSUB: {
+      expr_t *left = (expr_t *)expr->add.left;
+      expr_t *right = (expr_t *)expr->add.right;
+      newExp = newExpr_OPSub(left, right);
       break;
-    case EXPR_TYPE_VECTOR:
-      {
-        argsList_t *args = copy_argsList(expr->vec->content);
-        newExp = newExpr_Vector(args);
-        break;
-      }
-    case EXPR_TYPE_DICT:
-      {
-        newExp = newExpr_Dictionary(expr->dict->keyVals);
-      }
+    }
+    case EXPR_TYPE_OPMUL: {
+      expr_t *left = (expr_t *)expr->add.left;
+      expr_t *right = (expr_t *)expr->add.right;
+      newExp = newExpr_OPMul(left, right);
       break;
+    }
+    case EXPR_TYPE_OPMOD: {
+      expr_t *left = (expr_t *)expr->add.left;
+      expr_t *right = (expr_t *)expr->add.right;
+      newExp = newExpr_OPMod(left, right);
+      break;
+    } break;
+    case EXPR_TYPE_OPDIV: {
+      expr_t *left = (expr_t *)expr->add.left;
+      expr_t *right = (expr_t *)expr->add.right;
+      newExp = newExpr_OPDiv(left, right);
+      break;
+    }
+    case EXPR_TYPE_COND: {
+      ifCondition_t *cond = expr->cond;
+      ifCondition_t *newCond = ast_emalloc(sizeof(ifCondition_t));
+      newCond->type = cond->type;
+      newCond->left = newExpr_Copy(cond->left);
+      newCond->right = newExpr_Copy(cond->right);
+      newExp = newExpr_Cond(newCond);
+    } break;
+    case EXPR_TYPE_VECTOR: {
+      argsList_t *args = copy_argsList(expr->vec->content);
+      newExp = newExpr_Vector(args);
+      break;
+    }
+    case EXPR_TYPE_DICT: {
+      newExp = newExpr_Dictionary(expr->dict->keyVals);
+    } break;
     case EXPR_TYPE_EMPTY:
     default:
       break;
@@ -711,190 +695,169 @@ void free_expression(expr_t *expr) {
   if (expr == NULL) return;
 
   switch (expr->type) {
-    case EXPR_TYPE_ID:
-      {
-        free(expr->id.id);
-        break;
-      }
-    case EXPR_TYPE_BIGINT:
-      {
-        mpz_clear(*expr->bigInt);
-        free(expr->bigInt);
-        break;
-      }
-    case EXPR_TYPE_LOGICAL:
-      {
-        if (expr->logical->andsLen > 0) {
-          int32_t walk = 0;
-          while (walk < expr->logical->andsLen) {
-            free_expression(expr->logical->ands[walk]);
-            free(expr->logical->ands[walk]);
-            walk++;
-          }
-          free(expr->logical->ands);
-        }
-        if (expr->logical->orsLen > 0) {
-          int32_t walk = 0;
-          while (walk < expr->logical->orsLen) {
-            free_expression(expr->logical->ors[walk]);
-            free(expr->logical->ors[walk]);
-            walk++;
-          }
-          free(expr->logical->ors);
-        }
-        free(expr->logical);
-        break;
-      }
-    case EXPR_TYPE_CLASSPTR:
-      {
-        free(expr->classObj);
-      }
+    case EXPR_TYPE_ID: {
+      free(expr->id.id);
       break;
-    case EXPR_TYPE_CLASSFUNCCALL:
-      {
-        classFunctionCall_t *cls = expr->func;
-        argsList_t *args = cls->args;
-        free_expression(cls->classID);
-        free(cls->classID);
-        while (args != NULL) {
-          argsList_t *tmp = args;
-          free_expression(args->arg);
-          free(args->arg);
-          args = args->next;
-          free(tmp);
-        }
-        free(cls->funcID);
-        free(cls);
-      }
+    }
+    case EXPR_TYPE_BIGINT: {
+      mpz_clear(*expr->bigInt);
+      free(expr->bigInt);
       break;
+    }
+    case EXPR_TYPE_LOGICAL: {
+      if (expr->logical->andsLen > 0) {
+        int32_t walk = 0;
+        while (walk < expr->logical->andsLen) {
+          free_expression(expr->logical->ands[walk]);
+          free(expr->logical->ands[walk]);
+          walk++;
+        }
+        free(expr->logical->ands);
+      }
+      if (expr->logical->orsLen > 0) {
+        int32_t walk = 0;
+        while (walk < expr->logical->orsLen) {
+          free_expression(expr->logical->ors[walk]);
+          free(expr->logical->ors[walk]);
+          walk++;
+        }
+        free(expr->logical->ors);
+      }
+      free(expr->logical);
+      break;
+    }
+    case EXPR_TYPE_CLASSPTR: {
+      free(expr->classObj);
+    } break;
+    case EXPR_TYPE_CLASSFUNCCALL: {
+      classFunctionCall_t *cls = expr->func;
+      argsList_t *args = cls->args;
+      free_expression(cls->classID);
+      free(cls->classID);
+      while (args != NULL) {
+        argsList_t *tmp = args;
+        free_expression(args->arg);
+        free(args->arg);
+        args = args->next;
+        free(tmp);
+      }
+      free(cls->funcID);
+      free(cls);
+    } break;
     case EXPR_TYPE_FVAL:
     case EXPR_TYPE_IVAL:
     case EXPR_TYPE_UVAL:
       break;
-    case EXPR_TYPE_VECTOR_IDX:
-      {
-        vectorIndex_t *vecIdx = expr->vecIdx;
-        free_expression(vecIdx->expr);
-        free(vecIdx->expr);
-        free_expression(vecIdx->index);
-        free(vecIdx->index);
-        free(vecIdx);
-        break;
-      }
-    case EXPR_TYPE_TEXT:
-      {
-        free(expr->text);
-        break;
-      }
-    case EXPR_TYPE_OPADD:
-      {
-        free_expression((expr_t *)expr->add.left);
-        free_expression((expr_t *)expr->add.right);
-        break;
-      }
-    case EXPR_TYPE_OPSUB:
-      {
-        free_expression((expr_t *)expr->add.left);
-        free_expression((expr_t *)expr->add.right);
-
-        break;
-      }
-    case EXPR_TYPE_OPMUL:
-      {
-        free_expression((expr_t *)expr->add.left);
-        free_expression((expr_t *)expr->add.right);
-        break;
-      }
-    case EXPR_TYPE_OPMOD:
-      {
-        free_expression((expr_t *)expr->add.left);
-        free_expression((expr_t *)expr->add.right);
-        break;
-      }
+    case EXPR_TYPE_VECTOR_IDX: {
+      vectorIndex_t *vecIdx = expr->vecIdx;
+      free_expression(vecIdx->expr);
+      free(vecIdx->expr);
+      free_expression(vecIdx->index);
+      free(vecIdx->index);
+      free(vecIdx);
       break;
-    case EXPR_TYPE_OPDIV:
-      {
-        free_expression((expr_t *)expr->add.left);
-        free_expression((expr_t *)expr->add.right);
-        break;
-      }
-    case EXPR_TYPE_DICT:
-      {
-        dictionary_t *dict = expr->dict;
-
-        if (dict->initialized) {
-          hashtable_free(dict->hash);
-          free(dict->hash);
-        } else {
-          keyValList_t *walk = dict->keyVals;
-          keyValList_t *walk_next;
-
-          while (walk != NULL) {
-            walk_next = walk->next;
-            free_expression(walk->key);
-            free(walk->key);
-            free_expression(walk->val);
-            free(walk->val);
-            free(walk);
-            walk = walk_next;
-          }
-        }
-        free(dict);
-        break;
-      }
-    case EXPR_TYPE_FUNCCALL:
-      {
-        functionCall_t *call = expr->func;
-        argsList_t *args = call->args;
-
-        free_expression(call->id);
-        free(call->id);
-        while (args != NULL) {
-          argsList_t *tmp = args;
-          free_expression(args->arg);
-          free(args->arg);
-          args = args->next;
-          free(tmp);
-        }
-        free(call);
-      }
+    }
+    case EXPR_TYPE_TEXT: {
+      free(expr->text);
       break;
-    case EXPR_TYPE_COND:
-      {
-        ifCondition_t *cond = expr->cond;
-        free_expression((expr_t *)cond->left);
-        free_expression((expr_t *)cond->right);
-      }
+    }
+    case EXPR_TYPE_OPADD: {
+      free_expression((expr_t *)expr->add.left);
+      free_expression((expr_t *)expr->add.right);
       break;
-    case EXPR_TYPE_VECTOR:
-      {
-        vector_t *vec = expr->vec;
-        int32_t len = vec->length;
-        int32_t vecWalk = 0;
-        argsList_t *v = vec->content;
-        argsList_t *p;
+    }
+    case EXPR_TYPE_OPSUB: {
+      free_expression((expr_t *)expr->add.left);
+      free_expression((expr_t *)expr->add.right);
 
-        while (vecWalk < len) {
-          if (v->arg != NULL) {
-            free_expression(v->arg);
-            free(v->arg);
-            v->arg = NULL;
-          }
-          p = v;
-          v = v->next;
-          free(p);
-          ++vecWalk;
-          //  printf("(2.1)\n");
+      break;
+    }
+    case EXPR_TYPE_OPMUL: {
+      free_expression((expr_t *)expr->add.left);
+      free_expression((expr_t *)expr->add.right);
+      break;
+    }
+    case EXPR_TYPE_OPMOD: {
+      free_expression((expr_t *)expr->add.left);
+      free_expression((expr_t *)expr->add.right);
+      break;
+    } break;
+    case EXPR_TYPE_OPDIV: {
+      free_expression((expr_t *)expr->add.left);
+      free_expression((expr_t *)expr->add.right);
+      break;
+    }
+    case EXPR_TYPE_DICT: {
+      dictionary_t *dict = expr->dict;
+
+      if (dict->initialized) {
+        hashtable_free(dict->hash);
+        free(dict->hash);
+      } else {
+        keyValList_t *walk = dict->keyVals;
+        keyValList_t *walk_next;
+
+        while (walk != NULL) {
+          walk_next = walk->next;
+          free_expression(walk->key);
+          free(walk->key);
+          free_expression(walk->val);
+          free(walk->val);
+          free(walk);
+          walk = walk_next;
         }
-
-        if (vec->forEach != NULL) {
-          free_ast(vec->forEach);
-          free(vec->forEach);
-        }
-
-        free(vec);
-        break;
       }
+      free(dict);
+      break;
+    }
+    case EXPR_TYPE_FUNCCALL: {
+      functionCall_t *call = expr->func;
+      argsList_t *args = call->args;
+
+      free_expression(call->id);
+      free(call->id);
+      while (args != NULL) {
+        argsList_t *tmp = args;
+        free_expression(args->arg);
+        free(args->arg);
+        args = args->next;
+        free(tmp);
+      }
+      free(call);
+    } break;
+    case EXPR_TYPE_COND: {
+      ifCondition_t *cond = expr->cond;
+      free_expression((expr_t *)cond->left);
+      free_expression((expr_t *)cond->right);
+    } break;
+    case EXPR_TYPE_VECTOR: {
+      vector_t *vec = expr->vec;
+      int32_t len = vec->length;
+      int32_t vecWalk = 0;
+      argsList_t *v = vec->content;
+      argsList_t *p;
+
+      while (vecWalk < len) {
+        if (v->arg != NULL) {
+          free_expression(v->arg);
+          free(v->arg);
+          v->arg = NULL;
+        }
+        p = v;
+        v = v->next;
+        free(p);
+        ++vecWalk;
+        //  printf("(2.1)\n");
+      }
+
+      if (vec->forEach != NULL) {
+        free_ast(vec->forEach);
+        free(vec->forEach);
+      }
+
+      free(vec);
+      break;
+    }
 
     case EXPR_TYPE_EMPTY:
     default:
@@ -924,108 +887,92 @@ void free_ast(statement_t *stmt) {
       next = ((statement_t *)stmt)->next;
       break;
     case LANG_ENTITY_EMPTY_MATH:
-    case LANG_ENTITY_EMPTY_STR:
-      {
-        next = ((statement_t *)stmt)->next;
-        break;
-      }
-    case LANG_ENTITY_BODY:
-      {
-        next = ((body_t *)stmt)->content;
-      }
+    case LANG_ENTITY_EMPTY_STR: {
+      next = ((statement_t *)stmt)->next;
       break;
+    }
+    case LANG_ENTITY_BODY: {
+      next = ((body_t *)stmt)->content;
+    } break;
     default:
       break;
   }
 
   switch (eval->entity) {
-    case LANG_ENTITY_DECL:
-      {
-        declaration_t *decl = ((statement_t *)stmt)->content;
-        /* Evaluating the expression among global variables */
-        // free_expression(decl->val);
-        free_expression(decl->id);
+    case LANG_ENTITY_DECL: {
+      declaration_t *decl = ((statement_t *)stmt)->content;
+      /* Evaluating the expression among global variables */
+      // free_expression(decl->val);
+      free_expression(decl->id);
+    } break;
+    case LANG_ENTITY_EXPR: {
+      expr_t *e = ((statement_t *)stmt)->content;
+
+      free_expression(e);
+      free(e);
+    } break;
+    case LANG_ENTITY_FOREACH: {
+      forEachStmt_t *foreach = ((statement_t *)stmt)->content;
+
+      free_expression(foreach->root);
+      free_expression(foreach->entry);
+      free(foreach->uniqueUnfoldIncID);
+      free_ast(foreach->body->content);
+    } break;
+    case LANG_ENTITY_EMPTY_STR: {
+      free_expression(((statement_t *)stmt)->content);
+      break;
+    }
+    case LANG_ENTITY_CLASSDECL: {
+      class_t *class = ((statement_t *)stmt)->content;
+      free(class->id);
+      free_ast(class->defines);
+      break;
+    }
+    case LANG_ENTITY_FUNCDECL: {
+      functionDef_t *funcDef = ((statement_t *)stmt)->content;
+      argsList_t *args = funcDef->params;
+      free(funcDef->id.id);
+      while (args != NULL) {
+        free_expression(args->arg);
+        args = args->next;
+      }
+      free_ast(funcDef->body);
+    } break;
+    case LANG_ENTITY_FUNCCALL: {
+      functionCall_t *funcCall = ((statement_t *)stmt)->content;
+      argsList_t *args = funcCall->args;
+
+      free_expression(funcCall->id);
+      while (args != NULL) {
+        free_expression(args->arg);
+        args = args->next;
+      }
+    } break;
+    case LANG_ENTITY_CONDITIONAL: {
+      ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
+      ifStmt_t *ifstmtWalk;
+      expr_t *cond = ifstmt->cond;
+
+      free_expression(cond);
+      free_ast(ifstmt->body->content);
+
+      // Walk through the elifs.
+      ifstmtWalk = ifstmt->elif;
+
+      while (ifstmtWalk != NULL) {
+        free_expression(ifstmtWalk->cond);
+        free_ast(ifstmtWalk->body->content);
+        ifstmtWalk = ifstmtWalk->elif;
+      }
+
+      // Print the else if it is not NULL
+      if (ifstmt->endif != NULL) {
+        ifstmtWalk = ifstmt->endif;
+        free_ast(ifstmtWalk->body->content);
       }
       break;
-    case LANG_ENTITY_EXPR:
-      {
-        expr_t *e = ((statement_t *)stmt)->content;
-
-        free_expression(e);
-        free(e);
-      }
-      break;
-    case LANG_ENTITY_FOREACH:
-      {
-        forEachStmt_t *foreach = ((statement_t *)stmt)->content;
-
-        free_expression(foreach->root);
-        free_expression(foreach->entry);
-        free(foreach->uniqueUnfoldIncID);
-        free_ast(foreach->body->content);
-      }
-      break;
-    case LANG_ENTITY_EMPTY_STR:
-      {
-        free_expression(((statement_t *)stmt)->content);
-        break;
-      }
-    case LANG_ENTITY_CLASSDECL:
-      {
-        class_t *class = ((statement_t *)stmt)->content;
-        free(class->id);
-        free_ast(class->defines);
-        break;
-      }
-    case LANG_ENTITY_FUNCDECL:
-      {
-        functionDef_t *funcDef = ((statement_t *)stmt)->content;
-        argsList_t *args = funcDef->params;
-        free(funcDef->id.id);
-        while (args != NULL) {
-          free_expression(args->arg);
-          args = args->next;
-        }
-        free_ast(funcDef->body);
-      }
-      break;
-    case LANG_ENTITY_FUNCCALL:
-      {
-        functionCall_t *funcCall = ((statement_t *)stmt)->content;
-        argsList_t *args = funcCall->args;
-
-        free_expression(funcCall->id);
-        while (args != NULL) {
-          free_expression(args->arg);
-          args = args->next;
-        }
-      }
-      break;
-    case LANG_ENTITY_CONDITIONAL:
-      {
-        ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
-        ifStmt_t *ifstmtWalk;
-        expr_t *cond = ifstmt->cond;
-
-        free_expression(cond);
-        free_ast(ifstmt->body->content);
-
-        // Walk through the elifs.
-        ifstmtWalk = ifstmt->elif;
-
-        while (ifstmtWalk != NULL) {
-          free_expression(ifstmtWalk->cond);
-          free_ast(ifstmtWalk->body->content);
-          ifstmtWalk = ifstmtWalk->elif;
-        }
-
-        // Print the else if it is not NULL
-        if (ifstmt->endif != NULL) {
-          ifstmtWalk = ifstmt->endif;
-          free_ast(ifstmtWalk->body->content);
-        }
-        break;
-      }
+    }
     case LANG_ENTITY_SYSTEM:
       free_expression(((statement_t *)stmt)->content);
       break;

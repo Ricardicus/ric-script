@@ -479,7 +479,9 @@ statement_t *newStatement(int type, void *content) {
 
 class_t *newClass(char *id, body_t *body) {
   class_t *class = ast_emalloc(sizeof(class_t));
-  class->id = id;
+
+  class->id = ast_emalloc(strlen(id)+1);
+  sprintf(class->id,"%s", id); 
   class->defines = body->content;
   class->funcDefsScript = NULL;
   class->funcDefsABI = NULL;

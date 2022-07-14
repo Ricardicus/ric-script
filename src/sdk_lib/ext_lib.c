@@ -212,8 +212,11 @@ int example_class_init(LIBRARY_PARAMS()) {
   cls->id = class_name;
   cls->initialized = 1;
   cls->funcDefsABI = hashtable_new(10, 0.9);
+  cls->funcDefsABI->allocated_key = 1;
+  cls->funcDefsABI->allocated_data = 1;
   cls->funcDefsScript = hashtable_new(10, 0.9);
   cls->varMembers = hashtable_new(10, 0.9);
+  cls->varMembers->allocated_key = 1;
 
   stv.type = INT32TYPE;
   stv.i = 0;

@@ -22,8 +22,8 @@ typedef struct key_val_pair {
 typedef struct hash {
   int size;
   int ocupied;
-  int data_also;
-  int key_also;
+  int allocated_data;
+  int allocated_key;
   float load;
   entry_t **table;
   void (*put)(struct hash *, void *, char *, void *);

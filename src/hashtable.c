@@ -12,8 +12,8 @@ hashtable_t *hashtable_new(int size, float load) {
 
   hashtable->size = size;
   hashtable->ocupied = 0;
-  hashtable->data_also = 0; // to be modified by user
-  hashtable->key_also = 0;  // to be modified by user
+  hashtable->allocated_data = 0; // to be modified by user
+  hashtable->allocated_key = 0;  // to be modified by user
   hashtable->load = load;
   hashtable->table = (entry_t **)calloc(size, sizeof(entry_t *));
   hashtable->put = hashtable_put;
@@ -30,10 +30,10 @@ static void free_hashtable_table(hashtable_t *hash) {
     while (ptr1 != NULL) {
       ptr2 = ptr1;
       ptr1 = ptr1->next;
-      if (hash->data_also) {
+      if (hash->allocated_data) {
         free(ptr2->data);
       }
-      if (hash->key_also) {
+      if (hash->allocated_key) {
         free(ptr2->key);
       }
       free(ptr2);
@@ -47,7 +47,7 @@ void hashtable_rehash(hashtable_t *hashtable) {
   int size_old = hashtable->size;
   int newsize = size_old * 2;
   hashtable_t *newhash = hashtable_new(newsize, hashtable->load);
-  newhash->data_also = hashtable->data_also;
+  newhash->allocated_data = hashtable->allocated_data;
   int i = 0;
   while (i < size_old) {
     struct key_val_pair *ptr = hashtable->table[i];
@@ -66,7 +66,7 @@ hashtable_t *hashtable_copy(hashtable_t *hashtable) {
   int size_old = hashtable->size;
   int newsize = size_old;
   hashtable_t *newhash = hashtable_new(newsize, hashtable->load);
-  newhash->data_also = hashtable->data_also;
+  newhash->allocated_data = hashtable->allocated_data;
   int i = 0;
   while (i < size_old) {
     struct key_val_pair *ptr = hashtable->table[i];
@@ -145,10 +145,10 @@ void hashtable_put(hashtable_t *hashtable, void *ctx, char *key, void *val) {
     struct key_val_pair *ptr2;
     while (ptr1 != NULL) {
       if (strcmp(ptr1->key, key) == 0) {
-        if (hashtable->data_also) {
+        if (hashtable->allocated_data) {
           free(ptr1->data);
         }
-        if (hashtable->key_also) {
+        if (hashtable->allocated_key) {
           free(ptr1->key);
           ptr1->key = key;
         }

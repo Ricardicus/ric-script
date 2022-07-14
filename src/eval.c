@@ -3153,7 +3153,7 @@ void locals_remove(locals_stack_t *stack, char *id) {
 hashtable_t *new_argstable() {
   hashtable_t *argTable = hashtable_new(20, 0.8);
   assert(argTable != NULL);
-  argTable->data_also = 1;
+  argTable->allocated_data = 1;
   return argTable;
 }
 
@@ -3402,7 +3402,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
   newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
-  newDict->hash->key_also = 1;
+  newDict->hash->allocated_key = 1;
 
   if (dict->initialized == 0) {
     keyValList_t *walk = dict->keyVals;

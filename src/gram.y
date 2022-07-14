@@ -389,6 +389,8 @@ class: ';' ';' ID ';' ';' body {
     /* Only declarations allowed */
     body_t *bod = $6;
     statement_t *walk = bod->content;
+    char *classId = ast_emalloc(strlen($3)+2);
+    memset(classId, 0, strlen($3)+1);
     while ( walk != NULL ) {
         if (
             walk->entity != LANG_ENTITY_DECL &&
@@ -415,7 +417,8 @@ class: ';' ';' ID ';' ';' body {
         }
         walk = walk->next;
     }
-    $$ = newClass($3, bod);
+    snprintf(classId, strlen($3)+2, "%s", $3);
+    $$ = newClass(classId, bod);
 }
 
 function:

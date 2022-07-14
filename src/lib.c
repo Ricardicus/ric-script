@@ -27,6 +27,7 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("data", 1, ric_create_data),
     DECLARE_LIB_FUNCTION("text", 1, ric_create_text),
     DECLARE_LIB_FUNCTION("printEnv", 0, ric_print_env),
+    DECLARE_LIB_FUNCTION("sum", 1, ric_sum),
     // libjson
     DECLARE_LIB_FUNCTION("jsonLoad", 1, ric_json_load),
     DECLARE_LIB_FUNCTION("jsonConvert", 1, ric_json_convert),

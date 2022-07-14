@@ -1101,6 +1101,47 @@ int ric_is_defined(LIBRARY_PARAMS()) {
   return 0;
 }
 
+int ric_sum(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int32_t result = 0;
+  argsList_t *walk = NULL;
+  vector_t *arg1 = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+  switch (stv.type) {
+    case VECTORTYPE:
+      arg1 = stv.vec;
+      break;
+    default: {
+      fprintf(stderr,
+              "error: function '%s' got unexpected data type as argument, expected vector\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
+  }
+
+  walk = arg1->content;
+  while (walk != NULL) {
+    stackval_t sv;
+    evaluate_expression(walk->arg, EXPRESSION_ARGS());
+    POP_VAL(&sv, sp, sc);
+    if ( sv.type == INT32TYPE ) {
+    	result += sv.i;
+    } else {
+    	fprintf(stderr, "error: function '%s' got unexpected data type in vector, expected integers\n", LIBRARY_FUNC_NAME());
+    }
+    walk = walk->next;
+  }
+
+  /* Pushing result */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}
+
 extern libFunction_t ric_library[];
 
 int ric_help(LIBRARY_PARAMS()) {

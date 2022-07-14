@@ -4,6 +4,9 @@ from settings import *
 def test_directory_print():
 
   output_lines = [
+"load_test",
+" numbers.txt",
+" definitions.ric",
 "load_nt.ric",
 "types.ric",
 "demo.ric",

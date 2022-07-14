@@ -20,7 +20,7 @@ hashtable_t *hashtable_new(int size, float load) {
   return hashtable;
 }
 
-static void free_hashtable_table(hashtable_t *hash) {
+void free_hashtable_table(hashtable_t *hash) {
   int size = hash->size;
   int i = 0;
   struct key_val_pair *ptr1;

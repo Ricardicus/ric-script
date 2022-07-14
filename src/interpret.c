@@ -410,6 +410,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
         class_t *tmp = NULL;
         class_t *classObj = NULL;
         int *depth = PROVIDE_CONTEXT()->depth;
+        expr_t *rootExp = NULL;
         vector_t *rootVec = NULL;
         char *rootChars = NULL;
         int32_t rootInt = -1;
@@ -432,76 +433,77 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
         int continueLoop = 1;
         interpret_state_t interpret_state = INTEPRET_CONTINUE;
 
-        while (continueLoop) {
-          evaluate_expression(root, EXPRESSION_ARGS());
-          POP_VAL(&sv, sp, sc);
-          switch (sv.type) {
-            case VECTORTYPE:
-              rootVec = sv.vec;
-              break;
-            case DICTTYPE:
-              rootDict = sv.dict;
-              break;
-            case TEXT:
-              rootChars = sv.t;
-              break;
-            case INT32TYPE:
-              rootInt = sv.i;
-              break;
-            case BIGINT:
-              rootBigInt = sv.bigInt;
-              break;
-            default:
-              printf("%s.%d error: expression isn't an indexable\n", ((statement_t *)stmt)->file,
-                     ((statement_t *)stmt)->line);
-              break;
-          }
+        evaluate_expression(root, EXPRESSION_ARGS());
+        POP_VAL(&sv, sp, sc);
+        rootExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+        switch (rootExp->type) {
+          case EXPR_TYPE_VECTOR:
+            rootVec = rootExp->vec;
+            break;
+          case EXPR_TYPE_DICT:
+            rootDict = rootExp->dict;
+            break;
+          case EXPR_TYPE_TEXT:
+            rootChars = rootExp->text;
+            break;
+          case EXPR_TYPE_IVAL:
+            rootInt = rootExp->ival;
+            break;
+          case EXPR_TYPE_BIGINT:
+            rootBigInt = rootExp->bigInt;
+            break;
+          default:
+            printf("%s.%d error: expression isn't an indexable\n", ((statement_t *)stmt)->file,
+                   ((statement_t *)stmt)->line);
+            break;
+        }
 
+        if (rootVec != NULL) {
+          endIteration = rootVec->length;
+        } else if (rootDict != NULL) {
+          /* traverse the dictionary keys */
+          hashtable_t *hash = rootDict->hash;
+          int hashSize = hash->size;
+          struct key_val_pair *ptr;
+          int i = 0;
+          int keyCount = 0;
+          /* Check limits */
+          while (i < hashSize) {
+            ptr = hash->table[i];
+            while (ptr != NULL) {
+              /* Here is a key.. */
+              ptr = ptr->next;
+              keyCount++;
+            }
+            i++;
+          }
+          endIteration = keyCount;
+        } else if (rootChars != NULL) {
+          endIteration = strlen(rootChars);
+        } else if (rootInt >= 0) {
+          endIteration = rootInt;
+        } else if (rootBigInt != NULL) {
+          if (!festmtBigIntInitialized) {
+            mpz_init(endIterationBigInt);
+            mpz_init(festmtBigIndex);
+            mpz_add(endIterationBigInt, *rootBigInt, festmtBigIndex);
+ 
+            festmtBigIntInitialized = 1;
+          }
+        } else {
+          /* This is really not supposed to happen */
+          printf(
+              "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+          exit(1);
+        }
+
+        while (continueLoop) {
           if (entry->type != EXPR_TYPE_ID) {
             printf("%s.%d error: '%s' isn't a correct variable\n", ((statement_t *)stmt)->file,
                    ((statement_t *)stmt)->line, entry->id.id);
           } else {
             entryId = entry->id.id;
-          }
-
-          if (rootVec != NULL) {
-            endIteration = rootVec->length;
-          } else if (rootDict != NULL) {
-            /* traverse the dictionary keys */
-            hashtable_t *hash = rootDict->hash;
-            int hashSize = hash->size;
-            struct key_val_pair *ptr;
-            int i = 0;
-            int keyCount = 0;
-            /* Check limits */
-            while (i < hashSize) {
-              ptr = hash->table[i];
-              while (ptr != NULL) {
-                /* Here is a key.. */
-                ptr = ptr->next;
-                keyCount++;
-              }
-              i++;
-            }
-            endIteration = keyCount;
-          } else if (rootChars != NULL) {
-            endIteration = strlen(rootChars);
-          } else if (rootInt >= 0) {
-            endIteration = rootInt;
-          } else if (rootBigInt != NULL) {
-            if (!festmtBigIntInitialized) {
-              mpz_init(endIterationBigInt);
-              mpz_init(festmtBigIndex);
-              mpz_add(endIterationBigInt, *rootBigInt, festmtBigIndex);
-
-              festmtBigIntInitialized = 1;
-            }
-          } else {
-            /* This is really not supposed to happen */
-            printf(
-                "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
-            exit(1);
           }
 
           /* Get or set for-each unfold variable value */
@@ -777,7 +779,8 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
           if (hvp == NULL || (hvp->sv.type != INT32TYPE && hvp->sv.type != BIGINT)) {
             /* This is really not supposed to happen */
-            printf(
+            fprintf(
+                stderr,
                 "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                 ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
             exit(1);
@@ -798,40 +801,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               expr_t *newExp;
               POP_VAL(&sv, sp, sc);
 
-              switch (sv.type) {
-                case INT32TYPE:
-                  newExp = newExpr_Ival(sv.i);
-                  break;
-                case DOUBLETYPE:
-                  newExp = newExpr_Float(sv.d);
-                  break;
-                case TEXT:
-                  newExp = newExpr_Text(sv.t);
-                  break;
-                case TIMETYPE:
-                  newExp = newExpr_Time(sv.time);
-                  break;
-                case POINTERTYPE:
-                  newExp = newExpr_Pointer(sv.p);
-                  break;
-                case FUNCPTRTYPE:
-                  newExp = newExpr_FuncPtr(sv.func);
-                  break;
-                case LIBFUNCPTRTYPE:
-                  newExp = newExpr_LibFuncPtr(sv.libfunc);
-                  break;
-                case VECTORTYPE: {
-                  newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-                  break;
-                }
-                case BIGINT:
-                  newExp = newExpr_BigInt(sv.bigInt);
-                  break;
-                default:
-                  printf("%s.error: unknown type of value on the stack (%d)\n", __func__, sv.type);
-                  GENERAL_REPORT_ISSUE_MSG();
-                  break;
-              }
+              newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
 
               vecContent = newArgument(newExp, vecContent);
               newVec->vec->length++;
@@ -880,6 +850,19 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           PUSH_VECTOR(newVec->vec, sp, sc);
           free(newVec);
         }
+
+        if ( rootDict == NULL ) {
+          /* 
+           * root expressions are heap allocated 
+           * all others will be manually cleaned up here
+           */
+          free_expression(rootExp);
+        } else {
+          free_hashtable_table(rootDict->hash);
+          free(rootDict->hash);
+          free(rootDict);
+        }
+        free(rootExp);
         if (interpret_state == INTEPRET_RETURN) {
           /* Returning now from this function */
           free(ctx);

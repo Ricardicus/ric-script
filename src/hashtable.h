@@ -37,6 +37,7 @@ typedef void *(*callback_func_t)(int, hashtable_t *, char *);
  */
 
 hashtable_t *hashtable_new(int, float);
+void free_hashtable_table(hashtable_t *hash);
 void hashtable_rehash(hashtable_t *);
 void hashtable_free(hashtable_t *);
 void *hashtable_get(hashtable_t *, void *, const char *);

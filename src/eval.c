@@ -319,7 +319,7 @@ expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
       break;
     }
     default:
-      printf("%s.error: unknown type of value on the stack (%d)\n", __func__, sv->type);
+      fprintf(stderr, "%s.error: unknown type of value on the stack (%d)\n", __func__, sv->type);
       GENERAL_REPORT_ISSUE_MSG();
       exit(1);
       break;
@@ -735,40 +735,7 @@ expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS()) {
       evaluate_expression(walk->arg, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
-      switch (sv.type) {
-        case INT32TYPE:
-          newExp = newExpr_Ival(sv.i);
-          break;
-        case DOUBLETYPE:
-          newExp = newExpr_Float(sv.d);
-          break;
-        case TEXT:
-          newExp = newExpr_Text(sv.t);
-          break;
-        case TIMETYPE:
-          newExp = newExpr_Time(sv.time);
-          break;
-        case POINTERTYPE:
-          newExp = newExpr_Pointer(sv.p);
-          break;
-        case FUNCPTRTYPE:
-          newExp = newExpr_FuncPtr(sv.func);
-          break;
-        case LIBFUNCPTRTYPE:
-          newExp = newExpr_LibFuncPtr(sv.libfunc);
-          break;
-        case VECTORTYPE: {
-          newExp = copy_vector(sv.vec, EXPRESSION_ARGS());
-          break;
-        }
-        case BIGINT:
-          newExp = newExpr_BigInt(sv.bigInt);
-          break;
-        default:
-          printf("%s.error: unknown type of value on the stack (%d)\n", __func__, sv.type);
-          GENERAL_REPORT_ISSUE_MSG();
-          break;
-      }
+      newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
 
       newContent = newArgument(newExp, newContent);
       newVec->vec->length++;
@@ -802,11 +769,10 @@ expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS()) {
     /* Moving along, interpreting function */
     int localsStackSp = varLocals->sp;
     int localsStackSb = varLocals->sb;
-    varLocals->sb = varLocals->sp;
 
     *interactive = INTERACTIVE_STACK;
 
-    interpret_statements_(forEach, PROVIDE_CONTEXT(), NULL, NULL);
+    interpret_statements_(forEach, PROVIDE_CONTEXT(), args, argVals);
 
     varLocals->sb = localsStackSb;
     varLocals->sp = localsStackSp;
@@ -2658,7 +2624,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             if (params->arg->type != EXPR_TYPE_ID) {
               /* This is not supposed to happen */
-              printf("Error: parameter in function definition '%s' was invalid\n", funcID);
+              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n", funcID);
             }
 
             /* Evaluate expression */
@@ -2813,7 +2779,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             if (params->arg->type != EXPR_TYPE_ID) {
               /* This is not supposed to happen */
-              printf("Error: parameter in function definition '%s' was invalid\n", funcID);
+              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n", funcID);
             }
 
             /* Evaluate expression */
@@ -2992,7 +2958,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           if (params->arg->type != EXPR_TYPE_ID) {
             /* This is not supposed to happen */
-            printf("Error: parameter in function definition '%s' was invalid\n", funcID);
+            fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n", funcID);
           }
 
           /* Evaluate expression */
@@ -3434,6 +3400,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
       evaluate_expression(expVal, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
+
       /* Push all values to the heap */
       switch (sv.type) {
         case DOUBLETYPE:

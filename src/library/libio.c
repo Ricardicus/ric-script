@@ -266,7 +266,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
     argsList_t *a;
     /* Trim new line */
     char *c = strchr(buffer, '\n');
-    if ( c != NULL ) {
+    if (c != NULL) {
       *c = 0;
     }
     e = newExpr_Text(buffer);

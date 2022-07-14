@@ -487,7 +487,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             mpz_init(endIterationBigInt);
             mpz_init(festmtBigIndex);
             mpz_add(endIterationBigInt, *rootBigInt, festmtBigIndex);
- 
+
             festmtBigIntInitialized = 1;
           }
         } else {
@@ -851,9 +851,9 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           free(newVec);
         }
 
-        if ( rootDict == NULL ) {
-          /* 
-           * root expressions are heap allocated 
+        if (rootDict == NULL) {
+          /*
+           * root expressions are heap allocated
            * all others will be manually cleaned up here
            */
           free_expression(rootExp);

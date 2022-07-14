@@ -2624,7 +2624,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             if (params->arg->type != EXPR_TYPE_ID) {
               /* This is not supposed to happen */
-              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n", funcID);
+              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n",
+                      funcID);
             }
 
             /* Evaluate expression */
@@ -2779,7 +2780,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             if (params->arg->type != EXPR_TYPE_ID) {
               /* This is not supposed to happen */
-              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n", funcID);
+              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n",
+                      funcID);
             }
 
             /* Evaluate expression */

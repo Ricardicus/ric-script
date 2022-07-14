@@ -264,6 +264,11 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
+    /* Trim new line */
+    char *c = strchr(buffer, '\n');
+    if ( c != NULL ) {
+      *c = 0;
+    }
     e = newExpr_Text(buffer);
     a = newArgument(e, vecContent);
     vecContent = a;

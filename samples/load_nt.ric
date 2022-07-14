@@ -8,3 +8,6 @@ fbc = foobarclass()
 fbc::foo()
 fbc::bar()
 
+load("..\samples\load_test\definitions.ric")
+
+print(sum(getLinesAsInts("..\samples\load_test\numbers.txt")))

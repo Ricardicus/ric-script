@@ -1128,10 +1128,12 @@ int ric_sum(LIBRARY_PARAMS()) {
     stackval_t sv;
     evaluate_expression(walk->arg, EXPRESSION_ARGS());
     POP_VAL(&sv, sp, sc);
-    if ( sv.type == INT32TYPE ) {
-    	result += sv.i;
+    if (sv.type == INT32TYPE) {
+      result += sv.i;
     } else {
-    	fprintf(stderr, "error: function '%s' got unexpected data type in vector, expected integers\n", LIBRARY_FUNC_NAME());
+      fprintf(stderr,
+              "error: function '%s' got unexpected data type in vector, expected integers\n",
+              LIBRARY_FUNC_NAME());
     }
     walk = walk->next;
   }

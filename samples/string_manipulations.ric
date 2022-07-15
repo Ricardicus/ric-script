@@ -41,27 +41,27 @@ s = " ddrraakkcciiRR"
 print(s[1::-2])
 
 s = "hejsan japp nepp hoppsan"
-? [ startsWith(s, "hej") ] {
-  print(split(s, " ")[1])
+? [ s.startsWith("hej") ] {
+  print(s.split(" ")[1])
 }
-? [ startsWith(s, "hejsan") ] {
-  print(split(s, " ")[1])
+? [ s.startsWith("hejsan") ] {
+  print(s.split(" ")[1])
 }
-? [ startsWith(s, "tja") ] {
-  print(split(s, " ")[2])
+? [ s.startsWith("tja") ] {
+  print(s.split(" ")[2])
 }
-? [ startsWith(s, "") ] {
-  print(split(s, " ")[2])
+? [ s.startsWith("") ] {
+  print(s.split(" ")[2])
 }
-? [ endsWith(s, "san") ] {
-  print(split(s, " ")[1])
+? [ s.endsWith("san") ] {
+  print(s.split(" ")[1])
 }
-? [ endsWith(s, "hoppsan") ] {
-  print(split(s, " ")[1])
+? [ s.endsWith("hoppsan") ] {
+  print(s.split(" ")[1])
 }
-? [ endsWith(s, "tja") ] {
-  print(split(s, " ")[2])
+? [ s.endsWith("tja") ] {
+  print(s.split(" ")[2])
 }
-? [ endsWith(s, "") ] {
-  print(split(s, " ")[2])
+? [ s.endsWith("") ] {
+  print(s.split(" ")[2])
 }

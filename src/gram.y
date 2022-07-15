@@ -389,8 +389,6 @@ class: ';' ';' ID ';' ';' body {
     /* Only declarations allowed */
     body_t *bod = $6;
     statement_t *walk = bod->content;
-    char *classId = ast_emalloc(strlen($3)+2);
-    memset(classId, 0, strlen($3)+1);
     while ( walk != NULL ) {
         if (
             walk->entity != LANG_ENTITY_DECL &&
@@ -417,8 +415,7 @@ class: ';' ';' ID ';' ';' body {
         }
         walk = walk->next;
     }
-    snprintf(classId, strlen($3)+2, "%s", $3);
-    $$ = newClass(classId, bod);
+    $$ = newClass($3, bod);
 }
 
 function:
@@ -445,6 +442,24 @@ functionCall:
     | ID '(' ')' {
         expr_t *id = newExpr_ID($1);
         $$ = newFunCall(id,NULL);
+    }
+    | ID '.' ID '(' ')' {
+        expr_t *id = newExpr_ID($3);
+        expr_t *expr = newExpr_ID($1);
+        argsList_t *args = newArgument(expr, NULL);
+        $$ = newFunCall(id, args);
+    }
+    | ID '.' ID '(' arguments_list ')' {
+        expr_t *id = newExpr_ID($3);
+        expr_t *expr = newExpr_ID($1);
+        argsList_t *args = newArgument(expr, NULL);
+        argsList_t *walk = $5;
+        walk->length += 1;
+        while ( walk->next != NULL ) {
+          walk = walk->next;
+        }
+        walk->next = args;
+        $$ = newFunCall(id, $5);
     }
     | indexedVector '(' arguments_list ')' {
         expr_t *id = (expr_t*)$1;

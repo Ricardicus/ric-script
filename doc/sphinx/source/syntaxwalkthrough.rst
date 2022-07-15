@@ -33,7 +33,7 @@ declaration of a **map** and two of the **list** sort.
 
 	@ isNumber(num) {
 	  . (num ... c) {
-	    ? [ !contains( numberChars, c ) ] {
+	    ? [ !numberChars.contains( c ) ] {
 	      -> 0
 	    }
 	  }
@@ -85,12 +85,12 @@ declaration of a **map** and two of the **list** sort.
 	  in = input(">> ")
 	  expr = split(in, " ")
 	  . ( expr ... e ) {
-	    ? [ isNumber(e) ] {
-	      push( parseInt(e) )
-	    } ~[ contains(operators, e) ] {
+	    ? [ e.isNumber() ] {
+	      push( e.parseInt() )
+	    } ~[ operators.contains(e) ] {
 	      s = eval(e)
 	      push(s)
-	    } ~[ contains(e, "q") ] {
+	    } ~[ e.contains("q") ] {
 	      run = 0
 	    } ~ {
 	      print("Sorry, I don't understand this: " + e)
@@ -141,7 +141,7 @@ compute big numbers.
   a = bigInt(81)
   # Compute and print 81 to the power of 500
   print( pow(a, 500) )
-  print(typeInText(a) + " (" + type(a) + ")")
+  print(a.typeInText() + " (" + a.type() + ")")
 
 **output**:
 
@@ -157,7 +157,7 @@ Floats
 
 	a = 1337.0
 	print(a)
-	print(typeInText(a) + " (" + type(a) + ")")
+	print(a.typeInText() + " (" + a.type() + ")")
 
 **output**:
 
@@ -174,7 +174,7 @@ Strings
 	a = "Hello world!"
 	print(a)
 	a = 'Hello world!'
-	print(typeInText(a) + " (" + type(a) + ")")
+	print(a.typeInText() + " (" + a.type() + ")")
 
 	# Advanced indexing [e (start)]:[e (end)][:[e (offset)]]
 	a = "hejsan"
@@ -208,8 +208,8 @@ Function pointers
 		a( b )
 	}
 
-	hej(print, "hejsan")
-	print(typeInText(hej) + " (" + type(hej) + ")")
+	print.hej("hejsan")
+	print(hej.typeInText() + " (" + hej.type() + ")")
 
 **output**:
 
@@ -264,8 +264,8 @@ A dictionary maps a string to any type of references.
 	s["foobar"]()
 
 	# Checking stdlib 'contains' function
-	print(contains(s, "foobar"))
-	print(contains(s, "barfoo"))
+	print(s.contains("foobar"))
+	print(s.contains("barfoo"))
 
 	# Checkoing stdlib 'keys' function
 	print(keys(s))
@@ -282,7 +282,7 @@ A dictionary maps a string to any type of references.
 
 	# Convert dictionary to string
 	s_res = jsonConvert(s)
-	print(s_res + " (" + typeInText(s_res) + ")")
+	print(s_res + " (" + s_res.typeInText() + ")")
 
 
 **outputs**:
@@ -350,19 +350,19 @@ and can hold any type of expressions.
 
 	h = ["foo"]
 
-	append(h, "bar")
+	h.append("bar")
 
 	print(h)
 
-	print( len(h) )
+	print( h.len() )
 
 	# For each loop
 	. ( h ... entry ) {
 		print(entry)
 	}
 
-	append(h, "foo")
-	append(h, "bar")
+	h.append("foo")
+	h.append("bar")
 
 	h[0] = "Foobar! foo "
 
@@ -393,14 +393,14 @@ and can hold any type of expressions.
 
 	# Testing libstd 'contains' function
 	s = ["foobar", 1337]
-	print(contains(s, 1338))
-	print(contains(s, 1337))
-	print(contains(s, "barfoo"))
-	print(contains(s, "foobar"))
+	print(s.contains(1338))
+	print(s.contains(1337))
+	print(s.contains("barfoo"))
+	print(s.contains("foobar"))
 
 	# Testing libstring 'split' function
 	s = "hejsan hoppsan falleralera"
-	v = split(s, " ")
+	v = s.split(" ")
 	print(v)
 
 	# List multiplication
@@ -504,7 +504,7 @@ printed, it will be printed like it contains chars.
 .. code-block:: bash
 
 	s = [102,111,111,98,97,114]
-	s = data(s)
+	s = s.data()
 
 	print(typeInText(s) + " (" + type(s) + ")")
 	print(s[0])
@@ -555,7 +555,7 @@ Class pointer
 	print(s::getA())
 
 	# Convert class members to json string
-	print(jsonConvert(s))
+	print(s.jsonConvert())
 
 **outputs**:
 
@@ -643,7 +643,7 @@ Below is an implementation of an RPN calculator implemented using a class.
 	@ isNumber(num) {
 	  numberChars = [ (10 ... i) { text(i) } ]
 	  . (num ... c) {
-	    ? [ !contains( numberChars, c ) ] {
+	    ? [ !numberChars.contains( c ) ] {
 	      -> 0
 	    }
 	  }
@@ -659,12 +659,12 @@ Below is an implementation of an RPN calculator implemented using a class.
 	  in = input(">> ")
 	  expr = split(in, " ")
 	  . ( expr ... e ) {
-	    ? [ isNumber(e) ] {
-	      calc::push( parseInt(e) )
-	    } ~[ contains(operators, e) ] {
+	    ? [ e.isNumber() ] {
+	      calc::push( e.parseInt() )
+	    } ~[ operators.contains(e) ] {
 	      s = calc::eval(e)
 	      calc::push(s)
-	    } ~[ contains(e, "q") ] {
+	    } ~[ e.contains("q") ] {
 	      run = 0
 	    } ~ {
 	      print("Sorry, I don't understand this: " + e)
@@ -804,7 +804,7 @@ For example, you can do this:
 	# Showcase the advanced list initialization
 	# Using the raw data datatype
 	s = [(25 ... i) { 65 + i }]
-	d = data(s)
+	d = s.data()
 	print(d)
 
 	# Creating fibbonacci series

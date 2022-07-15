@@ -11,7 +11,7 @@ sends = 10
   exit(1) 
 }
 
-? [ len(args) < 5 ] {
+? [ args.len() < 5 ] {
   usage()
 }
 
@@ -25,11 +25,11 @@ sends = 10
       exit(1)
     }
 
-    t = socketWrite(s, args[4])
+    t = s.socketWrite(args[4])
     ? [ t > 0 ] {
       print("Sent " + t + " bytes to server.")
     }
-    socketClose(s)
+    s.socketClose()
     sleep(1)
     i += 1
     @
@@ -45,24 +45,24 @@ sends = 10
 
   i = 0
   . [ i < reads ] {
-    t = socketAccept(s)
+    t = s.socketAccept()
     ? [ t > 0 ] {
-      in = socketRead(t, 50)
-      print("read " + len(in) + " bytes: " + in)
-      socketWrite(t, in)
-      socketClose(t)
+      in = t.socketRead(50)
+      print("read " + in.len() + " bytes: " + in)
+      t.socketWrite(in)
+      t.socketClose()
     }
     i += 1
     @
   }
 
-  socketClose(s)
+  s.socketClose()
 }
 
 # Start server thread immediately
-setTimeout(serverThread, 0)
+serverThread.setTimeout(0)
 # Start client server one second later
-setTimeout(clientThread, 1)
+clientThread.setTimeout(1)
 
 
 

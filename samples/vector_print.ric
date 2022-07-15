@@ -27,19 +27,19 @@ print(f[1][1][2])
 
 h = ["foo"]
 
-append(h, "bar")
+h.append("bar")
 
-print(h)
+h.print()
 
-print( len(h) )
+print( h.len() )
 
 # For each loop
 . ( h ... entry ) {
 	print(entry)
 }
 
-append(h, "foo")
-append(h, "bar")
+h.append("foo")
+h.append("bar")
 
 h[0] = "Foobar! foo "
 
@@ -70,14 +70,14 @@ s[1]()
 
 # Testing libstd 'contains' function
 s = ["foobar", 1337]
-print(contains(s, 1338))
-print(contains(s, 1337))
-print(contains(s, "barfoo"))
-print(contains(s, "foobar"))
+print(s.contains(1338))
+print(s.contains(1337))
+print(s.contains("barfoo"))
+print(s.contains("foobar"))
 
 # Testing libstring 'split' function
 s = "hejsan hoppsan falleralera"
-v = split(s, " ")
+v = s.split(" ")
 print(v)
 
 # List multiplication
@@ -119,9 +119,9 @@ print(s)
 # Popping
 s = [(10 ... i) { i }]
 print(s)
-print(pop(s) + " " + pop(s) + " " + pop(s))
+print(s.pop() + " " + s.pop() + " " + s.pop())
 print(s)
 
 # Pushing
-. ( 10 ... i ) { push(s, i) }
+. ( 10 ... i ) { s.push(i) }
 print(s)

@@ -1,13 +1,13 @@
 @ getLines(file) {
-  ? [ isFile(file) ] {
-    -> fileReadLines(fileOpen(file))
+  ? [ file.isFile() ] {
+    -> fileReadLines(file.fileOpen())
   }
   -> []
 }
 
 @ getLinesAsInts(file) {
-  ? [ isFile(file) ] {
-    -> [ ( fileReadLines(fileOpen(file)) ... line ) { parseInt(line) } ]
+  ? [ file.isFile() ] {
+    -> [ ( fileReadLines(file.fileOpen()) ... line ) { line.parseInt() } ]
   } 
   -> []
 }

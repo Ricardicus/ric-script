@@ -1,6 +1,6 @@
 # Check the arguments passed
 
-print("Number of arguments: " + len(args))
+print("Number of arguments: " + args.len())
 printf("args: ")
-print(args)
+args.print()
 

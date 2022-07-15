@@ -61,7 +61,7 @@ print(b)
   
   # should print 1337
   a = 1337
-  print(a)
+  a.print()
 
 }
 
@@ -69,7 +69,7 @@ print(b)
   
   # should not print 1337
   a = 1337
-  print(a)
+  a.print()
 
 }
 
@@ -214,7 +214,7 @@ a(" foo ", "bar ", ":)")
 	a( b )
 }
 
-hej(print, "hejsan")
+print.hej("hejsan")
 
 s = ["hej", 1337, "hejsan"]
 
@@ -245,9 +245,9 @@ print(f[1][1][2])
 
 h = ["foo"]
 
-append(h, "bar")
+h.append("bar")
 
-print(h)
+h.print()
 
 print( len(h) )
 
@@ -258,8 +258,8 @@ i = 0
   @
 }
 
-append(h, "foo")
-append(h, "bar")
+h.append("foo")
+h.append("bar")
 
 h[0] = "Foobar! foo "
 

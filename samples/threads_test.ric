@@ -21,6 +21,6 @@ a = 1
 
 print("I have set a variable, named 'a', to: " + a)
 
-setTimeout(end, 2)
-setInterval(iterate, 1)
+end.setTimeout(2)
+iterate.setInterval(1)
 

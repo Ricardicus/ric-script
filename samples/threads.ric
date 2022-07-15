@@ -26,8 +26,8 @@ print("By the time, a thread running with an interval")
 print("will increment this variables value with each iteration.")
 print("Let's begin...")
 
-setTimeout(end, 10)
-setInterval(iterate, 1)
+end.setTimeout(10)
+iterate.setInterval(1)
 
 print("I have now launched the threads!")
 print("They are running in a separate context.")

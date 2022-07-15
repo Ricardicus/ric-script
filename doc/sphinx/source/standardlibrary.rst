@@ -13,7 +13,7 @@ I will present some of them here
 List of batteries
 ~~~~~~~~~~~~~~~~~
 
-Using **help()** you get, as of today, the following output:
+Here are some of the standard library functions. With newer versions, new function names will be added. Using **help()** you get, as of today, the output below. It might not be updated, I copy and paste this text sometimes (I sometimes fail to update the docs in all honesty):
 
 .. code-block:: text
 
@@ -97,7 +97,14 @@ Using **help()** you get, as of today, the following output:
 
 
 Due to the underlying structure, I have not been able to add function argument
-names to the structure that handles the extended library.
+names to the structure that handles the extended library but can see the number of arguments the function expects. In ric-script the following is equivalent:
+
+```
+   # In ric-script ID1.ID2(args...) <=> ID2(ID1, args)
+   a.b()
+   b(a,b)
+```
+
 All the extended library functions are implemented `here <https://github.com/Ricardicus/ric-script/tree/master/src/library>`_.
 
 File io
@@ -136,23 +143,23 @@ this:
 	}
 
 	@ listFiles(folder, indent) {
-	  . ( ls(folder) ... file ) {
+	  . ( folder.ls() ... file ) {
 	    fullfile = folder + "/" + file
-	    ? [ isFile(fullfile) ] {
+	    ? [ fullfile.isFile() ] {
 	      printf(" " * indent)
 	      print(file)
 	    } ~ {
 	      ? [ file != '.' && file != '..'] {
 	        printf(" " * indent)
 	        print(file)
-	        listFiles(fullfile, indent + 1)
+	        fullfile.listFiles(indent + 1)
 	      }
 	    }
 	  }
 	}
 
 	# argument checking
-	? [ len(args) < 3 ] {
+	? [ args.len() < 3 ] {
 	  printUsage()
 	  exit(1)
 	}
@@ -174,15 +181,15 @@ You can read and write data to a file like this:
 
 	# A file has been opened
 	content = "Hello World!\nThis is a message :)\n"
-	fileWrite(fp, content)
+	fp.fileWrite(content)
 	
 	# Closing the file
-	fileClose(fp)
+	fp.fileClose()
 	
 	# Opening the file, and print its contents
 	fp = fileOpen(fileCheck)
-	print(fileReadLines(fp))
-	fileClose(fp)
+	print(fp.fileReadLines())
+	fp.fileClose()
 
 **outputs:**
 
@@ -212,7 +219,7 @@ Here is an example of how sockets can be used, making a socket server and a sock
     exit(1) 
   }
 
-  ? [ len(args) < 5 ] {
+  ? [ args.len() < 5 ] {
     usage()
   }
 
@@ -226,11 +233,11 @@ Here is an example of how sockets can be used, making a socket server and a sock
         exit(1)
       }
 
-      t = socketWrite(s, args[4])
+      t = s.socketWrite(args[4])
       ? [ t > 0 ] {
         print("Sent " + t + " bytes to server.")
       }
-      socketClose(s)
+      s.socketClose()
       sleep(1)
       i += 1
       @
@@ -246,28 +253,24 @@ Here is an example of how sockets can be used, making a socket server and a sock
 
     i = 0
     . [ i < reads ] {
-      t = socketAccept(s)
+      t = s.socketAccept()
       ? [ t > 0 ] {
-        in = socketRead(t, 50)
-        print("read " + len(in) + " bytes: " + in)
-        socketWrite(t, in)
-        socketClose(t)
+        in = t.socketRead(50)
+        print("read " + in.len() + " bytes: " + in)
+        t.socketWrite(in)
+        t.socketClose()
       }
       i += 1
       @
     }
 
-    socketClose(s)
+    s.socketClose()
   }
 
   # Start server thread immediately
-  setTimeout(serverThread, 0)
+  serverThread.setTimeout(0)
   # Start client server one second later
-  setTimeout(clientThread, 1)
-
-
-
-
+  clientThread.setTimeout(1)
 
 
 Math
@@ -326,20 +329,20 @@ Here is an example of how to set, get and list x-attributes in ric-script:
 .. code-block:: python
 
 	file = "requirements.txt"
-	s = xattrList(file)
+	s = file.xattrList()
 	print("xattr's of '" + file + "':")
 	print(s)
 
 	print("Setting some xattributes")
 
-	xattrSet(file, "user.owner", "Rickard")
-	xattrSet(file, "user.master", "Rickard of course")
+	file.xattrSet("user.owner", "Rickard")
+	file.xattrSet("user.master", "Rickard of course")
 
 	print("xattr's of '" + file + "' and values:")
-	s = xattrList(file)
+	s = file.xattrList()
 	i = 0
-	. [ i < len(s) ] {
-	  val = xattrGet(file, s[i])
+	. [ i < s.len() ] {
+	  val = file.xattrGet(s[i])
 	  print("    - '" + s[i] + "': '" + val + "'")
 	  i += 1
 	  @
@@ -348,22 +351,22 @@ Here is an example of how to set, get and list x-attributes in ric-script:
 	print("Searching for user.* keyed files")
 	s = xattrFindKey("user\.*")
 	i = 0
-	. [ i < len(s) ] {
+	. [ i < s.len() ] {
 	  print(s[i])
 	  i += 1
 	  @
 	}
 
 	print("Removing xattributes I just set")
-	s = xattrList(file)
+	s = file.xattrList()
 	i = 0
-	. [ i < len(s) ] {
-	  xattrRm(file, s[i])
+	. [ i < s.len() ] {
+	  file.xattrRm(s[i])
 	  i += 1
 	  @
 	}
 
-	s = xattrList(file)
+	s = file.xattrList()
 	print("xattr's of '" + file + "':")
 	print(s)
 

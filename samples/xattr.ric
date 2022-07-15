@@ -1,18 +1,18 @@
 file = "requirements.txt"
-s = xattrList(file)
+s = file.xattrList()
 print("xattr's of '" + file + "':")
 print(s)
 
 print("Setting some xattributes")
 
-xattrSet(file, "user.owner", "Rickard")
-xattrSet(file, "user.master", "Rickard of course")
+file.xattrSet("user.owner", "Rickard")
+file.xattrSet("user.master", "Rickard of course")
 
 print("xattr's of '" + file + "' and values:")
-s = xattrList(file)
+s = file.xattrList()
 i = 0
-. [ i < len(s) ] {
-  val = xattrGet(file, s[i])
+. [ i < s.len() ] {
+  val = file.xattrGet(s[i])
   print("    - '" + s[i] + "': '" + val + "'")
   i += 1
   @
@@ -21,22 +21,22 @@ i = 0
 print("Searching for user.* keyed files")
 s = xattrFindKey("user\.*")
 i = 0
-. [ i < len(s) ] {
+. [ i < s.len() ] {
   print(s[i])
   i += 1
   @
 }
 
 print("Removing xattributes I just set")
-s = xattrList(file)
+s = file.xattrList()
 i = 0
-. [ i < len(s) ] {
-  xattrRm(file, s[i])
+. [ i < s.len() ] {
+  file.xattrRm(s[i])
   i += 1
   @
 }
 
-s = xattrList(file)
+s = file.xattrList()
 print("xattr's of '" + file + "':")
 print(s)
 

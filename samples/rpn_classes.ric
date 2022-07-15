@@ -76,12 +76,12 @@ run = 1
   in = input(">> ")
   expr = split(in, " ")
   . ( expr ... e ) {
-    ? [ isNumber(e) ] {
-      calc::push( parseInt(e) )
-    } ~[ contains(operators, e) ] {
+    ? [ e.isNumber() ] {
+      calc::push( e.parseInt() )
+    } ~[ operators.contains(e) ] {
       s = calc::eval(e)
       calc::push(s)
-    } ~[ contains(e, "q") ] {
+    } ~[ e.contains("q") ] {
       run = 0
     } ~ {
       print("Sorry, I don't understand this: " + e)

@@ -19,11 +19,11 @@ print(hej)
 
 s = hej()
 print("hej")
-print(s)
+s.print()
 
 s::setA(100)
 f = s::getA()
-print(f)
+f.print()
 
 print(s::getA())
 

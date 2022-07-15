@@ -10,7 +10,7 @@ sends = 10
   exit(1) 
 }
 
-? [ len(args) < 5 ] {
+? [ args.len() < 5 ] {
   usage()
 }
 
@@ -23,11 +23,11 @@ i = 0
     exit(1)
   }
 
-  t = socketWrite(s, args[4])
+  t = s.socketWrite(args[4])
   ? [ t > 0 ] {
     print("Sent " + t + " bytes to server.")
   }
-  socketClose(s)
+  s.socketClose()
   sleep(1)
   i += 1
   @

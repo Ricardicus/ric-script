@@ -1,41 +1,41 @@
 # Dealing with large numbers
 s = bigInt("9999999999999")
-print(s)
+s.print()
 
 s = bigInt(2)
-print(s)
+s.print()
 
 s = 231321321321321 + 32323232323232
-print(s)
+s.print()
 
 s = s * 1000000
-print(s)
+s.print()
 
 s = 2 + 32132132132132132
-print(s)
+s.print()
 
 s = 231321321321321 + 2
-print(s)
+s.print()
 
 s = 9999999999999 - 8888888888888
-print(s)
+s.print()
 
 s = s - 9999999999999 
-print(s)
+s.print()
 
 s = 88888888888888 % 77777777777777
-print(s)
+s.print()
 
 s = 6666666666666666 / 3
-print(s)
+s.print()
 
 s = 8888888888888881 / 4
-print(s)
+s.print()
 
 s = pow(bigInt(2), 32)
-print(s)
+s.print()
 s = pow(bigInt(2), 128)
-print(s)
+s.print()
 
 # Ridiculously big numbers
 s = pow(bigInt(81), 100)

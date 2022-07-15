@@ -6,23 +6,23 @@
 }
 
 @ listFiles(folder, indent) {
-  . ( ls(folder) ... file ) {
+  . ( folder.ls() ... file ) {
     fullfile = folder + "/" + file
-    ? [ isFile(fullfile) ] {
+    ? [ fullfile.isFile() ] {
       printf(" " * indent)
       print(file)
     } ~ {
       ? [ file != '.' && file != '..' ] {
         printf(" " * indent)
         print(file)
-        listFiles(fullfile, indent + 1)
+        fullfile.listFiles(indent + 1)
       }
     }
   }
 }
 
 # argument checking
-? [ len(args) < 3 ] {
+? [ args.len() < 3 ] {
   printUsage()
   exit(1)
 }

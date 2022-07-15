@@ -6,7 +6,7 @@ fileCheck = "test.txt"
 
 print("Checking if there is a file called: '" + fileCheck + "': ")
 
-? [ isFile(fileCheck) ] {
+? [ fileCheck.isFile() ] {
   print("- Yes, there was such a file.")
 } ~ {
   print("- No, there was no such file.")
@@ -14,35 +14,35 @@ print("Checking if there is a file called: '" + fileCheck + "': ")
 
 print("Opening a file: " + fileCheck)
 
-fp = fileOpen(fileCheck)
+fp = fileCheck.fileOpen()
 
 print("File has been opened")
 
 content = "Hello world!\nNew line right?\nThis is a slash: \\\nNew line?\nHave a good day!\n"
 
-fileWrite(fp, content)
+fp.fileWrite(content)
 
 print("Closing the file")
 
-fileClose(fp)
+fp.fileClose()
 
-fp = fileOpen(fileCheck)
+fp = fileCheck.fileOpen()
 
-print(len(fileReadLines(fp)))
+print(len(fp.fileReadLines()))
 
-fileClose(fp)
+fp.fileClose()
 
 # Creating some folders and removing them
 mkdir("a")
 cd("a")
 fp = fileOpen("a.txt")
-fileWrite(fp, "hejsan")
-fileClose(fp)
+fp.fileWrite("hejsan")
+fp.fileClose()
 mkdir("b")
 cd("b")
 fp = fileOpen("b.txt")
-fileWrite(fp, "hejsan")
-fileClose(fp)
+fp.fileWrite("hejsan")
+fp.fileClose()
 cd("..")
 cd("..")
 print(ls("a"))

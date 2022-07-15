@@ -10,6 +10,6 @@
 
 # Calling a never ending function
 whatToWrite = "Ric Script!"
-neverEnd( whatToWrite )
+whatToWrite.neverEnd()
 
 

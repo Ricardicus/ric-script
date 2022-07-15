@@ -37,8 +37,8 @@ a(" foo ", "bar ", ":)")
   print(a)
 }
 
-hej(print, "hejsan")
-hej(willprint, "hej")
+print.hej("hejsan")
+willprint.hej("hej")
 
 @ returnZero() {
 	-> 0

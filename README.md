@@ -120,7 +120,7 @@ numberChars = [ (10 ... i) { text(i) } ]
 
 @ isNumber(num) {
   . (num ... c) {
-    ? [ !contains( numberChars, c ) ] {
+    ? [ !numberChars.contains( c ) ] {
       -> 0
     }
   }
@@ -172,12 +172,12 @@ run = 1
   in = input(">> ")
   expr = split(in, " ")
   . ( expr ... e ) {
-    ? [ isNumber(e) ] {
-      push( parseInt(e) )
-    } ~[ contains(operators, e) ] {
-      s = eval(e)
+    ? [ e.isNumber() ] {
+      push( e.parseInt() )
+    } ~[ operators.contains(e) ] {
+      s = e.eval()
       push(s)
-    } ~[ contains(e, "q") ] {
+    } ~[ e.contains("q") ] {
       run = 0
     } ~ {
       print("Sorry, I don't understand this: " + e)
@@ -268,7 +268,7 @@ A calulator in reverse Polish notation can be implemented like this in ric-scrip
 @ isNumber(num) {
   numberChars = [ (10 ... i) { text(i) } ]
   . (num ... c) {
-    ? [ !contains( numberChars, c ) ] {
+    ? [ ! numberChars.contains( c ) ] {
       -> 0
     }
   }
@@ -284,12 +284,12 @@ run = 1
   in = input(">> ")
   expr = split(in, " ")
   . ( expr ... e ) {
-    ? [ isNumber(e) ] {
-      calc::push( parseInt(e) )
-    } ~[ contains(operators, e) ] {
+    ? [ e.isNumber() ] {
+      calc::push( e.parseInt() )
+    } ~[ operators.contains(e) ] {
       s = calc::eval(e)
       calc::push(s)
-    } ~[ contains(e, "q") ] {
+    } ~[ e.contains("q") ] {
       run = 0
     } ~ {
       print("Sorry, I don't understand this: " + e)
@@ -376,8 +376,8 @@ print("By the time, a thread running with an interval")
 print("will increment this variables value with each iteration.")
 print("Let's begin...")
 
-setTimeout(end, 10)
-setInterval(iterate, 1)
+end.setTimeout(10)
+iterate.setInterval(1)
 
 print("I have now launched the threads!")
 print("They are running in a separate context.")
@@ -422,7 +422,7 @@ sends = 10
   exit(1) 
 }
 
-? [ len(args) < 5 ] {
+? [ args.len() < 5 ] {
   usage()
 }
 
@@ -436,11 +436,11 @@ sends = 10
       exit(1)
     }
 
-    t = socketWrite(s, args[4])
+    t = s.socketWrite(args[4])
     ? [ t > 0 ] {
       print("Sent " + t + " bytes to server.")
     }
-    socketClose(s)
+    s.socketClose()
     sleep(1)
     i += 1
     @
@@ -456,24 +456,24 @@ sends = 10
 
   i = 0
   . [ i < reads ] {
-    t = socketAccept(s)
+    t = s.socketAccept()
     ? [ t > 0 ] {
-      in = socketRead(t, 50)
-      print("read " + len(in) + " bytes: " + in)
-      socketWrite(t, in)
-      socketClose(t)
+      in = t.socketRead(50)
+      print("read " + in.len() + " bytes: " + in)
+      t.socketWrite(in)
+      t.socketClose()
     }
     i += 1
     @
   }
 
-  socketClose(s)
+  s.socketClose()
 }
 
 # Start server thread immediately
-setTimeout(serverThread, 0)
+serverThread.setTimeout(0)
 # Start client server one second later
-setTimeout(clientThread, 1)
+clientThread.setTimeout(1)
 ```
 
 This would output something like this:
@@ -500,9 +500,9 @@ ric-script comment symbol **#** so it looks alright.
 }
 
 @ listFiles(folder, indent) {
-  ( ls(folder) ... file ) {
+  ( folder.ls() ... file ) {
     fullfile = folder + "/" + file
-    ? [ isFile(fullfile) ] {
+    ? [ fullfile.isFile() ] {
       printf(" " * indent)
       print(file)
     } ~ {
@@ -510,14 +510,14 @@ ric-script comment symbol **#** so it looks alright.
       ? [ file != '..'] {
         printf(" " * indent)
         print(file)
-        listFiles(fullfile, indent + 1)
+        fullfile.listFiles(indent + 1)
       }}
     }
   }
 }
 
 //# argument checking
-? [ len(args) < 3 ] {
+? [ args.len() < 3 ] {
   printUsage()
   exit(1)
 }
@@ -545,14 +545,14 @@ print(s)
 
 print("Setting some xattributes")
 
-xattrSet(file, "user.owner", "Rickard")
-xattrSet(file, "user.master", "Rickard of course")
+file.xattrSet("user.owner", "Rickard")
+file.xattrSet("user.master", "Rickard of course")
 
 print("xattr's of '" + file + "' and values:")
-s = xattrList(file)
+s = file.xattrList()
 i = 0
-. [ i < len(s) ] {
-  val = xattrGet(file, s[i])
+. [ i < s.len() ] {
+  val = file.xattrGet(s[i])
   print("    - '" + s[i] + "': '" + val + "'")
   i += 1
   @
@@ -561,13 +561,13 @@ i = 0
 print("Removing xattributes I just set")
 s = xattrList(file)
 i = 0
-. [ i < len(s) ] {
-  xattrRm(file, s[i])
+. [ i < s.len() ] {
+  file.xattrRm(s[i])
   i += 1
   @
 }
 
-s = xattrList(file)
+s = file.xattrList()
 print("xattr's of '" + file + "':")
 print(s)
 ```
@@ -625,9 +625,9 @@ a = 1338
 }
 
 //# Calling out 'hej' function with our 'willprint' function as first argument
-hej(willprint, "hej")
+willprint.hej("hej")
 //# Calling out 'hej' function with standard library 'print' function as first argument
-hej(print, "hejsan")
+print.hej("hejsan")
 
 //# Dictionary expressions
 s = {"hello": "world", "elit": 1337}
@@ -763,8 +763,9 @@ aims to take in the future:
 - [x] Dynamic library support
 - [x] Built in JSON <-> ric-script dictionary mapping (like Pythons 'json' module)
 - [x] Support for huge integers (powered by https://gmplib.org/)
+- [x] Some form of variable scope for calling functions (Implemented ID.ID(args) <=> ID(ID, args)
+- [x] Possibility to define classes, with functions, in C (this far classes are only implemented in ric-script).
 - [ ] Nested function declarations that properly catches variable scope (makes it suitable for functional programming).
-- [ ] Possibility to define classes, with functions, in C (this far classes are only implemented in ric-script).
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files
 - [ ] Better interactive mode, support for multi-lines (single lines is supported in interactive mode, the language is also indifferent to line breaks).

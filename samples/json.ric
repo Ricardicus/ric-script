@@ -17,15 +17,15 @@ d = jsonLoad(json)
 print(d)
 
 testFile = "test.json"
-rm(testFile)
+testFile.rm()
 fp = fileOpen(testFile)
-fileWrite(fp, json)
-fileClose(fp)
+fp.fileWrite(json)
+fp.fileClose()
 
 fp = fileOpen(testFile)
-d = jsonLoad(fp)
-fileClose(fp)
-rm(testFile)
+d = fp.jsonLoad()
+fp.fileClose()
+testFile.rm()
 
 print(d)
 

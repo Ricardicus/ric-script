@@ -478,8 +478,10 @@ statement_t *newStatement(int type, void *content) {
 }
 
 class_t *newClass(char *id, body_t *body) {
+  size_t idLen = strlen(id) + 1;
   class_t *class = ast_emalloc(sizeof(class_t));
-  class->id = id;
+  class->id = ast_ecalloc(idLen);
+  snprintf(class->id, idLen, "%s", id);
   class->defines = body->content;
   class->funcDefsScript = NULL;
   class->funcDefsABI = NULL;
@@ -925,7 +927,6 @@ void free_ast(statement_t *stmt) {
     }
     case LANG_ENTITY_CLASSDECL: {
       class_t *class = ((statement_t *)stmt)->content;
-      free(class->id);
       free_ast(class->defines);
       break;
     }
@@ -935,6 +936,7 @@ void free_ast(statement_t *stmt) {
       free(funcDef->id.id);
       while (args != NULL) {
         free_expression(args->arg);
+        free(args->arg);
         args = args->next;
       }
       free_ast(funcDef->body);
@@ -946,6 +948,7 @@ void free_ast(statement_t *stmt) {
       free_expression(funcCall->id);
       while (args != NULL) {
         free_expression(args->arg);
+        free(args->arg);
         args = args->next;
       }
     } break;

@@ -22,16 +22,16 @@ s = socketServer(args[2])
 
 i = 0
 . [ i < reads ] {
-  t = socketAccept(s)
+  t = s.socketAccept()
   ? [ t > 0 ] {
-    in = socketRead(t, 50)
+    in = t.socketRead(50)
     print("read " + len(in) + " bytes: " + in)
-    socketWrite(t, in)
-    socketClose(t)
+    t.socketWrite(in)
+    t.socketClose()
   }
   i += 1
   @
 }
 
-socketClose(s)
+s.socketClose()
 

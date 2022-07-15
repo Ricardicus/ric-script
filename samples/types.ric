@@ -1,21 +1,21 @@
 #!/usr/bin/ric
 s = "1337"
 print(s)
-print(typeInText(s) + " (" + type(s) + ")")
-s = parseInt(s)
+print(s.typeInText() + " (" + s.type() + ")")
+s = s.parseInt()
 print(s)
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 s = "foobar"
 s = data(s)
 print(s)
-print(typeInText(s) + " (" + type(s) + ")")
-print(len(s))
-s = list(s)
+print(s.typeInText() + " (" + s.type() + ")")
+print(s.len())
+s = s.list()
 print(s)
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 print(len(s))
 s = now()
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + type(s) + ")")
 
 ;; dummy ;; {
 	@ hello () {
@@ -25,41 +25,41 @@ print(typeInText(s) + " (" + type(s) + ")")
 
 s = dummy()
 s::hello()
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 
 s = {"a" : 1337}
 print(s)
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 
 s = print
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 
 @ foobar () {
 	print("dummy")
 }
 
 s = foobar
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 
 s = [102,111,111,98,97,114]
-s = text(s)
-print(s)
+s = s.text()
+s.print()
 s = [102,111,111,98,97,114]
-s = data(s)
-s = text(s)
-print(s)
+s = s.data()
+s = s.text()
+s.print()
 
 s = "hejsan"
 s = s[0]
 print(s[0])
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 s = data("hejsan")
 s = s[0]
 print(s)
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 s = data("hejsan")
 s = text(s)
 print(len(s))
 print(s[0] + s[1] + s[2])
-print(typeInText(s) + " (" + type(s) + ")")
+print(s.typeInText() + " (" + s.type() + ")")
 

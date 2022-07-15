@@ -6,7 +6,7 @@ numberChars = [ (10 ... i) { text(i) } ]
 
 @ isNumber(num) {
   . (num ... c) {
-    ? [ !contains( numberChars, c ) ] {
+    ? [ !numberChars.contains( c ) ] {
       -> 0
     }
   }
@@ -58,12 +58,12 @@ run = 1
   in = input(">> ")
   expr = split(in, " ")
   . ( expr ... e ) {
-    ? [ isNumber(e) ] {
-      push( parseInt(e) )
-    } ~[ contains(operators, e) ] {
+    ? [ e.isNumber() ] {
+      push( e.parseInt() )
+    } ~[ operators.contains(e) ] {
       s = eval(e)
       push(s)
-    } ~[ contains(e, "q") ] {
+    } ~[ e.contains("q") ] {
       run = 0
     } ~ {
       print("Sorry, I don't understand this: " + e)

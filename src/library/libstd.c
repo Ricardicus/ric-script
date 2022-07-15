@@ -660,8 +660,8 @@ int ric_append(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument. (%d)\n",
+              LIBRARY_FUNC_NAME(), stv.type);
       exit(1);
     } break;
   }

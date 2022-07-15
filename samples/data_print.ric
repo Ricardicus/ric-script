@@ -12,8 +12,8 @@ print(d[5:20:-2])
   ? [ file == "requirements.txt" ||
       file == ".\\requirements.txt" ] {
     fp = fileOpen(file)
-    d = fileRead(fp, 100)
-    print(list(d))
-    fileClose(fp)
+    d = fp.fileRead(100)
+    print(d.list())
+    fp.fileClose()
   }
 }

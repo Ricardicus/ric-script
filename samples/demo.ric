@@ -29,7 +29,7 @@ a = 1338
 h = [ "hej", "hopp" ]
 print("len(h): " + len(h))
 
-append(h, "hejsan")
+h.append("hejsan")
 
 print("len(h): " + len(h))
 
@@ -70,12 +70,12 @@ print("====================")
 # Calling out 'hej' function with our 'willprint' function as first argument
 hej(willprint, "hej")
 # Calling out 'hej' function with standard library 'print' function as first argument
-hej(print, "hejsan")
+print.hej("hejsan")
 
 # Dictionary expressions
 
 s = {"hello": "world", "elit": 1337}
-print(s)
+s.print()
 print(s["hello"])
 print(s["elit"])
 
@@ -134,6 +134,6 @@ s = [(15 ... i ) {
   }
   fibPos(i)
 }]
-print(s)
+s.print()
 
 

@@ -764,7 +764,7 @@ aims to take in the future:
 - [x] Built in JSON <-> ric-script dictionary mapping (like Pythons 'json' module)
 - [x] Support for huge integers (powered by https://gmplib.org/)
 - [x] Some form of variable scope for calling functions (Implemented ID.ID(args) <=> ID(ID, args)
-- [x] Possibility to define classes, with functions, in C (this far classes are only implemented in ric-script).
+- [x] Possibility to define classes, with functions, in C for export.
 - [ ] Nested function declarations that properly catches variable scope (makes it suitable for functional programming).
 - [ ] Support for function declarations with different number of parameters but same id without overload
 - [ ] Built in support for using xattr-tags instead of file paths when browsing files

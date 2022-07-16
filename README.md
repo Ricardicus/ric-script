@@ -175,7 +175,7 @@ run = 1
     ? [ e.isNumber() ] {
       push( e.parseInt() )
     } ~[ operators.contains(e) ] {
-      s = e.eval()
+      s = eval(e)
       push(s)
     } ~[ e.contains("q") ] {
       run = 0

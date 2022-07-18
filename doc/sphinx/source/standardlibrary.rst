@@ -99,11 +99,11 @@ Here are some of the standard library functions. With newer versions, new functi
 Due to the underlying structure, I have not been able to add function argument
 names to the structure that handles the extended library but can see the number of arguments the function expects. In ric-script the following is equivalent:
 
-```
+.. code-block:: python
+
    # In ric-script ID1.ID2(args...) <=> ID2(ID1, args)
    a.b()
    b(a,b)
-```
 
 All the extended library functions are implemented `here <https://github.com/Ricardicus/ric-script/tree/master/src/library>`_.
 

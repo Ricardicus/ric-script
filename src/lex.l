@@ -15,12 +15,12 @@ int simple_citation = 0;
 
 DIGIT_VAL        [0-9]
 FLOAT_VAL        [0-9]+"."[0-9]*
-KEYWORD_PROCESS  process
 HASHTAG          [#]
 RETURN_TOKEN     "->"
 FOREACH_TOKEN    "..."
+LOOP_START "*"
 ID_TOKEN         [_[:alnum:]åäöÅÄÖ]
-RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=,@$\\{}]
+RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=_,@$\\{}]
 
 %%
 

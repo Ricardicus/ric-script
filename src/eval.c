@@ -9,6 +9,11 @@
   } while (0)
 #endif
 
+#define ERROR(format, ...)                                                         \
+  do {                                                                             \
+    fprintf(stderr, "error %s.%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__); \
+  } while (0)
+
 void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
   stackval_t sv = *stackval;
   /* Push value to the stack */
@@ -2431,6 +2436,38 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       push_stackval(&sv, sp, sc);
       break;
     }
+    case EXPR_TYPE_CLASSACCESSER: {
+      stackval_t sv;
+      classAccesser_t *access = expr->classAccess;
+      expr_t *classID = access->classID;
+      char *memberID = access->memberID;
+      class_t *classObj = NULL;
+      heapval_t *hv = NULL;
+
+      evaluate_expression(classID, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+        case CLASSTYPE:
+          classObj = sv.classObj;
+          break;
+        default: {
+          ERROR("attempting to access '%s' but fails because of invalid root class ID", memberID);
+          exit(1);
+          break;
+        }
+      }
+
+      hv = hashtable_get(classObj->varMembers, PROVIDE_CONTEXT()->syncCtx, memberID);
+      if (hv == NULL) {
+        ERROR("%s not found in class %s", memberID, classObj->id);
+        exit(1);
+      }
+
+      push_stackval(&hv->sv, sp, sc);
+      break;
+    }
+
     case EXPR_TYPE_EMPTY:
     default:
       break;

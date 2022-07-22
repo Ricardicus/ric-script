@@ -644,6 +644,21 @@ expr_t *newClassFunCall(expr_t *classID, char *funcID, void *args) {
   return e;
 }
 
+expr_t *newClassAccesser(expr_t *classID, char *memberID) {
+  expr_t *e = ast_emalloc(sizeof(expr_t));
+  classAccesser_t *func = ast_emalloc(sizeof(classAccesser_t));
+  char *newTxt = ast_emalloc(strlen(memberID) + 2);
+  snprintf(newTxt, strlen(memberID) + 2, "%s", memberID);
+
+  func->classID = classID;
+  func->memberID = newTxt;
+
+  e->type = EXPR_TYPE_CLASSACCESSER;
+  e->func = func;
+
+  return e;
+}
+
 expr_t *newFunCall(expr_t *id, void *args) {
   expr_t *e = ast_emalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
@@ -746,6 +761,12 @@ void free_expression(expr_t *expr) {
       free(cls->funcID);
       free(cls);
     } break;
+    case EXPR_TYPE_CLASSACCESSER: {
+      classAccesser_t *cls = expr->classAccess;
+      free_expression(cls->classID);
+      free(cls->memberID);
+    } break;
+
     case EXPR_TYPE_FVAL:
     case EXPR_TYPE_IVAL:
     case EXPR_TYPE_UVAL:

@@ -29,3 +29,16 @@ print(s::getA())
 
 # Convert class members to json string
 print(jsonConvert(s))
+
+# Using class as a struct
+;; fields ;; {
+a = 1337
+b = "hejsan"
+c = [1,2,3]
+}
+
+f = fields()
+print(f::a)
+print(f::b)
+append(f::c, 4)
+print(f::c)

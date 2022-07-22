@@ -49,6 +49,7 @@
 #define EXPR_TYPE_LOGICAL 24
 #define EXPR_TYPE_INDEXER 25
 #define EXPR_TYPE_BIGINT 26
+#define EXPR_TYPE_CLASSACCESSER 27
 
 #define LANG_ENTITY_DECL 1
 #define LANG_ENTITY_ARGS 2
@@ -170,6 +171,8 @@ struct logical_t;
 typedef struct logical_t logical_t;
 struct statement_s;
 typedef struct statement_s statement_t;
+struct classAccesser;
+typedef struct classAccesser classAccesser_t;
 
 typedef struct vector_t {
   int32_t length;
@@ -231,6 +234,7 @@ typedef struct expr_s {
     logical_t *logical;
     indexer_t *indexer;
     mpz_t *bigInt;
+    classAccesser_t *classAccess;
   };
 } expr_t;
 
@@ -305,6 +309,11 @@ typedef struct classFunctionCall {
   argsList_t *args;
 } classFunctionCall_t;
 
+typedef struct classAccesser {
+  expr_t *classID;
+  char *memberID;
+} classAccesser_t;
+
 typedef struct functionCallContainer {
   int type;
   union {
@@ -358,8 +367,9 @@ expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset);
 expr_t *newExpr_BigIntFromStr(const char *intStr);
 expr_t *newExpr_BigIntFromInt(intptr_t val);
 expr_t *newExpr_BigInt(mpz_t *n);
-
+expr_t *newClassAccesser(expr_t *classID, char *memberID);
 expr_t *newConditional(int type, expr_t *left, expr_t *right);
+
 declaration_t *newDeclaration(expr_t *id, expr_t *exp);
 statement_t *newStatement(int type, void *content);
 argsList_t *newArgument(expr_t *exp, void *next);

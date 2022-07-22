@@ -45,15 +45,6 @@ statement_t *root = NULL;
 %token FOREACH
 %token COMMENT
 %token NEWLINE
-%token KEY_FLOAT
-%token KEY_INT
-%token KEY_STR
-%token KEY_STRUCT
-%token KEY_PROCESS
-%token WHITESPACE
-%token OPEN
-%token CLOSE
-%token OTHER
 %type<id> otherChar
 %type<data> mathContentDigit
 %type<data> mathContentDouble
@@ -78,6 +69,7 @@ statement_t *root = NULL;
 %type<data> class
 %type<data> classFunctionCall
 %type<data> functionCall
+%type<data> namespacedFunctionCall
 %type<data> mathContent
 %type<data> vector
 %type<data> ifStatement
@@ -432,7 +424,11 @@ classFunctionCall:
     }
     | expression ':' ':' ID '(' ')' {
         $$ = newClassFunCall($1, $4, NULL);
+    }
+    | expression ':' ':' ID {
+        $$ = newClassAccesser($1, $4);
     };
+
 
 functionCall:
     ID '(' arguments_list ')' {
@@ -443,7 +439,20 @@ functionCall:
         expr_t *id = newExpr_ID($1);
         $$ = newFunCall(id,NULL);
     }
-    | ID '.' ID '(' ')' {
+    | namespacedFunctionCall {
+        $$ = $1;
+    }
+    | indexedVector '(' arguments_list ')' {
+        expr_t *id = (expr_t*)$1;
+        $$ = newFunCall(id,$3);
+    }
+    | indexedVector '(' ')' {
+        expr_t *id = (expr_t*)$1;
+        $$ = newFunCall(id,NULL);
+    };
+
+namespacedFunctionCall: 
+    ID '.' ID '(' ')' {
         expr_t *id = newExpr_ID($3);
         expr_t *expr = newExpr_ID($1);
         argsList_t *args = newArgument(expr, NULL);
@@ -460,14 +469,6 @@ functionCall:
         }
         walk->next = args;
         $$ = newFunCall(id, $5);
-    }
-    | indexedVector '(' arguments_list ')' {
-        expr_t *id = (expr_t*)$1;
-        $$ = newFunCall(id,$3);
-    }
-    | indexedVector '(' ')' {
-        expr_t *id = (expr_t*)$1;
-        $$ = newFunCall(id,NULL);
     };
 
 declaration: 
@@ -561,7 +562,7 @@ dictionary_keys_vals:
     }
 
 dictionary_key_val:
-    stringContent ':' expressions {
+    stringContent ':' expression {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
       keyVal->key = $1;
@@ -883,6 +884,10 @@ otherChar:
         $$[1] = 0;
     }
     | '=' {
+        $$[0] = yyval.id[0];
+        $$[1] = 0;
+    }
+    | '_' {
         $$[0] = yyval.id[0];
         $$[1] = 0;
     };

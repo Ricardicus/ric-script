@@ -12,7 +12,7 @@ syn keyword	ricTodo	contained TODO FIXME XXX
 " Avoid matching "text#text", used in /etc/disktab and /etc/gettytab
 syn match	ricComment	"^#.*" 
 syn match	ricComment	"\s#.*"
-syn match       ricKeywordMarks	"[@?!]"
+syn match       ricKeywordMarks	"[@?!~]"
 syn match       ricKeywordClass	";;"
 syn match       ricKeywordDots	"\.\.\."
 syn region	ricString	start=+"+ skip=+\\\\\|\\"+ end=+"+ oneline

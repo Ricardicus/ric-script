@@ -881,9 +881,8 @@ Version   : 0.1
 
 # Vim syntax highlighting for ric-script
 
-I use nvim and these are my configuration files for
-ric script! The installation guide below is for nvim,
-but the configuration files are valid for vim also.
+I use nvim and my configuration files for ric-script can be found under the folder 'vim' here.
+The installation guide below is for nvim, but the configuration files are valid for vim also.
 
 ## Install ric script syntax highlighter
 

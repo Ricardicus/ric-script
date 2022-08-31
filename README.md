@@ -896,5 +896,4 @@ the following line to your run commands file:
 " ric-script
 Plug 'Ricardicus/ric-script.vim'
 ```
-```
 

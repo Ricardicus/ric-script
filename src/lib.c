@@ -68,7 +68,8 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("ceil", 1, ric_ceil),
     DECLARE_LIB_FUNCTION("randomInt", 2, ric_random_uniform_int),
     DECLARE_LIB_FUNCTION("random", 0, ric_random_uniform),
-    DECLARE_LIB_FUNCTION("textBase", 2, ric_print_nbr_base),
+    DECLARE_LIB_FUNCTION("textBase", 2, ric_get_nbr_base_string),
+    DECLARE_LIB_FUNCTION("intBase", 2, ric_get_nbr_base_int),
     // libload
     DECLARE_LIB_FUNCTION("load", 1, ric_load),
     // libtime

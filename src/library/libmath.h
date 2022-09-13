@@ -10,6 +10,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 /* the big integers library, mini-gmp */
 #include <mini-gmp.h>
@@ -27,7 +28,8 @@ int ric_exp(LIBRARY_PARAMS());
 int ric_abs(LIBRARY_PARAMS());
 int ric_floor(LIBRARY_PARAMS());
 int ric_ceil(LIBRARY_PARAMS());
-int ric_print_nbr_base(LIBRARY_PARAMS());
+int ric_get_nbr_base_string(LIBRARY_PARAMS());
+int ric_get_nbr_base_int(LIBRARY_PARAMS());
 int ric_random_uniform(LIBRARY_PARAMS());
 int ric_random_uniform_int(LIBRARY_PARAMS());
 

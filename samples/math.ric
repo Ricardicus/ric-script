@@ -66,4 +66,13 @@ i = 0
   @
 }
 
+# Testing some conversions
+print(textBase(32891, 2))
+print(textBase(32321, 8))
+print(textBase(1337,10))
+
+print(intBase("1000000001111011",2))
+print(intBase("77101",8))
+print(intBase("1337",10))
+
 

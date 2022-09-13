@@ -454,7 +454,74 @@ int ric_random_uniform(LIBRARY_PARAMS()) {
   return 0;
 }
 
-int ric_print_nbr_base(LIBRARY_PARAMS()) {
+int ric_get_nbr_base_int(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  char *arg1 = NULL;
+  int32_t arg2 = 10;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  (void)arg1;
+  // Pop arg1
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      arg1 = stv.t;
+      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
+  }
+
+  // Pop arg2
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+      arg2 = (int32_t)stv.i;
+      break;
+    default: {
+      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
+              LIBRARY_FUNC_NAME());
+      return 1;
+    } break;
+  }
+
+  if (arg2 < 2 || arg2 > 16) {
+    fprintf(stderr, "error: function '%s' only supports bases [2, 16] (%" PRIi32 " given)\n",
+            LIBRARY_FUNC_NAME(), arg2);
+    return 1;
+  }
+
+  int32_t converted_number = 0;
+  size_t len = strlen(arg1);
+  size_t index = 0;
+
+  // convert to the indicated base
+  while (index < len) {
+    int32_t val = 0;
+    char c = arg1[index];
+    if ( c >= '0' && c <= '9') {
+      val = (int32_t) c - '0';
+    } else if ( c >= 'A' && c <= 'Z' ) {
+      val = (int32_t) c - 'A';
+    } else if ( c >= 'a' && c <= 'z' ) {
+      val = (int32_t) c - 'a';
+    }
+    converted_number *= arg2;
+    converted_number += val;
+    index++;
+  }
+
+  /* Pushing the parsed value */
+  PUSH_INT(converted_number, sp, sc);
+
+  return 0;
+}
+
+int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
   stackval_t stv;
   int32_t arg1 = 1;
   int32_t arg2 = 10;
@@ -517,7 +584,10 @@ int ric_print_nbr_base(LIBRARY_PARAMS()) {
     char base_digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     char *converted_number = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
+    char *converted_number_result = ast_ecalloc(RIC_BIG_INT_MAX_SIZE);
     int32_t index = 0;
+    size_t len;
+    size_t i = 0;
 
     /* convert to the indicated base */
     while (arg1 != 0 && index < RIC_BIG_INT_MAX_SIZE) {
@@ -526,8 +596,16 @@ int ric_print_nbr_base(LIBRARY_PARAMS()) {
       ++index;
     }
 
-    newText = newExpr_Text(converted_number);
+    /* Reverse the converted number string */
+    len = strlen(converted_number);
+    while (i < len) {
+      converted_number_result[i] = converted_number[len - i - 1];
+      ++i;
+    }
+
     free(converted_number);
+    newText = newExpr_Text(converted_number_result);
+    free(converted_number_result);
   }
 
   stv.type = TEXT;

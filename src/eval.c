@@ -2581,7 +2581,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         break;
       }
       default:
-        fprintf(stderr, "error: invalid function call (%d)\n", sv.type);
+        fprintf(stderr, "%s.%d error: invalid function call (%d)\n", __FILE__, __LINE__, sv.type);
         exit(1);
         break;
     }

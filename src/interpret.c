@@ -231,12 +231,12 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                   exit(1);
                 }
 
+                evaluate_expression(decl->val, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+
                 /* Placing this expression into the array */
                 free_expression(*expToSet);
                 free(*expToSet);
-
-                evaluate_expression(decl->val, EXPRESSION_ARGS());
-                POP_VAL(&sv, sp, sc);
 
                 newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
                 *expToSet = newExp;
@@ -1150,15 +1150,15 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
   return INTEPRET_CONTINUE;
 }
 
-void interpret_statements(int argc, char *argv[], statement_t *stmt) {
+void interpret_statements(int argc, char *argv[], statement_t *stmt, int stacksize, int heapsize) {
   // "CPU" registers definitions
   DEF_NEW_CONTEXT();
 
   // Setup stack
-  SETUP_STACK(&sp, &sb, RIC_STACKSIZE, &sc);
+  SETUP_STACK(&sp, &sb, stacksize, &sc);
 
   // Setup heap
-  SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
+  SETUP_HEAP(&hp, &hb, heapsize);
 
   // Setup locals
   varLocals = ast_emalloc(sizeof(locals_stack_t));
@@ -1217,17 +1217,17 @@ void interpret_statements(int argc, char *argv[], statement_t *stmt) {
   }
 }
 
-void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown) {
+void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown, int stacksize, int heapsize) {
   static int firstCall = 1;
   // "CPU" registers definitions
   DEF_NEW_CONTEXT_STATIC();
 
   if (firstCall) {
     // Setup stack
-    SETUP_STACK(&sp, &sb, RIC_STACKSIZE, &sc);
+    SETUP_STACK(&sp, &sb, stacksize, &sc);
 
     // Setup heap
-    SETUP_HEAP(&hp, &hb, RIC_HEAPSIZE);
+    SETUP_HEAP(&hp, &hb, heapsize);
 
     // Setup locals
     varLocals = ast_emalloc(sizeof(locals_stack_t));

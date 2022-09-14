@@ -21,6 +21,8 @@ void usage(char *argv0, int ret) {
   fprintf((ret == 0 ? stdout : stderr), "  -c: command passed as string directly\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -v|--version: print interpreter version\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -h|--help: print this help\r\n");
+  fprintf((ret == 0 ? stdout : stderr), "  -ah|--alloc-heap: set heap allocation spots (default: %d)\r\n", RIC_HEAPSIZE);
+  fprintf((ret == 0 ? stdout : stderr), "  -as|--alloc-stack: set stack allocation spots (default: %d)\r\n", RIC_STACKSIZE);
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
   fprintf((ret == 0 ? stdout : stderr), "source code:\r\n  %s\r\n", GENERAL_SOURCE_URL);
   fprintf((ret == 0 ? stdout : stderr), "docs:\r\n  %s\r\n", GENERAL_DOCS);
@@ -43,6 +45,8 @@ int main(int argc, char *argv[]) {
   statement_t *root = NULL;
   char *commandString = NULL;
   MainParserFunc parse;
+  int stacksize = RIC_STACKSIZE;
+  int heapsize = RIC_HEAPSIZE;
   int ret = 0;
   FILE *fp = NULL;
 
@@ -73,6 +77,20 @@ int main(int argc, char *argv[]) {
       } else if (strcmp("-v", argv[i]) == 0 || strcmp("--version", argv[i]) == 0) {
         printf("%s\n", RICSCRIPT_VERSION);
         return 0;
+      } else if (strcmp("-ah", argv[i]) == 0 || strcmp("--alloc-heap", argv[i]) == 0) {
+        if (i + 1 < argc) {
+          heapsize = atoi(argv[i+1]);
+        } else {
+          usage(argv[0], 1);
+          return 1;
+        }
+      } else if (strcmp("-as", argv[i]) == 0 || strcmp("--alloc-stack", argv[i]) == 0) {
+        if (i + 1 < argc) {
+          stacksize = atoi(argv[i+1]);
+        } else {
+          usage(argv[0], 1);
+          return 1;
+        }
       } else {
         if (fp == NULL) {
           /* Attempt to open the file */
@@ -100,17 +118,17 @@ int main(int argc, char *argv[]) {
       /* Unbuffered mode */
       setUnbufferedOutput();
       /* Run the interactive mode */
-      runInteractive(argc, argv, interpret_statements_interactive, ">> ");
+      runInteractive(argc, argv, interpret_statements_interactive, stacksize, heapsize, ">> ");
     } break;
     case runAsInteractiveNoPrompt: {
       /* Unbuffered mode */
       setUnbufferedOutput();
       /* Run the interactive mode */
-      runInteractive(argc, argv, interpret_statements_interactive, "");
+      runInteractive(argc, argv, interpret_statements_interactive, stacksize, heapsize, "");
     } break;
     case runAsCommand: {
       /* Run the interactive mode */
-      runCommand(argc, argv, interpret_statements_interactive, commandString);
+      runCommand(argc, argv, interpret_statements_interactive, commandString, stacksize, heapsize);
     } break;
     case runAsIntepreter:
       /* Parse the program */
@@ -122,7 +140,7 @@ int main(int argc, char *argv[]) {
       setMainRoot(root);
       if (root != NULL) {
         /* Interpret the program */
-        interpret_statements(argc, argv, root);
+        interpret_statements(argc, argv, root, stacksize, heapsize);
       } else {
         fprintf(stderr, "Failed to parse program!\r\n");
         ret = 1;
@@ -160,7 +178,7 @@ int main(int argc, char *argv[]) {
         print_statements(root);
         /* Interpret the program */
         printf("\n\nOUTPUT:\n\n");
-        interpret_statements(argc, argv, root);
+        interpret_statements(argc, argv, root, stacksize, heapsize);
       } else {
         fprintf(stderr, "Failed to parse program!\r\n");
         ret = 1;

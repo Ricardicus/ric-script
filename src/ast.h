@@ -384,8 +384,8 @@ class_t *newClass(char *id, body_t *body);
 argsList_t *copy_argsList(argsList_t *args);
 
 void print_statements(statement_t *root);
-void interpret_statements(int argc, char *argv[], statement_t *stmt);
-void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown);
+void interpret_statements(int argc, char *argv[], statement_t *stmt, int stacksize, int heapsize);
+void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown, int stacksize, int heapsize);
 void free_expression(expr_t *expr);
 void free_keyvals(dictionary_t *dict);
 

@@ -908,7 +908,7 @@ void initParser() {
     setRoot(&root);
 }
 
-void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, const char *prompt) {
+void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int stacksize, int heapsize, const char *prompt) {
     char lineBuffer[256];
 
     ParsedFile = "stdin";
@@ -923,7 +923,7 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, con
 
         /* Check if the user wants to quit */
         if ( strstr(lineBuffer, "quit") != NULL ) {
-            func(argc, argv, NULL, 1);
+            func(argc, argv, NULL, 1, stacksize, heapsize);
             return;
         }
 
@@ -933,7 +933,7 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, con
         yy_delete_buffer(buffer);
 
         if ( root != NULL ) {
-            func(argc, argv, root, 0);
+            func(argc, argv, root, 0, stacksize, heapsize);
         }
 
         printf("%s", prompt);
@@ -942,7 +942,7 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, con
 }
 
 
-void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command) {
+void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command, int stacksize, int heapsize) {
     YY_BUFFER_STATE buffer;
     ParsedFile = "stdin";
 
@@ -952,6 +952,6 @@ void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *c
     yy_delete_buffer(buffer);
 
     if ( root != NULL ) {
-        func(argc, argv, root, 0);
+        func(argc, argv, root, 0, stacksize, heapsize);
     }
 }

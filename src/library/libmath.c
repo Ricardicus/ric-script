@@ -503,12 +503,12 @@ int ric_get_nbr_base_int(LIBRARY_PARAMS()) {
   while (index < len) {
     int32_t val = 0;
     char c = arg1[index];
-    if ( c >= '0' && c <= '9') {
-      val = (int32_t) c - '0';
-    } else if ( c >= 'A' && c <= 'Z' ) {
-      val = (int32_t) c - 'A';
-    } else if ( c >= 'a' && c <= 'z' ) {
-      val = (int32_t) c - 'a';
+    if (c >= '0' && c <= '9') {
+      val = (int32_t)c - '0';
+    } else if (c >= 'A' && c <= 'Z') {
+      val = (int32_t)c - 'A';
+    } else if (c >= 'a' && c <= 'z') {
+      val = (int32_t)c - 'a';
     }
     converted_number *= arg2;
     converted_number += val;

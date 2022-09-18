@@ -11,6 +11,8 @@ endif
 syn keyword	ricTodo	contained TODO FIXME XXX
 " Avoid matching "text#text", used in /etc/disktab and /etc/gettytab
 " Regular int like number with - + or nothing in front
+"
+syn match ricID     '[a-zA-ZåäöÅÄÖ0-9_]\+'
 syn match ricNumber '\d\+' 
 syn match ricNumber '[-+]\d\+' 
 
@@ -25,7 +27,7 @@ syn match ricNumber '\d[[:digit:]]*[eE][\-+]\=\d\+'
 " Floating point like number with E and decimal point (+,-)
 syn match ricNumber '[-+]\=\d[[:digit:]]*\.\d*[eE][\-+]\=\d\+' 
 syn match ricNumber '\d[[:digit:]]*\.\d*[eE][\-+]\=\d\+' 
-syn match	ricComment	"^#.*" 
+syn match	ricComment	"^#.*"
 syn match	ricComment	"\s#.*"
 syn match       ricKeywordMarks	"[@?!~]"
 syn match       ricKeywordClass	";;"
@@ -42,6 +44,9 @@ hi def link ricKeywordDots Keyword
 hi def link ricKeywordClass Keyword
 hi def link ricKeywordMarks Keyword 
 hi def link ricNumber Constant
+hi def link ricID Identifier
+
+hi ricID ctermfg=white
 
 let b:current_syntax = "ric"
 

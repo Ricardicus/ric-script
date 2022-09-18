@@ -183,8 +183,8 @@ int example_class_init(LIBRARY_PARAMS()) {
   int dummy;
   libFunction_t *classFuncABIadd = ast_ecalloc(sizeof(libFunction_t));
   libFunction_t *classFuncABIsub = ast_ecalloc(sizeof(libFunction_t));
+	static char *class_name = "example_class";
 
-  char *class_name = ast_ecalloc(20);
   char *class_function_add_name = ast_ecalloc(20);
   char *class_function_sub_name = ast_ecalloc(20);
   char *class_var_member = ast_ecalloc(20);
@@ -195,7 +195,6 @@ int example_class_init(LIBRARY_PARAMS()) {
   /* Getting the heap pointer */
   heapval_t *hp = PROVIDE_CONTEXT()->hp;
 
-  snprintf(class_name, 20, "%s", "example_class");
   snprintf(class_function_add_name, 20, "%s", "add");
   snprintf(class_function_sub_name, 20, "%s", "sub");
   snprintf(class_var_member, 20, "%s", "member1");

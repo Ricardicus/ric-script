@@ -201,7 +201,6 @@ void free_heap(void *hp, void *hbp) {
             ((heapval_t *)hp)[i].sv.classObj->funcDefsABI->allocated_key = 1;
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsABI);
           }
-          free(((heapval_t *)hp)[i].sv.classObj->id);
           free(((heapval_t *)hp)[i].sv.classObj);
 
           /* Purge the rest */

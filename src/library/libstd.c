@@ -391,9 +391,7 @@ int ric_print(LIBRARY_PARAMS()) {
   stackval_t stv;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-
   POP_VAL(&stv, sp, sc);
-
   switch (stv.type) {
     case TEXT: {
       char *c = stv.t;
@@ -681,6 +679,9 @@ int ric_append(LIBRARY_PARAMS()) {
       break;
     case POINTERTYPE:
       entry = newExpr_Pointer(stv.p);
+      break;
+    case CLASSTYPE:
+      entry = newExpr_ClassPtrCopy(stv.classObj);
       break;
     case FUNCPTRTYPE:
       entry = newExpr_FuncPtr((void *)stv.p);

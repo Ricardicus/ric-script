@@ -915,6 +915,9 @@ int print_vector(vector_t *vec, EXPRESSION_PARAMS()) {
       case VECTORTYPE:
         print_vector(sv.vec, EXPRESSION_ARGS());
         break;
+      case CLASSTYPE:
+        printf("<Class: '%s'>", sv.classObj->id);
+        break;
       case DICTTYPE:
         print_dictionary(sv.dict, EXPRESSION_ARGS());
         break;

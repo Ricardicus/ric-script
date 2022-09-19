@@ -2467,7 +2467,12 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       push_stackval(&hv->sv, sp, sc);
       break;
     }
-
+    case EXPR_TYPE_CLASSPTR: {
+      expr_t *e = newExpr_ClassPtrCopy(expr->classObj);
+      PUSH_CLASSREF(e->classObj, sp, sc);
+      free(e);
+      break;
+    }
     case EXPR_TYPE_EMPTY:
     default:
       break;
@@ -2895,7 +2900,6 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
-
           push_stackval(&sv, sp, sc);
 
           argsWalk = argsWalk->next;

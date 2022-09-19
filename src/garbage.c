@@ -138,7 +138,6 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsScript);
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->funcDefsABI);
           }
-          free(((heapval_t *)hp)[i].sv.classObj->id);
           free(((heapval_t *)hp)[i].sv.classObj);
         }
         heap[i].toFree = false;

@@ -959,9 +959,12 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
     case EXPR_TYPE_LIBFUNCPTR:
       PUSH_LIBFUNCPTR(expr->func, sp, sc);
       break;
-    case EXPR_TYPE_BIGINT:
-      PUSH_BIGINT(expr->bigInt, sp, sc);
+    case EXPR_TYPE_BIGINT: {
+      expr_t *e = newExpr_BigInt(expr->bigInt);
+      PUSH_BIGINT(e->bigInt, sp, sc);
+      free(e);
       break;
+    }
     case EXPR_TYPE_VECTOR:
       PUSH_VECTOR(expr->vec, sp, sc);
       break;
@@ -1519,47 +1522,34 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       } else if (svLeft.type == BIGINT && svRight.type == BIGINT) {
         expr_t *e = newExpr_BigIntFromInt(0);
         stackval_t sv;
-        int dummy;
-        heapval_t *hvp;
 
         sv.type = BIGINT;
         sv.bigInt = e->bigInt;
 
         mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
-
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
         PUSH_BIGINT(sv.bigInt, sp, sc);
-
         free(e);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         expr_t *e = newExpr_BigIntFromInt(svLeft.i);
         stackval_t sv;
-        int dummy;
-        heapval_t *hvp;
 
         sv.type = BIGINT;
         sv.bigInt = e->bigInt;
 
         mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
         PUSH_BIGINT(sv.bigInt, sp, sc);
-
         free(e);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         expr_t *e = newExpr_BigIntFromInt(svRight.i);
         stackval_t sv;
-        int dummy;
-        heapval_t *hvp;
 
         sv.type = BIGINT;
         sv.bigInt = e->bigInt;
 
         mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
         PUSH_BIGINT(sv.bigInt, sp, sc);
-
         free(e);
       } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
         PUSH_DOUBLE(svLeft.time + svRight.time, sp, sc);

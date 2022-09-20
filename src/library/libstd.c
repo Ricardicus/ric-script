@@ -671,6 +671,10 @@ int ric_append(LIBRARY_PARAMS()) {
     case INT32TYPE:
       entry = newExpr_Ival((int)stv.i); // This.. is not so good! Remind me to fix :)
       break;
+    case BIGINT: {
+      entry = newExpr_BigInt(stv.bigInt);
+      break;
+    }
     case DOUBLETYPE:
       entry = newExpr_Float(stv.d);
       break;
@@ -837,6 +841,58 @@ int ric_pop(LIBRARY_PARAMS()) {
   return 0;
 }
 
+int ric_pop_first(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  vector_t *vec = NULL;
+  argsList_t *walk;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  /* Get vector reference */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+      vec = stv.vec;
+      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  if (vec->length == 0) {
+    /* This is not very good.. Guess I will return 0 then. */
+    PUSH_INT(0, sp, sc);
+    return 0;
+  }
+
+  walk = vec->content;
+
+  if (walk->next == NULL) {
+    // handle special case
+    expr_t *e = newExpr_Copy(walk->arg);
+    evaluate_expression(e, EXPRESSION_ARGS());
+
+    free_expression(walk->arg);
+    free(walk->arg);
+    free(walk);
+    vec->content = NULL;
+    free(e);
+  } else {
+    vec->content = walk->next;
+    evaluate_expression(walk->arg, EXPRESSION_ARGS());
+    free_expression(walk->arg);
+    free(walk->arg);
+    free(walk);
+  }
+
+  // Decrease vector size
+  vec->length--;
+  return 0;
+}
+
 int ric_contains(LIBRARY_PARAMS()) {
   stackval_t stv;
   vector_t *argVec = NULL;
@@ -894,7 +950,6 @@ int ric_contains(LIBRARY_PARAMS()) {
     argsList_t *walk = argVec->content;
 
     while (walk != NULL) {
-      /* Evaluate expression */
       evaluate_expression(walk->arg, EXPRESSION_ARGS());
       POP_VAL(&stv, sp, sc);
 
@@ -1105,6 +1160,7 @@ int ric_is_defined(LIBRARY_PARAMS()) {
 int ric_sum(LIBRARY_PARAMS()) {
   stackval_t stv;
   int32_t result = 0;
+  mpz_t *resultBigInt = NULL;
   argsList_t *walk = NULL;
   vector_t *arg1 = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -1131,6 +1187,19 @@ int ric_sum(LIBRARY_PARAMS()) {
     POP_VAL(&sv, sp, sc);
     if (sv.type == INT32TYPE) {
       result += sv.i;
+      if (resultBigInt != NULL) {
+        mpz_add_ui(*resultBigInt, *resultBigInt, sv.i);
+      }
+    } else if (sv.type == BIGINT) {
+      mpz_t left;
+      if (resultBigInt == NULL) {
+        resultBigInt = ast_emalloc(sizeof(mpz_t));
+        mpz_init_set_ui(*resultBigInt, 0);
+      }
+
+      mpz_init_set(left, *resultBigInt);
+      mpz_add(*resultBigInt, left, *sv.bigInt);
+      mpz_clear(left);
     } else {
       fprintf(stderr,
               "error: function '%s' got unexpected data type in vector, expected integers\n",
@@ -1140,8 +1209,11 @@ int ric_sum(LIBRARY_PARAMS()) {
   }
 
   /* Pushing result */
-  PUSH_INT(result, sp, sc);
-
+  if (resultBigInt != NULL) {
+    PUSH_BIGINT(resultBigInt, sp, sc);
+  } else {
+    PUSH_INT(result, sp, sc);
+  }
   return 0;
 }
 

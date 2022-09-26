@@ -1217,7 +1217,8 @@ void interpret_statements(int argc, char *argv[], statement_t *stmt, int stacksi
   }
 }
 
-void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown, int stacksize, int heapsize) {
+void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown,
+                                      int stacksize, int heapsize) {
   static int firstCall = 1;
   // "CPU" registers definitions
   DEF_NEW_CONTEXT_STATIC();

@@ -235,6 +235,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
   char *buffer = NULL;
   heapval_t *hpv;
   int dummy;
+  size_t fz = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -254,13 +255,18 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
     } break;
   }
 
-  buffer = calloc(MAX_LINE_LENGTH, 1);
+
+  fseek(fp, 0L, SEEK_END);
+  fz = ftell(fp);
+  fseek(fp, 0L, SEEK_SET);
+
+  buffer = calloc(fz+1, 1);
   if (buffer == NULL) {
     fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
-  while (fgets(buffer, MAX_LINE_LENGTH, fp) != NULL) {
+  while (fgets(buffer, fz+1, fp) != NULL) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
@@ -272,7 +278,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
     e = newExpr_Text(buffer);
     a = newArgument(e, vecContent);
     vecContent = a;
-    memset(buffer, 0, MAX_LINE_LENGTH);
+    memset(buffer, 0, fz);
   }
 
   /* Reset file pointer */

@@ -5,6 +5,7 @@ int ric_atoi(LIBRARY_PARAMS()) {
   char *string = NULL;
   rawdata_t *rawdata = NULL;
   int result = 0;
+  double valDouble = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -16,6 +17,9 @@ int ric_atoi(LIBRARY_PARAMS()) {
       break;
     case RAWDATATYPE:
       rawdata = stv.rawdata;
+      break;
+    case DOUBLETYPE:
+      valDouble = stv.d;
       break;
     default: {
       fprintf(
@@ -30,6 +34,8 @@ int ric_atoi(LIBRARY_PARAMS()) {
     result = atoi(string);
   } else if (rawdata != NULL) {
     result = (int)((unsigned char *)rawdata->data)[0];
+  } else {
+    result = (int) valDouble;
   }
 
   /* Pushing the parsed value */

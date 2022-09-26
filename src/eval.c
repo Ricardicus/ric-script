@@ -14,7 +14,9 @@
     fprintf(stderr, "error %s.%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__); \
   } while (0)
 
-void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
+void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS()) {
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   stackval_t sv = *stackval;
   /* Push value to the stack */
   switch (sv.type) {
@@ -73,7 +75,9 @@ void push_stackval(stackval_t *stackval, void *sp, size_t *sc) {
   }
 }
 
-void push_heapval(heapval_t *hv, void *sp, size_t *sc) {
+void push_heapval(heapval_t *hv, PROVIDE_CONTEXT_ARGS()) {
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
   if (hv != NULL) {
     switch (hv->sv.type) {
       case DOUBLETYPE:
@@ -829,7 +833,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         hv = hashtable_get(classCtx->varMembers, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
         if (hv != NULL) {
-          push_heapval(hv, sp, sc);
+          push_heapval(hv, PROVIDE_CONTEXT());
           stop = 1;
         }
 
@@ -886,7 +890,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             walk = walk->next;
           }
         } else {
-          push_heapval(hv, sp, sc);
+          push_heapval(hv, PROVIDE_CONTEXT());
           stop = 1;
         }
 
@@ -897,7 +901,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         hv = hashtable_get(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, expr->id.id);
 
         if (hv != NULL) {
-          push_heapval(hv, sp, sc);
+          push_heapval(hv, PROVIDE_CONTEXT());
           stop = 1;
         }
 
@@ -1218,7 +1222,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             /* Evaluate the expression */
             evaluate_expression(exp, EXPRESSION_ARGS());
             POP_VAL(&sv, sp, sc);
-            push_stackval(&sv, sp, sc);
+            push_stackval(&sv, PROVIDE_CONTEXT());
           } else if (sv.type == INDEXER) {
             indexer_t *indexer = sv.indexer;
             int idxStart = 0;
@@ -2411,7 +2415,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
       call_func(&func, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
-      push_stackval(&sv, sp, sc);
+      push_stackval(&sv, PROVIDE_CONTEXT());
       break;
     }
     case EXPR_TYPE_CLASSFUNCCALL: {
@@ -2423,7 +2427,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
       call_func(&func, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
-      push_stackval(&sv, sp, sc);
+      push_stackval(&sv, PROVIDE_CONTEXT());
       break;
     }
     case EXPR_TYPE_CLASSACCESSER: {
@@ -2454,7 +2458,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         exit(1);
       }
 
-      push_stackval(&hv->sv, sp, sc);
+      push_stackval(&hv->sv, PROVIDE_CONTEXT());
       break;
     }
     case EXPR_TYPE_CLASSPTR: {
@@ -2691,7 +2695,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         }
 
         /* Push function return value to the stack */
-        push_stackval(&sv_ret, sp, sc);
+        push_stackval(&sv_ret, PROVIDE_CONTEXT());
 
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
@@ -2857,7 +2861,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         }
 
         /* Push function return value to the stack */
-        push_stackval(&sv_ret, sp, sc);
+        push_stackval(&sv_ret, PROVIDE_CONTEXT());
 
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
@@ -2890,7 +2894,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
-          push_stackval(&sv, sp, sc);
+          push_stackval(&sv, PROVIDE_CONTEXT());
 
           argsWalk = argsWalk->next;
         }
@@ -3055,7 +3059,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         /* Fetch the evaluated expression to the arguments table */
         POP_VAL(&sv, sp, sc);
 
-        push_stackval(&sv, sp, sc);
+        push_stackval(&sv, PROVIDE_CONTEXT());
 
         argsWalk = argsWalk->next;
       }
@@ -3077,7 +3081,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
     }
 
     /* Push function return value to the stack */
-    push_stackval(&sv_ret, sp, sc);
+    push_stackval(&sv_ret, PROVIDE_CONTEXT());
 
     /* Free the argument value table */
     flush_arguments(newArgumentTable);

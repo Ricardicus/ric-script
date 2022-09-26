@@ -385,7 +385,8 @@ argsList_t *copy_argsList(argsList_t *args);
 
 void print_statements(statement_t *root);
 void interpret_statements(int argc, char *argv[], statement_t *stmt, int stacksize, int heapsize);
-void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown, int stacksize, int heapsize);
+void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt, int teardown,
+                                      int stacksize, int heapsize);
 void free_expression(expr_t *expr);
 void free_keyvals(dictionary_t *dict);
 
@@ -467,6 +468,7 @@ typedef struct context_full_t {
   hashtable_t *classDecs;
   hashtable_t *funcDecs;
   hashtable_t *varDecs;
+  int *stacksize;
 } context_full_t;
 
 #define DEF_NEW_CONTEXT()        \
@@ -505,10 +507,10 @@ typedef struct context_full_t {
 
 #define PROVIDE_CONTEXT_INIT_MEMBERS()                                                   \
   &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, \
-      &interactive, classCtx, syncCtx, classDecs, funcDecs, varDecs
+      &interactive, classCtx, syncCtx, classDecs, funcDecs, varDecs, &stacksize
 #define PROVIDE_CONTEXT_MEMBERS()                                                        \
   r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, \
-      classCtx, syncCtx, classDecs, funcDecs, varDecs
+      classCtx, syncCtx, classDecs, funcDecs, varDecs, stacksize
 
 #define ASSIGN_CONTEXT(ctx) \
   ctx = (context_full_t) { PROVIDE_CONTEXT_INIT_MEMBERS() }
@@ -533,7 +535,8 @@ typedef struct context_full_t {
   locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals; \
   int *interactive = PROVIDE_CONTEXT()->interactive;        \
   class_t *classCtx = PROVIDE_CONTEXT()->classCtx;          \
-  void *syncCtx = PROVIDE_CONTEXT()->syncCtx;
+  void *syncCtx = PROVIDE_CONTEXT()->syncCtx;               \
+  int *stacksize = PROVIDE_CONTEXT()->stacksize;
 
 #define PROVIDE_CONTEXT_ARGS_OLD()                                                          \
   int32_t *r0, int32_t *r1, int32_t *r2, int32_t *ax, double *f0, double *f1, double *f2,   \
@@ -589,7 +592,7 @@ typedef struct libFunction {
 #define PUSH_DOUBLE(a, sp, sc)                           \
   do {                                                   \
     stackval_t stackval;                                 \
-    if (*sc >= RIC_STACKSIZE) {                          \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {          \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix it!\n", \
@@ -605,7 +608,7 @@ This is not supposed to happen, I hope I can fix it!\n", \
 #define PUSH_INT(a, sp, sc)                                          \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -621,7 +624,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_VECTOR(a, sp, sc)                                       \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -637,7 +640,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_STRING(a, sp, sc)                                       \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -653,7 +656,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_BIGINT(a, sp, sc)                                       \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -669,7 +672,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_POINTER(a, sp, sc)                                      \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -686,7 +689,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_FUNCPTR(a, sp, sc)                                      \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -703,7 +706,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_LIBFUNCPTR(a, sp, sc)                                   \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -720,7 +723,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_TIME(a, sp, sc)                                         \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -737,7 +740,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_DICTIONARY(a, sp, sc)                                   \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -754,7 +757,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_INDEXER(a, sp, sc)                                      \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -771,7 +774,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_CLASSREF(a, sp, sc)                                     \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
@@ -788,7 +791,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 #define PUSH_RAWDATA(a, sp, sc)                                      \
   do {                                                               \
     stackval_t stackval;                                             \
-    if (*sc >= RIC_STACKSIZE) {                                      \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
       fprintf(stderr, "Error: Intepreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \

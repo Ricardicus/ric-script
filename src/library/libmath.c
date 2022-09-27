@@ -589,6 +589,8 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
     size_t len;
     size_t i = 0;
 
+    converted_number[0] = '0';
+
     /* convert to the indicated base */
     while (arg1 != 0 && index < RIC_BIG_INT_MAX_SIZE) {
       converted_number[index] = base_digits[arg1 % arg2];

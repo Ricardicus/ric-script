@@ -44,6 +44,61 @@ int ric_atoi(LIBRARY_PARAMS()) {
   return 0;
 }
 
+int ric_trim(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  char *string = NULL;
+  char *c = NULL;
+  size_t sz = 0;
+  int dummy;
+  heapval_t *hpv = NULL;
+  char *result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      string = stv.t;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  c = string;
+  while ( *c && isspace(*c) ) c++;
+
+  sz = strlen(c);
+  result = ast_ecalloc(sz+2);
+  snprintf(result, sz+1, "%s", c);
+
+  c = result;
+  while ( *c ) { ++c; }
+  --c;
+
+  while ( *c && *c == ' ' ) {
+    *c = 0;
+    --c;
+  }
+
+  stv.type = TEXT;
+  stv.t = result;
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the trimmed string */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}
+
+
 int ric_split(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *arg1 = NULL;

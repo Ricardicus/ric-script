@@ -39,7 +39,10 @@ void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
     i = 0;
     while (i < varLocals->sp) {
       heapval_t *hv = varLocals->stack[i].hpv;
-
+      if (hv->mark == markVal) {
+        i++;
+        continue;
+      }
       hv->mark = markVal;
       if (hv->sv.type == DICTTYPE) {
         mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());

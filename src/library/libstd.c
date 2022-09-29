@@ -847,6 +847,9 @@ int ric_pop_first(LIBRARY_PARAMS()) {
   argsList_t *walk;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
+  heapval_t *hpv;
+  int dummy;
+  void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Get vector reference */
   POP_VAL(&stv, sp, sc);
@@ -870,23 +873,13 @@ int ric_pop_first(LIBRARY_PARAMS()) {
 
   walk = vec->content;
 
-  if (walk->next == NULL) {
-    // handle special case
-    expr_t *e = newExpr_Copy(walk->arg);
-    evaluate_expression(e, EXPRESSION_ARGS());
+  vec->content = walk->next;
 
-    free_expression(walk->arg);
-    free(walk->arg);
-    free(walk);
-    vec->content = NULL;
-    free(e);
-  } else {
-    vec->content = walk->next;
-    evaluate_expression(walk->arg, EXPRESSION_ARGS());
-    free_expression(walk->arg);
-    free(walk->arg);
-    free(walk);
-  }
+  evaluate_expression(walk->arg, EXPRESSION_ARGS());
+  POP_VAL(&stv, sp, sc);
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  push_stackval(&stv, PROVIDE_CONTEXT());
 
   // Decrease vector size
   vec->length--;
@@ -1269,6 +1262,126 @@ int ric_print_env(LIBRARY_PARAMS()) {
     }
     i++;
   }
+
+  return 0;
+}
+
+static int _cmp_func_mpz(const void *a, const void *b) {
+  return (int)(mpz_cmp(**(mpz_t **)a, **(mpz_t **)b));
+}
+
+static int _cmp_func_int32(const void *a, const void *b) {
+  return (int)(*(int32_t *)a - *(int32_t *)b);
+}
+
+int ric_sort(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  int i = 0;
+  vector_t *vec = NULL;
+  expr_t *newVec = NULL;
+  argsList_t *vecContent = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  int32_t *outSort = NULL;
+  mpz_t **outSortBigInt = NULL;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+      vec = stv.vec;
+      break;
+    default:
+      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected list\n",
+              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      exit(1);
+      break;
+  }
+
+  vecContent = vec->content;
+
+  if (vecContent->length > 0) {
+
+    if (vecContent->arg->type == EXPR_TYPE_IVAL) {
+
+      outSort = ast_emalloc(vec->length * sizeof(int32_t));
+      while (vecContent != NULL) {
+        if (vecContent->arg->type != EXPR_TYPE_IVAL) {
+          free(outSort);
+          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
+                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
+                  vecContent->arg->type);
+          exit(1);
+        }
+
+        outSort[i] = vecContent->arg->ival;
+        vecContent = vecContent->next;
+        i++;
+      }
+
+      qsort(outSort, vec->length, sizeof(int32_t), _cmp_func_int32);
+    } else if (vecContent->arg->type == EXPR_TYPE_BIGINT) {
+
+      outSortBigInt = ast_emalloc(vec->length * sizeof(mpz_t *));
+
+      while (vecContent != NULL) {
+        mpz_t *n = ast_emalloc(sizeof(mpz_t));
+        if (vecContent->arg->type != EXPR_TYPE_BIGINT) {
+          free(outSortBigInt);
+          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
+                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
+                  vecContent->arg->type);
+          exit(1);
+        }
+
+        mpz_init_set(*n, *vecContent->arg->bigInt);
+
+        outSortBigInt[i] = n;
+        vecContent = vecContent->next;
+        i++;
+      }
+
+      qsort(outSortBigInt, vec->length, sizeof(mpz_t *), _cmp_func_mpz);
+    }
+    vecContent = NULL;
+  }
+  i = 0;
+  while (i < vec->length) {
+    expr_t *e = NULL;
+    argsList_t *a;
+
+    if (outSort != NULL) {
+      e = newExpr_Ival(outSort[i]);
+    } else if (outSortBigInt != NULL) {
+      e = newExpr_BigInt(outSortBigInt[i]);
+      free(outSortBigInt[i]);
+    }
+
+    a = newArgument(e, vecContent);
+    vecContent = a;
+
+    ++i;
+  }
+
+  if (outSort != NULL) {
+    free(outSort);
+  } else if (outSortBigInt != NULL) {
+    free(outSortBigInt);
+  }
+
+  newVec = newExpr_Vector(vecContent);
+
+  stv.type = VECTORTYPE;
+  stv.vec = newVec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(newVec);
+
+  /* Pushing the parsed value */
+  PUSH_VECTOR(stv.vec, sp, sc);
 
   return 0;
 }

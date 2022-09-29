@@ -9,6 +9,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "lib.h"
 #include "dl.h"
 #include "hashtable.h"
@@ -34,5 +36,6 @@ int ric_create_data(LIBRARY_PARAMS());
 int ric_create_text(LIBRARY_PARAMS());
 int ric_print_env(LIBRARY_PARAMS());
 int ric_sum(LIBRARY_PARAMS());
+int ric_sort(LIBRARY_PARAMS());
 
 #endif

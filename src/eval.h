@@ -58,5 +58,5 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv);
 void locals_remove(locals_stack_t *stack, char *id);
 
 expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS());
-
+void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS());
 #endif

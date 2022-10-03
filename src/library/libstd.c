@@ -790,6 +790,9 @@ int ric_pop(LIBRARY_PARAMS()) {
   argsList_t *prev;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  heapval_t *hpv = NULL;
+  int dummy;
 
   /* Get vector reference */
   POP_VAL(&stv, sp, sc);
@@ -814,27 +817,20 @@ int ric_pop(LIBRARY_PARAMS()) {
   walk = vec->content;
   prev = NULL;
   while (walk->next != NULL) {
-    // Special case
     prev = walk;
     walk = walk->next;
   }
 
-  if (prev == NULL) {
-    // handle special case
-    expr_t *e = newExpr_Copy(walk->arg);
-    free_expression(walk->arg);
-    free(walk->arg);
-    free(walk);
-    vec->content = NULL;
-    evaluate_expression(e, EXPRESSION_ARGS());
-    free(e);
+  if ( prev == NULL ) {
+    vec->content = walk->next;
   } else {
     prev->next = NULL;
-    evaluate_expression(walk->arg, EXPRESSION_ARGS());
-    free_expression(walk->arg);
-    free(walk->arg);
-    free(walk);
   }
+  evaluate_expression(walk->arg, EXPRESSION_ARGS());
+  POP_VAL(&stv, sp, sc);
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  push_stackval(&stv, PROVIDE_CONTEXT());
 
   // Decrease vector size
   vec->length--;

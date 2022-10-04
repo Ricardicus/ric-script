@@ -498,6 +498,10 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           exit(1);
         }
 
+        if (!festmtBigIntInitialized && endIteration == 0) {
+          continueLoop = 0;
+        }
+
         while (continueLoop) {
           if (entry->type != EXPR_TYPE_ID) {
             printf("%s.%d error: '%s' isn't a correct variable\n", ((statement_t *)stmt)->file,

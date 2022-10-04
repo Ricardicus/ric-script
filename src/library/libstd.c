@@ -821,7 +821,7 @@ int ric_pop(LIBRARY_PARAMS()) {
     walk = walk->next;
   }
 
-  if ( prev == NULL ) {
+  if (prev == NULL) {
     vec->content = walk->next;
   } else {
     prev->next = NULL;
@@ -1270,6 +1270,10 @@ static int _cmp_func_int32(const void *a, const void *b) {
   return (int)(*(int32_t *)a - *(int32_t *)b);
 }
 
+static int _cmp_func_chars(const void *a, const void *b) {
+  return strcmp(*(char **)a, *(char **)b);
+}
+
 int ric_sort(LIBRARY_PARAMS()) {
   stackval_t stv;
   int dummy;
@@ -1283,6 +1287,7 @@ int ric_sort(LIBRARY_PARAMS()) {
   void *hp = PROVIDE_CONTEXT()->hp;
   int32_t *outSort = NULL;
   mpz_t **outSortBigInt = NULL;
+  char **outSortChars = NULL;
 
   /* Read argument */
   POP_VAL(&stv, sp, sc);
@@ -1342,6 +1347,24 @@ int ric_sort(LIBRARY_PARAMS()) {
       }
 
       qsort(outSortBigInt, vec->length, sizeof(mpz_t *), _cmp_func_mpz);
+    } else if (vecContent->arg->type == EXPR_TYPE_TEXT) {
+      outSortChars = ast_emalloc(vec->length * sizeof(char *));
+
+      while (vecContent != NULL) {
+        if (vecContent->arg->type != EXPR_TYPE_TEXT) {
+          free(outSortBigInt);
+          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
+                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
+                  vecContent->arg->type);
+          exit(1);
+        }
+
+        outSortChars[i] = vecContent->arg->text;
+        vecContent = vecContent->next;
+        i++;
+      }
+
+      qsort(outSortChars, vec->length, sizeof(char *), _cmp_func_chars);
     }
     vecContent = NULL;
   }
@@ -1355,6 +1378,8 @@ int ric_sort(LIBRARY_PARAMS()) {
     } else if (outSortBigInt != NULL) {
       e = newExpr_BigInt(outSortBigInt[i]);
       free(outSortBigInt[i]);
+    } else if (outSortChars != NULL) {
+      e = newExpr_Text(outSortChars[i]);
     }
 
     a = newArgument(e, vecContent);
@@ -1367,6 +1392,8 @@ int ric_sort(LIBRARY_PARAMS()) {
     free(outSort);
   } else if (outSortBigInt != NULL) {
     free(outSortBigInt);
+  } else if (outSortChars != NULL) {
+    free(outSortChars);
   }
 
   newVec = newExpr_Vector(vecContent);

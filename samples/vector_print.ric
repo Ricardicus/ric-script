@@ -125,3 +125,16 @@ print(s)
 # Pushing
 . ( 10 ... i ) { s.push(i) }
 print(s)
+
+
+# Sorting vectors
+s = [23,123,4,234,1,321]
+print(s.sort())
+
+s = [bigInt(3132), bigInt(2), bigInt(123), bigInt(12334)]
+s = s.sort()
+print(s)
+
+# Pop first
+print(s.popFirst())
+print(s)

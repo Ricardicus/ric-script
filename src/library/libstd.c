@@ -1408,3 +1408,92 @@ int ric_sort(LIBRARY_PARAMS()) {
 
   return 0;
 }
+
+int ric_join(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  int i = 0;
+  char *joinArg = NULL;
+  size_t joinArgLen = 0;
+  vector_t *vec = NULL;
+  argsList_t *vecContent = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  char *outChars = NULL;
+  size_t outputStringSize = 0;
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+      vec = stv.vec;
+      break;
+    default:
+      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected list\n",
+              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      exit(1);
+      break;
+  }
+
+  /* Read argument */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      joinArg = stv.t;
+      joinArgLen = strlen(joinArg);
+      break;
+    default:
+      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected string\n",
+              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      exit(1);
+      break;
+  }
+
+  vecContent = vec->content;
+  // Calculate total string size
+  while (vecContent != NULL) {
+    if (vecContent->arg->type != EXPR_TYPE_TEXT) {
+      fprintf(stderr, "error %s.%d: %s unexpected list member type; expected string\n",
+              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      exit(1);
+    }
+    if (outputStringSize == 0) {
+      // First iteration
+      outputStringSize += strlen(vecContent->arg->text);
+    } else {
+      outputStringSize += strlen(vecContent->arg->text) + joinArgLen;
+    }
+    vecContent = vecContent->next;
+  }
+
+  outChars = ast_emalloc(outputStringSize + 1);
+  vecContent = vec->content;
+  i = 0;
+  // Calculate total string size
+  while (vecContent != NULL) {
+    size_t bytesToWrite = 0;
+    if (i == 0) {
+      // first iteration
+      bytesToWrite = strlen(vecContent->arg->text);
+      snprintf(&outChars[i], bytesToWrite + 1, "%s", vecContent->arg->text);
+    } else {
+      bytesToWrite = strlen(vecContent->arg->text) + joinArgLen;
+      snprintf(&outChars[i], bytesToWrite + 1, "%s%s", joinArg, vecContent->arg->text);
+    }
+    i += bytesToWrite;
+    vecContent = vecContent->next;
+  }
+
+  stv.type = TEXT;
+  stv.t = outChars;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the parsed value */
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}

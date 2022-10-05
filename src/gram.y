@@ -242,6 +242,11 @@ expression:
     | ID {
       $$ = newExpr_ID($1);
     }
+    | '-' ID {
+      expr_t *id = newExpr_ID($2);
+      expr_t *neg = newExpr_Ival(-1);
+      $$ = newExpr_OPMul(neg, id);
+    }
     | '(' expressions ')' {
       $$ = $2;
     };
@@ -678,7 +683,11 @@ mathContentDigit:
       if ( strlen(yyval.id) >= 10 ) {
         $$ = newExpr_BigIntFromStr(yyval.id);
       } else {
-        $$ = newExpr_Ival(atoi(yyval.id));
+        if ( yyval.id[0] == '0' && strlen(yyval.id) > 1 ) {
+          $$ = newExpr_Text(yyval.id);
+        } else {
+          $$ = newExpr_Ival(atoi(yyval.id));
+        }
       }
     };
 
@@ -758,6 +767,8 @@ stringEdition:
 
           c = mpz_get_str(buf, 10, *d->bigInt);
           snprintf(buffer, sizeof(buffer), "%s", c);
+        } else if ( d->type == EXPR_TYPE_TEXT ) {
+          snprintf(buffer, sizeof(buffer), "%s", d->text);
         }
         $$ = newExpr_Text(buffer);
         free($1);

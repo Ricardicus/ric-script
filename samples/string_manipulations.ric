@@ -65,3 +65,8 @@ s = "hejsan japp nepp hoppsan"
 ? [ s.endsWith("") ] {
   print(s.split(" ")[2])
 }
+
+# Indexing backwards
+s = "9876543210"
+p = [(10 ... i) { s[-i] }]
+print(p.join(""))

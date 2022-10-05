@@ -32,7 +32,8 @@ def test_vector_print():
 "japp",
 "japp",
 "japp",
-"japp"
+"japp",
+"9012345678"
 ]
 
   script = callSample('string_manipulations.ric')

@@ -92,7 +92,7 @@
 // Max number of input arguments
 #define MAX_NBR_ARGUMENTS 10
 // Max number of locals that can be defined at the same time
-#define MAX_NBR_LOCALS 1000
+#define MAX_NBR_LOCALS 1024
 // Maximum body depth
 #define MAX_BODY_LEVELS 30 // If you need more; I am sorry.
 // Number of elements on the stack of this interpreter (arbitrary number?)

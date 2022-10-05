@@ -3142,7 +3142,7 @@ void locals_remove(locals_stack_t *stack, char *id) {
     if (strcmp(id, local.id) == 0) {
       /* Remove this element from the stack */
       int p = i + 1;
-      while (p < stack->sp && i < MAX_NBR_LOCALS) {
+      while (p < stack->sp && p < MAX_NBR_LOCALS) {
         stack->stack[p - 1] = stack->stack[p];
         ++p;
       }

@@ -1201,6 +1201,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
                       "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
                       arrayIndex, vec->length);
               exit(1);
+            } else if (arrayIndex < 0) {
+              arrayIndex = vec->length - ((vec->length - arrayIndex) % vec->length);
             }
 
             walk = vec->content;
@@ -1294,6 +1296,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           heapval_t *hvp;
           int heapUpdated;
           char *newText = NULL;
+          size_t origLen = strlen(text);
 
           evaluate_expression(index, EXPRESSION_ARGS());
           POP_VAL(&sv, sp, sc);
@@ -1308,8 +1311,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           if (sv.type == INT32TYPE) {
             arrayIndex = sv.i;
 
-            if (arrayIndex > strlen(text)) {
-              fprintf(stderr, "index error: out of bounds\n");
+            if (arrayIndex < 0) {
+              arrayIndex = origLen - ((origLen - arrayIndex) % origLen);
+            } else if (arrayIndex >= origLen) {
+              fprintf(stderr, "index error: out of bounds (index: %d, size: %zu)\n", arrayIndex,
+                      origLen);
               if (!*interactive) {
                 exit(1);
               }
@@ -3107,7 +3113,7 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
   if (stack->sp >= MAX_NBR_LOCALS) {
     fprintf(
         stderr,
-        "You are defining over %d locals, what are you doin? I will not cooperate with you. Sorry.\n",
+        "error: You are defining over %d locals, this is more than the ric-script interpreter can handle unfortunately. Is the program heavily recursive perhaps? The interpreter will not cooperate... Sorry.\n",
         MAX_NBR_LOCALS);
     exit(1);
   }
@@ -3298,6 +3304,8 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                           "'\n",
                           arrayIndex, vec->length);
                   exit(1);
+                } else if (arrayIndex < 0) {
+                  arrayIndex = vec->length - ((vec->length - arrayIndex) % vec->length);
                 }
 
                 walk = vec->content;
@@ -3341,8 +3349,10 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
 
                 arrayIndex = sv.i;
 
-                if (arrayIndex >= strlen(text)) {
-                  fprintf(stderr, "index error: index out of bounds\n");
+                if (arrayIndex < 0) {
+                  arrayIndex = origLen - ((origLen - arrayIndex) % origLen);
+                } else if (arrayIndex >= origLen) {
+                  fprintf(stderr, "index error: index out of bounds (index: %d)\n", arrayIndex);
                   exit(1);
                 }
 

@@ -216,6 +216,8 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                           "'\n",
                           arrayIndex, vec->length);
                   exit(1);
+                } else if (arrayIndex < 0) {
+                  arrayIndex = vec->length - ((vec->length - arrayIndex) % vec->length);
                 }
 
                 walk = vec->content;
@@ -259,11 +261,12 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
                 arrayIndex = sv.i;
 
-                if (arrayIndex >= strlen(text)) {
+                if (arrayIndex < 0) {
+                  arrayIndex = origLen - ((origLen - arrayIndex) % origLen);
+                } else if (arrayIndex >= strlen(text)) {
                   fprintf(stderr, "index error: index out of bounds\n");
                   exit(1);
                 }
-
                 /* Evaluating the expression among global variables */
                 evaluate_expression(decl->val, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);

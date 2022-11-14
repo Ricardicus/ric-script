@@ -1786,6 +1786,47 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         }
 
         PUSH_STRING(sv.t, sp, sc);
+      } else if (svRight.type == VECTORTYPE && svLeft.type == VECTORTYPE) {
+        stackval_t sv;
+        heapval_t *hvp;
+        argsList_t *vecContent = NULL;
+        expr_t *newVec;
+        argsList_t *walk = NULL;
+        int dummy;
+
+        walk = svLeft.vec->content;
+        while (walk != NULL) {
+          stackval_t svTmp;
+          expr_t *newEntry;
+          evaluate_expression(walk->arg, EXPRESSION_ARGS());
+          POP_VAL(&svTmp, sp, sc);
+
+          newEntry = stackval_to_expression(&svTmp, EXPRESSION_ARGS());
+
+          vecContent = newArgument(newEntry, vecContent);
+          walk = walk->next;
+        }
+        walk = svRight.vec->content;
+        while (walk != NULL) {
+          stackval_t svTmp;
+          expr_t *newEntry;
+          evaluate_expression(walk->arg, EXPRESSION_ARGS());
+          POP_VAL(&svTmp, sp, sc);
+
+          newEntry = stackval_to_expression(&svTmp, EXPRESSION_ARGS());
+
+          vecContent = newArgument(newEntry, vecContent);
+          walk = walk->next;
+        }
+
+        newVec = newExpr_Vector(vecContent);
+
+        sv.type = VECTORTYPE;
+        sv.vec = newVec->vec;
+        free(newVec);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_VECTOR(sv.vec, sp, sc);
       }
 
       break;

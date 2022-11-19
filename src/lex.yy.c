@@ -462,14 +462,16 @@ char *yytext;
 
 #include "y.tab.h"
 
-int yylinenor=1;
+int yylinenor=0;
 
 int return_spaces = 0;
 int double_citation = 0;
 int simple_citation = 0;
 
-#line 471 "lex.yy.c"
-#line 472 "lex.yy.c"
+int commenting = 0;
+
+#line 473 "lex.yy.c"
+#line 474 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -686,10 +688,10 @@ YY_DECL
 		}
 
 	{
-#line 25 "lex.l"
+#line 27 "lex.l"
 
 
-#line 692 "lex.yy.c"
+#line 694 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -748,14 +750,15 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "lex.l"
+#line 29 "lex.l"
 {
 	// Comment
+	commenting = 1;
 }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 31 "lex.l"
+#line 34 "lex.l"
 {
   memset(yylval.id,0,sizeof(yylval.id));
   memcpy(
@@ -768,7 +771,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 40 "lex.l"
+#line 43 "lex.l"
 {
 	if ( double_citation || simple_citation ) {
 		memset(yylval.id,0,sizeof(yylval.id));
@@ -786,7 +789,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 55 "lex.l"
+#line 58 "lex.l"
 {
 	yylval.id[0] = yytext[0];
 	yylval.id[1] = 0;
@@ -801,21 +804,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 67 "lex.l"
+#line 70 "lex.l"
 {
 	return RETURN;
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 71 "lex.l"
+#line 74 "lex.l"
 {
 	return FOREACH;
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 75 "lex.l"
+#line 78 "lex.l"
 {
 	// return spaces only if within a citation
 	if ( double_citation|| simple_citation ) {
@@ -825,7 +828,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 82 "lex.l"
+#line 85 "lex.l"
 {
 	memset(yylval.id,0,sizeof(yylval.id));
 	memcpy(
@@ -839,22 +842,29 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 92 "lex.l"
+#line 95 "lex.l"
 {
 	yylinenor++;
+	if ( commenting ) {
+		commenting = 0;
+	} else if ( double_citation|| simple_citation ) {
+		return ' ';
+	} else {
+		return NEWLINE;
+	}
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 96 "lex.l"
+#line 106 "lex.l"
 ;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 98 "lex.l"
+#line 108 "lex.l"
 ECHO;
 	YY_BREAK
-#line 857 "lex.yy.c"
+#line 867 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1859,6 +1869,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 98 "lex.l"
+#line 108 "lex.l"
 
 

@@ -5,11 +5,13 @@
 
 #include "y.tab.h"
 
-int yylinenor=1;
+int yylinenor=0;
 
 int return_spaces = 0;
 int double_citation = 0;
 int simple_citation = 0;
+
+int commenting = 0;
 
 %}
 
@@ -26,6 +28,7 @@ RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=_,@$\\{}]
 
 [ \t]*#.* {
 	// Comment
+	commenting = 1;
 }
 
 {DIGIT_VAL}+ {
@@ -91,6 +94,13 @@ RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=_,@$\\{}]
 
 \n {
 	yylinenor++;
+	if ( commenting ) {
+		commenting = 0;
+	} else if ( double_citation|| simple_citation ) {
+		return ' ';
+	} else {
+		return NEWLINE;
+	}
 }
 
 .               ;

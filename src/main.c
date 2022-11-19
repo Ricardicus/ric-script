@@ -133,7 +133,6 @@ int main(int argc, char *argv[]) {
     case runAsIntepreter:
       /* Parse the program */
       parse();
-
       /* Get the root statement */
       root = getRoot();
       /* Set main root statement */

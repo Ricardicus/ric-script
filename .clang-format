@@ -1,5 +1,7 @@
 ---
 BasedOnStyle: LLVM
+IndentWidth: 2
+TabWidth: 2
 AlignEscapedNewlines: Left
 AllowShortIfStatementsOnASingleLine: WithoutElse
 BinPackArguments: true

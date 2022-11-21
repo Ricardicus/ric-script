@@ -57,7 +57,7 @@ statement_t *root = NULL;
 %type<data> dictionary_keys_vals
 %type<data> dictionary_key_val
 %type<data> statements
-%type<data> statement statement_
+%type<data> statement
 %type<data> program
 %type<data> expressions
 %type<data> expression
@@ -111,17 +111,13 @@ program: statements {
 };
 
 statements: 
-    _ statement_ statements {
-        statement_t *stmt = (statement_t*)$2;
-        stmt->next = (statement_t*)$3;
-        $$ = $2;
+    statement statements {
+        statement_t *stmt = (statement_t*)$1;
+        stmt->next = (statement_t*)$2;
+        $$ = $1;
     }
     | { $$ = NULL; } /* EMPTY */
     ;
-
-statement_: statement _ {
-	$$ = $1;
-};
 
 statement:
     declaration {
@@ -158,8 +154,6 @@ statement:
         $$ = newStatement(LANG_ENTITY_CLASSDECL, $1);
     };
 
-_: _ NEWLINE {} | {};
-
 systemStatement: '$' ID {
     $$ = newExpr_ID($2);
 } | '$' stringContent {
@@ -172,10 +166,8 @@ forEachStatementFull:
 };
 
 forEachStatement: 
-    '(' expressions FOREACH ID _ ')' body {
-    $$ = newForEach($2, $4, $7);
-} | '(' _ expressions FOREACH ID _ ')' body {
-    $$ = newForEach($3, $5, $8);
+    '(' expressions FOREACH ID ')' body {
+    $$ = newForEach($2, $4, $6);
 };
 
 returnStatement: RETURN expressions {
@@ -194,33 +186,33 @@ expressions:
     expression {
       $$ = $1;
     }
-    | expressions '+' _ expressions {
+    | expressions '+' expressions {
       expr_t *e1 = (expr_t*)$1;
-      expr_t *e2 = (expr_t*)$4;
+      expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPAdd(e1,e2);
     }
-    | expressions '*' _ expressions {
+    | expressions '*' expressions {
       expr_t *e1 = (expr_t*)$1;
-      expr_t *e2 = (expr_t*)$4;
+      expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPMul(e1,e2);
     }
-    | expressions '-' _ expressions {
+    | expressions '-' expressions {
       expr_t *e1 = (expr_t*)$1;
-      expr_t *e2 = (expr_t*)$4;
+      expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPSub(e1,e2);
     }
-    | expressions '%' _ expressions {
+    | expressions '%' expressions {
       expr_t *e1 = (expr_t*)$1;
-      expr_t *e2 = (expr_t*)$4;
+      expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPMod(e1,e2);
     }
-    | expressions '/' _ expressions {
+    | expressions '/' expressions {
       expr_t *e1 = (expr_t*)$1;
-      expr_t *e2 = (expr_t*)$4;
+      expr_t *e2 = (expr_t*)$3;
 
       $$ = newExpr_OPDiv(e1,e2);
     };
@@ -339,16 +331,16 @@ endIf:
     };
 
 logical_a:
-    logical_a '|' '|' _ logical_b {
-      $$ = newExpr_Logical($1, NULL, $5);
+    logical_a '|' '|' logical_b {
+      $$ = newExpr_Logical($1, NULL, $4);
     }
     | logical_b {
       $$ = $1;
     };
 
 logical_b:
-    logical_b '&' '&' _ logical_expression {
-      $$ = newExpr_Logical($1, $5, NULL);
+    logical_b '&' '&' logical_expression {
+      $$ = newExpr_Logical($1, $4, NULL);
     }
     | logical_expression {
       $$ = $1;
@@ -568,6 +560,9 @@ dictionary_keys_vals:
       $$ = right;
     }
     | dictionary_key_val {
+      $$ = $1;
+    }
+    | dictionary_key_val _ {
       $$ = $1;
     }
     | {

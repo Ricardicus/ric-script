@@ -116,6 +116,7 @@ statements:
         stmt->next = (statement_t*)$3;
         $$ = $2;
     }
+    | _ { $$ = NULL; }
     | { $$ = NULL; } /* EMPTY */
     ;
 

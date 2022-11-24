@@ -255,18 +255,17 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
     } break;
   }
 
-
   fseek(fp, 0L, SEEK_END);
   fz = ftell(fp);
   fseek(fp, 0L, SEEK_SET);
 
-  buffer = calloc(fz+1, 1);
+  buffer = calloc(fz + 1, 1);
   if (buffer == NULL) {
     fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
-  while (fgets(buffer, fz+1, fp) != NULL) {
+  while (fgets(buffer, fz + 1, fp) != NULL) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;

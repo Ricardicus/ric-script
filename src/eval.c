@@ -1748,44 +1748,68 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         }
 
         PUSH_STRING(sv.t, sp, sc);
-      } else if (svLeft.type == VECTORTYPE && svRight.type == TEXT) {
-        size_t len = 50 + strlen(svRight.t);
+      } else if (svLeft.type == VECTORTYPE
+                 && (svRight.type == TEXT || svRight.type == BIGINT || svRight.type == INT32TYPE
+                     || svRight.type == DOUBLETYPE)) {
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
-        char *newText = ast_emalloc(len + 1);
-        snprintf(newText, len + 1, "<List:size=%" PRIi32 ">%s", svLeft.vec->length, svRight.t);
+        argsList_t *vecContent = NULL;
+        expr_t *newVec;
+        argsList_t *walk = NULL;
+        int dummy;
+        expr_t *newEntry = NULL;
 
-        sv.type = TEXT;
-        sv.t = newText;
+        walk = svLeft.vec->content;
+        while (walk != NULL) {
+          stackval_t svTmp;
+          evaluate_expression(walk->arg, EXPRESSION_ARGS());
+          POP_VAL(&svTmp, sp, sc);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+          newEntry = stackval_to_expression(&svTmp, EXPRESSION_ARGS());
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
+          vecContent = newArgument(newEntry, vecContent);
+          walk = walk->next;
         }
 
-        PUSH_STRING(sv.t, sp, sc);
-      } else if (svLeft.type == TEXT && svRight.type == VECTORTYPE) {
-        size_t len = 50 + strlen(svRight.t);
-        stackval_t sv;
-        heapval_t *hvp;
-        int heapUpdated;
-        char *newText = ast_emalloc(len + 1);
-        snprintf(newText, len + 1, "%s<List:size=%" PRIi32 ">", svLeft.t, svRight.vec->length);
-
-        sv.type = TEXT;
-        sv.t = newText;
-
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
+        sv.type = svRight.type;
+        switch (svRight.type) {
+          case INT32TYPE: {
+            sv.i = svRight.i;
+            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            break;
+          }
+          case DOUBLETYPE: {
+            sv.d = svRight.d;
+            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            break;
+          }
+          case BIGINT: {
+            sv.bigInt = svRight.bigInt;
+            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            break;
+          }
+          case TEXT: {
+            size_t len = 50 + strlen(svRight.t);
+            char *newText = ast_emalloc(len + 1);
+            snprintf(newText, len + 1, "%s", svRight.t);
+            sv.t = newText;
+            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            break;
+          }
+          default:
+            break;
         }
 
-        PUSH_STRING(sv.t, sp, sc);
+        vecContent = newArgument(newEntry, vecContent);
+
+        newVec = newExpr_Vector(vecContent);
+
+        sv.type = VECTORTYPE;
+        sv.vec = newVec->vec;
+        free(newVec);
+
+        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        PUSH_VECTOR(sv.vec, sp, sc);
       } else if (svRight.type == VECTORTYPE && svLeft.type == VECTORTYPE) {
         stackval_t sv;
         heapval_t *hvp;

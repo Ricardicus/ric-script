@@ -183,7 +183,7 @@ int example_class_init(LIBRARY_PARAMS()) {
   int dummy;
   libFunction_t *classFuncABIadd = ast_ecalloc(sizeof(libFunction_t));
   libFunction_t *classFuncABIsub = ast_ecalloc(sizeof(libFunction_t));
-	static char *class_name = "example_class";
+  static char *class_name = "example_class";
 
   char *class_function_add_name = ast_ecalloc(20);
   char *class_function_sub_name = ast_ecalloc(20);

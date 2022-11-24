@@ -21,8 +21,10 @@ void usage(char *argv0, int ret) {
   fprintf((ret == 0 ? stdout : stderr), "  -c: command passed as string directly\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -v|--version: print interpreter version\r\n");
   fprintf((ret == 0 ? stdout : stderr), "  -h|--help: print this help\r\n");
-  fprintf((ret == 0 ? stdout : stderr), "  -ah|--alloc-heap: set heap allocation spots (default: %d)\r\n", RIC_HEAPSIZE);
-  fprintf((ret == 0 ? stdout : stderr), "  -as|--alloc-stack: set stack allocation spots (default: %d)\r\n", RIC_STACKSIZE);
+  fprintf((ret == 0 ? stdout : stderr),
+          "  -ah|--alloc-heap: set heap allocation spots (default: %d)\r\n", RIC_HEAPSIZE);
+  fprintf((ret == 0 ? stdout : stderr),
+          "  -as|--alloc-stack: set stack allocation spots (default: %d)\r\n", RIC_STACKSIZE);
   fprintf((ret == 0 ? stdout : stderr), "\r\n");
   fprintf((ret == 0 ? stdout : stderr), "source code:\r\n  %s\r\n", GENERAL_SOURCE_URL);
   fprintf((ret == 0 ? stdout : stderr), "docs:\r\n  %s\r\n", GENERAL_DOCS);
@@ -79,14 +81,14 @@ int main(int argc, char *argv[]) {
         return 0;
       } else if (strcmp("-ah", argv[i]) == 0 || strcmp("--alloc-heap", argv[i]) == 0) {
         if (i + 1 < argc) {
-          heapsize = atoi(argv[i+1]);
+          heapsize = atoi(argv[i + 1]);
         } else {
           usage(argv[0], 1);
           return 1;
         }
       } else if (strcmp("-as", argv[i]) == 0 || strcmp("--alloc-stack", argv[i]) == 0) {
         if (i + 1 < argc) {
-          stacksize = atoi(argv[i+1]);
+          stacksize = atoi(argv[i + 1]);
         } else {
           usage(argv[0], 1);
           return 1;
@@ -133,7 +135,6 @@ int main(int argc, char *argv[]) {
     case runAsIntepreter:
       /* Parse the program */
       parse();
-
       /* Get the root statement */
       root = getRoot();
       /* Set main root statement */

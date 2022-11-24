@@ -35,7 +35,7 @@ int ric_atoi(LIBRARY_PARAMS()) {
   } else if (rawdata != NULL) {
     result = (int)((unsigned char *)rawdata->data)[0];
   } else {
-    result = (int) valDouble;
+    result = (int)valDouble;
   }
 
   /* Pushing the parsed value */
@@ -72,17 +72,20 @@ int ric_trim(LIBRARY_PARAMS()) {
   }
 
   c = string;
-  while ( *c && isspace(*c) ) c++;
+  while (*c && isspace(*c))
+    c++;
 
   sz = strlen(c);
-  result = ast_ecalloc(sz+2);
-  snprintf(result, sz+1, "%s", c);
+  result = ast_ecalloc(sz + 2);
+  snprintf(result, sz + 1, "%s", c);
 
   c = result;
-  while ( *c ) { ++c; }
+  while (*c) {
+    ++c;
+  }
   --c;
 
-  while ( *c && *c == ' ' ) {
+  while (*c && *c == ' ') {
     *c = 0;
     --c;
   }
@@ -97,7 +100,6 @@ int ric_trim(LIBRARY_PARAMS()) {
 
   return 0;
 }
-
 
 int ric_split(LIBRARY_PARAMS()) {
   stackval_t stv;

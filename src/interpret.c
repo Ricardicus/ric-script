@@ -188,6 +188,10 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 } else if (sv.type == DICTTYPE) {
                   dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
                   sv.dict = dict;
+                } else if (sv.type == BIGINT) {
+                  expr_t *e = newExpr_BigInt(sv.bigInt);
+                  sv.bigInt = e->bigInt;
+                  free(e);
                 }
 
                 ALLOC_HEAP(&sv, hp, &hvp, &dummy);

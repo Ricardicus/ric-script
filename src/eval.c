@@ -964,9 +964,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       PUSH_LIBFUNCPTR(expr->func, sp, sc);
       break;
     case EXPR_TYPE_BIGINT: {
-      expr_t *e = newExpr_BigInt(expr->bigInt);
-      PUSH_BIGINT(e->bigInt, sp, sc);
-      free(e);
+      PUSH_BIGINT(expr->bigInt, sp, sc);
       break;
     }
     case EXPR_TYPE_VECTOR:
@@ -1556,7 +1554,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         sv.type = BIGINT;
         sv.bigInt = e->bigInt;
-
         mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
 
         PUSH_BIGINT(sv.bigInt, sp, sc);
@@ -1926,16 +1923,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
         int dummy;
-
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_sub(*n, *svLeft.bigInt, *svRight.bigInt);
+        PUSH_BIGINT(n, sp, sc);
 
         stv.type = BIGINT;
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-        PUSH_BIGINT(n, sp, sc);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -1947,15 +1942,15 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_sub(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
 
-        stv.type = BIGINT;
-        stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
         mpz_clear(*bigIntEtmp->bigInt);
         free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -1967,15 +1962,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_sub(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
 
-        stv.type = BIGINT;
-        stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
         mpz_clear(*bigIntEtmp->bigInt);
         free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
       }
 
       break;
@@ -2054,16 +2048,15 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
         int dummy;
-
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
 
+        PUSH_BIGINT(n, sp, sc);
+
         stv.type = BIGINT;
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-        PUSH_BIGINT(n, sp, sc);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -2073,26 +2066,23 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         mpz_init(*n);
         mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
 
+        PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-        PUSH_BIGINT(n, sp, sc);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
         int dummy;
-
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
 
+        PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-        PUSH_BIGINT(n, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
         heapval_t *hpv;
         stackval_t stv;
@@ -2296,16 +2286,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
         int dummy;
-
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mod(*n, *svLeft.bigInt, *svRight.bigInt);
 
+        PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-        PUSH_BIGINT(n, sp, sc);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -2317,15 +2305,15 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_mod(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
 
-        stv.type = BIGINT;
-        stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
         mpz_clear(*bigIntEtmp->bigInt);
         free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
+
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -2337,15 +2325,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_mod(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
 
-        stv.type = BIGINT;
-        stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
         mpz_clear(*bigIntEtmp->bigInt);
         free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
       }
 
       break;
@@ -2417,16 +2404,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
         int dummy;
-
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_fdiv_q(*n, *svLeft.bigInt, *svRight.bigInt);
 
+        PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
         ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
-        PUSH_BIGINT(n, sp, sc);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -2438,15 +2423,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_fdiv_q(*n, *svLeft.bigInt, *bigIntEtmp->bigInt);
 
-        stv.type = BIGINT;
-        stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
         mpz_clear(*bigIntEtmp->bigInt);
         free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
@@ -2458,15 +2442,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_fdiv_q(*n, *bigIntEtmp->bigInt, *svRight.bigInt);
 
-        stv.type = BIGINT;
-        stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
-
         mpz_clear(*bigIntEtmp->bigInt);
         free(bigIntEtmp->bigInt);
         free(bigIntEtmp);
 
         PUSH_BIGINT(n, sp, sc);
+        stv.type = BIGINT;
+        stv.bigInt = n;
+        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
       }
 
       break;
@@ -3282,6 +3265,10 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
             } else if (sv.type == DICTTYPE) {
               dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
               sv.dict = dict;
+            } else if (sv.type == BIGINT) {
+              expr_t *e = newExpr_BigInt(sv.bigInt);
+              sv.bigInt = e->bigInt;
+              free(e);
             }
 
             ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
@@ -3341,6 +3328,10 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 } else if (sv.type == DICTTYPE) {
                   dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
                   sv.dict = dict;
+                } else if (sv.type == BIGINT) {
+                  expr_t *e = newExpr_BigInt(sv.bigInt);
+                  sv.bigInt = e->bigInt;
+                  free(e);
                 }
 
                 ALLOC_HEAP(&sv, hp, &hvp, &dummy);
@@ -3521,9 +3512,14 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case LIBFUNCPTRTYPE:
         case FUNCPTRTYPE:
         case TIMETYPE:
-        case BIGINT:
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           break;
+        case BIGINT: {
+          expr_t *e = newExpr_BigInt(sv.bigInt);
+          sv.bigInt = e->bigInt;
+          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          break;
+        }
         case VECTORTYPE: {
           expr_t *eTemp = ast_emalloc(sizeof(expr_t));
           expr_t *newVecExpr = NULL;
@@ -3606,9 +3602,14 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case LIBFUNCPTRTYPE:
           case FUNCPTRTYPE:
           case TIMETYPE:
-          case BIGINT:
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
             break;
+          case BIGINT: {
+            expr_t *e = newExpr_BigInt(sv.bigInt);
+            sv.bigInt = e->bigInt;
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            break;
+          }
           case VECTORTYPE: {
             expr_t *eTemp = ast_emalloc(sizeof(expr_t));
             expr_t *newVecExpr = NULL;

@@ -721,6 +721,7 @@ updated from the outside
 ```
 
 For more of a walkthrough check [here](https://ricardicus.se/doc/syntaxwalkthrough.html).
+
 I have also implemented some [Advent of code](https://adventofcode.com/) problems in ric-script in this repo: [https://github.com/Ricardicus/ric-script-advent-of-code](https://github.com/Ricardicus/ric-script-advent-of-code).
 
 ## Loading external scripts

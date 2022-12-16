@@ -188,6 +188,14 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
     offset = (int)sv.i;
   }
 
+  if ( idxStart < 0 ) {
+    idxStart = idxStart + max;
+  }
+
+  if ( idxEnd < 0 ) {
+    idxEnd = idxEnd + max;
+  }
+
   if (idxStart < 0 || idxStart > max || (idxEnd > 0 && idxStart > idxEnd)) {
     fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
             idxStart, idxEnd, max);

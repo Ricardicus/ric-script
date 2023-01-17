@@ -56,6 +56,9 @@ void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
           if (e->type == EXPR_TYPE_DICT && e->dict->type == RIC_DICTIONARY_DYN) {
             mark(e->dict->hash, markVal, EXPRESSION_ARGS());
           }
+          if (e->type == EXPR_TYPE_CLASSPTR && e->classObj->initialized) {
+            mark(e->classObj->varMembers, markVal, EXPRESSION_ARGS());
+          }
           args = args->next;
         }
       }

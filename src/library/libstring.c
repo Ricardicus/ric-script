@@ -85,7 +85,7 @@ int ric_trim(LIBRARY_PARAMS()) {
   }
   --c;
 
-  while (*c && *c == ' ') {
+  while (*c && (*c == ' ' || *c == '\n')) {
     *c = 0;
     --c;
   }

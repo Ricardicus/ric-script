@@ -26,6 +26,8 @@ if ( target_os == 'darwin' )
   library_source_list += ['libxattr_darwin.c']
 elif ( target_os == 'linux' )
   library_source_list += ['libxattr_linux.c']
+else
+  ric_c_args += ['-DNO_XATTR']
 endif
 
 library_sources = files(library_source_list)

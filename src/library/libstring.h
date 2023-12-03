@@ -24,5 +24,6 @@ int ric_to_lower(LIBRARY_PARAMS());
 int ric_ends_with(LIBRARY_PARAMS());
 int ric_starts_with(LIBRARY_PARAMS());
 int ric_trim(LIBRARY_PARAMS());
+int ric_is_numerical(LIBRARY_PARAMS());
 
 #endif

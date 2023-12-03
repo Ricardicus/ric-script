@@ -188,11 +188,11 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
     offset = (int)sv.i;
   }
 
-  if ( idxStart < 0 ) {
+  if (idxStart < 0) {
     idxStart = idxStart + max;
   }
 
-  if ( idxEnd < 0 ) {
+  if (idxEnd < 0) {
     idxEnd = idxEnd + max;
   }
 

@@ -662,21 +662,16 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             size_t len;
             char *newText;
 
-            hvp = locals_lookup(varLocals, entryId);
-            if (hvp == NULL) {
-              len = 2;
-              newText = ast_emalloc(len);
-              snprintf(newText, 2, "%c", rootChars[arrayIndex]);
+            len = 2;
+            newText = ast_emalloc(len);
+            snprintf(newText, 2, "%c", rootChars[arrayIndex]);
 
-              sv.type = TEXT;
-              sv.t = newText;
+            sv.type = TEXT;
+            sv.t = newText;
 
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, entryId, hvp);
-            } else {
-              /* Update with new text */
-              snprintf(hvp->sv.t, 2, "%c", rootChars[arrayIndex]);
-            }
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, entryId, hvp);
+
             /* Increase the value of the unfolded variable */
             festmtIndex++;
             hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
@@ -695,17 +690,13 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           } else if (rootInt >= 0) {
             /* traverse the integer, start from zero */
             hvp = locals_lookup(varLocals, entryId);
-            if (hvp == NULL) {
-              stackval_t sv;
+            stackval_t sv;
 
-              sv.type = INT32TYPE;
-              sv.i = festmtIndex;
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, entryId, hvp);
-            } else {
-              /* Update value on the heap */
-              hvp->sv.i = festmtIndex;
-            }
+            sv.type = INT32TYPE;
+            sv.i = festmtIndex;
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, entryId, hvp);
+
             /* Increase the value of the unfolded variable */
             festmtIndex++;
             hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
@@ -728,20 +719,16 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             heapval_t *hvp = NULL;
 
             hvp = locals_lookup(varLocals, entryId);
-            if (hvp == NULL) {
-              e = newExpr_BigIntFromInt(0);
+            e = newExpr_BigIntFromInt(0);
 
-              sv.type = BIGINT;
-              sv.bigInt = e->bigInt;
-              free(e);
+            sv.type = BIGINT;
+            sv.bigInt = e->bigInt;
+            free(e);
 
-              mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
+            mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
 
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, entryId, hvp);
-            } else {
-              mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
-            }
+            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            locals_push(varLocals, entryId, hvp);
 
             /* Increase the value of the unfolded variable */
             mpz_add_ui(festmtBigIndex, festmtBigIndex, 1);
@@ -1396,6 +1383,16 @@ static void flush_arg(void *key, void *val) {
   } else if (e->type == EXPR_TYPE_BIGINT) {
     mpz_clear(*e->bigInt);
     free(e->bigInt);
+  } else if (e->type == EXPR_TYPE_VECTOR) {
+    argsList_t *walk = e->vec->content;
+    argsList_t *next;
+    while (walk != NULL) {
+      next = walk->next;
+      free_expression(walk->arg);
+      free(walk);
+      walk = next;
+    }
+    free(e->vec);
   }
 }
 

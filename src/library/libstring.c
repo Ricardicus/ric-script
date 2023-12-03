@@ -436,3 +436,43 @@ int ric_ends_with(LIBRARY_PARAMS()) {
 
   return 0;
 }
+
+int ric_is_numerical(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  char *string = NULL;
+  int result = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      string = stv.t;
+      break;
+    default: {
+      fprintf(stderr,
+              "error: function call '%s' got unexpected data type as argument, string expected.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  if (string != NULL) {
+    char *c = string;
+    result = 1;
+    while (*c) {
+      if (!isdigit(*c)) {
+        result = 0;
+        break;
+      }
+      ++c;
+    }
+    result = atoi(string);
+  }
+
+  /* Pushing the parsed value */
+  PUSH_INT(result, sp, sc);
+
+  return 0;
+}

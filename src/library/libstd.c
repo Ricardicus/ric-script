@@ -687,6 +687,11 @@ int ric_append(LIBRARY_PARAMS()) {
     case CLASSTYPE:
       entry = newExpr_ClassPtrCopy(stv.classObj);
       break;
+    case DICTTYPE: {
+      entry = ast_emalloc(sizeof(expr_t));
+      entry->type = EXPR_TYPE_DICT;
+      entry->dict = allocNewDictionary(stv.dict, EXPRESSION_ARGS());
+    } break;
     case FUNCPTRTYPE:
       entry = newExpr_FuncPtr((void *)stv.p);
       break;

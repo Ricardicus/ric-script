@@ -491,7 +491,7 @@ class_t *newClass(char *id, body_t *body) {
   return class;
 }
 
-expr_t *newExpr_Copy(expr_t *expr) {
+expr_t *newExpr_Copy(expr_t *expr, EXPRESSION_PARAMS()) {
   expr_t *newExp = expr;
 
   if (expr == NULL) return NULL;
@@ -514,8 +514,8 @@ expr_t *newExpr_Copy(expr_t *expr) {
     case EXPR_TYPE_UVAL:
       break;
     case EXPR_TYPE_VECTOR_IDX: {
-      expr_t *id = newExpr_Copy(expr->vecIdx->expr);
-      expr_t *index = newExpr_Copy(expr->vecIdx->index);
+      expr_t *id = newExpr_Copy(expr->vecIdx->expr, EXPRESSION_ARGS());
+      expr_t *index = newExpr_Copy(expr->vecIdx->index, EXPRESSION_ARGS());
       newExp = newExpr_VectorIndex(id, index);
     } break;
     case EXPR_TYPE_TEXT: {
@@ -556,17 +556,18 @@ expr_t *newExpr_Copy(expr_t *expr) {
       ifCondition_t *cond = expr->cond;
       ifCondition_t *newCond = ast_emalloc(sizeof(ifCondition_t));
       newCond->type = cond->type;
-      newCond->left = newExpr_Copy(cond->left);
-      newCond->right = newExpr_Copy(cond->right);
+      newCond->left = newExpr_Copy(cond->left, EXPRESSION_ARGS());
+      newCond->right = newExpr_Copy(cond->right, EXPRESSION_ARGS());
       newExp = newExpr_Cond(newCond);
     } break;
     case EXPR_TYPE_VECTOR: {
-      argsList_t *args = copy_argsList(expr->vec->content);
-      newExp = newExpr_Vector(args);
+      newExp = copy_vector(expr->vec, EXPRESSION_ARGS());
       break;
     }
     case EXPR_TYPE_DICT: {
-      newExp = newExpr_Dictionary(expr->dict->keyVals);
+      newExp = ast_emalloc(sizeof(expr_t));
+      newExp->type = EXPR_TYPE_DICT;
+      newExp->dict = allocNewDictionary(expr->dict, EXPRESSION_ARGS());
     } break;
     case EXPR_TYPE_EMPTY:
     default:
@@ -604,6 +605,10 @@ forEachStmt_t *newForEach(expr_t *root, char *entry, void *body) {
   stmt->uniqueUnfoldIncID = ast_emalloc(40);
   memset(stmt->uniqueUnfoldIncID, 0, 40);
   snprintf(stmt->uniqueUnfoldIncID, 40, "__UniqueShadyRicForEachInc%d", uniqueForEachUnfoldIndex);
+  stmt->uniqueUnfoldRootID = ast_emalloc(40);
+  memset(stmt->uniqueUnfoldRootID, 0, 40);
+  snprintf(stmt->uniqueUnfoldRootID, 40, "__UniqueShadyRicForEachRoot%d",
+           uniqueForEachUnfoldIndex);
 
   uniqueForEachUnfoldIndex++;
   return stmt;
@@ -812,7 +817,6 @@ void free_expression(expr_t *expr) {
     }
     case EXPR_TYPE_DICT: {
       dictionary_t *dict = expr->dict;
-
       if (dict->initialized) {
         hashtable_free(dict->hash);
         free(dict->hash);
@@ -862,7 +866,12 @@ void free_expression(expr_t *expr) {
 
       while (vecWalk < len) {
         if (v->arg != NULL) {
-          free_expression(v->arg);
+          if (v->arg->type != EXPR_TYPE_DICT) {
+            free_expression(v->arg);
+          } else {
+            hashtable_free(v->arg->dict->hash);
+            free(v->arg->dict);
+          }
           free(v->arg);
           v->arg = NULL;
         }
@@ -1028,10 +1037,8 @@ argsList_t *copy_argsList(argsList_t *args) {
 
 void free_keyvals(dictionary_t *dict) {
   keyValList_t *keyVals = dict->keyVals;
-
   while (keyVals) {
     keyValList_t *kv = keyVals;
-
     if (kv->val->type == EXPR_TYPE_DICT) {
       free_keyvals(kv->val->dict);
       free(kv->val->dict);

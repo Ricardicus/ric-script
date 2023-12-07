@@ -466,6 +466,17 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
         }
 
         if (rootVec != NULL) {
+          /* place the root vec on the heap */
+          stackval_t svtmp;
+          int dummy;
+          heapval_t *hvp = NULL;
+          heapval_t *hp = PROVIDE_CONTEXT()->hp;
+
+          svtmp.type = VECTORTYPE;
+          svtmp.vec = rootVec;
+          ALLOC_HEAP(&svtmp, hp, &hvp, &dummy);
+          locals_push(varLocals, festmt->uniqueUnfoldRootID, hvp);
+
           endIteration = rootVec->length;
         } else if (rootDict != NULL) {
           /* traverse the dictionary keys */
@@ -690,13 +701,17 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           } else if (rootInt >= 0) {
             /* traverse the integer, start from zero */
             hvp = locals_lookup(varLocals, entryId);
-            stackval_t sv;
+            if (hvp == NULL) {
+              stackval_t sv;
 
-            sv.type = INT32TYPE;
-            sv.i = festmtIndex;
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
-
+              sv.type = INT32TYPE;
+              sv.i = festmtIndex;
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, entryId, hvp);
+            } else {
+              /* Update value on the heap */
+              hvp->sv.i = festmtIndex;
+            }
             /* Increase the value of the unfolded variable */
             festmtIndex++;
             hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
@@ -719,16 +734,20 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             heapval_t *hvp = NULL;
 
             hvp = locals_lookup(varLocals, entryId);
-            e = newExpr_BigIntFromInt(0);
+            if (hvp == NULL) {
+              e = newExpr_BigIntFromInt(0);
 
-            sv.type = BIGINT;
-            sv.bigInt = e->bigInt;
-            free(e);
+              sv.type = BIGINT;
+              sv.bigInt = e->bigInt;
+              free(e);
 
-            mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
+              mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
 
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
+              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              locals_push(varLocals, entryId, hvp);
+            } else {
+              mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
+            }
 
             /* Increase the value of the unfolded variable */
             mpz_add_ui(festmtBigIndex, festmtBigIndex, 1);
@@ -850,16 +869,18 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           free(newVec);
         }
 
-        if (rootDict == NULL) {
+        if (rootDict != NULL) {
           /*
            * root expressions are heap allocated
            * all others will be manually cleaned up here
            */
-          free_expression(rootExp);
-        } else {
           free_hashtable_table(rootDict->hash);
           free(rootDict->hash);
           free(rootDict);
+        } else if (rootVec != NULL) {
+          /* Root vec will be taken care of by the collector */
+        } else {
+          free_expression(rootExp);
         }
         free(rootExp);
         if (interpret_state == INTEPRET_RETURN) {
@@ -1388,7 +1409,13 @@ static void flush_arg(void *key, void *val) {
     argsList_t *next;
     while (walk != NULL) {
       next = walk->next;
-      free_expression(walk->arg);
+      if (walk->arg->type != EXPR_TYPE_DICT) {
+        free_expression(walk->arg);
+      } else {
+        free_hashtable_table(walk->arg->dict->hash);
+        free(walk->arg->dict);
+      }
+      free(walk->arg);
       free(walk);
       walk = next;
     }

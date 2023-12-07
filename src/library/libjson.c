@@ -86,6 +86,11 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
   keyVals = keyValsHead;
 
   if (isArray && out != NULL) {
+    expr_t *newVec = NULL;
+    stackval_t stv;
+    int dummy;
+    heapval_t *hpv = NULL;
+    heapval_t *hp = PROVIDE_CONTEXT()->hp;
     argsList_t *args = NULL;
     argsList_t *argsHead = NULL;
     keyValList_t *keyValsWalk = keyVals;
@@ -132,11 +137,21 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
       keyValsWalk = keyValsWalk->next;
       free(kvw);
     }
-    *out = newExpr_Vector(args);
+    newVec = newExpr_Vector(args);
+    stv.type = VECTORTYPE;
+    stv.vec = newVec->vec;
+
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    *out = newVec;
   } else if (out != NULL) {
     expr_t *outE = newExpr_Dictionary(keyVals);
-    outE->dict->type = RIC_DICTIONARY_DYN;
-    *out = outE;
+    dictionary_t *outEHead = allocNewDictionary(outE->dict, EXPRESSION_ARGS());
+    free(outE->dict);
+    expr_t *newExp = ast_emalloc(sizeof(expr_t));
+    newExp->type = EXPR_TYPE_DICT;
+    newExp->dict = outEHead;
+    free(outE);
+    *out = newExp;
   }
 }
 

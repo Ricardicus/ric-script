@@ -1255,7 +1255,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
                 /* Add this expression to the vector */
                 argsList_t *a;
                 expr_t *e = walk->arg;
-                e = newExpr_Copy(e);
+                e = newExpr_Copy(e, EXPRESSION_ARGS());
                 a = newArgument(e, vecContent);
                 vecContent = a;
               }
@@ -3478,6 +3478,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  newDict->type = dict->type;
   newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   newDict->hash->allocated_key = 1;
 
@@ -3508,7 +3509,6 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           exit(1);
           break;
       }
-
       evaluate_expression(expVal, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
@@ -3536,7 +3536,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           eTemp->type = EXPR_TYPE_VECTOR;
           eTemp->vec = sv.vec;
 
-          newVecExpr = newExpr_Copy(eTemp);
+          newVecExpr = newExpr_Copy(eTemp, EXPRESSION_ARGS());
           free(eTemp);
 
           newStackVal = sv;
@@ -3626,7 +3626,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
             eTemp->type = EXPR_TYPE_VECTOR;
             eTemp->vec = sv.vec;
 
-            newVecExpr = newExpr_Copy(eTemp);
+            newVecExpr = newExpr_Copy(eTemp, EXPRESSION_ARGS());
             free(eTemp);
 
             newStackVal = sv;
@@ -3676,6 +3676,5 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   }
 
   newDict->initialized = 1;
-
   return newDict;
 }

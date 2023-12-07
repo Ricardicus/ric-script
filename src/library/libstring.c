@@ -417,16 +417,17 @@ int ric_ends_with(LIBRARY_PARAMS()) {
   }
 
   if (strlen(arg2) <= strlen(arg1)) {
-    char *start = arg2;
     compareBase = arg1 + (strlen(arg1) - 1);
     compareWith = arg2 + (strlen(arg2) - 1);
+    size_t comparisons = 0;
 
-    while (compareWith != start && *compareBase && *compareWith == *compareBase) {
+    while (comparisons < strlen(arg2) && *compareBase && *compareWith == *compareBase) {
       compareBase--;
       compareWith--;
+      comparisons++;
     }
 
-    if (compareWith == start) {
+    if (comparisons > 0) {
       result = 1;
     }
   }

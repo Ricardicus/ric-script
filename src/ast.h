@@ -290,6 +290,7 @@ typedef struct forEachStmt {
   expr_t *entry;
   body_t *body;
   char *uniqueUnfoldIncID;
+  char *uniqueUnfoldRootID;
 } forEachStmt_t;
 
 typedef struct functionCall_t {
@@ -361,7 +362,6 @@ expr_t *newExpr_VectorFromForEach(statement_t *stmt);
 expr_t *newExpr_ClassPtr(class_t *class);
 expr_t *newExpr_ClassPtrCopy(class_t *class);
 expr_t *newExpr_VectorIndex(expr_t *expr, expr_t *index);
-expr_t *newExpr_Copy(expr_t *exp);
 expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr);
 expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset);
 expr_t *newExpr_BigIntFromStr(const char *intStr);
@@ -551,6 +551,8 @@ typedef struct context_full_t {
 
 #define DECLARE_LIB_FUNCTION(name, args, func) \
   { name, args, func }
+
+expr_t *newExpr_Copy(expr_t *exp, EXPRESSION_PARAMS());
 
 typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
 

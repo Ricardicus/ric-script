@@ -53,7 +53,7 @@ void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
         argsList_t *args = vec->content;
         while (args != NULL) {
           expr_t *e = args->arg;
-          if (e->type == EXPR_TYPE_DICT && e->dict->type == RIC_DICTIONARY_DYN) {
+          if (e->type == EXPR_TYPE_DICT) {
             mark(e->dict->hash, markVal, EXPRESSION_ARGS());
           }
           if (e->type == EXPR_TYPE_CLASSPTR && e->classObj->initialized) {
@@ -84,7 +84,6 @@ void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
   while (i < argCount) {
     heapval_t *hv = hashtable_get(varDecs, NULL, variableIDS[i]);
     hv->mark = markVal;
-
     if (hv->sv.type == DICTTYPE) {
       mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
     } else if (hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized) {
@@ -94,8 +93,11 @@ void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
       argsList_t *args = vec->content;
       while (args != NULL) {
         expr_t *e = args->arg;
-        if (e->type == EXPR_TYPE_DICT && e->dict->type == RIC_DICTIONARY_DYN) {
+        if (e->type == EXPR_TYPE_DICT) {
           mark(e->dict->hash, markVal, EXPRESSION_ARGS());
+        }
+        if (e->type == EXPR_TYPE_CLASSPTR && e->classObj->initialized) {
+          mark(e->classObj->varMembers, markVal, EXPRESSION_ARGS());
         }
         args = args->next;
       }

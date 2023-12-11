@@ -491,7 +491,7 @@ class_t *newClass(char *id, body_t *body) {
   return class;
 }
 
-expr_t *newExpr_Copy(expr_t *expr, EXPRESSION_PARAMS()) {
+expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
   expr_t *newExp = expr;
 
   if (expr == NULL) return NULL;
@@ -514,8 +514,8 @@ expr_t *newExpr_Copy(expr_t *expr, EXPRESSION_PARAMS()) {
     case EXPR_TYPE_UVAL:
       break;
     case EXPR_TYPE_VECTOR_IDX: {
-      expr_t *id = newExpr_Copy(expr->vecIdx->expr, EXPRESSION_ARGS());
-      expr_t *index = newExpr_Copy(expr->vecIdx->index, EXPRESSION_ARGS());
+      expr_t *id = newExpr_Copy(expr->vecIdx->expr, alloc, EXPRESSION_ARGS());
+      expr_t *index = newExpr_Copy(expr->vecIdx->index, alloc, EXPRESSION_ARGS());
       newExp = newExpr_VectorIndex(id, index);
     } break;
     case EXPR_TYPE_TEXT: {
@@ -556,18 +556,22 @@ expr_t *newExpr_Copy(expr_t *expr, EXPRESSION_PARAMS()) {
       ifCondition_t *cond = expr->cond;
       ifCondition_t *newCond = ast_emalloc(sizeof(ifCondition_t));
       newCond->type = cond->type;
-      newCond->left = newExpr_Copy(cond->left, EXPRESSION_ARGS());
-      newCond->right = newExpr_Copy(cond->right, EXPRESSION_ARGS());
+      newCond->left = newExpr_Copy(cond->left, alloc, EXPRESSION_ARGS());
+      newCond->right = newExpr_Copy(cond->right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_Cond(newCond);
     } break;
     case EXPR_TYPE_VECTOR: {
-      newExp = copy_vector(expr->vec, EXPRESSION_ARGS());
+      newExp = copy_vector(expr->vec, alloc, EXPRESSION_ARGS());
       break;
     }
     case EXPR_TYPE_DICT: {
       newExp = ast_emalloc(sizeof(expr_t));
       newExp->type = EXPR_TYPE_DICT;
-      newExp->dict = allocNewDictionary(expr->dict, EXPRESSION_ARGS());
+      if (alloc == EXPR_ALLOC) {
+        newExp->dict = allocNewDictionary(expr->dict, EXPRESSION_ARGS());
+      } else {
+        newExp->dict = copyNewDictionary(expr->dict, EXPRESSION_ARGS());
+      }
     } break;
     case EXPR_TYPE_EMPTY:
     default:

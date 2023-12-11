@@ -288,7 +288,7 @@ int push_expression(expr_t *expArg, EXPRESSION_PARAMS()) {
   return ret;
 }
 
-expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
+expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
   expr_t *newExp = NULL;
 
   switch (sv->type) {
@@ -322,13 +322,17 @@ expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS()) {
       break;
     }
     case VECTORTYPE: {
-      newExp = copy_vector(sv->vec, EXPRESSION_ARGS());
+      newExp = copy_vector(sv->vec, alloc, EXPRESSION_ARGS());
       break;
     }
     case DICTTYPE: {
       newExp = ast_emalloc(sizeof(expr_t));
       newExp->type = EXPR_TYPE_DICT;
-      newExp->dict = allocNewDictionary(sv->dict, EXPRESSION_ARGS());
+      if (alloc == EXPR_ALLOC) {
+        newExp->dict = allocNewDictionary(sv->dict, EXPRESSION_ARGS());
+      } else {
+        newExp->dict = copyNewDictionary(sv->dict, EXPRESSION_ARGS());
+      }
       break;
     }
     case CLASSTYPE: {
@@ -730,7 +734,7 @@ int evaluate_condition(ifCondition_t *cond, EXPRESSION_PARAMS()) {
   return 0;
 }
 
-expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS()) {
+expr_t *copy_vector(vector_t *vec, int alloc, EXPRESSION_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *sp = PROVIDE_CONTEXT()->sp;
   // The idea is to create a new vector based on
@@ -752,7 +756,7 @@ expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS()) {
       evaluate_expression(walk->arg, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
 
-      newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+      newExp = stackval_to_expression(&sv, alloc, EXPRESSION_ARGS());
 
       newContent = newArgument(newExp, newContent);
       newVec->vec->length++;
@@ -1255,7 +1259,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
                 /* Add this expression to the vector */
                 argsList_t *a;
                 expr_t *e = walk->arg;
-                e = newExpr_Copy(e, EXPRESSION_ARGS());
+                e = newExpr_Copy(e, EXPR_ALLOC, EXPRESSION_ARGS());
                 a = newArgument(e, vecContent);
                 vecContent = a;
               }
@@ -1770,7 +1774,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           evaluate_expression(walk->arg, EXPRESSION_ARGS());
           POP_VAL(&svTmp, sp, sc);
 
-          newEntry = stackval_to_expression(&svTmp, EXPRESSION_ARGS());
+          newEntry = stackval_to_expression(&svTmp, EXPR_ALLOC, EXPRESSION_ARGS());
 
           vecContent = newArgument(newEntry, vecContent);
           walk = walk->next;
@@ -1780,17 +1784,17 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         switch (svRight.type) {
           case INT32TYPE: {
             sv.i = svRight.i;
-            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            newEntry = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
             break;
           }
           case DOUBLETYPE: {
             sv.d = svRight.d;
-            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            newEntry = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
             break;
           }
           case BIGINT: {
             sv.bigInt = svRight.bigInt;
-            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            newEntry = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
             break;
           }
           case TEXT: {
@@ -1798,7 +1802,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             char *newText = ast_emalloc(len + 1);
             snprintf(newText, len + 1, "%s", svRight.t);
             sv.t = newText;
-            newEntry = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            newEntry = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
             break;
           }
           default:
@@ -1830,7 +1834,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           evaluate_expression(walk->arg, EXPRESSION_ARGS());
           POP_VAL(&svTmp, sp, sc);
 
-          newEntry = stackval_to_expression(&svTmp, EXPRESSION_ARGS());
+          newEntry = stackval_to_expression(&svTmp, EXPR_ALLOC, EXPRESSION_ARGS());
 
           vecContent = newArgument(newEntry, vecContent);
           walk = walk->next;
@@ -1842,7 +1846,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           evaluate_expression(walk->arg, EXPRESSION_ARGS());
           POP_VAL(&svTmp, sp, sc);
 
-          newEntry = stackval_to_expression(&svTmp, EXPRESSION_ARGS());
+          newEntry = stackval_to_expression(&svTmp, EXPR_ALLOC, EXPRESSION_ARGS());
 
           vecContent = newArgument(newEntry, vecContent);
           walk = walk->next;
@@ -2158,7 +2162,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         }
 
         if (mult > 0) {
-          e = copy_vector(vec, EXPRESSION_ARGS());
+          e = copy_vector(vec, EXPR_ALLOC, EXPRESSION_ARGS());
         } else {
           e = newExpr_Vector(NULL);
         }
@@ -2186,7 +2190,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
               /* Fetch the evaluated expression to the arguments table */
               POP_VAL(&sv, sp, sc);
 
-              newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+              newExp = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
 
               newContent = newArgument(newExp, newContent);
               newVec->vec->length++;
@@ -2731,7 +2735,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             /* Fetch the evaluated expression to the arguments table */
             POP_VAL(&sv, sp, sc);
-            newArg = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            newArg = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
 
             /* Adding expression to argument table */
             hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id,
@@ -2887,7 +2891,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             /* Fetch the evaluated expression to the arguments table */
             POP_VAL(&sv, sp, sc);
-            newArg = stackval_to_expression(&sv, EXPRESSION_ARGS());
+            newArg = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
 
             /* Adding expression to argument table */
             hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id,
@@ -3065,7 +3069,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
-          newArg = stackval_to_expression(&sv, EXPRESSION_ARGS());
+          newArg = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
 
           /* Adding expression to argument table */
           hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id, newArg);
@@ -3267,7 +3271,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
               snprintf(newText, len, "%s", c);
               sv.t = newText;
             } else if (sv.type == VECTORTYPE) {
-              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
               sv.vec = e->vec;
               free(e);
             } else if (sv.type == DICTTYPE) {
@@ -3330,7 +3334,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                   snprintf(newText, len, "%s", c);
                   sv.t = newText;
                 } else if (sv.type == VECTORTYPE) {
-                  expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+                  expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
                   sv.vec = e->vec;
                   free(e);
                 } else if (sv.type == DICTTYPE) {
@@ -3392,7 +3396,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 evaluate_expression(decl->val, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);
 
-                newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+                newExp = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
                 *expToSet = newExp;
               } break;
               case TEXT: {
@@ -3536,7 +3540,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           eTemp->type = EXPR_TYPE_VECTOR;
           eTemp->vec = sv.vec;
 
-          newVecExpr = newExpr_Copy(eTemp, EXPRESSION_ARGS());
+          newVecExpr = newExpr_Copy(eTemp, EXPR_ALLOC, EXPRESSION_ARGS());
           free(eTemp);
 
           newStackVal = sv;
@@ -3626,7 +3630,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
             eTemp->type = EXPR_TYPE_VECTOR;
             eTemp->vec = sv.vec;
 
-            newVecExpr = newExpr_Copy(eTemp, EXPRESSION_ARGS());
+            newVecExpr = newExpr_Copy(eTemp, EXPR_ALLOC, EXPRESSION_ARGS());
             free(eTemp);
 
             newStackVal = sv;
@@ -3657,6 +3661,210 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
             newStackVal.dict = newDict;
 
             ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            break;
+          }
+          default:
+            fprintf(
+                stderr,
+                "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+            exit(1);
+            break;
+        }
+        /* Adding heap allocated value to dictionary hash table */
+        hashtable_put(newDict->hash, PROVIDE_CONTEXT()->syncCtx, newKeyStr, hvp);
+
+        walk = walk->next;
+      }
+      i++;
+    }
+  }
+
+  newDict->initialized = 1;
+  return newDict;
+}
+
+dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  newDict->type = dict->type;
+  newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
+  newDict->hash->allocated_key = 1;
+  newDict->hash->allocated_data = 1;
+
+  if (dict->initialized == 0) {
+    keyValList_t *walk = dict->keyVals;
+    while (walk != NULL) {
+      /* Dictionary already initialized, evaluate expressions in the key-value list */
+      expr_t *expKey = walk->key;
+      expr_t *expVal = walk->val;
+      char *newKeyStr = NULL;                          // Storing the key
+      heapval_t *hvp = ast_emalloc(sizeof(heapval_t)); // Storing the value
+      stackval_t sv;
+
+      evaluate_expression(expKey, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      switch (sv.type) {
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          newKeyStr = ast_emalloc(len + 2);
+          snprintf(newKeyStr, len + 2, "%s", sv.t);
+          break;
+        }
+        default:
+          fprintf(stderr,
+                  "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
+          exit(1);
+          break;
+      }
+      evaluate_expression(expVal, EXPRESSION_ARGS());
+      POP_VAL(&sv, sp, sc);
+
+      /* Write all the values to the heap value */
+      switch (sv.type) {
+        case DOUBLETYPE:
+        case POINTERTYPE:
+        case INT32TYPE:
+        case LIBFUNCPTRTYPE:
+        case FUNCPTRTYPE:
+        case TIMETYPE:
+          hvp->sv = sv;
+          break;
+        case BIGINT: {
+          expr_t *e = newExpr_BigInt(sv.bigInt);
+          sv.bigInt = e->bigInt;
+          hvp->sv = sv;
+          break;
+        }
+        case VECTORTYPE: {
+          expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+          expr_t *newVecExpr = NULL;
+          stackval_t newStackVal;
+
+          eTemp->type = EXPR_TYPE_VECTOR;
+          eTemp->vec = sv.vec;
+
+          newVecExpr = newExpr_Copy(eTemp, EXPR_NO_ALLOC, EXPRESSION_ARGS());
+          free(eTemp);
+
+          newStackVal = sv;
+          newStackVal.vec = newVecExpr->vec;
+
+          free(newVecExpr);
+
+          hvp->sv = newStackVal;
+          break;
+        }
+        case TEXT: {
+          size_t len = strlen(sv.t);
+          stackval_t newStackVal;
+
+          char *newText = ast_emalloc(len + 1);
+          snprintf(newText, len + 1, "%s", sv.t);
+
+          newStackVal = sv;
+          newStackVal.t = newText;
+
+          hvp->sv = newStackVal;
+          break;
+        }
+        case DICTTYPE: {
+          dictionary_t *newDict = copyNewDictionary(expVal->dict, EXPRESSION_ARGS());
+          stackval_t newStackVal = sv;
+
+          newStackVal.dict = newDict;
+
+          hvp->sv = newStackVal;
+          break;
+        }
+        default:
+          fprintf(
+              stderr,
+              "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
+          exit(1);
+          break;
+      }
+      /* Adding heap allocated value to dictionary hash table */
+      hashtable_put(newDict->hash, PROVIDE_CONTEXT()->syncCtx, newKeyStr, hvp);
+
+      walk = walk->next;
+    }
+  } else {
+    /* Dictionary already initialized, traverse hashtable */
+    hashtable_t *hash = dict->hash;
+    int size = hash->size;
+    int i = 0;
+    struct key_val_pair *walk;
+    while (i < size) {
+      walk = hash->table[i];
+      while (walk != NULL) {
+        // Time to evaluate the keys and the values
+        char *key = walk->key;
+        heapval_t *hpVal = (heapval_t *)walk->data;
+        char *newKeyStr = NULL;                          // Storing the key
+        heapval_t *hvp = ast_emalloc(sizeof(heapval_t)); // Storing the value
+        stackval_t sv;
+        size_t len = strlen(key);
+        newKeyStr = ast_emalloc(len + 2);
+        snprintf(newKeyStr, len + 2, "%s", key);
+
+        sv = hpVal->sv;
+        /* Push all values to the heap */
+        switch (sv.type) {
+          case DOUBLETYPE:
+          case POINTERTYPE:
+          case INT32TYPE:
+          case LIBFUNCPTRTYPE:
+          case FUNCPTRTYPE:
+          case TIMETYPE:
+            hvp->sv = sv;
+            break;
+          case BIGINT: {
+            expr_t *e = newExpr_BigInt(sv.bigInt);
+            sv.bigInt = e->bigInt;
+            hvp->sv = sv;
+            break;
+          }
+          case VECTORTYPE: {
+            expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+            expr_t *newVecExpr = NULL;
+            stackval_t newStackVal;
+
+            eTemp->type = EXPR_TYPE_VECTOR;
+            eTemp->vec = sv.vec;
+
+            newVecExpr = newExpr_Copy(eTemp, EXPR_NO_ALLOC, EXPRESSION_ARGS());
+            free(eTemp);
+
+            newStackVal = sv;
+            newStackVal.vec = newVecExpr->vec;
+
+            free(newVecExpr);
+
+            hvp->sv = newStackVal;
+            break;
+          }
+          case TEXT: {
+            size_t len = strlen(sv.t);
+            stackval_t newStackVal;
+
+            char *newText = ast_emalloc(len + 1);
+            snprintf(newText, len + 1, "%s", sv.t);
+
+            newStackVal = sv;
+            newStackVal.t = newText;
+
+            hvp->sv = newStackVal;
+            break;
+          }
+          case DICTTYPE: {
+            dictionary_t *newDict = copyNewDictionary(sv.dict, EXPRESSION_ARGS());
+            stackval_t newStackVal = sv;
+
+            newStackVal.dict = newDict;
+
+            hvp->sv = newStackVal;
             break;
           }
           default:

@@ -93,7 +93,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               snprintf(newText, len, "%s", c);
               sv.t = newText;
             } else if (sv.type == VECTORTYPE) {
-              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
               sv.vec = e->vec;
               free(e);
             } else if (sv.type == DICTTYPE) {
@@ -182,7 +182,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                   snprintf(newText, len, "%s", c);
                   sv.t = newText;
                 } else if (sv.type == VECTORTYPE) {
-                  expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+                  expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
                   sv.vec = e->vec;
                   free(e);
                 } else if (sv.type == DICTTYPE) {
@@ -244,7 +244,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 free_expression(*expToSet);
                 free(*expToSet);
 
-                newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+                newExp = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
                 *expToSet = newExp;
               } break;
               case TEXT: {
@@ -360,7 +360,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             /* Placing value on the heap */
             int dummy;
             heapval_t *hvp = NULL;
-            expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+            expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
             sv.vec = e->vec;
             free(e);
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
@@ -442,7 +442,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
         evaluate_expression(root, EXPRESSION_ARGS());
         POP_VAL(&sv, sp, sc);
-        rootExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+        rootExp = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
         switch (rootExp->type) {
           case EXPR_TYPE_VECTOR:
             rootVec = rootExp->vec;
@@ -614,7 +614,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               snprintf(newText, len, "%s", c);
               sv.t = newText;
             } else if (sv.type == VECTORTYPE) {
-              expr_t *e = copy_vector(sv.vec, EXPRESSION_ARGS());
+              expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
               sv.vec = e->vec;
               free(e);
             } else if (sv.type == DICTTYPE) {
@@ -819,7 +819,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               expr_t *newExp;
               POP_VAL(&sv, sp, sc);
 
-              newExp = stackval_to_expression(&sv, EXPRESSION_ARGS());
+              newExp = stackval_to_expression(&sv, EXPR_ALLOC, EXPRESSION_ARGS());
 
               vecContent = newArgument(newExp, vecContent);
               newVec->vec->length++;

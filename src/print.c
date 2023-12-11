@@ -749,7 +749,7 @@ int snprint_vector(char **buf, size_t *bufSize, size_t *pos, vector_t *vec, EXPR
   }
 
   if (vec->content == NULL && vec->forEach != NULL) {
-    vec_e = copy_vector(vec, EXPRESSION_ARGS());
+    vec_e = copy_vector(vec, EXPR_ALLOC, EXPRESSION_ARGS());
     if (vec_e != NULL) {
       walk = vec_e->vec->content;
     }
@@ -859,7 +859,7 @@ int print_vector(vector_t *vec, EXPRESSION_PARAMS()) {
   expr_t *vec_e = NULL;
 
   if (vec->content == NULL && vec->forEach != NULL) {
-    vec_e = copy_vector(vec, EXPRESSION_ARGS());
+    vec_e = copy_vector(vec, EXPR_ALLOC, EXPRESSION_ARGS());
     if (vec_e != NULL) {
       walk = vec_e->vec->content;
     }

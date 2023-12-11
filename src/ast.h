@@ -549,10 +549,13 @@ typedef struct context_full_t {
 #define LIBRARY_INIT() UNPACK_CONTEXT()
 #define LIBRARY_FUNC_NAME() func_name
 
+#define EXPR_ALLOC 1
+#define EXPR_NO_ALLOC 0
+
 #define DECLARE_LIB_FUNCTION(name, args, func) \
   { name, args, func }
 
-expr_t *newExpr_Copy(expr_t *exp, EXPRESSION_PARAMS());
+expr_t *newExpr_Copy(expr_t *exp, int alloc, EXPRESSION_PARAMS());
 
 typedef int (*ric_lib_callback_t)(LIBRARY_PARAMS());
 

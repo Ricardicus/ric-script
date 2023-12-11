@@ -26,7 +26,7 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart, int *idxEnd, in
 
 void free_vector(vector_t *vec);
 
-expr_t *copy_vector(vector_t *vec, EXPRESSION_PARAMS());
+expr_t *copy_vector(vector_t *vec, int alloc, EXPRESSION_PARAMS());
 
 void check_buf_size(char **buf, size_t *bufSize, size_t *pos, size_t require);
 
@@ -39,6 +39,7 @@ hashtable_t *new_argstable();
 hashtable_t *hashtable_heapvals_copy(hashtable_t *hash, EXPRESSION_PARAMS());
 
 dictionary_t *allocNewDictionary(dictionary_t *, EXPRESSION_PARAMS());
+dictionary_t *copyNewDictionary(dictionary_t *, EXPRESSION_PARAMS());
 
 typedef struct ctx_table_t {
   void *stmt;
@@ -57,6 +58,6 @@ heapval_t *locals_lookup(locals_stack_t *stack, char *id);
 void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv);
 void locals_remove(locals_stack_t *stack, char *id);
 
-expr_t *stackval_to_expression(stackval_t *sv, EXPRESSION_PARAMS());
+expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS());
 void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS());
 #endif

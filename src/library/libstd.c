@@ -699,7 +699,7 @@ int ric_append(LIBRARY_PARAMS()) {
       entry = newExpr_LibFuncPtr((void *)stv.p);
       break;
     case VECTORTYPE: {
-      entry = copy_vector(stv.vec, EXPRESSION_ARGS());
+      entry = copy_vector(stv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
     } break;
     default: {
       fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
@@ -770,7 +770,7 @@ int ric_push(LIBRARY_PARAMS()) {
       entry = newExpr_LibFuncPtr((void *)stv.p);
       break;
     case VECTORTYPE: {
-      entry = copy_vector(stv.vec, EXPRESSION_ARGS());
+      entry = copy_vector(stv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
     } break;
     default: {
       fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",

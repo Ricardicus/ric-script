@@ -2736,7 +2736,6 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
             /* Fetch the evaluated expression to the arguments table */
             POP_VAL(&sv, sp, sc);
             newArg = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
-
             /* Adding expression to argument table */
             hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id,
                           newArg);
@@ -2892,7 +2891,6 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
             /* Fetch the evaluated expression to the arguments table */
             POP_VAL(&sv, sp, sc);
             newArg = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
-
             /* Adding expression to argument table */
             hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id,
                           newArg);
@@ -2934,6 +2932,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       } else {
         /* This is a library function */
         int libfunc_ret;
+        argsList_t *argsWalkToFree = NULL;
 
         if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
           fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
@@ -2954,12 +2953,16 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         /* Populate arguments */
         while (argsWalk != NULL) {
           stackval_t sv;
-
           /* Evaluate expression */
           evaluate_expression(argsWalk->arg, EXPRESSION_ARGS());
 
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
+          if (sv.type == VECTORTYPE && sv.vec->forEach != NULL) {
+            expr_t *e = copy_vector(sv.vec, EXPR_NO_ALLOC, EXPRESSION_ARGS());
+            sv.vec = e->vec;
+            argsWalkToFree = newArgument(e, argsWalkToFree);
+          }
           push_stackval(&sv, PROVIDE_CONTEXT());
 
           argsWalk = argsWalk->next;
@@ -2967,6 +2970,15 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
+
+        // Freeing argsWalkToFree
+        while (argsWalkToFree != NULL) {
+          argsList_t *tmp = argsWalkToFree;
+          free_expression(argsWalkToFree->arg);
+          free(argsWalkToFree->arg);
+          argsWalkToFree = argsWalkToFree->next;
+          free(tmp);
+        }
 
         if (libfunc_ret != 0) {
           fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
@@ -3070,7 +3082,6 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
           /* Fetch the evaluated expression to the arguments table */
           POP_VAL(&sv, sp, sc);
           newArg = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
-
           /* Adding expression to argument table */
           hashtable_put(newArgumentTable, PROVIDE_CONTEXT()->syncCtx, params->arg->id.id, newArg);
 

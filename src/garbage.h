@@ -8,6 +8,8 @@
 #include "hashtable.h"
 #include <time.h>
 
+#define GARBAGE_COLLECTION_PILEUP_FACTOR 20
+
 void mark_and_sweep(hashtable_t *varDecs, EXPRESSION_PARAMS());
 
 void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS());

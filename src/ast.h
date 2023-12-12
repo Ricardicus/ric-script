@@ -855,7 +855,7 @@ extern void releaseContext(void *);
     }                                                                                      \
     if (i == size) {                                                                       \
       fprintf(stderr, "Error: Heap full (size: %d)\n", size);                              \
-      fprintf(stderr, "       The heap size can be increased with the -ah flag");          \
+      fprintf(stderr, "       The heap size can be increased with the -ah flag\n");        \
       fprintf(stderr, "       See: ric -h for more information\n");                        \
       exit(1);                                                                             \
     }                                                                                      \

@@ -43,6 +43,23 @@ void free_hashtable_table(hashtable_t *hash) {
   free(hash->table);
 }
 
+void _free_hashtable_table_rehash(hashtable_t *hash) {
+  int size = hash->size;
+  int i = 0;
+  struct key_val_pair *ptr1;
+  struct key_val_pair *ptr2;
+  while (i < size) {
+    ptr1 = hash->table[i];
+    while (ptr1 != NULL) {
+      ptr2 = ptr1;
+      ptr1 = ptr1->next;
+      free(ptr2);
+    }
+    i++;
+  }
+  free(hash->table);
+}
+
 void hashtable_rehash(hashtable_t *hashtable) {
   int size_old = hashtable->size;
   int newsize = size_old * 2;
@@ -57,7 +74,7 @@ void hashtable_rehash(hashtable_t *hashtable) {
     }
     i++;
   }
-  free_hashtable_table(hashtable);
+  _free_hashtable_table_rehash(hashtable);
   hashtable->table = newhash->table;
   hashtable->size = newsize;
 }

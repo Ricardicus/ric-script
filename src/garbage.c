@@ -158,7 +158,15 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
 }
 
 void mark_and_sweep(hashtable_t *varDecs, EXPRESSION_PARAMS()) {
+  static unsigned long count = 0;
   uint32_t markVal;
+
+  count += 1;
+
+  if ( count % GARBAGE_COLLECTION_PILEUP_FACTOR != 0 ) {
+    return;
+  }
+
   /* Rest assure, you are doing this safely */
   getContext(PROVIDE_CONTEXT()->syncCtx);
   /* Generate mark value */

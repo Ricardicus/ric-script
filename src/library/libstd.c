@@ -1419,6 +1419,7 @@ int ric_join(LIBRARY_PARAMS()) {
   int dummy;
   heapval_t *hpv;
   int i = 0;
+  int first_iteration = 1;
   char *joinArg = NULL;
   size_t joinArgLen = 0;
   vector_t *vec = NULL;
@@ -1457,14 +1458,12 @@ int ric_join(LIBRARY_PARAMS()) {
       exit(1);
       break;
   }
-
   vecContent = vec->content;
   // Calculate total string size
   while (vecContent != NULL) {
     stackval_t stv;
     evaluate_expression(vecContent->arg, EXPRESSION_ARGS());
     POP_VAL(&stv, sp, sc);
-
     if (stv.type != TEXT) {
       fprintf(stderr, "error %s.%d: %s unexpected list member type; expected string\n",
               ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
@@ -1489,14 +1488,21 @@ int ric_join(LIBRARY_PARAMS()) {
     evaluate_expression(vecContent->arg, EXPRESSION_ARGS());
     POP_VAL(&stv, sp, sc);
 
-    if (i == 0) {
+    if (first_iteration) {
       // first iteration
       bytesToWrite = strlen(stv.t);
-      snprintf(&outChars[i], bytesToWrite + 1, "%s", stv.t);
+      if ( bytesToWrite > 0 ) {
+        snprintf(&outChars[i], bytesToWrite + 1, "%s", stv.t);
+      }
     } else {
       bytesToWrite = strlen(stv.t) + joinArgLen;
-      snprintf(&outChars[i], bytesToWrite + 1, "%s%s", joinArg, stv.t);
+      if ( strlen(stv.t) > 0 ) {
+        snprintf(&outChars[i], bytesToWrite + 1, "%s%s", joinArg, stv.t);
+      } else {
+        snprintf(&outChars[i], bytesToWrite + 1, "%s", joinArg);
+      }
     }
+    first_iteration = 0;
     i += bytesToWrite;
     vecContent = vecContent->next;
   }

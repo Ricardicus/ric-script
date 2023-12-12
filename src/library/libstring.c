@@ -109,6 +109,7 @@ int ric_split(LIBRARY_PARAMS()) {
   expr_t *vec;
   argsList_t *vecContent = NULL;
   intptr_t offset = 0;
+  int special_case = 0;
   char *c;
   heapval_t *hpv;
   int dummy;
@@ -154,6 +155,11 @@ int ric_split(LIBRARY_PARAMS()) {
 
   snprintf(buffer, strlen(arg1) + 2, "%s", arg1);
 
+  if ( strcmp(arg1, arg2) == 0 ) {
+    /* Special case */
+    special_case = 1;
+  }
+
   offset = 0;
   while ((c = strstr(buffer + offset, arg2)) != NULL) {
     expr_t *e;
@@ -171,9 +177,11 @@ int ric_split(LIBRARY_PARAMS()) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
-    e = newExpr_Text(buffer + offset);
-    a = newArgument(e, vecContent);
-    vecContent = a;
+    if ( ! special_case ) {
+      e = newExpr_Text(buffer + offset);
+      a = newArgument(e, vecContent);
+      vecContent = a;
+    }
   }
 
   vec = newExpr_Vector(vecContent);

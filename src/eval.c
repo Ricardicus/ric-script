@@ -68,6 +68,9 @@ void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS()) {
       PUSH_BIGINT(sv.bigInt, sp, sc);
       break;
     }
+    case CACHEPOT: {
+      PUSH_CACHEPOT(sv.cachepot, sp, sc);
+    } break;
     default:
       fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
@@ -115,6 +118,10 @@ void push_heapval(heapval_t *hv, PROVIDE_CONTEXT_ARGS()) {
         break;
       case TEXT: {
         PUSH_STRING(hv->sv.t, sp, sc);
+        break;
+      }
+      case CACHEPOT: {
+        PUSH_CACHEPOT(hv->sv.cachepot, sp, sc);
         break;
       }
       default:
@@ -274,6 +281,9 @@ int push_expression(expr_t *expArg, EXPRESSION_PARAMS()) {
       case EXPR_TYPE_BIGINT:
         PUSH_BIGINT(expArg->bigInt, sp, sc);
         break;
+      case EXPR_TYPE_CACHEPOT:
+        PUSH_CACHEPOT(expArg->cachepot, sp, sc);
+        break;
       case EXPR_TYPE_TEXT: {
         PUSH_STRING(expArg->text, sp, sc);
         break;
@@ -316,6 +326,12 @@ expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
     case BIGINT:
       newExp = newExpr_BigInt(sv->bigInt);
       break;
+    case CACHEPOT: {
+      newExp = newExpr_Cachepot();
+      hashtable_free(newExp->cachepot->hash);
+      free(newExp->cachepot);
+      newExp->cachepot = sv->cachepot;
+    } break;
     case RAWDATATYPE: {
       newExp = newExpr_RawData(sv->rawdata->size);
       memcpy(newExp->rawdata->data, sv->rawdata->data, sv->rawdata->size);
@@ -979,6 +995,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       PUSH_BIGINT(expr->bigInt, sp, sc);
       break;
     }
+    case EXPR_TYPE_CACHEPOT: {
+      printf("puyshing cachepot\n");
+      PUSH_CACHEPOT(expr->cachepot, sp, sc);
+      break;
+    }
     case EXPR_TYPE_VECTOR:
       PUSH_VECTOR(expr->vec, sp, sc);
       break;
@@ -1072,6 +1093,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       int32_t arrayIndex = 0;
       vector_t *vec = NULL;
       dictionary_t *dict = NULL;
+      cachepot_t *cachepot = NULL;
       argsList_t *walk;
       char *text = NULL;
       rawdata_t *rawdata = NULL;
@@ -1105,6 +1127,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           text = sv.t;
         } else if (sv.type == RAWDATATYPE) {
           rawdata = sv.rawdata;
+        } else if (sv.type == CACHEPOT) {
+          cachepot = sv.cachepot;
         }
       } else {
         fprintf(stderr, "error: Invalid indexing %d\n", id->type);
@@ -1137,60 +1161,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           sv = hpv->sv;
 
           /* Push value to the stack */
-          switch (sv.type) {
-            case INT32TYPE: {
-              PUSH_INT(sv.i, sp, sc);
-              break;
-            }
-            case DOUBLETYPE: {
-              PUSH_DOUBLE(sv.d, sp, sc);
-              break;
-            }
-            case TEXT: {
-              PUSH_STRING(sv.t, sp, sc);
-              break;
-            }
-            case POINTERTYPE: {
-              PUSH_POINTER(sv.p, sp, sc);
-              break;
-            }
-            case VECTORTYPE: {
-              PUSH_VECTOR(sv.vec, sp, sc);
-              break;
-            }
-            case FUNCPTRTYPE: {
-              PUSH_FUNCPTR(sv.func, sp, sc);
-              break;
-            }
-            case LIBFUNCPTRTYPE: {
-              PUSH_LIBFUNCPTR(sv.libfunc, sp, sc);
-              break;
-            }
-            case DICTTYPE: {
-              PUSH_DICTIONARY(sv.dict, sp, sc);
-              break;
-            }
-            case CLASSTYPE: {
-              PUSH_CLASSREF(sv.classObj, sp, sc);
-              break;
-            }
-            case TIMETYPE: {
-              PUSH_TIME(sv.time, sp, sc);
-              break;
-            }
-            case BIGINT: {
-              PUSH_BIGINT(sv.bigInt, sp, sc);
-              break;
-            }
-            case RAWDATATYPE: {
-              PUSH_RAWDATA(sv.rawdata, sp, sc);
-              break;
-            }
-            default:
-              fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
-              exit(1);
-              break;
-          }
+          push_stackval(&sv, PROVIDE_CONTEXT());
         } break;
         case VECTORTYPE: {
           /* Array indexing */
@@ -1450,6 +1421,30 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
             PUSH_RAWDATA(sv.rawdata, sp, sc);
           }
+        } break;
+        case CACHEPOT: {
+          /* Indexing a cachepot */
+          char *key = NULL;
+          expr_t *e = NULL;
+
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if (sv.type != TEXT) {
+            fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
+            exit(1);
+          }
+
+          key = sv.t;
+
+          /* find heapval */
+          e = hashtable_get(cachepot->hash, PROVIDE_CONTEXT()->syncCtx, key);
+          if (e == NULL) {
+            fprintf(stderr, "error: key '%s' not present in cachepot\n", key);
+            exit(1);
+          }
+
+          push_expression(e, EXPRESSION_ARGS());
         } break;
         default:
           break;

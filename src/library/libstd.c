@@ -488,6 +488,11 @@ int ric_print(LIBRARY_PARAMS()) {
       printf("\n");
       break;
     }
+    case CACHEPOT: {
+      print_cachepot(stv.cachepot, EXPRESSION_ARGS());
+      printf("\n");
+      break;
+    }
     case FUNCPTRTYPE:
       printf("<Function: '%s'>\n", stv.func->id.id);
       break;
@@ -965,25 +970,14 @@ int ric_contains(LIBRARY_PARAMS()) {
   } else if (argDict != NULL) {
     /* Search in a dictionary */
     hashtable_t *hash = argDict->hash;
-    int hashSize = hash->size;
-    struct key_val_pair *ptr;
-    int i = 0;
 
     if (searchForInt) {
       /* all keys are strings */
       result = 0;
     } else {
-      while (i < hashSize && result == 0) {
-        ptr = hash->table[i];
-        while (ptr != NULL) {
-          /* Check if match */
-          if (strcmp((char *)ptr->key, containText) == 0) {
-            result = 1;
-            break;
-          }
-          ptr = ptr->next;
-        }
-        i++;
+      heapval_t *hvp = hashtable_get(hash, PROVIDE_CONTEXT()->syncCtx, containText);
+      if (hvp != NULL) {
+        result = 1;
       }
     }
   } else if (argText != NULL) {
@@ -1491,12 +1485,12 @@ int ric_join(LIBRARY_PARAMS()) {
     if (first_iteration) {
       // first iteration
       bytesToWrite = strlen(stv.t);
-      if ( bytesToWrite > 0 ) {
+      if (bytesToWrite > 0) {
         snprintf(&outChars[i], bytesToWrite + 1, "%s", stv.t);
       }
     } else {
       bytesToWrite = strlen(stv.t) + joinArgLen;
-      if ( strlen(stv.t) > 0 ) {
+      if (strlen(stv.t) > 0) {
         snprintf(&outChars[i], bytesToWrite + 1, "%s%s", joinArg, stv.t);
       } else {
         snprintf(&outChars[i], bytesToWrite + 1, "%s", joinArg);
@@ -1514,5 +1508,17 @@ int ric_join(LIBRARY_PARAMS()) {
   /* Pushing the parsed value */
   PUSH_STRING(stv.t, sp, sc);
 
+  return 0;
+}
+
+int ric_cachepot(LIBRARY_PARAMS()) {
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  expr_t *e = newExpr_Cachepot();
+
+  cachepot_t *cachepot = e->cachepot;
+  free(e);
+
+  PUSH_CACHEPOT(cachepot, sp, sc);
   return 0;
 }

@@ -270,6 +270,18 @@ expr_t *newExpr_Dictionary(keyValList_t *keyVals) {
   return expr;
 }
 
+expr_t *newExpr_Cachepot() {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  cachepot_t *cachepot = ast_emalloc(sizeof(expr_t));
+
+  cachepot->hash = hashtable_new(CACHEPOT_STANDARD_SIZE, CACHEPOT_STANDARD_LOAD);
+
+  expr->type = EXPR_TYPE_CACHEPOT;
+  expr->cachepot = cachepot;
+
+  return expr;
+}
+
 expr_t *newExpr_Text(char *text) {
   size_t textLen = strlen(text);
   expr_t *expr = ast_emalloc(sizeof(expr_t));

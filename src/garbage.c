@@ -23,16 +23,11 @@ uint32_t generate_mark_value() {
 }
 
 void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
-  char *variableIDS[RIC_MAX_NBR_VARS];
-  int argCount = 0;
   int i = 0;
-  int hashSize = 0;
-  struct key_val_pair *ptr;
   locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
-
-  if (varDecs != NULL) {
-    hashSize = varDecs->size;
-  }
+  int size;
+  struct key_val_pair *ptr1;
+  struct key_val_pair *ptr2;
 
   if (varLocals != NULL) {
     /* Mark local variables */
@@ -67,42 +62,42 @@ void mark(hashtable_t *varDecs, uint32_t markVal, EXPRESSION_PARAMS()) {
     }
   }
 
-  argCount = 0;
-  i = 0;
-  while (i < hashSize) {
-    ptr = varDecs->table[i];
-    while (ptr != NULL) {
-      variableIDS[argCount] = ptr->key;
-      argCount++;
-      ptr = ptr->next;
-    }
-    i++;
-  }
+  /* Mark var decs if they exist */
+  if (varDecs == NULL) return;
 
-  /* Mark all variables in the heap */
   i = 0;
-  while (i < argCount) {
-    heapval_t *hv = hashtable_get(varDecs, NULL, variableIDS[i]);
-    hv->mark = markVal;
-    if (hv->sv.type == DICTTYPE) {
-      mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
-    } else if (hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized) {
-      mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
-    } else if (hv->sv.type == VECTORTYPE) {
-      vector_t *vec = hv->sv.vec;
-      argsList_t *args = vec->content;
-      while (args != NULL) {
-        expr_t *e = args->arg;
-        if (e->type == EXPR_TYPE_DICT) {
-          mark(e->dict->hash, markVal, EXPRESSION_ARGS());
+  size = varDecs->size;
+  while (i < size) {
+    ptr1 = varDecs->table[i];
+    while (ptr1 != NULL) {
+      heapval_t *hv = NULL;
+
+      ptr2 = ptr1;
+      ptr1 = ptr1->next;
+
+      hv = ptr2->data;
+      hv->mark = markVal;
+      // printf("marking %s\n", ptr2->key);
+      if (hv->sv.type == DICTTYPE) {
+        mark(hv->sv.dict->hash, markVal, EXPRESSION_ARGS());
+      } else if (hv->sv.type == CLASSTYPE && hv->sv.classObj->initialized) {
+        mark(hv->sv.classObj->varMembers, markVal, EXPRESSION_ARGS());
+      } else if (hv->sv.type == VECTORTYPE) {
+        vector_t *vec = hv->sv.vec;
+        argsList_t *args = vec->content;
+        while (args != NULL) {
+          expr_t *e = args->arg;
+          if (e->type == EXPR_TYPE_DICT) {
+            mark(e->dict->hash, markVal, EXPRESSION_ARGS());
+          }
+          if (e->type == EXPR_TYPE_CLASSPTR && e->classObj->initialized) {
+            mark(e->classObj->varMembers, markVal, EXPRESSION_ARGS());
+          }
+          args = args->next;
         }
-        if (e->type == EXPR_TYPE_CLASSPTR && e->classObj->initialized) {
-          mark(e->classObj->varMembers, markVal, EXPRESSION_ARGS());
-        }
-        args = args->next;
       }
     }
-    ++i;
+    i++;
   }
 }
 
@@ -163,7 +158,7 @@ void mark_and_sweep(hashtable_t *varDecs, EXPRESSION_PARAMS()) {
 
   count += 1;
 
-  if ( count % GARBAGE_COLLECTION_PILEUP_FACTOR != 0 ) {
+  if (count % GARBAGE_COLLECTION_PILEUP_FACTOR != 0) {
     return;
   }
 

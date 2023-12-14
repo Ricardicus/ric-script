@@ -76,6 +76,8 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("random", 0, ric_random_uniform),
     DECLARE_LIB_FUNCTION("textBase", 2, ric_get_nbr_base_string),
     DECLARE_LIB_FUNCTION("intBase", 2, ric_get_nbr_base_int),
+    // libcrypto
+    DECLARE_LIB_FUNCTION("sha256", 1, ric_sha256),
     // libload
     DECLARE_LIB_FUNCTION("load", 1, ric_load),
     // libtime

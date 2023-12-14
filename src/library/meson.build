@@ -9,7 +9,8 @@ library_source_list = [
   'libtime.c',
   'libctx.c',
   'libjson.c',
-  'libbigint.c'
+  'libbigint.c',
+  'libcrypto.c'
 ]
 
 target_os = target_machine.system()

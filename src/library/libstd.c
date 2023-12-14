@@ -626,6 +626,9 @@ int ric_printf(LIBRARY_PARAMS()) {
       print_dictionary(stv.dict, EXPRESSION_ARGS());
       break;
     }
+    case CACHEPOT: {
+      print_cachepot(stv.cachepot, EXPRESSION_ARGS());
+    } break;
     case VECTORTYPE: {
       print_vector(stv.vec, EXPRESSION_ARGS());
     } break;
@@ -642,6 +645,7 @@ int ric_printf(LIBRARY_PARAMS()) {
       exit(1);
     } break;
   }
+  fflush(stdout);
 
   return 0;
 }

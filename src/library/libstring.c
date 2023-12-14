@@ -155,7 +155,7 @@ int ric_split(LIBRARY_PARAMS()) {
 
   snprintf(buffer, strlen(arg1) + 2, "%s", arg1);
 
-  if ( strcmp(arg1, arg2) == 0 ) {
+  if (strcmp(arg1, arg2) == 0) {
     /* Special case */
     special_case = 1;
   }
@@ -177,7 +177,7 @@ int ric_split(LIBRARY_PARAMS()) {
     /* Take the remaining part also */
     expr_t *e;
     argsList_t *a;
-    if ( ! special_case ) {
+    if (!special_case) {
       e = newExpr_Text(buffer + offset);
       a = newArgument(e, vecContent);
       vecContent = a;

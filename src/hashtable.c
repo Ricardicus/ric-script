@@ -207,6 +207,27 @@ void *hashtable_get(hashtable_t *hashtable, void *ctx, const char *key) {
   return NULL;
 }
 
+void *hashtable_get_key_ptr(hashtable_t *hashtable, void *ctx, const char *key) {
+  if (hashtable == NULL) return NULL;
+
+  int index = hashtable_hash(hashtable, key);
+  if (hashtable->table[index] == NULL) {
+    return NULL;
+  }
+
+  getContext(ctx);
+  struct key_val_pair *p = hashtable->table[index];
+  while (p != NULL) {
+    if (strcmp(p->key, key) == 0) {
+      releaseContext(ctx);
+      return p->key;
+    }
+    p = p->next;
+  }
+  releaseContext(ctx);
+  return NULL;
+}
+
 void print_table_as_chars(hashtable_t *hashtable) {
   int i = 0;
   int size = hashtable->size;

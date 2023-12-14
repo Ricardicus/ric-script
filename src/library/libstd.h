@@ -38,5 +38,6 @@ int ric_print_env(LIBRARY_PARAMS());
 int ric_sum(LIBRARY_PARAMS());
 int ric_sort(LIBRARY_PARAMS());
 int ric_join(LIBRARY_PARAMS());
+int ric_cachepot(LIBRARY_PARAMS());
 
 #endif

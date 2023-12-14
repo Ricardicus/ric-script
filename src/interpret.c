@@ -20,7 +20,6 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
   while (stmt != NULL) {
     eval = (entity_eval_t *)stmt;
-
     switch (eval->entity) {
       case LANG_ENTITY_DECL:
       case LANG_ENTITY_FUNCDECL:
@@ -71,7 +70,6 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
         heapval_t *hvp = NULL;
         declaration_t *decl = ((statement_t *)stmt)->content;
         id = decl->id;
-
         switch (id->type) {
           case EXPR_TYPE_ID: {
             int heapUpdated;
@@ -79,7 +77,6 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             heapval_t *classCheck = NULL;
             char *idStr = id->id.id;
             int stop = 0;
-
             /* Evaluating the expression among global variables */
             evaluate_expression(decl->val, EXPRESSION_ARGS());
             POP_VAL(&sv, sp, sc);
@@ -110,7 +107,13 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               free(e);
             }
 
-            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            /* In case we are dealing with a cachepot */
+            if (sv.type == CACHEPOT) {
+              hvp = ast_emalloc(sizeof(heapval_t));
+              hvp->sv = sv;
+            } else {
+              ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            }
 
             /* Check if the variable is to be put in the class namespace */
             if (classCtx != NULL) {
@@ -146,7 +149,6 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             expr_t *index = id->vecIdx->index;
 
             stackval_t sv;
-
             evaluate_expression(vecid, EXPRESSION_ARGS());
             POP_VAL(&sv, sp, sc);
 
@@ -291,6 +293,38 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                   text[arrayIndex + q] = newAddition[q];
                   q++;
                 }
+              } break;
+              case CACHEPOT: {
+                cachepot_t *cachepot = sv.cachepot;
+                expr_t *newExp;
+                expr_t *p = NULL;
+                char *key = NULL;
+                /* Assigning a cachepot */
+                evaluate_expression(index, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+                if (sv.type != TEXT) {
+                  fprintf(stderr, "index error: Must provide a string as index\n");
+                  exit(1);
+                }
+                key = ast_emalloc(strlen(sv.t) + 1);
+                snprintf(key, strlen(sv.t) + 1, "%s", sv.t);
+
+                /* Evaluating the expression among global variables */
+                evaluate_expression(decl->val, EXPRESSION_ARGS());
+                POP_VAL(&sv, sp, sc);
+
+                newExp = stackval_to_expression(&sv, EXPR_NO_ALLOC, EXPRESSION_ARGS());
+                /* check if overwrite */
+                p = hashtable_get(cachepot->hash, PROVIDE_CONTEXT()->syncCtx, key);
+                if (p != NULL) {
+                  // Free the overwritten data
+                  char *key_ptr =
+                      hashtable_get_key_ptr(cachepot->hash, PROVIDE_CONTEXT()->syncCtx, key);
+                  free(key_ptr);
+                  free_expression(p);
+                  free(p);
+                }
+                hashtable_put(cachepot->hash, PROVIDE_CONTEXT()->syncCtx, key, newExp);
               } break;
               default: {
                 fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);

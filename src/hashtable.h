@@ -41,6 +41,7 @@ void free_hashtable_table(hashtable_t *hash);
 void hashtable_rehash(hashtable_t *);
 void hashtable_free(hashtable_t *);
 void *hashtable_get(hashtable_t *, void *, const char *);
+void *hashtable_get_key_ptr(hashtable_t *, void *, const char *);
 int hashtable_hash(hashtable_t *, const char *);
 void hashtable_put(hashtable_t *, void *, char *, void *);
 void print_table_as_chars(hashtable_t *);

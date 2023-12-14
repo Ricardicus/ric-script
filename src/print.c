@@ -208,6 +208,56 @@ void print_indents(int indent) {
   }
 }
 
+int print_cachepot(cachepot_t *cachepot, EXPRESSION_PARAMS()) {
+  hashtable_t *hash = cachepot->hash;
+  // dictionary_t *newDict = NULL;
+  int size;
+  int i;
+  int keyCount = 0;
+  int keyCountTotal = 0;
+  struct key_val_pair *ptr;
+
+  size = hash->size;
+
+  i = 0;
+  while (i < size) {
+    ptr = hash->table[i];
+    while (ptr != NULL) {
+      keyCount++;
+      ptr = ptr->next;
+    }
+    i++;
+  }
+
+  keyCountTotal = keyCount;
+  if (keyCountTotal > 0) {
+    printf("{");
+    keyCount = 0;
+    i = 0;
+    while (i < size) {
+      expr_t *e;
+      ptr = hash->table[i];
+
+      if (ptr == NULL) {
+        ++i;
+        continue;
+      }
+
+      printf("%s'%s' : ", (keyCount > 0 ? ", " : ""), ptr->key);
+      e = ptr->data;
+      print_expr(e);
+
+      keyCount++;
+      i++;
+    }
+    printf("}");
+  } else {
+    printf("{}");
+  }
+
+  return 0;
+}
+
 int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   hashtable_t *hash = dict->hash;
   // dictionary_t *newDict = NULL;
@@ -273,6 +323,9 @@ int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         } break;
         case DICTTYPE: {
           print_dictionary(sv.dict, EXPRESSION_ARGS());
+        } break;
+        case CACHEPOT: {
+          print_cachepot(sv.cachepot, EXPRESSION_ARGS());
         } break;
         default:
           break;
@@ -350,6 +403,9 @@ int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         } break;
         case DICTTYPE: {
           print_dictionary(sv.dict, EXPRESSION_ARGS());
+        } break;
+        case CACHEPOT: {
+          print_cachepot(sv.cachepot, EXPRESSION_ARGS());
         } break;
         default:
           break;
@@ -506,10 +562,144 @@ void print_expr(expr_t *expr) {
     case EXPR_TYPE_DICT:
       printf("<Dictionary>");
       break;
+    case EXPR_TYPE_CACHEPOT:
+      printf("<Cachepot>");
+      break;
     case EXPR_TYPE_EMPTY:
     default:
       break;
   }
+}
+
+int snprint_cachepot(char **buf, size_t *bufSize, size_t *pos, cachepot_t *cachepot,
+                     EXPRESSION_PARAMS()) {
+  hashtable_t *hash = cachepot->hash;
+  int size;
+  int i;
+  int keyCount = 0;
+  int keyCountTotal = 0;
+  struct key_val_pair *ptr;
+
+  if (*buf == NULL) {
+    const size_t startSize = 128;
+    *buf = ast_emalloc(startSize);
+    *bufSize = startSize;
+    *pos = 0;
+  }
+
+  size = hash->size;
+
+  i = 0;
+  while (i < size) {
+    ptr = hash->table[i];
+    while (ptr != NULL) {
+      keyCount++;
+      ptr = ptr->next;
+    }
+    i++;
+  }
+
+  keyCountTotal = keyCount;
+
+  if (keyCountTotal > 0) {
+
+    check_buf_size(buf, bufSize, pos, 1);
+    snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", "{");
+    *pos = *pos + 1;
+
+    keyCount = 0;
+    i = 0;
+    while (i < size) {
+      char tmpBuf[256];
+      size_t tmpLen;
+      heapval_t *hpv;
+      stackval_t sv;
+      ptr = hash->table[i];
+
+      if (ptr == NULL) {
+        ++i;
+        continue;
+      }
+
+      snprintf(tmpBuf, sizeof(tmpBuf), "%s\"%s\" : ", (keyCount > 0 ? ", " : ""), ptr->key);
+      tmpLen = strlen(tmpBuf);
+
+      check_buf_size(buf, bufSize, pos, tmpLen);
+      snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", tmpBuf);
+      *pos += tmpLen;
+
+      hpv = ptr->data;
+      sv = hpv->sv;
+
+      tmpLen = 0;
+
+      switch (sv.type) {
+        case INT32TYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case BIGINT: {
+          char buf[128];
+          char *c = NULL;
+
+          c = mpz_get_str(buf, 10, *sv.bigInt);
+          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+        } break;
+        case DOUBLETYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case TEXT: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case POINTERTYPE: {
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case FUNCPTRTYPE: {
+          functionDef_t *funcDec = sv.func;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case LIBFUNCPTRTYPE: {
+          libFunction_t *libFunc = sv.libfunc;
+          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
+          tmpLen = strlen(tmpBuf);
+        } break;
+        case VECTORTYPE: {
+          snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        } break;
+        case DICTTYPE: {
+          snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        } break;
+        case CACHEPOT: {
+          snprint_cachepot(buf, bufSize, pos, sv.cachepot, EXPRESSION_ARGS());
+        } break;
+        default:
+          break;
+      }
+
+      if (tmpLen > 0) {
+        check_buf_size(buf, bufSize, pos, tmpLen);
+        snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", tmpBuf);
+
+        *pos += tmpLen;
+      }
+
+      keyCount++;
+      i++;
+    }
+    check_buf_size(buf, bufSize, pos, 1);
+    snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", "}");
+    *pos = *pos + 1;
+  } else {
+    check_buf_size(buf, bufSize, pos, 2);
+    snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", "{}");
+    *pos += 2;
+  }
+
+  return 0;
 }
 
 int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *dict,
@@ -602,6 +792,9 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
         } break;
         case DICTTYPE: {
           snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        } break;
+        case CACHEPOT: {
+          snprint_cachepot(buf, bufSize, pos, sv.cachepot, EXPRESSION_ARGS());
         } break;
         default:
           break;
@@ -708,6 +901,9 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
         } break;
         case DICTTYPE: {
           snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        } break;
+        case CACHEPOT: {
+          snprint_cachepot(buf, bufSize, pos, sv.cachepot, EXPRESSION_ARGS());
         } break;
         default:
           break;
@@ -821,6 +1017,9 @@ int snprint_vector(char **buf, size_t *bufSize, size_t *pos, vector_t *vec, EXPR
         break;
       case DICTTYPE:
         snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+        break;
+      case CACHEPOT:
+        snprint_cachepot(buf, bufSize, pos, sv.cachepot, EXPRESSION_ARGS());
         break;
       default:
         break;

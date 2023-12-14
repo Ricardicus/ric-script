@@ -84,6 +84,10 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("base64Dec", 1, ric_base64_decode),
     DECLARE_LIB_FUNCTION("hex", 1, ric_hex_encode),
     DECLARE_LIB_FUNCTION("hexDec", 1, ric_hex_decode),
+    DECLARE_LIB_FUNCTION("blowfishKeys", 1, ric_blowfish_keys),
+    DECLARE_LIB_FUNCTION("blowfishKeysDestroy", 1, ric_blowfish_keys_destroy),
+    DECLARE_LIB_FUNCTION("blowfish", 2, ric_blowfish_encrypt),
+    DECLARE_LIB_FUNCTION("blowfishDec", 2, ric_blowfish_decrypt),
     // libload
     DECLARE_LIB_FUNCTION("load", 1, ric_load),
     // libtime

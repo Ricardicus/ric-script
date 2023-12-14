@@ -12,7 +12,12 @@ def test_crypto():
     "aGVqc2Fu",
     "68656a73616e",
     "hejsan",
-    "hejsan"
+    "hejsan",
+    "e4b09bd1fd314ca2",
+    "5LCb0f0xTKI=",
+    "hejsan",
+    "hejsan",
+    "hejsan",
   ]
 
   lib_script = callSample('crypto.ric')

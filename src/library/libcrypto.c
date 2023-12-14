@@ -380,3 +380,223 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
 
   return 0;
 }
+
+int ric_blowfish_keys(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  unsigned char *user_key;
+  size_t user_key_len = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  BLOWFISH_KEY *key = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      user_key = (unsigned char *)stv.t;
+      user_key_len = strlen(stv.t);
+      break;
+    case RAWDATATYPE:
+      user_key = (unsigned char *)stv.rawdata->data;
+      user_key_len = stv.rawdata->size;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  key = ast_ecalloc(sizeof(BLOWFISH_KEY));
+  blowfish_key_setup(user_key, key, user_key_len);
+
+  PUSH_POINTER((uintptr_t)key, sp, sc);
+
+  return 0;
+}
+
+int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  unsigned char *data_in;
+  unsigned char *data_in_buf = NULL;
+  size_t data_in_len = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  BLOWFISH_KEY *key = NULL;
+  BYTE block[BLOWFISH_BLOCK_SIZE];
+  BYTE *data_out = NULL;
+  size_t data_out_len = 0;
+  size_t i;
+  expr_t *e = NULL;
+  heapval_t *hpv;
+  int dummy;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case POINTERTYPE:
+      key = (BLOWFISH_KEY *)stv.p;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      data_in = (unsigned char *)stv.t;
+      data_in_len = strlen(stv.t);
+      break;
+    case RAWDATATYPE:
+      data_in = (unsigned char *)stv.rawdata->data;
+      data_in_len = stv.rawdata->size;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, text or raw data expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  data_out_len = data_in_len + (8 - data_in_len % 8) % 8;
+  data_out = ast_ecalloc(data_out_len);
+
+  data_in_buf = ast_ecalloc(data_out_len);
+  memcpy(data_in_buf, data_in, data_in_len);
+
+  for (i = 0; i < data_out_len / BLOWFISH_BLOCK_SIZE; ++i) {
+    memcpy(block, data_in_buf + i * BLOWFISH_BLOCK_SIZE,
+           BLOWFISH_BLOCK_SIZE); // Copy 8 bytes into the block
+    blowfish_encrypt(block, data_out + i * BLOWFISH_BLOCK_SIZE, key); // Encrypt the block
+  }
+
+  free(data_in_buf);
+
+  e = newExpr_RawData(data_out_len);
+  free(e->rawdata->data);
+  stv.type = RAWDATATYPE;
+  stv.rawdata = e->rawdata;
+  stv.rawdata->data = data_out;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(e);
+
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+
+  return 0;
+}
+
+int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  unsigned char *data_in;
+  size_t data_in_len = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  BLOWFISH_KEY *key = NULL;
+  BYTE block[BLOWFISH_BLOCK_SIZE];
+  BYTE *data_out = NULL;
+  size_t data_out_len = 0;
+  size_t i;
+  expr_t *e = NULL;
+  heapval_t *hpv;
+  int dummy;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case POINTERTYPE:
+      key = (BLOWFISH_KEY *)stv.p;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case RAWDATATYPE:
+      data_in = (unsigned char *)stv.rawdata->data;
+      data_in_len = stv.rawdata->size;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, raw data expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  data_out_len = data_in_len + (8 - data_in_len % 8) % 8;
+  data_out = ast_ecalloc(data_out_len);
+
+  for (i = 0; i < data_in_len / BLOWFISH_BLOCK_SIZE; ++i) {
+    memcpy(block, data_in + i * BLOWFISH_BLOCK_SIZE,
+           BLOWFISH_BLOCK_SIZE); // Copy 8 bytes into the block
+    blowfish_decrypt(block, data_out + i * BLOWFISH_BLOCK_SIZE, key); // Encrypt the block
+  }
+
+  // Handle any remaining bytes if the data_in length is not a multiple of 8
+  if (data_in_len % BLOWFISH_BLOCK_SIZE != 0) {
+    memset(block, 0, BLOWFISH_BLOCK_SIZE); // Clear the block
+    memcpy(block, data_in + i * BLOWFISH_BLOCK_SIZE,
+           data_in_len % BLOWFISH_BLOCK_SIZE);                        // Copy remaining bytes
+    blowfish_decrypt(block, data_out + i * BLOWFISH_BLOCK_SIZE, key); // Encrypt the block
+  }
+
+  e = newExpr_RawData(data_out_len);
+  free(e->rawdata->data);
+  stv.type = RAWDATATYPE;
+  stv.rawdata = e->rawdata;
+  stv.rawdata->data = data_out;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  free(e);
+
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+
+  return 0;
+}
+
+int ric_blowfish_keys_destroy(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  BLOWFISH_KEY *key = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case POINTERTYPE:
+      key = (BLOWFISH_KEY *)stv.p;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  free(key);
+
+  return 0;
+}

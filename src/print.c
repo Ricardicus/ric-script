@@ -230,14 +230,12 @@ int print_cachepot(cachepot_t *cachepot, EXPRESSION_PARAMS()) {
   }
 
   keyCountTotal = keyCount;
-
   if (keyCountTotal > 0) {
     printf("{");
     keyCount = 0;
     i = 0;
     while (i < size) {
-      heapval_t *hpv;
-      stackval_t sv;
+      expr_t *e;
       ptr = hash->table[i];
 
       if (ptr == NULL) {
@@ -246,49 +244,8 @@ int print_cachepot(cachepot_t *cachepot, EXPRESSION_PARAMS()) {
       }
 
       printf("%s'%s' : ", (keyCount > 0 ? ", " : ""), ptr->key);
-      hpv = ptr->data;
-      sv = hpv->sv;
-
-      switch (sv.type) {
-        case INT32TYPE: {
-          printf("%" PRIi32 "", sv.i);
-        } break;
-        case DOUBLETYPE: {
-          printf("%lf", sv.d);
-        } break;
-        case BIGINT: {
-          char buf[128];
-          char *c = NULL;
-
-          c = mpz_get_str(buf, 10, *sv.bigInt);
-          printf("%s\n", c);
-        } break;
-        case TEXT: {
-          printf("'%s'", sv.t);
-        } break;
-        case POINTERTYPE: {
-          printf("<Pointer: %" PRIxPTR ">", sv.p);
-        } break;
-        case FUNCPTRTYPE: {
-          functionDef_t *funcDec = sv.func;
-          printf("<FuncPointer: '%s'>", funcDec->id.id);
-        } break;
-        case LIBFUNCPTRTYPE: {
-          libFunction_t *libFunc = sv.libfunc;
-          printf("<LibFuncPointer: '%s'>", libFunc->libFuncName);
-        } break;
-        case VECTORTYPE: {
-          print_vector(sv.vec, EXPRESSION_ARGS());
-        } break;
-        case DICTTYPE: {
-          print_dictionary(sv.dict, EXPRESSION_ARGS());
-        } break;
-        case CACHEPOT: {
-          print_cachepot(sv.cachepot, EXPRESSION_ARGS());
-        } break;
-        default:
-          break;
-      }
+      e = ptr->data;
+      print_expr(e);
 
       keyCount++;
       i++;

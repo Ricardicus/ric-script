@@ -897,6 +897,7 @@ int ric_contains(LIBRARY_PARAMS()) {
   vector_t *argVec = NULL;
   dictionary_t *argDict = NULL;
   char *argText = NULL;
+  cachepot_t *cachepot = NULL;
   char *containText = NULL;
   int32_t containInt = 0;
   int32_t result = 0;
@@ -916,6 +917,9 @@ int ric_contains(LIBRARY_PARAMS()) {
       break;
     case TEXT:
       argText = stv.t;
+      break;
+    case CACHEPOT:
+      cachepot = stv.cachepot;
       break;
     default: {
       fprintf(stderr,
@@ -977,6 +981,19 @@ int ric_contains(LIBRARY_PARAMS()) {
     } else {
       heapval_t *hvp = hashtable_get(hash, PROVIDE_CONTEXT()->syncCtx, containText);
       if (hvp != NULL) {
+        result = 1;
+      }
+    }
+  } else if (cachepot != NULL) {
+    /* Search in a cachepot */
+    hashtable_t *hash = cachepot->hash;
+
+    if (searchForInt) {
+      /* all keys are strings */
+      result = 0;
+    } else {
+      expr_t *e = hashtable_get(hash, PROVIDE_CONTEXT()->syncCtx, containText);
+      if (e != NULL) {
         result = 1;
       }
     }

@@ -1065,7 +1065,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
               break;
             }
             default: {
-              fprintf(stderr, "%s.%d index error: datatype the does not support conditioning.\n",
+              fprintf(stderr, "%s.%d index error: datatype that does not support conditioning.\n",
                       ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
               if (!*interactive) {
                 exit(1);
@@ -1110,9 +1110,10 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         POP_VAL(&sv, sp, sc);
 
         if (sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT
-            && sv.type != RAWDATATYPE) {
-          fprintf(stderr, "%s.%d index error: '%s' is a datatype the does not support indexing.\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, id->id.id);
+            && sv.type != RAWDATATYPE && sv.type != CACHEPOT) {
+          fprintf(stderr,
+                  "%s.%d index error: '%s' is a datatype (%d) that does not support indexing.\n",
+                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, id->id.id, sv.type);
           if (!*interactive) {
             exit(1);
           }

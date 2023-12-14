@@ -46,7 +46,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libnet \
 	$(LIB_DIR)/libctx \
 	$(LIB_DIR)/libjson \
-	$(LIB_DIR)/libbigint
+	$(LIB_DIR)/libbigint \
+	$(LIB_DIR)/libcrypto 
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -76,9 +77,9 @@ CFLAGS = Wall \
 .PHONY: lex yacc test
 
 EXTERNAL_INCS = $(addprefix external/, \
-	cjson-1.7.14 mini-gmp-6.2.1)
+	cjson-1.7.14 mini-gmp-6.2.1 crypto-algorithms)
 EXTERNAL_SRCS = $(addprefix external/, \
-	cjson-1.7.14/cJSON.c mini-gmp-6.2.1/mini-gmp.c)
+	cjson-1.7.14/cJSON.c mini-gmp-6.2.1/mini-gmp.c crypto-algorithms/*.c)
 
 RULES = $(RIC_OBJS:.o=.d)
 

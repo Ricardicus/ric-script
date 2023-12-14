@@ -59,6 +59,7 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("fileClose", 1, ric_close_file),
     DECLARE_LIB_FUNCTION("fileWrite", 2, ric_write_file),
     DECLARE_LIB_FUNCTION("fileRead", 2, ric_read_file),
+    DECLARE_LIB_FUNCTION("fileReadAll", 1, ric_read_file_all),
     DECLARE_LIB_FUNCTION("fileReadLines", 1, ric_read_lines_file),
     DECLARE_LIB_FUNCTION("input", 1, ric_read_input),
     // libmath
@@ -76,6 +77,17 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("random", 0, ric_random_uniform),
     DECLARE_LIB_FUNCTION("textBase", 2, ric_get_nbr_base_string),
     DECLARE_LIB_FUNCTION("intBase", 2, ric_get_nbr_base_int),
+    // libcrypto
+    DECLARE_LIB_FUNCTION("sha256", 1, ric_sha256),
+    DECLARE_LIB_FUNCTION("md5", 1, ric_md5),
+    DECLARE_LIB_FUNCTION("base64", 1, ric_base64_encode),
+    DECLARE_LIB_FUNCTION("base64Dec", 1, ric_base64_decode),
+    DECLARE_LIB_FUNCTION("hex", 1, ric_hex_encode),
+    DECLARE_LIB_FUNCTION("hexDec", 1, ric_hex_decode),
+    DECLARE_LIB_FUNCTION("blowfishKeys", 1, ric_blowfish_keys),
+    DECLARE_LIB_FUNCTION("blowfishKeysDestroy", 1, ric_blowfish_keys_destroy),
+    DECLARE_LIB_FUNCTION("blowfish", 2, ric_blowfish_encrypt),
+    DECLARE_LIB_FUNCTION("blowfishDec", 2, ric_blowfish_decrypt),
     // libload
     DECLARE_LIB_FUNCTION("load", 1, ric_load),
     // libtime
@@ -131,7 +143,7 @@ void initialize_ric_lib() {
   FILE *fp;
   size_t i = 0;
   size_t libFuncs = sizeof(ric_library) / sizeof(*ric_library);
-  libCallbacks = hashtable_new(100, 0.8);
+  libCallbacks = hashtable_new(200, 0.8);
   assert(libCallbacks != NULL);
 
   while (i < libFuncs) {

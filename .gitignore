@@ -36,3 +36,6 @@ ric.dSYM
 src/*.swp
 tags
 cscope.files
+
+# Test files
+tests/testfile.txt

@@ -62,7 +62,8 @@ def test_directory_print():
 "string_manipulations.ric",
 "vector_print.ric",
 "math.ric",
-"foobar.ric"
+"foobar.ric",
+"crypto.ric"
 ]
   if ( os.name == 'nt' ):
     # list directory only works on unix platforms

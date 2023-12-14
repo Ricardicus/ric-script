@@ -134,6 +134,57 @@ int ric_read_file(LIBRARY_PARAMS()) {
   return 0;
 }
 
+int ric_read_file_all(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  FILE *fp;
+  size_t datasize = 0;
+  expr_t *e;
+  size_t readBytes = 0;
+  int dummy;
+  heapval_t *hpv;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case POINTERTYPE:
+      fp = (FILE *)stv.p;
+      break;
+    default: {
+      fprintf(
+          stderr,
+          "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
+          LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  fseek(fp, 0, SEEK_END); // Move to the end of the file
+  datasize = ftell(fp);   // Get the current byte offset in the file
+  fseek(fp, 0, SEEK_SET);
+
+  e = newExpr_RawData(datasize);
+
+  readBytes = fread(e->rawdata->data, 1, e->rawdata->size, fp);
+
+  if (readBytes != e->rawdata->size) {
+    e->rawdata->size = readBytes;
+  }
+
+  stv.type = RAWDATATYPE;
+  stv.rawdata = e->rawdata;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the raw data read */
+  PUSH_RAWDATA(stv.rawdata, sp, sc);
+
+  free(e);
+
+  return 0;
+}
+
 int ric_write_file(LIBRARY_PARAMS()) {
   stackval_t stv;
   FILE *fp;

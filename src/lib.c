@@ -59,6 +59,7 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("fileClose", 1, ric_close_file),
     DECLARE_LIB_FUNCTION("fileWrite", 2, ric_write_file),
     DECLARE_LIB_FUNCTION("fileRead", 2, ric_read_file),
+    DECLARE_LIB_FUNCTION("fileReadAll", 1, ric_read_file_all),
     DECLARE_LIB_FUNCTION("fileReadLines", 1, ric_read_lines_file),
     DECLARE_LIB_FUNCTION("input", 1, ric_read_input),
     // libmath
@@ -78,6 +79,11 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("intBase", 2, ric_get_nbr_base_int),
     // libcrypto
     DECLARE_LIB_FUNCTION("sha256", 1, ric_sha256),
+    DECLARE_LIB_FUNCTION("md5", 1, ric_md5),
+    DECLARE_LIB_FUNCTION("base64", 1, ric_base64_encode),
+    DECLARE_LIB_FUNCTION("base64Dec", 1, ric_base64_decode),
+    DECLARE_LIB_FUNCTION("hex", 1, ric_hex_encode),
+    DECLARE_LIB_FUNCTION("hexDec", 1, ric_hex_decode),
     // libload
     DECLARE_LIB_FUNCTION("load", 1, ric_load),
     // libtime

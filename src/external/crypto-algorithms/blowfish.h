@@ -17,11 +17,11 @@
 
 /**************************** DATA TYPES ****************************/
 typedef unsigned char BYTE;             // 8-bit byte
-typedef unsigned int  WORD;             // 32-bit word, change to "long" for 16-bit machines
+typedef unsigned int  BLOWFISH_WORD;             // 32-bit word, change to "long" for 16-bit machines
 
 typedef struct {
-   WORD p[18];
-   WORD s[4][256];
+   BLOWFISH_WORD p[18];
+   BLOWFISH_WORD s[4][256];
 } BLOWFISH_KEY;
 
 /*********************** FUNCTION DECLARATIONS **********************/

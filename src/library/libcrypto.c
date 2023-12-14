@@ -44,7 +44,7 @@ int ric_sha256(LIBRARY_PARAMS()) {
     void *hp = PROVIDE_CONTEXT()->hp;
     char *result = ast_ecalloc(SHA256_BLOCK_SIZE * 2 + 1);
     for (int i = 0; i < SHA256_BLOCK_SIZE; i++) {
-      sprintf(result + (i * 2), "%02x", buf[i]);
+      snprintf(result + (i * 2), 3, "%02x", buf[i]);
     }
 
     stv.type = TEXT;
@@ -114,7 +114,7 @@ int ric_md5(LIBRARY_PARAMS()) {
   if (stringArg != NULL) {
     char *result = ast_ecalloc(MD5_BLOCK_SIZE * 2 + 1);
     for (int i = 0; i < MD5_BLOCK_SIZE; i++) {
-      sprintf(result + (i * 2), "%02x", buf[i]);
+      snprintf(result + (i * 2), 3, "%02x", buf[i]);
     }
     stv.type = TEXT;
     stv.t = result;
@@ -360,7 +360,7 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
     char *result = ast_ecalloc(len * 2 + 1);
 
     for (i = 0; i < len; i++) {
-      sprintf(&result[i * 2], "%02x", (unsigned char)stringArg[i]);
+      snprintf(&result[i * 2], 3, "%02x", (unsigned char)stringArg[i]);
     }
 
     stv.type = TEXT;
@@ -375,7 +375,7 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
     char *result = ast_ecalloc(len * 2 + 1);
 
     for (i = 0; i < len; i++) {
-      sprintf(&result[i * 2], "%02x", ((unsigned char *)rawdata->data)[i]);
+      snprintf(&result[i * 2], 3, "%02x", ((unsigned char *)rawdata->data)[i]);
     }
 
     stv.type = TEXT;

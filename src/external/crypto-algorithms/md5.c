@@ -34,7 +34,7 @@
 /*********************** FUNCTION DEFINITIONS ***********************/
 void md5_transform(MD5_CTX *ctx, const BYTE data[])
 {
-	WORD a, b, c, d, m[16], i, j;
+	MD5_WORD a, b, c, d, m[16], i, j;
 
 	// MD5 specifies big endian byte order, but this implementation assumes a little
 	// endian byte order CPU. Reverse all the bytes upon input, and re-reverse them

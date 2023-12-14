@@ -17,13 +17,13 @@
 
 /**************************** DATA TYPES ****************************/
 typedef unsigned char BYTE;             // 8-bit byte
-typedef unsigned int  WORD;             // 32-bit word, change to "long" for 16-bit machines
+typedef unsigned int  MD5_WORD;             // 32-bit word, change to "long" for 16-bit machines
 
 typedef struct {
    BYTE data[64];
-   WORD datalen;
+   MD5_WORD datalen;
    unsigned long long bitlen;
-   WORD state[4];
+   MD5_WORD state[4];
 } MD5_CTX;
 
 /*********************** FUNCTION DECLARATIONS **********************/

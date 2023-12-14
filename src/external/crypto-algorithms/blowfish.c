@@ -23,13 +23,13 @@
 #define ITERATION(l,r,t,pval) l ^= keystruct->p[pval]; F(l,t); r^= t; swap(r,l,t);
 
 /**************************** VARIABLES *****************************/
-static const WORD p_perm[18] = {
+static const BLOWFISH_WORD p_perm[18] = {
    0x243F6A88,0x85A308D3,0x13198A2E,0x03707344,0xA4093822,0x299F31D0,0x082EFA98,
    0xEC4E6C89,0x452821E6,0x38D01377,0xBE5466CF,0x34E90C6C,0xC0AC29B7,0xC97C50DD,
    0x3F84D5B5,0xB5470917,0x9216D5D9,0x8979FB1B
 };
 
-static const WORD s_perm[4][256] = { {
+static const BLOWFISH_WORD s_perm[4][256] = { {
    0xD1310BA6,0x98DFB5AC,0x2FFD72DB,0xD01ADFB7,0xB8E1AFED,0x6A267E96,0xBA7C9045,0xF12C7F99,
    0x24A19947,0xB3916CF7,0x0801F2E2,0x858EFC16,0x636920D8,0x71574E69,0xA458FEA3,0xF4933D7E,
    0x0D95748F,0x728EB658,0x718BCD58,0x82154AEE,0x7B54A41D,0xC25A59B5,0x9C30D539,0x2AF26013,
@@ -166,7 +166,7 @@ static const WORD s_perm[4][256] = { {
 /*********************** FUNCTION DEFINITIONS ***********************/
 void blowfish_encrypt(const BYTE in[], BYTE out[], const BLOWFISH_KEY *keystruct)
 {
-   WORD l,r,t; //,i;
+   BLOWFISH_WORD l,r,t; //,i;
 
    l = (in[0] << 24) | (in[1] << 16) | (in[2] << 8) | (in[3]);
    r = (in[4] << 24) | (in[5] << 16) | (in[6] << 8) | (in[7]);
@@ -202,7 +202,7 @@ void blowfish_encrypt(const BYTE in[], BYTE out[], const BLOWFISH_KEY *keystruct
 
 void blowfish_decrypt(const BYTE in[], BYTE out[], const BLOWFISH_KEY *keystruct)
 {
-   WORD l,r,t; //,i;
+   BLOWFISH_WORD l,r,t; //,i;
 
    l = (in[0] << 24) | (in[1] << 16) | (in[2] << 8) | (in[3]);
    r = (in[4] << 24) | (in[5] << 16) | (in[6] << 8) | (in[7]);
@@ -242,8 +242,8 @@ void blowfish_key_setup(const BYTE user_key[], BLOWFISH_KEY *keystruct, size_t l
    int idx,idx2;
 
    // Copy over the constant init array vals (so the originals aren't destroyed).
-   memcpy(keystruct->p,p_perm,sizeof(WORD) * 18);
-   memcpy(keystruct->s,s_perm,sizeof(WORD) * 1024);
+   memcpy(keystruct->p,p_perm,sizeof(BLOWFISH_WORD) * 18);
+   memcpy(keystruct->s,s_perm,sizeof(BLOWFISH_WORD) * 1024);
 
    // Combine the key with the P box. Assume key is standard 448 bits (56 bytes) or less.
    for (idx = 0, idx2 = 0; idx < 18; ++idx, idx2 += 4)

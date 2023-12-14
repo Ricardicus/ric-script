@@ -39,10 +39,18 @@ int ric_sha256(LIBRARY_PARAMS()) {
   sha256_final(&sha256, buf);
 
   if (stringArg != NULL) {
+    heapval_t *hpv;
+    int dummy;
+    void *hp = PROVIDE_CONTEXT()->hp;
     char *result = ast_ecalloc(SHA256_BLOCK_SIZE * 2 + 1);
     for (int i = 0; i < SHA256_BLOCK_SIZE; i++) {
       sprintf(result + (i * 2), "%02x", buf[i]);
     }
+
+    stv.type = TEXT;
+    stv.t = result;
+
+    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
     /* Pushing the parsed value */
     PUSH_STRING(result, sp, sc);

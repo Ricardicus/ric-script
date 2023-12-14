@@ -143,7 +143,7 @@ void initialize_ric_lib() {
   FILE *fp;
   size_t i = 0;
   size_t libFuncs = sizeof(ric_library) / sizeof(*ric_library);
-  libCallbacks = hashtable_new(100, 0.8);
+  libCallbacks = hashtable_new(200, 0.8);
   assert(libCallbacks != NULL);
 
   while (i < libFuncs) {

@@ -22,6 +22,9 @@ includes = [
     join_paths('..', 'external', 'cjson-1.7.14')
   ),
   include_directories(
+    join_paths('..', 'external', 'crypto-algorithms')
+  ),
+  include_directories(
     join_paths('..', 'external', 'mini-gmp-6.2.1')
   )
 ]
@@ -35,12 +38,18 @@ library_sources = [
   join_paths('..','library','libtime.c'),
   join_paths('..','library','libctx.c'),
   join_paths('..','library','libjson.c'),
+  join_paths('..','library','libcrypto.c'),
   join_paths('..','library','libbigint.c'),
   join_paths('..','external','cjson-1.7.14',
     'cJSON.c'),
   join_paths('..','external','mini-gmp-6.2.1',
-    'mini-gmp.c')
-]
+    'mini-gmp.c'),
+  join_paths('..','external','crypto-algorithms','md5.c'),
+  join_paths('..','external','crypto-algorithms','base64.c'),
+  join_paths('..','external','crypto-algorithms','blowfish.c'),
+  join_paths('..','external','crypto-algorithms','sha256.c'),
+
+  ]
 
 # Handling windows NT vs. unix POSIX differences
 if ( target_os == 'windows' )

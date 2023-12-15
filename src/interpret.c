@@ -859,6 +859,11 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               newVec->vec->length++;
               newVec->vec->content = vecContent;
             }
+          } else {
+            /* Empty the stack */
+            while (*sc > stackCount) {
+              POP_VAL(&sv, sp, sc);
+            }
           }
           continueLoop = arrayIndex < endIteration;
           if (rootBigInt != NULL) {

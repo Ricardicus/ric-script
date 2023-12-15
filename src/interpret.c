@@ -861,7 +861,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             }
           } else {
             /* Empty the stack */
-            while (*sc > stackCount) {
+            while (*sc > stackCount + 1) {
               POP_VAL(&sv, sp, sc);
             }
           }

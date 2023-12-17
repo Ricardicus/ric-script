@@ -903,6 +903,7 @@ int ric_contains(LIBRARY_PARAMS()) {
   char *argText = NULL;
   cachepot_t *cachepot = NULL;
   char *containText = NULL;
+  vector_t *containVec = NULL;
   int32_t containInt = 0;
   int32_t result = 0;
   int searchForInt = 0; // Lazy, search for int or text.
@@ -945,6 +946,10 @@ int ric_contains(LIBRARY_PARAMS()) {
       containInt = stv.i;
       searchForInt = 1;
       break;
+    case VECTORTYPE:
+      searchForInt = 0;
+      containVec = stv.vec;
+      break;
     default: {
       fprintf(stderr, "error: function '%s' expected text or integer as first argument.\n",
               LIBRARY_FUNC_NAME());
@@ -966,11 +971,26 @@ int ric_contains(LIBRARY_PARAMS()) {
           result = 1;
           break;
         }
-      } else {
+      } else if (containText != NULL) {
         /* Check if is text */
         if (stv.type == TEXT && strcmp(stv.t, containText) == 0) {
           result = 1;
           break;
+        }
+      } else if (containVec != NULL) {
+        if (stv.type == VECTORTYPE) {
+          expr_t a, b;
+
+          a.type = EXPR_TYPE_VECTOR;
+          b.type = EXPR_TYPE_VECTOR;
+
+          a.vec = stv.vec;
+          b.vec = containVec;
+
+          if (evaluate_equal(&a, &b, EXPRESSION_ARGS())) {
+            result = 1;
+            break;
+          }
         }
       }
       walk = walk->next;

@@ -365,6 +365,21 @@ expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
   return newExp;
 }
 
+int evaluate_equal(expr_t *a, expr_t *b, EXPRESSION_PARAMS()) {
+  int result = 0;
+  ifCondition_t ifCond;
+
+  ifCond.type = CONDITION_EQ;
+  ifCond.left = a;
+  ifCond.right = b;
+
+  evaluate_condition(&ifCond, EXPRESSION_ARGS());
+
+  result = *PROVIDE_CONTEXT()->ax;
+
+  return result;
+}
+
 int evaluate_condition(ifCondition_t *cond, EXPRESSION_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -443,6 +458,30 @@ int evaluate_condition(ifCondition_t *cond, EXPRESSION_PARAMS()) {
         } else {
           *ax = 0;
         }
+      } else if (svLeft.type == VECTORTYPE && svRight.type == VECTORTYPE) {
+        argsList_t *walkA = svLeft.vec->content;
+        argsList_t *walkB = svRight.vec->content;
+        int res = svLeft.vec->length == svRight.vec->length;
+        while (res && walkA != NULL && walkB != NULL) {
+          ifCondition_t ifCond;
+          int tmpax = *PROVIDE_CONTEXT()->ax;
+          ifCond.type = CONDITION_EQ;
+
+          ifCond.left = walkA->arg;
+          ifCond.right = walkB->arg;
+
+          evaluate_condition(&ifCond, EXPRESSION_ARGS());
+          if (*PROVIDE_CONTEXT()->ax == 0) {
+            res = 0;
+            break;
+          }
+
+          *PROVIDE_CONTEXT()->ax = tmpax;
+
+          walkA = walkA->next;
+          walkB = walkB->next;
+        }
+        *ax = res;
       }
       break;
     }

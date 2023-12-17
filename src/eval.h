@@ -23,7 +23,7 @@ int evaluate_id_valid(char *id, void *stmt, void *next, PROVIDE_CONTEXT_ARGS(), 
                       hashtable_t *argVals);
 int evaluate_indexer(indexer_t *indexer, int max, int *idxStart, int *idxEnd, int *offset,
                      EXPRESSION_PARAMS());
-
+int evaluate_equal(expr_t *a, expr_t *b, EXPRESSION_PARAMS());
 void free_vector(vector_t *vec);
 
 expr_t *copy_vector(vector_t *vec, int alloc, EXPRESSION_PARAMS());

@@ -23,6 +23,7 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("push", 2, ric_push),
     DECLARE_LIB_FUNCTION("pop", 1, ric_pop),
     DECLARE_LIB_FUNCTION("popFirst", 1, ric_pop_first),
+    DECLARE_LIB_FUNCTION("popIdx", 2, ric_pop_idx),
     DECLARE_LIB_FUNCTION("len", 1, ric_len),
     DECLARE_LIB_FUNCTION("contains", 2, ric_contains),
     DECLARE_LIB_FUNCTION("keys", 1, ric_keys),

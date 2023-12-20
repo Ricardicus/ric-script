@@ -851,6 +851,86 @@ int ric_pop(LIBRARY_PARAMS()) {
   return 0;
 }
 
+int ric_pop_idx(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  vector_t *vec = NULL;
+  argsList_t *walk;
+  argsList_t *prev;
+  int idx = 0;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  heapval_t *hpv = NULL;
+  int dummy;
+  int walk_count = 0;
+
+  /* Get vector reference */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case VECTORTYPE:
+      vec = stv.vec;
+      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  /* Get idx */
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case INT32TYPE:
+      idx = stv.i;
+      break;
+    default: {
+      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+    } break;
+  }
+
+  if (vec->length == 0 || idx >= vec->length) {
+    /* This is not very good.. Guess I will return 0 then. */
+    PUSH_INT(0, sp, sc);
+    return 0;
+  }
+
+  if (idx < 0) {
+    /* Negative index, wrap around */
+    idx = (vec->length + idx % vec->length);
+  }
+
+  walk = vec->content;
+  prev = NULL;
+  while (walk->next != NULL) {
+    if (walk_count == idx) {
+      break;
+    }
+
+    prev = walk;
+    walk = walk->next;
+    walk_count++;
+  }
+
+  if (prev == NULL) {
+    vec->content = walk->next;
+  } else {
+    prev->next = walk->next;
+  }
+  evaluate_expression(walk->arg, EXPRESSION_ARGS());
+  POP_VAL(&stv, sp, sc);
+
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  push_stackval(&stv, PROVIDE_CONTEXT());
+
+  // Decrease vector size
+  vec->length--;
+  return 0;
+}
+
 int ric_pop_first(LIBRARY_PARAMS()) {
   stackval_t stv;
   vector_t *vec = NULL;
@@ -1345,7 +1425,7 @@ int ric_sort(LIBRARY_PARAMS()) {
 
   vecContent = vec->content;
 
-  if (vecContent->length > 0) {
+  if (vec->length > 0 && vecContent->length > 0) {
 
     if (vecContent->arg->type == EXPR_TYPE_IVAL) {
 

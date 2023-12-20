@@ -24,6 +24,7 @@ int ric_append(LIBRARY_PARAMS());
 int ric_push(LIBRARY_PARAMS());
 int ric_pop(LIBRARY_PARAMS());
 int ric_pop_first(LIBRARY_PARAMS());
+int ric_pop_idx(LIBRARY_PARAMS());
 int ric_len(LIBRARY_PARAMS());
 int ric_contains(LIBRARY_PARAMS());
 int ric_keys(LIBRARY_PARAMS());

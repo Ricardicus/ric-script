@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "eval.h"
 #include "hashtable.h"
+#include "prioqueue.h"
 
 extern int yylinenor;
 extern char *ParsedFile;
@@ -278,6 +279,16 @@ expr_t *newExpr_Cachepot() {
 
   expr->type = EXPR_TYPE_CACHEPOT;
   expr->cachepot = cachepot;
+
+  return expr;
+}
+
+expr_t *newExpr_PriorityQueue(int capacity) {
+  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  priority_queue_t *prioqueue = new_priority_queue(capacity);
+
+  expr->type = EXPR_TYPE_PRIOQUEUE;
+  expr->prioqueue = prioqueue;
 
   return expr;
 }
@@ -585,6 +596,16 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
         newExp->dict = copyNewDictionary(expr->dict, EXPRESSION_ARGS());
       }
     } break;
+    case EXPR_TYPE_PRIOQUEUE: {
+      priority_queue_t *pq = expr->prioqueue;
+      newExp = newExpr_PriorityQueue(pq->capacity);
+      newExp->prioqueue->size = pq->size;
+      for (int i = 0; i < pq->size; i++) {
+        newExp->prioqueue->items[i].value =
+            newExpr_Copy(pq->items[i].value, alloc, EXPRESSION_ARGS());
+        newExp->prioqueue->items[i].priority = pq->items[i].priority;
+      }
+    } break;
     case EXPR_TYPE_EMPTY:
     default:
       break;
@@ -825,6 +846,10 @@ void free_expression(expr_t *expr) {
       free_expression((expr_t *)expr->add.left);
       free_expression((expr_t *)expr->add.right);
       break;
+    } break;
+    case EXPR_TYPE_PRIOQUEUE: {
+      free(expr->prioqueue->items);
+      free(expr->prioqueue);
     } break;
     case EXPR_TYPE_OPDIV: {
       free_expression((expr_t *)expr->add.left);

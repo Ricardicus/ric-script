@@ -36,6 +36,7 @@ RIC_SOURCES = \
 	dl \
 	interpret \
 	print \
+	prioqueue \
 	$(LIB_DIR)/libio \
 	$(LIB_DIR)/libmath \
 	$(LIB_DIR)/libstd \
@@ -47,7 +48,8 @@ RIC_SOURCES = \
 	$(LIB_DIR)/libctx \
 	$(LIB_DIR)/libjson \
 	$(LIB_DIR)/libbigint \
-	$(LIB_DIR)/libcrypto 
+	$(LIB_DIR)/libcrypto \
+	$(LIB_DIR)/libprioqueue
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)

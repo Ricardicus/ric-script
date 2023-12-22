@@ -71,6 +71,9 @@ void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS()) {
     case CACHEPOT: {
       PUSH_CACHEPOT(sv.cachepot, sp, sc);
     } break;
+    case PRIOQUEUE: {
+      PUSH_PRIOQUEUE(sv.prioqueue, sp, sc);
+    } break;
     default:
       fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
@@ -122,6 +125,10 @@ void push_heapval(heapval_t *hv, PROVIDE_CONTEXT_ARGS()) {
       }
       case CACHEPOT: {
         PUSH_CACHEPOT(hv->sv.cachepot, sp, sc);
+        break;
+      }
+      case PRIOQUEUE: {
+        PUSH_PRIOQUEUE(hv->sv.prioqueue, sp, sc);
         break;
       }
       default:
@@ -284,6 +291,9 @@ int push_expression(expr_t *expArg, EXPRESSION_PARAMS()) {
       case EXPR_TYPE_CACHEPOT:
         PUSH_CACHEPOT(expArg->cachepot, sp, sc);
         break;
+      case EXPR_TYPE_PRIOQUEUE:
+        PUSH_PRIOQUEUE(expArg->prioqueue, sp, sc);
+        break;
       case EXPR_TYPE_TEXT: {
         PUSH_STRING(expArg->text, sp, sc);
         break;
@@ -331,6 +341,13 @@ expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
       hashtable_free(newExp->cachepot->hash);
       free(newExp->cachepot);
       newExp->cachepot = sv->cachepot;
+    } break;
+    case PRIOQUEUE: {
+      expr_t *e = ast_emalloc(sizeof(expr_t));
+      e->type = EXPR_TYPE_PRIOQUEUE;
+      e->prioqueue = sv->prioqueue;
+      newExp = newExpr_Copy(e, alloc, EXPRESSION_ARGS());
+      free(e);
     } break;
     case RAWDATATYPE: {
       newExp = newExpr_RawData(sv->rawdata->size);
@@ -1133,6 +1150,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       vector_t *vec = NULL;
       dictionary_t *dict = NULL;
       cachepot_t *cachepot = NULL;
+      priority_queue_t *prioqueue = NULL;
       argsList_t *walk;
       char *text = NULL;
       rawdata_t *rawdata = NULL;
@@ -1149,7 +1167,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         POP_VAL(&sv, sp, sc);
 
         if (sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT
-            && sv.type != RAWDATATYPE && sv.type != CACHEPOT) {
+            && sv.type != RAWDATATYPE && sv.type != CACHEPOT && sv.type != PRIOQUEUE) {
           fprintf(stderr,
                   "%s.%d index error: '%s' is a datatype (%d) that does not support indexing.\n",
                   ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, id->id.id, sv.type);
@@ -1169,6 +1187,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           rawdata = sv.rawdata;
         } else if (sv.type == CACHEPOT) {
           cachepot = sv.cachepot;
+        } else if (sv.type == PRIOQUEUE) {
+          prioqueue = sv.prioqueue;
         }
       } else {
         fprintf(stderr, "error: Invalid indexing %d\n", id->type);
@@ -1484,6 +1504,33 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             exit(1);
           }
 
+          push_expression(e, EXPRESSION_ARGS());
+        } break;
+        case PRIOQUEUE: {
+          /* Indexing a prioqueue */
+          int idx = 0;
+          expr_t *e = NULL;
+
+          evaluate_expression(index, EXPRESSION_ARGS());
+          POP_VAL(&sv, sp, sc);
+
+          if (sv.type != INT32TYPE) {
+            fprintf(stderr, "index error: Must provide an integer as index for prioqueues\n");
+            exit(1);
+          }
+
+          idx = sv.i;
+
+          if (idx >= prioqueue->size) {
+            fprintf(stderr, "index error: index out of bounds\n");
+            exit(1);
+          }
+
+          if (idx < 0) {
+            idx = prioqueue->size - ((prioqueue->size - idx) % prioqueue->size);
+          }
+
+          e = prioqueue->items[idx].value;
           push_expression(e, EXPRESSION_ARGS());
         } break;
         default:

@@ -20,6 +20,7 @@
 #include "libjson.h"
 #include "libbigint.h"
 #include "libcrypto.h"
+#include "libprioqueue.h"
 
 #define EXPORT_STR(s) XEXPORT_STR(s)
 #define XEXPORT_STR(s) #s

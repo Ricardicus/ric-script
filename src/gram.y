@@ -656,6 +656,11 @@ indexedVector:
     }
     | indexedVector '[' expressions ']' {
       $$ = newExpr_VectorIndex($1, $3);
+    }
+    | indexedVector '[' indexer ']' {
+      expr_t *id = $1;
+      expr_t *index = $3;
+      $$ = newExpr_VectorIndex(id, index);
     };
 
 indexer:

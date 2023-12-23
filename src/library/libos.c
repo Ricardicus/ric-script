@@ -29,9 +29,6 @@ int ric_sleep(LIBRARY_PARAMS()) {
 
   (void)sleep((unsigned int)sleepTime);
 
-  /* Pushing zero */
-  PUSH_INT(0, sp, sc);
-
   return 0;
 }
 

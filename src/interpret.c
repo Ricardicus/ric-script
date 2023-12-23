@@ -345,6 +345,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
         // Mark and sweep the heap
         mark_and_sweep(PROVIDE_CONTEXT()->varDecs, EXPRESSION_ARGS());
+
       } break;
       case LANG_ENTITY_SYSTEM: {
         expr_t *sys_var = (expr_t *)((statement_t *)stmt)->content;
@@ -1426,6 +1427,7 @@ void close_namespaces(PROVIDE_CONTEXT_ARGS()) {
 static void flush_arg(void *key, void *val) {
   expr_t *e = (expr_t *)val;
   (void)key;
+
   if (e->type == EXPR_TYPE_TEXT) {
     free(e->text);
   } else if (e->type == EXPR_TYPE_DICT) {

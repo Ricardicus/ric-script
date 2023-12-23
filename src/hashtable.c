@@ -140,7 +140,7 @@ void hashtable_put(hashtable_t *hashtable, void *ctx, char *key, void *val) {
   if (hashtable == NULL) return;
 
   getContext(ctx);
-  load_level = (float)hashtable->ocupied * hashtable->load;
+  load_level = (float)hashtable->ocupied;
   max_load_level = (float)hashtable->size * hashtable->load;
   if (load_level > max_load_level) {
     hashtable_rehash(hashtable);

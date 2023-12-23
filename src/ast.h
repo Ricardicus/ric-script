@@ -100,12 +100,9 @@
 // Maximum body depth
 #define MAX_BODY_LEVELS 30 // If you need more; I am sorry.
 // Number of elements on the stack of this interpreter (arbitrary number?)
-#define RIC_STACKSIZE 8096
+#define RIC_STACKSIZE 1024
 // Number of elements on the heap of this interpreter (arbitrary number?)
 #define RIC_HEAPSIZE 8096
-// maximum number of variables in the langauge, need to be known by current
-// garbage collector algorithm (making a list of all active)
-#define RIC_MAX_NBR_VARS 8096
 // Big integers max size (in character width base 10)
 #define RIC_BIG_INT_MAX_SIZE 4096
 
@@ -381,7 +378,7 @@ expr_t *newExpr_BigIntFromStr(const char *intStr);
 expr_t *newExpr_BigIntFromInt(intptr_t val);
 expr_t *newExpr_BigInt(mpz_t *n);
 expr_t *newExpr_Cachepot();
-expr_t *newExpr_PriorityQueue(int capacity);
+expr_t *newExpr_PriorityQueue(int capacity, int is_minimum);
 expr_t *newClassAccesser(expr_t *classID, char *memberID);
 expr_t *newConditional(int type, expr_t *left, expr_t *right);
 
@@ -589,7 +586,7 @@ typedef struct libFunction {
     intptr_t p;                                            \
     *sb = calloc(sz + 1, sizeof(stackval_t));              \
     assert(*sb != NULL);                                   \
-    p = ((intptr_t)*sb) % sizeof(stackval_t);              \
+    p = ((intptr_t) * sb) % sizeof(stackval_t);            \
     if (p != 0) {                                          \
       p = (sizeof(stackval_t) - (p % sizeof(stackval_t))); \
     }                                                      \
@@ -603,7 +600,7 @@ typedef struct libFunction {
     heapval_t hpbv;                                    \
     *hb = calloc(hz + 2, sizeof(heapval_t));           \
     assert(*hb != NULL);                               \
-    p = ((intptr_t)*hb) % sizeof(heapval_t);           \
+    p = ((intptr_t) * hb) % sizeof(heapval_t);         \
     p = (sizeof(heapval_t) - (p % sizeof(heapval_t))); \
     hpbv.sv.type = INT32TYPE;                          \
     hpbv.sv.i = (int32_t)hz;                           \

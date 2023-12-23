@@ -1,29 +1,13 @@
 #include "libprioqueue.h"
 #include "eval.h"
 
-int ric_new_priority_queue(LIBRARY_PARAMS()) {
-  stackval_t stv;
-  int capacity = 0;
+int ric_new_min_heap(LIBRARY_PARAMS()) {
+  int capacity = PRIO_QUEUE_DEFAULT_CAP;
   priority_queue_t *result = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
-  POP_VAL(&stv, sp, sc);
-
-  switch (stv.type) {
-    case INT32TYPE:
-      capacity = stv.i;
-      break;
-    default: {
-      fprintf(
-          stderr,
-          "error: function call '%s' got unexpected data type as argument, expected an integer.\n",
-          LIBRARY_FUNC_NAME());
-      exit(1);
-    } break;
-  }
-
-  result = new_priority_queue(capacity);
+  result = new_priority_queue(capacity, 1);
 
   /* Pushing the parsed value */
   PUSH_PRIOQUEUE(result, sp, sc);
@@ -31,7 +15,21 @@ int ric_new_priority_queue(LIBRARY_PARAMS()) {
   return 0;
 }
 
-int ric_priority_queue_insert(LIBRARY_PARAMS()) {
+int ric_new_max_heap(LIBRARY_PARAMS()) {
+  int capacity = PRIO_QUEUE_DEFAULT_CAP;
+  priority_queue_t *result = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+
+  result = new_priority_queue(capacity, 0);
+
+  /* Pushing the parsed value */
+  PUSH_PRIOQUEUE(result, sp, sc);
+
+  return 0;
+}
+
+int ric_heap_insert(LIBRARY_PARAMS()) {
   stackval_t stv;
   priority_queue_t *arg = NULL;
   expr_t *toAdd = NULL;
@@ -76,13 +74,10 @@ int ric_priority_queue_insert(LIBRARY_PARAMS()) {
 
   priority_queue_insert(arg, toAdd, priority);
 
-  /* Pushing the parsed value */
-  PUSH_INT(0, sp, sc);
-
   return 0;
 }
 
-int ric_priority_queue_pop_max(LIBRARY_PARAMS()) {
+int ric_heap_pop(LIBRARY_PARAMS()) {
   stackval_t stv;
   priority_queue_t *arg = NULL;
   expr_t *popped = NULL;
@@ -112,8 +107,9 @@ int ric_priority_queue_pop_max(LIBRARY_PARAMS()) {
   }
 
   // pop the maximum prio value from the queue
-  popped = priority_queue_pop_max(arg);
+  popped = priority_queue_pop(arg);
 
   push_expression(popped, EXPRESSION_ARGS());
+  free(popped);
   return 0;
 }

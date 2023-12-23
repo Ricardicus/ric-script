@@ -55,9 +55,10 @@ libFunction_t ric_library[] = {
     // libbigint
     DECLARE_LIB_FUNCTION("bigInt", 1, ric_new_big_int),
     // libprioqueue
-    DECLARE_LIB_FUNCTION("prioQueue", 1, ric_new_priority_queue),
-    DECLARE_LIB_FUNCTION("prioInsert", 3, ric_priority_queue_insert),
-    DECLARE_LIB_FUNCTION("prioPop", 1, ric_priority_queue_pop_max),
+    DECLARE_LIB_FUNCTION("minHeap", 0, ric_new_min_heap),
+    DECLARE_LIB_FUNCTION("maxHeap", 0, ric_new_max_heap),
+    DECLARE_LIB_FUNCTION("heapInsert", 3, ric_heap_insert),
+    DECLARE_LIB_FUNCTION("heapPop", 1, ric_heap_pop),
     // libio
     DECLARE_LIB_FUNCTION("isFile", 1, ric_is_file),
     DECLARE_LIB_FUNCTION("fileOpen", 1, ric_open_file),

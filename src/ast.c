@@ -276,16 +276,15 @@ expr_t *newExpr_Cachepot() {
   cachepot_t *cachepot = ast_emalloc(sizeof(expr_t));
 
   cachepot->hash = hashtable_new(CACHEPOT_STANDARD_SIZE, CACHEPOT_STANDARD_LOAD);
-
   expr->type = EXPR_TYPE_CACHEPOT;
   expr->cachepot = cachepot;
 
   return expr;
 }
 
-expr_t *newExpr_PriorityQueue(int capacity) {
+expr_t *newExpr_PriorityQueue(int capacity, int is_minimum) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
-  priority_queue_t *prioqueue = new_priority_queue(capacity);
+  priority_queue_t *prioqueue = new_priority_queue(capacity, is_minimum);
 
   expr->type = EXPR_TYPE_PRIOQUEUE;
   expr->prioqueue = prioqueue;
@@ -598,7 +597,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
     } break;
     case EXPR_TYPE_PRIOQUEUE: {
       priority_queue_t *pq = expr->prioqueue;
-      newExp = newExpr_PriorityQueue(pq->capacity);
+      newExp = newExpr_PriorityQueue(pq->capacity, pq->minimum);
       newExp->prioqueue->size = pq->size;
       for (int i = 0; i < pq->size; i++) {
         newExp->prioqueue->items[i].value =
@@ -848,8 +847,7 @@ void free_expression(expr_t *expr) {
       break;
     } break;
     case EXPR_TYPE_PRIOQUEUE: {
-      free(expr->prioqueue->items);
-      free(expr->prioqueue);
+      free_priority_queue(expr->prioqueue);
     } break;
     case EXPR_TYPE_OPDIV: {
       free_expression((expr_t *)expr->add.left);
@@ -920,7 +918,6 @@ void free_expression(expr_t *expr) {
         v = v->next;
         free(p);
         ++vecWalk;
-        //  printf("(2.1)\n");
       }
 
       if (vec->forEach != NULL) {

@@ -493,6 +493,11 @@ int ric_print(LIBRARY_PARAMS()) {
       printf("\n");
       break;
     }
+    case PRIOQUEUE: {
+      print_prioqueue(stv.prioqueue, EXPRESSION_ARGS());
+      printf("\n");
+      break;
+    }
     case FUNCPTRTYPE:
       printf("<Function: '%s'>\n", stv.func->id.id);
       break;
@@ -1102,7 +1107,10 @@ int ric_contains(LIBRARY_PARAMS()) {
       }
     }
   } else if (argText != NULL) {
-    if (searchForInt) {
+    if (strlen(argText) == 0) {
+      /* Empty string */
+      result = 0;
+    } else if (searchForInt) {
       /* Check if int is in the text */
       char buffer[50];
 
@@ -1129,7 +1137,10 @@ int ric_len(LIBRARY_PARAMS()) {
   stackval_t stv;
   vector_t *argVec = NULL;
   char *argText = NULL;
+  dictionary_t *argDict = NULL;
+  cachepot_t *argCachepot = NULL;
   rawdata_t *rawdata = NULL;
+  priority_queue_t *argPq = NULL;
   int32_t result = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -1147,6 +1158,15 @@ int ric_len(LIBRARY_PARAMS()) {
     case RAWDATATYPE:
       rawdata = stv.rawdata;
       break;
+    case DICTTYPE:
+      argDict = stv.dict;
+      break;
+    case PRIOQUEUE:
+      argPq = stv.prioqueue;
+      break;
+    case CACHEPOT:
+      argCachepot = stv.cachepot;
+      break;
     default: {
       fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
               LIBRARY_FUNC_NAME());
@@ -1158,6 +1178,12 @@ int ric_len(LIBRARY_PARAMS()) {
     result = argVec->length;
   } else if (argText != NULL) {
     result = (int32_t)strlen(argText);
+  } else if (argText != NULL) {
+    result = (int32_t)argDict->hash->size;
+  } else if (argPq != NULL) {
+    result = (int32_t)argPq->size;
+  } else if (argCachepot != NULL) {
+    result = (int32_t)argCachepot->hash->size;
   } else if (rawdata != NULL) {
     result = rawdata->size;
   } else {

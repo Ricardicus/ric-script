@@ -19,7 +19,7 @@ includes = [include_directories('.'), library_inc, external_inc]
 
 sources = ['main.c','hashtable.c','lib.c', 'garbage.c',
   'ast.c', 'hooks.c', 'eval.c', 'interpret.c', 'print.c',
-  'lex.yy.c', 'y.tab.c',
+  'prioqueue.c', 'lex.yy.c', 'y.tab.c',
   library_sources]
 
 deps = []

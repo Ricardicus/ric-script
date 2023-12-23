@@ -51,6 +51,7 @@
 #define EXPR_TYPE_BIGINT 26
 #define EXPR_TYPE_CLASSACCESSER 27
 #define EXPR_TYPE_CACHEPOT 28
+#define EXPR_TYPE_PRIOQUEUE 29
 
 #define LANG_ENTITY_DECL 1
 #define LANG_ENTITY_ARGS 2
@@ -95,16 +96,13 @@
 // Max number of input arguments
 #define MAX_NBR_ARGUMENTS 10
 // Max number of locals that can be defined at the same time
-#define MAX_NBR_LOCALS 1024
+#define MAX_NBR_LOCALS 4096
 // Maximum body depth
 #define MAX_BODY_LEVELS 30 // If you need more; I am sorry.
 // Number of elements on the stack of this interpreter (arbitrary number?)
 #define RIC_STACKSIZE 1024
 // Number of elements on the heap of this interpreter (arbitrary number?)
-#define RIC_HEAPSIZE 4096
-// maximum number of variables in the langauge, need to be known by current
-// garbage collector algorithm (making a list of all active)
-#define RIC_MAX_NBR_VARS 4096
+#define RIC_HEAPSIZE 8096
 // Big integers max size (in character width base 10)
 #define RIC_BIG_INT_MAX_SIZE 4096
 
@@ -211,6 +209,9 @@ typedef struct dictionary {
   int type;
 } dictionary_t;
 
+typedef struct priority_queue_item priority_queue_item;
+typedef struct priority_queue priority_queue_t;
+
 typedef struct cachepot {
   hashtable_t *hash;
 } cachepot_t;
@@ -243,6 +244,7 @@ typedef struct expr_s {
     mpz_t *bigInt;
     classAccesser_t *classAccess;
     cachepot_t *cachepot;
+    priority_queue_t *prioqueue;
   };
 } expr_t;
 
@@ -376,6 +378,7 @@ expr_t *newExpr_BigIntFromStr(const char *intStr);
 expr_t *newExpr_BigIntFromInt(intptr_t val);
 expr_t *newExpr_BigInt(mpz_t *n);
 expr_t *newExpr_Cachepot();
+expr_t *newExpr_PriorityQueue(int capacity, int is_minimum);
 expr_t *newClassAccesser(expr_t *classID, char *memberID);
 expr_t *newConditional(int type, expr_t *left, expr_t *right);
 
@@ -413,7 +416,8 @@ typedef enum stackvaltypes {
   RAWDATATYPE,
   INDEXER,
   BIGINT,
-  CACHEPOT
+  CACHEPOT,
+  PRIOQUEUE
 } stackvaltypes_t;
 
 typedef struct stackval {
@@ -433,6 +437,7 @@ typedef struct stackval {
     indexer_t *indexer;
     mpz_t *bigInt;
     cachepot_t *cachepot;
+    priority_queue_t *prioqueue;
   };
 } stackval_t;
 
@@ -581,7 +586,7 @@ typedef struct libFunction {
     intptr_t p;                                            \
     *sb = calloc(sz + 1, sizeof(stackval_t));              \
     assert(*sb != NULL);                                   \
-    p = ((intptr_t)*sb) % sizeof(stackval_t);              \
+    p = ((intptr_t) * sb) % sizeof(stackval_t);            \
     if (p != 0) {                                          \
       p = (sizeof(stackval_t) - (p % sizeof(stackval_t))); \
     }                                                      \
@@ -595,7 +600,7 @@ typedef struct libFunction {
     heapval_t hpbv;                                    \
     *hb = calloc(hz + 2, sizeof(heapval_t));           \
     assert(*hb != NULL);                               \
-    p = ((intptr_t)*hb) % sizeof(heapval_t);           \
+    p = ((intptr_t) * hb) % sizeof(heapval_t);         \
     p = (sizeof(heapval_t) - (p % sizeof(heapval_t))); \
     hpbv.sv.type = INT32TYPE;                          \
     hpbv.sv.i = (int32_t)hz;                           \
@@ -838,6 +843,23 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
     *sc = *sc + 1;                                                   \
   } while (0)
 
+#define PUSH_PRIOQUEUE(a, sp, sc)                                    \
+  do {                                                               \
+    stackval_t stackval;                                             \
+    if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
+      fprintf(stderr, "Error: Interpreter stack overflow\n\
+Please include the script and file an error report to me here:\n    %s\n\
+This is not supposed to happen, I hope I can fix the intepreter!\n", \
+              GENERAL_ERROR_ISSUE_URL);                              \
+      exit(1);                                                       \
+    }                                                                \
+    stackval.type = PRIOQUEUE;                                       \
+    stackval.prioqueue = a;                                          \
+    **((stackval_t **)sp) = stackval;                                \
+    *((stackval_t **)sp) += 1;                                       \
+    *sc = *sc + 1;                                                   \
+  } while (0)
+
 #define POP_VAL(a, sp, sc)                                           \
   do {                                                               \
     if (*sc == 0) {                                                  \
@@ -856,38 +878,39 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 extern void getContext(void *);
 extern void releaseContext(void *);
 
-#define ALLOC_HEAP(a, hp, hpv, upd)                                                        \
-  do {                                                                                     \
-    int32_t size = (*(heapval_t *)hp).sv.i;                                                \
-    int32_t i = 0;                                                                         \
-    heapval_t hv;                                                                          \
-    getContext(PROVIDE_CONTEXT()->syncCtx);                                                \
-    if (upd != NULL) {                                                                     \
-      *(int *)upd = 1;                                                                     \
-    }                                                                                      \
-    hv.sv = *a;                                                                            \
-    if (hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || hv.sv.type == DICTTYPE           \
-        || hv.sv.type == CLASSTYPE || hv.sv.type == RAWDATATYPE || hv.sv.type == BIGINT) { \
-      hv.toFree = true;                                                                    \
-    } else {                                                                               \
-      hv.toFree = false;                                                                   \
-    }                                                                                      \
-    hv.occupied = true;                                                                    \
-    while (i < size) {                                                                     \
-      if (!((heapval_t *)hp)[i].occupied) {                                                \
-        ((heapval_t *)hp)[i] = hv;                                                         \
-        *hpv = &((heapval_t *)hp)[i];                                                      \
-        break;                                                                             \
-      }                                                                                    \
-      ++i;                                                                                 \
-    }                                                                                      \
-    if (i == size) {                                                                       \
-      fprintf(stderr, "Error: Heap full (size: %d)\n", size);                              \
-      fprintf(stderr, "       The heap size can be increased with the -ah flag\n");        \
-      fprintf(stderr, "       For more information, see: ric -h\n");                       \
-      exit(1);                                                                             \
-    }                                                                                      \
-    releaseContext(PROVIDE_CONTEXT()->syncCtx);                                            \
+#define ALLOC_HEAP(a, hp, hpv, upd)                                                     \
+  do {                                                                                  \
+    int32_t size = (*(heapval_t *)hp).sv.i;                                             \
+    int32_t i = 0;                                                                      \
+    heapval_t hv;                                                                       \
+    getContext(PROVIDE_CONTEXT()->syncCtx);                                             \
+    if (upd != NULL) {                                                                  \
+      *(int *)upd = 1;                                                                  \
+    }                                                                                   \
+    hv.sv = *a;                                                                         \
+    if (hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || hv.sv.type == DICTTYPE        \
+        || hv.sv.type == CLASSTYPE || hv.sv.type == RAWDATATYPE || hv.sv.type == BIGINT \
+        || hv.sv.type == PRIOQUEUE) {                                                   \
+      hv.toFree = true;                                                                 \
+    } else {                                                                            \
+      hv.toFree = false;                                                                \
+    }                                                                                   \
+    hv.occupied = true;                                                                 \
+    while (i < size) {                                                                  \
+      if (!((heapval_t *)hp)[i].occupied) {                                             \
+        ((heapval_t *)hp)[i] = hv;                                                      \
+        *hpv = &((heapval_t *)hp)[i];                                                   \
+        break;                                                                          \
+      }                                                                                 \
+      ++i;                                                                              \
+    }                                                                                   \
+    if (i == size) {                                                                    \
+      fprintf(stderr, "Error: Heap full (size: %d)\n", size);                           \
+      fprintf(stderr, "       The heap size can be increased with the -ah flag\n");     \
+      fprintf(stderr, "       For more information, see: ric -h\n");                    \
+      exit(1);                                                                          \
+    }                                                                                   \
+    releaseContext(PROVIDE_CONTEXT()->syncCtx);                                         \
   } while (0);
 
 #define ALLOC_HEAP_UNSAFE(a, hp, hpv, upd)                                                 \

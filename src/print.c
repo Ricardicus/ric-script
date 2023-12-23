@@ -565,6 +565,9 @@ void print_expr(expr_t *expr) {
     case EXPR_TYPE_CACHEPOT:
       printf("<Cachepot>");
       break;
+    case EXPR_TYPE_PRIOQUEUE:
+      printf("<Prioqueue>");
+      break;
     case EXPR_TYPE_EMPTY:
     default:
       break;
@@ -669,6 +672,9 @@ int snprint_cachepot(char **buf, size_t *bufSize, size_t *pos, cachepot_t *cache
         } break;
         case VECTORTYPE: {
           snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        } break;
+        case PRIOQUEUE: {
+          snprint_prioqueue(buf, bufSize, pos, sv.prioqueue, EXPRESSION_ARGS());
         } break;
         case DICTTYPE: {
           snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
@@ -790,6 +796,9 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
         case VECTORTYPE: {
           snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
         } break;
+        case PRIOQUEUE: {
+          snprint_prioqueue(buf, bufSize, pos, sv.prioqueue, EXPRESSION_ARGS());
+        } break;
         case DICTTYPE: {
           snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
         } break;
@@ -898,6 +907,9 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
         } break;
         case VECTORTYPE: {
           snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+        } break;
+        case PRIOQUEUE: {
+          snprint_prioqueue(buf, bufSize, pos, sv.prioqueue, EXPRESSION_ARGS());
         } break;
         case DICTTYPE: {
           snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
@@ -1048,6 +1060,271 @@ int snprint_vector(char **buf, size_t *bufSize, size_t *pos, vector_t *vec, EXPR
     free(vec_e);
   }
 
+  return 0;
+}
+
+int printf_prioqueue(priority_queue_t *pq, EXPRESSION_PARAMS()) {
+  int i = 0;
+
+  printf("Prioqueue <size: %d>: [", pq->size);
+
+  while (i < pq->size) {
+    expr_t *e = pq->items[i].value;
+
+    switch (e->type) {
+      case EXPR_TYPE_IVAL:
+        printf("%" PRIi32 "", e->ival);
+        break;
+      case EXPR_TYPE_BIGINT: {
+        char buf[128];
+        char *c = NULL;
+
+        c = mpz_get_str(buf, 10, *e->bigInt);
+        printf("%s", c);
+      } break;
+      case EXPR_TYPE_FVAL:
+        printf("%lf", e->fval);
+        break;
+      case EXPR_TYPE_TEXT:
+        printf("'%s'", e->text);
+        break;
+      case EXPR_TYPE_TIME: {
+        struct tm *info;
+        if (e->time < 0) {
+          /* Relative time to now */
+          time_t nowTime;
+          time_t result;
+          time(&nowTime);
+          result = nowTime + e->time;
+          info = localtime(&result);
+        } else {
+          info = localtime(&e->time);
+        }
+        printf("%s", asctime(info));
+        break;
+      }
+      case EXPR_TYPE_POINTER:
+        printf("<%" PRIuPTR ">", e->p);
+        break;
+      case EXPR_TYPE_FUNCPTR:
+        printf("<Function: '%s'>", ((functionDef_t *)e->func)->id.id);
+        break;
+      case EXPR_TYPE_LIBFUNCPTR:
+        printf("<Function: '%s'>", ((libFunction_t *)e->func)->libFuncName);
+        break;
+      case EXPR_TYPE_VECTOR:
+        print_vector(e->vec, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_CLASSPTR:
+        printf("<Class: '%s'>", e->classObj->id);
+        break;
+      case EXPR_TYPE_PRIOQUEUE:
+        printf_prioqueue(e->prioqueue, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_CACHEPOT:
+        print_cachepot(e->cachepot, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_DICT:
+        print_dictionary(e->dict, EXPRESSION_ARGS());
+        break;
+      default:
+        printf("%s.error: unknown type of value on the stack (%d)\n", __func__, e->type);
+        break;
+    }
+    i++;
+  }
+
+  printf("]");
+  return 0;
+}
+
+int snprint_prioqueue(char **buf, size_t *bufSize, size_t *pos, priority_queue_t *pq,
+                      EXPRESSION_PARAMS()) {
+  int i = 0;
+
+  if (*buf == NULL) {
+    const size_t startSize = 128;
+    *buf = ast_emalloc(startSize);
+    *bufSize = startSize;
+    *pos = 0;
+  }
+
+  check_buf_size(buf, bufSize, pos, 1);
+  snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", "[");
+  *pos = *pos + 1;
+
+  while (i < pq->size) {
+    char tmpBuf[256];
+    size_t tmpLen = 0;
+    expr_t *e = pq->items[i].value;
+
+    if (i > 0) {
+      check_buf_size(buf, bufSize, pos, 1);
+      snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", ",");
+      *pos = *pos + 1;
+    }
+
+    switch (e->type) {
+      case EXPR_TYPE_IVAL:
+        snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", e->ival);
+        tmpLen = strlen(tmpBuf);
+        break;
+      case EXPR_TYPE_BIGINT: {
+        char buf[128];
+        char *c = NULL;
+
+        c = mpz_get_str(buf, 10, *e->bigInt);
+        snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+        tmpLen = strlen(tmpBuf);
+      } break;
+      case EXPR_TYPE_FVAL:
+        snprintf(tmpBuf, sizeof(tmpBuf), "%lf", e->fval);
+        tmpLen = strlen(tmpBuf);
+        break;
+      case EXPR_TYPE_TEXT:
+        snprintf(tmpBuf, sizeof(tmpBuf), "'%s'", e->text);
+        tmpLen = strlen(tmpBuf);
+        break;
+      case EXPR_TYPE_TIME: {
+        struct tm *info;
+        if (e->time < 0) {
+          /* Relative time to now */
+          time_t nowTime;
+          time_t result;
+          time(&nowTime);
+          result = nowTime + e->time;
+          info = localtime(&result);
+        } else {
+          info = localtime(&e->time);
+        }
+        snprintf(tmpBuf, sizeof(tmpBuf), "%s", asctime(info));
+        tmpLen = strlen(tmpBuf);
+        break;
+      }
+      case EXPR_TYPE_POINTER:
+        snprintf(tmpBuf, sizeof(tmpBuf), "<%" PRIuPTR ">", e->p);
+        tmpLen = strlen(tmpBuf);
+        break;
+      case EXPR_TYPE_FUNCPTR:
+        snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", ((functionDef_t *)e->func)->id.id);
+        tmpLen = strlen(tmpBuf);
+        break;
+      case EXPR_TYPE_LIBFUNCPTR:
+        snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>",
+                 ((libFunction_t *)e->func)->libFuncName);
+        tmpLen = strlen(tmpBuf);
+        break;
+      case EXPR_TYPE_VECTOR:
+        snprint_vector(buf, bufSize, pos, e->vec, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_CLASSPTR:
+        snprintf(tmpBuf, sizeof(tmpBuf), "<Class: '%s'>", e->classObj->id);
+        break;
+      case EXPR_TYPE_PRIOQUEUE:
+        snprint_prioqueue(buf, bufSize, pos, e->prioqueue, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_CACHEPOT:
+        snprint_cachepot(buf, bufSize, pos, e->cachepot, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_DICT:
+        snprint_dictionary(buf, bufSize, pos, e->dict, EXPRESSION_ARGS());
+        break;
+      default:
+        printf("%s.error: unknown type of value on the stack (%d)\n", __func__, e->type);
+        break;
+    }
+
+    if (tmpLen > 0) {
+      check_buf_size(buf, bufSize, pos, tmpLen);
+      snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", tmpBuf);
+      *pos += tmpLen;
+    }
+    i++;
+  }
+
+  check_buf_size(buf, bufSize, pos, 1);
+  snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", "]");
+  *pos = *pos + 1;
+
+  return 0;
+}
+
+int print_prioqueue(priority_queue_t *pq, EXPRESSION_PARAMS()) {
+  int i = 0;
+
+  printf("Prioqueue <size: %d>: [", pq->size);
+
+  while (i < pq->size) {
+    expr_t *e = pq->items[i].value;
+
+    if (i > 0) {
+      printf(",");
+    }
+
+    switch (e->type) {
+      case EXPR_TYPE_IVAL:
+        printf("%" PRIi32 "", e->ival);
+        break;
+      case EXPR_TYPE_BIGINT: {
+        char buf[128];
+        char *c = NULL;
+
+        c = mpz_get_str(buf, 10, *e->bigInt);
+        printf("%s", c);
+      } break;
+      case EXPR_TYPE_FVAL:
+        printf("%lf", e->fval);
+        break;
+      case EXPR_TYPE_TEXT:
+        printf("'%s'", e->text);
+        break;
+      case EXPR_TYPE_TIME: {
+        struct tm *info;
+        if (e->time < 0) {
+          /* Relative time to now */
+          time_t nowTime;
+          time_t result;
+          time(&nowTime);
+          result = nowTime + e->time;
+          info = localtime(&result);
+        } else {
+          info = localtime(&e->time);
+        }
+        printf("%s", asctime(info));
+        break;
+      }
+      case EXPR_TYPE_POINTER:
+        printf("<%" PRIuPTR ">", e->p);
+        break;
+      case EXPR_TYPE_FUNCPTR:
+        printf("<Function: '%s'>", ((functionDef_t *)e->func)->id.id);
+        break;
+      case EXPR_TYPE_LIBFUNCPTR:
+        printf("<Function: '%s'>", ((libFunction_t *)e->func)->libFuncName);
+        break;
+      case EXPR_TYPE_VECTOR:
+        print_vector(e->vec, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_CLASSPTR:
+        printf("<Class: '%s'>", e->classObj->id);
+        break;
+      case EXPR_TYPE_PRIOQUEUE:
+        print_prioqueue(e->prioqueue, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_CACHEPOT:
+        print_cachepot(e->cachepot, EXPRESSION_ARGS());
+        break;
+      case EXPR_TYPE_DICT:
+        print_dictionary(e->dict, EXPRESSION_ARGS());
+        break;
+      default:
+        printf("%s.error: unknown type of value on the stack (%d)\n", __func__, e->type);
+        break;
+    }
+    i++;
+  }
+
+  printf("]\n");
   return 0;
 }
 

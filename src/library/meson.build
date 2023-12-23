@@ -10,7 +10,8 @@ library_source_list = [
   'libctx.c',
   'libjson.c',
   'libbigint.c',
-  'libcrypto.c'
+  'libcrypto.c',
+  'libprioqueue.c'
 ]
 
 target_os = target_machine.system()

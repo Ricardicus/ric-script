@@ -15,6 +15,9 @@ int print_args(argsList_t *args);
 int print_vector(vector_t *vec, EXPRESSION_PARAMS());
 int snprint_vector(char **buf, size_t *bufSize, size_t *pos, vector_t *vec, EXPRESSION_PARAMS());
 
+int snprint_prioqueue(char **buf, size_t *bufSize, size_t *pos, priority_queue_t *pq,
+                      EXPRESSION_PARAMS());
+int print_prioqueue(priority_queue_t *prio, EXPRESSION_PARAMS());
 int print_cachepot(cachepot_t *dict, EXPRESSION_PARAMS());
 int print_dictionary(dictionary_t *dict, EXPRESSION_PARAMS());
 int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *dict,

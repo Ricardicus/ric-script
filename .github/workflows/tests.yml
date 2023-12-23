@@ -54,6 +54,22 @@ jobs:
     - id: running-pytest  
       run: cd tests; pytest
 
+  test-advent-of-code-solutions:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+    - id: install-python-deps
+      run: pip3 install -r requirements.txt
+    - id: build-meson
+      run: mkdir install && meson builddir --prefix $(pwd)/install && cd builddir && ninja && ninja install
+    - id: clone-advent-of-code
+      run: git clone https://x-access-token:${{ secrets.PIPELINE_PAT }}@github.com/ricardicus/ric-script-advent-of-code.git && cp builddir/src/ric ric-script-advent-of-code/ric-script
+    - id: run-advenct-of-code-tests
+      run: cd ric-script-advent-of-code/tests && pytest
+
   build-and-test-windows-dyn-lib:
 
     runs-on: ${{ matrix.os }}

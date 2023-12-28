@@ -132,6 +132,11 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
         } else if (heap[i].sv.type == BIGINT) {
           mpz_clear(*heap[i].sv.bigInt);
           free(heap[i].sv.bigInt);
+        } else if (heap[i].sv.type == CACHEPOT) {
+          expr_t e;
+          e.type = EXPR_TYPE_CACHEPOT;
+          e.cachepot = heap[i].sv.cachepot;
+          free_expression(&e);
         } else if (heap[i].sv.type == RAWDATATYPE) {
           free(heap[i].sv.rawdata->data);
           free(heap[i].sv.rawdata);
@@ -199,6 +204,11 @@ void free_heap(void *hp, void *hbp) {
       } else if (((heapval_t *)hp)[i].sv.type == DICTTYPE) {
         hashtable_free(((heapval_t *)hp)[i].sv.dict->hash);
         free(((heapval_t *)hp)[i].sv.dict);
+      } else if (((heapval_t *)hp)[i].sv.type == CACHEPOT) {
+        expr_t e;
+        e.type = EXPR_TYPE_CACHEPOT;
+        e.cachepot = ((heapval_t *)hp)[i].sv.cachepot;
+        free_expression(&e);
       } else if (((heapval_t *)hp)[i].sv.type == PRIOQUEUE) {
         priority_queue_t *pq = ((heapval_t *)hp)[i].sv.prioqueue;
         int i = 0;

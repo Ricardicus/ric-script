@@ -108,12 +108,12 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             }
 
             /* In case we are dealing with a cachepot */
-            if (sv.type == CACHEPOT) {
-              hvp = ast_emalloc(sizeof(heapval_t));
-              hvp->sv = sv;
-            } else {
-              ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
-            }
+            // if (sv.type == CACHEPOT) {
+            //  hvp = ast_emalloc(sizeof(heapval_t));
+            //  hvp->sv = sv;
+            //} else {
+            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            //}
 
             /* Check if the variable is to be put in the class namespace */
             if (classCtx != NULL) {

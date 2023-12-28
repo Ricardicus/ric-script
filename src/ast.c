@@ -854,6 +854,34 @@ void free_expression(expr_t *expr) {
       free_expression((expr_t *)expr->add.right);
       break;
     }
+    case EXPR_TYPE_CACHEPOT: {
+      cachepot_t *cachepot = expr->cachepot;
+      hashtable_t *hash = cachepot->hash;
+      {
+        int size;
+        int i = 0;
+        struct key_val_pair *ptr1;
+        struct key_val_pair *ptr2;
+
+        if (hash != NULL) {
+          size = hash->size;
+          while (i < size) {
+            ptr1 = hash->table[i];
+            while (ptr1 != NULL) {
+              expr_t *e = ptr1->data;
+              ptr2 = ptr1;
+              ptr1 = ptr1->next;
+              free(ptr2->key);
+              free_expression(e);
+              free(e);
+            }
+            i++;
+          }
+        }
+      }
+      hashtable_free(hash);
+      free(cachepot);
+    } break;
     case EXPR_TYPE_DICT: {
       dictionary_t *dict = expr->dict;
       if (dict->initialized) {

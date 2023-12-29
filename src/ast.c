@@ -465,11 +465,13 @@ statement_t *newStatement(int type, void *content) {
   statement_t *stmt = ast_emalloc(sizeof(statement_t));
   stmt->entity = type;
   stmt->next = NULL;
-  stmt->line = yylinenor;
+  stmt->line = yylinenor - 1;
 
   stmt->file[0] = 0;
   if (ParsedFile != NULL) {
     snprintf(stmt->file, sizeof(stmt->file), "%s", ParsedFile);
+  } else {
+    snprintf(stmt->file, sizeof(stmt->file), "%s", "stdin");
   }
 
   switch (type) {

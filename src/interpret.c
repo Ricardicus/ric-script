@@ -1338,7 +1338,7 @@ void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt,
 
       if (e->type == EXPR_TYPE_FUNCCALL) {
         functionCall_t *call = e->func;
-        evaluate_expression(call->id, NULL, NULL, PROVIDE_CONTEXT_INIT(), NULL, NULL);
+        evaluate_expression(call->id, stmt, NULL, PROVIDE_CONTEXT_INIT(), NULL, NULL);
 
         POP_VAL(&stv, &sp, &sc);
         if (stv.type == LIBFUNCPTRTYPE) {

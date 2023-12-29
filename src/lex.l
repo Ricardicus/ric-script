@@ -5,7 +5,7 @@
 
 #include "y.tab.h"
 
-int yylinenor=0;
+int yylinenor=1;
 
 int return_spaces = 0;
 int double_citation = 0;

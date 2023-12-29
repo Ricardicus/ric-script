@@ -349,7 +349,7 @@ logical_a:
 
 logical_b:
     logical_b '&' '&' _ logical_expression {
-      $$ = newExpr_Logical($1, $5, NULL);
+      $$ = newExpr_Logical($5, $1, NULL);
     }
     | logical_expression {
       $$ = $1;
@@ -592,22 +592,22 @@ body:
     };
 
 vector:
-    '[' arguments_list ']' {
-      argsList_t *args = (argsList_t*) $2;
+    '[' _ arguments_list _ ']' {
+      argsList_t *args = (argsList_t*) $3;
       $$ = newExpr_Vector(args);
     }
     |
-    '[' forEachStatement ']' {
-      statement_t* stmt = newStatement(LANG_ENTITY_FOREACH, $2);
+    '[' _ forEachStatement _ ']' {
+      statement_t* stmt = newStatement(LANG_ENTITY_FOREACH, $3);
       $$ = newExpr_VectorFromForEach(stmt);
     }
-    | '[' ']' {
+    | '[' _ ']' {
       $$ = newExpr_Vector(NULL);
     };
 
 arguments_list:
-    arguments_list ',' expressions {
-        expr_t *expr = $3;
+    arguments_list _ ',' _ expressions {
+        expr_t *expr = $5;
         $$ = newArgument(expr, $1);
     }
     | expressions {
@@ -936,8 +936,6 @@ void initParser() {
 void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int stacksize, int heapsize, const char *prompt) {
     char lineBuffer[256];
 
-    ParsedFile = "stdin";
-
     memset(lineBuffer, 0, sizeof(lineBuffer));
 
     PRINT_INTERACTIVE_BANNER();
@@ -969,7 +967,6 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
 
 void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command, int stacksize, int heapsize) {
     YY_BUFFER_STATE buffer;
-    ParsedFile = "stdin";
 
     /* Parse from provided command line */
     buffer = yy_scan_string(command);

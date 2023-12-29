@@ -499,6 +499,8 @@ int evaluate_condition(ifCondition_t *cond, EXPRESSION_PARAMS()) {
           walkB = walkB->next;
         }
         *ax = res;
+      } else {
+        *ax = 0;
       }
       break;
     }
@@ -1025,9 +1027,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       if (!stop) {
         fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", ((statement_t *)stmt)->file,
                 ((statement_t *)stmt)->line, expr->id.id);
-        if (!*interactive) {
-          exit(1);
-        }
+        exit(1);
       }
 
       break;

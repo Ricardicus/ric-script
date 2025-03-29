@@ -68,6 +68,19 @@ endif
 
 LIBS = m pthread dl
 
+# Detect if libcurl is available
+CURL_CONFIG := $(shell which curl-config)
+ifdef CURL_CONFIG
+  HAS_LIBCURL := 1
+endif
+
+# Add the libcurl flag and sources if found
+ifeq ($(HAS_LIBCURL), 1)
+  DEFINES += RIC_SCRIPT_REQUESTS
+  LIBS += curl
+  RIC_SOURCES += $(LIB_DIR)/librequests
+endif
+
 CFLAGS = Wall \
 	Werror \
 	O2 \

@@ -12,6 +12,9 @@ external_links = []
 external_inc = []
 subdir('external')
 
+deps = []
+links = []
+
 # Fetching the library sources
 subdir('library')
 
@@ -21,10 +24,6 @@ sources = ['main.c','hashtable.c','lib.c', 'garbage.c',
   'ast.c', 'hooks.c', 'eval.c', 'interpret.c', 'print.c',
   'prioqueue.c', 'lex.yy.c', 'y.tab.c',
   library_sources]
-
-deps = []
-
-links = []
 
 # Multithreading
 thread_dep = dependency('threads')

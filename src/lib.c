@@ -120,6 +120,10 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("xattrFindKey", 1, ric_find_xattr),
     DECLARE_LIB_FUNCTION("xattrRm", 2, ric_remove_xattr),
 #endif
+#ifdef RIC_SCRIPT_REQUESTS
+    DECLARE_LIB_FUNCTION("requestGet", 2, ric_requests_get),
+    DECLARE_LIB_FUNCTION("requestPost", 3, ric_requests_post),
+#endif
     // libos
     DECLARE_LIB_FUNCTION("sleep", 1, ric_sleep),
     DECLARE_LIB_FUNCTION("isDir", 1, ric_is_directory),

@@ -21,6 +21,9 @@
 #include "libbigint.h"
 #include "libcrypto.h"
 #include "libprioqueue.h"
+#ifdef RIC_SCRIPT_REQUESTS
+#include "librequests.h"
+#endif
 
 #define EXPORT_STR(s) XEXPORT_STR(s)
 #define XEXPORT_STR(s) #s

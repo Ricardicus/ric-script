@@ -2,17 +2,10 @@
 
 static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS()) {
   cJSON *walk = json;
-  int count = 0;
   int i = 0;
   keyValList_t *keyVals = NULL;
   keyValList_t *keyValsHead = NULL;
   int isArray = 0;
-
-  /* Get number of elements */
-  while (walk != NULL) {
-    walk = walk->next;
-    count++;
-  }
 
   walk = json;
   i = 0;

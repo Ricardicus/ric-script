@@ -794,7 +794,7 @@ This is in it's very early stage... it only supports one liners!
 
 Some short tips:
 help() gives you a list of available functions
-printEnv() lists the names of variables defined in this session
+printVars() lists the names of variables defined in this session
 quit() quits this interpreter interactive mode
 
 >> a = 1337
@@ -839,7 +839,7 @@ This is in it's very early stage... it only supports one liners!
 
 Some short tips:
 help() gives you a list of available functions
-printEnv() lists the names of variables defined in this session
+printVars() lists the names of variables defined in this session
 quit() quits this interpreter interactive mode
 
 >> help()

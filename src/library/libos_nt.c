@@ -509,3 +509,40 @@ int ric_env_keys(LIBRARY_PARAMS()) {
   PUSH_VECTOR(stv.vec, sp, sc);
   return 0;
 }
+
+int ric_set_env(LIBRARY_PARAMS()) {
+  stackval_t stv_key, stv_val;
+  heapval_t *hpv;
+  int dummy;
+  expr_t *ret = NULL;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  // Pop value first, then key (stack order)
+  POP_VAL(&stv_key, sp, sc);
+  POP_VAL(&stv_val, sp, sc);
+
+  if (stv_key.type != TEXT || stv_val.type != TEXT) {
+    fprintf(stderr, "error: function '%s' expected (string, string) as arguments.\n",
+            LIBRARY_FUNC_NAME());
+    exit(1);
+  }
+
+  char *key = stv_key.t;
+  char *val = stv_val.t;
+
+  if (_putenv_s(key, val) != 0) {
+    fprintf(stderr, "error: _putenv_s failed in '%s' for key='%s'\n", LIBRARY_FUNC_NAME(), key);
+    exit(1);
+  }
+
+  // Return empty string as success indicator
+  stackval_t stv;
+  stv.type = TEXT;
+  stv.t = strdup("");
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  PUSH_STRING(stv.t, sp, sc);
+
+  return 0;
+}

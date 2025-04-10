@@ -22,5 +22,6 @@ int ric_os_name(LIBRARY_PARAMS());
 int ric_mkdir(LIBRARY_PARAMS());
 int ric_find_files(LIBRARY_PARAMS());
 int ric_env_keys(LIBRARY_PARAMS());
+int ric_set_env(LIBRARY_PARAMS());
 
 #endif

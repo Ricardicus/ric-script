@@ -59,8 +59,17 @@ print("'1336' as a string + 1 is: '" + stringed + "'")
 testString = "The length of this text before the column including the space behind and the column itself is: "
 print(testString + len(testString))
 
-exitCode = 2
 
+
+# Manipulating the environment
+# Setting a variable
+setEnv("HELLO_WORLD", "HI")
+environment = listEnv()
+? [ environment.contains("HELLO_WORLD") ] {
+  print(getEnv("HELLO_WORLD"))
+}
+
+exitCode = 2
 print ( "I will exit with exit code: " + exitCode )
 
 exit ( exitCode )

@@ -54,6 +54,7 @@ def test_output():
 "0",
 "'1336' as a string + 1 is: '1337'",
 "The length of this text before the column including the space behind and the column itself is: 95",
+"HI",
 "I will exit with exit code: 2"
 ]
 

@@ -135,6 +135,7 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("find", 1, ric_find_files),
     DECLARE_LIB_FUNCTION("cd", 1, ric_cd),
     DECLARE_LIB_FUNCTION("osName", 0, ric_os_name),
+    DECLARE_LIB_FUNCTION("setEnv", 2, ric_set_env),
     // libctx
     DECLARE_LIB_FUNCTION("setTimeout", 2, ric_set_timeout),
     DECLARE_LIB_FUNCTION("setInterval", 2, ric_set_interval),

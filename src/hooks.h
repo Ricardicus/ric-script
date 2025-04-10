@@ -9,13 +9,13 @@ typedef void (*interactiveInterpreterFunc)(int, char **, statement_t *, int, int
 
 void setParser(MainParserFunc func);
 void setRoot(statement_t **newRoot);
-MainParserFunc getParser();
-statement_t *getRoot();
+MainParserFunc getParser(void);
+statement_t *getRoot(void);
 void setMainRoot(statement_t *newRoot);
-statement_t *getMainRoot();
+statement_t *getMainRoot(void);
 
 /* Implemented in gram.y */
-void initParser();
+void initParser(void);
 void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int stacksize,
                     int heapsize, const char *prompt);
 void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command,

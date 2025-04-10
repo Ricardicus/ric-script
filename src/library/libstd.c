@@ -1388,7 +1388,7 @@ int ric_help(LIBRARY_PARAMS()) {
   return 0;
 }
 
-int ric_print_env(LIBRARY_PARAMS()) {
+int ric_print_vars(LIBRARY_PARAMS()) {
   hashtable_t *varDecs = PROVIDE_CONTEXT()->varDecs;
   int i = 0;
   int size = varDecs->size;
@@ -1667,5 +1667,49 @@ int ric_cachepot(LIBRARY_PARAMS()) {
   free(e);
 
   PUSH_CACHEPOT(cachepot, sp, sc);
+  return 0;
+}
+
+int ric_get_env(LIBRARY_PARAMS()) {
+  stackval_t stv;
+  int dummy;
+  heapval_t *hpv;
+  size_t strSize = 100;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  char *resultText = ast_ecalloc(strSize);
+  void *hp = PROVIDE_CONTEXT()->hp;
+  char *env_requested = NULL;
+  char *result = NULL;
+
+  POP_VAL(&stv, sp, sc);
+
+  switch (stv.type) {
+    case TEXT:
+      env_requested = stv.t;
+      break;
+    default:
+      fprintf(stderr, "error: function call '%s' expects a single string as argument.\n",
+              LIBRARY_FUNC_NAME());
+      exit(1);
+      break;
+  }
+
+  result = getenv(env_requested);
+  if (result != NULL) {
+    strSize = strlen(result);
+    resultText = ast_ecalloc(strSize + 1);
+    snprintf(resultText, strSize + 1, "%s", result);
+  } else {
+    result = ast_ecalloc(1);
+  }
+
+  stv.type = TEXT;
+  stv.t = resultText;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+
+  /* Pushing the value */
+  PUSH_STRING(stv.t, sp, sc);
+
   return 0;
 }

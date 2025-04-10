@@ -34,7 +34,9 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("list", 1, ric_create_list),
     DECLARE_LIB_FUNCTION("data", 1, ric_create_data),
     DECLARE_LIB_FUNCTION("text", 1, ric_create_text),
-    DECLARE_LIB_FUNCTION("printEnv", 0, ric_print_env),
+    DECLARE_LIB_FUNCTION("printVars", 0, ric_print_vars),
+    DECLARE_LIB_FUNCTION("getEnv", 1, ric_get_env),
+    DECLARE_LIB_FUNCTION("listEnv", 0, ric_env_keys),
     DECLARE_LIB_FUNCTION("sum", 1, ric_sum),
     DECLARE_LIB_FUNCTION("sort", 1, ric_sort),
     DECLARE_LIB_FUNCTION("join", 2, ric_join),
@@ -149,7 +151,7 @@ dl_handle_t libDlHandles[MAX_NBR_MODULES];
 int libOpenHandles = 0;
 hashtable_t *libCallbacks = NULL;
 
-void initialize_ric_lib() {
+void initialize_ric_lib(void) {
   FILE *fp;
   size_t i = 0;
   size_t libFuncs = sizeof(ric_library) / sizeof(*ric_library);
@@ -202,7 +204,7 @@ void ric_get_dynamic_libraries(dl_handle_t **hnds, int *nbrLibs) {
   *nbrLibs = libOpenHandles;
 }
 
-size_t ric_lib_calls() { return sizeof(ric_library) / sizeof(libFunction_t); }
+size_t ric_lib_calls(void) { return sizeof(ric_library) / sizeof(libFunction_t); }
 
 libFunction_t *look_up_lib(char *id) {
   libFunction_t *res = NULL;

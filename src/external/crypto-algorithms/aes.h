@@ -114,10 +114,10 @@ int aes_decrypt_ccm(const BYTE ciphertext[],             // IN  - Ciphertext, th
 ///////////////////
 // Test functions
 ///////////////////
-int aes_test();
-int aes_ecb_test();
-int aes_cbc_test();
-int aes_ctr_test();
-int aes_ccm_test();
+int aes_test(void);
+int aes_ecb_test(void);
+int aes_cbc_test(void);
+int aes_ctr_test(void);
+int aes_ccm_test(void);
 
 #endif   // AES_H

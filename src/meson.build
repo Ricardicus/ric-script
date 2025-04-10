@@ -10,12 +10,10 @@ ric_c_args = ['-DYYERROR_VERBOSE']
 # Getting external projects
 external_links = []
 external_inc = []
-subdir('external')
 
 deps = []
 links = []
 
-# Fetching the library sources
 subdir('library')
 
 includes = [include_directories('.'), library_inc, external_inc]
@@ -57,11 +55,13 @@ else
   deps += [dllib]
 
   # Silence some warnings
-  ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function']
+  ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function', '-Wno-sign-compare']
 
   # Adding POSIX translation units (for darwin, linux etc.)
   sources += ['sync.c', 'dl.c']
 endif
+
+subdir('external')
 
 interpreter = executable('ric',
   sources: [sources],

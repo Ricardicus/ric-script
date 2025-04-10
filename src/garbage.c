@@ -6,7 +6,7 @@
 #include "eval.h"
 #include "sync.h"
 
-uint32_t generate_mark_value() {
+uint32_t generate_mark_value(void) {
   static int initial = 1;
   uint32_t r;
 

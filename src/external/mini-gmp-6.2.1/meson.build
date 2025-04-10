@@ -6,7 +6,7 @@ minigmp_source_list = [
 
 minigmp_args = [
   '-DMINI_GMP_DONT_USE_FLOAT_H'
-]
+] + ric_c_args
 
 minigmp_lib = static_library('minigmp',
   sources: minigmp_source_list,

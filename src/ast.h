@@ -377,7 +377,7 @@ expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset);
 expr_t *newExpr_BigIntFromStr(const char *intStr);
 expr_t *newExpr_BigIntFromInt(intptr_t val);
 expr_t *newExpr_BigInt(mpz_t *n);
-expr_t *newExpr_Cachepot();
+expr_t *newExpr_Cachepot(void);
 expr_t *newExpr_PriorityQueue(int capacity, int is_minimum);
 expr_t *newClassAccesser(expr_t *classID, char *memberID);
 expr_t *newConditional(int type, expr_t *left, expr_t *right);
@@ -959,7 +959,7 @@ void free_ast(statement_t *stmt);
     printf("this is in it's very early stage... it only supports one liners!\n");            \
     printf("\n");                                                                            \
     printf("Some short tips:\nhelp() gives you a list of available functions\n");            \
-    printf("printEnv() lists the names of variables defined in this session\n");             \
+    printf("printVars() lists the names of variables defined in this session\n");            \
     printf("quit() quits this interpreter interactive mode\n");                              \
     printf("\n");                                                                            \
   } while (0)

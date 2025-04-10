@@ -35,7 +35,7 @@ void call_func(functionCallContainer_t *funcCall, void *stmt, void *next, PROVID
 
 void initClass(class_t *cls, EXPRESSION_PARAMS());
 
-hashtable_t *new_argstable();
+hashtable_t *new_argstable(void);
 hashtable_t *hashtable_heapvals_copy(hashtable_t *hash, EXPRESSION_PARAMS());
 
 dictionary_t *allocNewDictionary(dictionary_t *, EXPRESSION_PARAMS());

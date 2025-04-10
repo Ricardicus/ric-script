@@ -271,7 +271,7 @@ expr_t *newExpr_Dictionary(keyValList_t *keyVals) {
   return expr;
 }
 
-expr_t *newExpr_Cachepot() {
+expr_t *newExpr_Cachepot(void) {
   expr_t *expr = ast_emalloc(sizeof(expr_t));
   cachepot_t *cachepot = ast_emalloc(sizeof(expr_t));
 

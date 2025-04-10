@@ -3312,7 +3312,7 @@ void locals_remove(locals_stack_t *stack, char *id) {
   }
 }
 
-hashtable_t *new_argstable() {
+hashtable_t *new_argstable(void) {
   hashtable_t *argTable = hashtable_new(20, 0.8);
   assert(argTable != NULL);
   argTable->allocated_data = 1;

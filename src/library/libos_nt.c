@@ -461,3 +461,51 @@ int ric_os_name(LIBRARY_PARAMS()) {
   PUSH_STRING(stv.t, sp, sc);
   return 0;
 }
+
+int ric_env_keys(LIBRARY_PARAMS()) {
+  LPCH envStrings = GetEnvironmentStrings();
+  if (envStrings == NULL) {
+    fprintf(stderr, "error %s: GetEnvironmentStrings failed\n", LIBRARY_FUNC_NAME());
+    exit(1);
+  }
+
+  expr_t *vec = NULL;
+  argsList_t *vecContent = NULL;
+  stackval_t stv;
+  heapval_t *hpv;
+  int dummy;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  LPCH var = envStrings;
+  while (*var) {
+    char *equalSign = strchr(var, '=');
+    if (equalSign) {
+      size_t keyLen = equalSign - var;
+      if (keyLen > 0) {
+        char *key = (char *)malloc(keyLen + 1);
+        strncpy(key, var, keyLen);
+        key[keyLen] = '\0';
+
+        expr_t *e = newExpr_Text(key);
+        argsList_t *a = newArgument(e, vecContent);
+        vecContent = a;
+
+        free(key);
+      }
+    }
+    var += strlen(var) + 1;
+  }
+
+  FreeEnvironmentStrings(envStrings);
+
+  vec = newExpr_Vector(vecContent);
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  PUSH_VECTOR(stv.vec, sp, sc);
+  return 0;
+}

@@ -476,3 +476,40 @@ int ric_os_name(LIBRARY_PARAMS()) {
   PUSH_STRING(stv.t, sp, sc);
   return 0;
 }
+
+extern char **environ;
+int ric_env_keys(LIBRARY_PARAMS()) {
+  expr_t *vec = NULL;
+  argsList_t *vecContent = NULL;
+  stackval_t stv;
+  heapval_t *hpv;
+  int dummy;
+  void *sp = PROVIDE_CONTEXT()->sp;
+  size_t *sc = PROVIDE_CONTEXT()->sc;
+  void *hp = PROVIDE_CONTEXT()->hp;
+
+  for (char **env = environ; *env != NULL; env++) {
+    char *equalSign = strchr(*env, '=');
+    if (equalSign) {
+      size_t keyLen = equalSign - *env;
+      char *key = (char *)malloc(keyLen + 1);
+      strncpy(key, *env, keyLen);
+      key[keyLen] = '\0';
+
+      expr_t *e = newExpr_Text(key);
+      argsList_t *a = newArgument(e, vecContent);
+      vecContent = a;
+
+      free(key);
+    }
+  }
+
+  vec = newExpr_Vector(vecContent);
+  stv.type = VECTORTYPE;
+  stv.vec = vec->vec;
+  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  free(vec);
+
+  PUSH_VECTOR(stv.vec, sp, sc);
+  return 0;
+}

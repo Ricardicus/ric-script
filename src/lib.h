@@ -31,8 +31,8 @@
 struct dl_handle;
 typedef struct dl_handle dl_handle_t;
 
-void initialize_ric_lib();
-size_t ric_lib_calls();
+void initialize_ric_lib(void);
+size_t ric_lib_calls(void);
 libFunction_t *look_up_lib(char *id);
 void ric_get_dynamic_libraries(dl_handle_t **hnds, int *nbrLibs);
 

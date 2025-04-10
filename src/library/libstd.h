@@ -35,10 +35,11 @@ int ric_type_text(LIBRARY_PARAMS());
 int ric_create_list(LIBRARY_PARAMS());
 int ric_create_data(LIBRARY_PARAMS());
 int ric_create_text(LIBRARY_PARAMS());
-int ric_print_env(LIBRARY_PARAMS());
+int ric_print_vars(LIBRARY_PARAMS());
 int ric_sum(LIBRARY_PARAMS());
 int ric_sort(LIBRARY_PARAMS());
 int ric_join(LIBRARY_PARAMS());
 int ric_cachepot(LIBRARY_PARAMS());
+int ric_get_env(LIBRARY_PARAMS());
 
 #endif

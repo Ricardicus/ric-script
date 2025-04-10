@@ -171,7 +171,7 @@ void *initiateRicCallInterval(void *ctx) {
   return NULL;
 }
 
-void *createContext() {
+void *createContext(void) {
   int i;
   ricSyncCtx_t *ctx = calloc(1, sizeof(ricSyncCtx_t));
 
@@ -312,7 +312,7 @@ void freeContext(void *ctx) {
 }
 
 /* Used in interactive mode, no buffering */
-void setUnbufferedOutput() {
+void setUnbufferedOutput(void) {
   /* Unbuffered mode */
   setvbuf(stdout, NULL, _IONBF, 0);
 }

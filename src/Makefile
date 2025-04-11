@@ -37,6 +37,7 @@ RIC_SOURCES = \
 	interpret \
 	print \
 	prioqueue \
+	stdin \
 	$(LIB_DIR)/libio \
 	$(LIB_DIR)/libmath \
 	$(LIB_DIR)/libstd \

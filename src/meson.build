@@ -44,7 +44,7 @@ if ( target_os == 'windows' )
   deps += [dep]
 
   # Adding windows specific translation units 
-  sources += ['sync_nt.c', 'dl_nt.c']
+  sources += ['stdin_nt.c', 'sync_nt.c', 'dl_nt.c']
 else
 	# Math as depencendy, not needed in MSVC but needed elsewhere
 	mathlib = cc.find_library('m', required: true)
@@ -58,7 +58,7 @@ else
   ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function', '-Wno-sign-compare']
 
   # Adding POSIX translation units (for darwin, linux etc.)
-  sources += ['sync.c', 'dl.c']
+  sources += ['stdin.c', 'sync.c', 'dl.c']
 endif
 
 subdir('external')

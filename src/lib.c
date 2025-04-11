@@ -41,6 +41,7 @@ libFunction_t ric_library[] = {
     DECLARE_LIB_FUNCTION("sort", 1, ric_sort),
     DECLARE_LIB_FUNCTION("join", 2, ric_join),
     DECLARE_LIB_FUNCTION("cachepot", 0, ric_cachepot),
+    DECLARE_LIB_FUNCTION("system", 1, ric_system),
     // libjson
     DECLARE_LIB_FUNCTION("jsonLoad", 1, ric_json_load),
     DECLARE_LIB_FUNCTION("jsonConvert", 1, ric_json_convert),

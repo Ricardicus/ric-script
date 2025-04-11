@@ -20,5 +20,6 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
                     int heapsize, const char *prompt);
 void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command,
                 int stacksize, int heapsize);
+char *readCommand(char *lineBuffer, size_t size, const char *prompt);
 
 #endif

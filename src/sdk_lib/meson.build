@@ -164,7 +164,7 @@ if ( target_os == 'windows' )
   includes += [pcre_inc]
 
   # Adding windows specific translation units 
-  sources += [join_paths('..','sync_nt.c'), join_paths('..','dl_nt.c')]
+  sources += [join_paths('..','stdin_nt.c'), join_paths('..','sync_nt.c'), join_paths('..','dl_nt.c')]
 else
   # Math as depencendy, not needed in MSVC but needed elsewhere
   mathlib = cc.find_library('m', required: true)
@@ -178,7 +178,7 @@ else
   ric_c_args += ['-Wno-unused-parameter', '-Wno-unused-function']
 
   # Adding POSIX translation units (for darwin, linux etc.)
-  sources += [join_paths('..','sync.c'), join_paths('..','dl.c')]
+  sources += [join_paths('..','stdin.c'), join_paths('..','sync.c'), join_paths('..','dl.c')]
 endif
 
 if ( target_os == 'windows' )

@@ -940,8 +940,7 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
 
     PRINT_INTERACTIVE_BANNER();
 
-    printf("%s", prompt);
-    while ( fgets(lineBuffer, sizeof(lineBuffer), stdin) != NULL ) {
+    while ( readCommand(lineBuffer, sizeof(lineBuffer), prompt) != NULL ) {
         YY_BUFFER_STATE buffer;
 
         /* Check if the user wants to quit */
@@ -959,7 +958,6 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
             func(argc, argv, root, 0, stacksize, heapsize);
         }
 
-        printf("%s", prompt);
         memset(lineBuffer, 0, sizeof(lineBuffer));
     }
 }

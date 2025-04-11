@@ -586,7 +586,7 @@ typedef struct libFunction {
     intptr_t p;                                            \
     *sb = calloc(sz + 1, sizeof(stackval_t));              \
     assert(*sb != NULL);                                   \
-    p = ((intptr_t) * sb) % sizeof(stackval_t);            \
+    p = ((intptr_t)*sb) % sizeof(stackval_t);              \
     if (p != 0) {                                          \
       p = (sizeof(stackval_t) - (p % sizeof(stackval_t))); \
     }                                                      \
@@ -600,7 +600,7 @@ typedef struct libFunction {
     heapval_t hpbv;                                    \
     *hb = calloc(hz + 2, sizeof(heapval_t));           \
     assert(*hb != NULL);                               \
-    p = ((intptr_t) * hb) % sizeof(heapval_t);         \
+    p = ((intptr_t)*hb) % sizeof(heapval_t);           \
     p = (sizeof(heapval_t) - (p % sizeof(heapval_t))); \
     hpbv.sv.type = INT32TYPE;                          \
     hpbv.sv.i = (int32_t)hz;                           \

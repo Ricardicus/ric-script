@@ -1,0 +1,2 @@
+option('use_curl', type: 'boolean', value: true, description: 'Enable libcurl support - will unlock request functions in the standard library')
+

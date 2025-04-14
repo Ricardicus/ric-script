@@ -35,12 +35,20 @@ else
 endif
 
 # Try to find libcurl
-libcurl_dep = dependency('libcurl', required : false)
+use_curl = get_option('use_curl')
 
-if libcurl_dep.found()
-  ric_c_args += ['-DRIC_SCRIPT_REQUESTS']
-  library_source_list += ['librequests.c']
-  deps += [libcurl_dep]
+if use_curl
+  libcurl_dep = dependency('libcurl', required: false)
+  if libcurl_dep.found()
+    ric_c_args += ['-DRIC_SCRIPT_REQUESTS']
+    library_source_list += ['librequests.c']
+    deps += [libcurl_dep]
+  else
+    warning('libcurl not found, building without curl support')
+  endif
+else
+  message('Building without libcurl support (disabled by option)')
 endif
+
 
 library_sources = files(library_source_list)

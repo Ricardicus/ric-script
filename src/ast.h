@@ -950,7 +950,7 @@ extern void releaseContext(void *);
 
 void free_ast(statement_t *stmt);
 
-#define RICSCRIPT_VERSION "0.9.2"
+#define RICSCRIPT_VERSION "0.9.3"
 
 #define PRINT_INTERACTIVE_BANNER()                                                           \
   do {                                                                                       \

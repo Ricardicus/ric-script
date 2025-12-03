@@ -7,7 +7,7 @@ WORKDIR /doc
 COPY ./doc/sphinx/ /doc/sphinx/
 RUN cd /doc/sphinx && pip install -r requirements.txt && make html
 
-FROM node:16-buster as remote-terminal
+FROM node:20-bookworm AS remote-terminal
 
 RUN apt-get update -y && apt-get install -y build-essential flex bison
 

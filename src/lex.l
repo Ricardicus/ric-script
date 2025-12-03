@@ -3,6 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_WIN32) || defined(_MSC_VER)
+  #include <io.h>
+  #define isatty _isatty
+#else
+  #include <unistd.h>
+#endif
+
 #include "y.tab.h"
 
 int yylinenor=1;

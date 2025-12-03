@@ -771,6 +771,9 @@ int ric_push(LIBRARY_PARAMS()) {
     case DOUBLETYPE:
       entry = newExpr_Float(stv.d);
       break;
+    case BIGINT:
+      entry = newExpr_BigInt(stv.bigInt);
+      break;
     case TEXT:
       entry = newExpr_Text(stv.t);
       break;

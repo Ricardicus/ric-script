@@ -167,7 +167,7 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
     return 1;
   }
 
-  clientSocket = WSAAccept(socket, NULL, NULL, NULL, NULL);
+  clientSocket = WSAAccept(socket, NULL, NULL, NULL, 0);
 
   if (clientSocket < 0) {
     int errorStatus = WSAGetLastError();

@@ -345,7 +345,7 @@ int ric_find_files(LIBRARY_PARAMS()) {
   pcre *re;
   heapval_t *hpv;
   int dummy;
-  char *pcre_error = NULL;
+  const char *pcre_error;
   int pcre_erroffset;
   char *pattern = NULL;
   int rc;

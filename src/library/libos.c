@@ -55,8 +55,7 @@ int ric_is_directory(LIBRARY_PARAMS()) {
     } break;
   }
 
-  stat(string, &path_stat);
-  if (S_ISDIR(path_stat.st_mode)) {
+  if (stat(string, &path_stat) == 0 && S_ISDIR(path_stat.st_mode)) {
     result = 1;
   } else {
     result = 0;
@@ -133,8 +132,9 @@ int ric_rm(LIBRARY_PARAMS()) {
     } break;
   }
 
-  stat(file, &path_stat);
-  if (S_ISDIR(path_stat.st_mode)) {
+  if (stat(file, &path_stat) != 0) {
+    result = -1;
+  } else if (S_ISDIR(path_stat.st_mode)) {
     result = recursive_delete(file);
   } else {
     result = remove(file);
@@ -251,8 +251,7 @@ int ric_is_file(LIBRARY_PARAMS()) {
     } break;
   }
 
-  stat(filename, &path_stat);
-  if (S_ISREG(path_stat.st_mode)) {
+  if (stat(filename, &path_stat) == 0 && S_ISREG(path_stat.st_mode)) {
     result = 1;
   } else {
     result = 0;

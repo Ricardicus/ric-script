@@ -75,7 +75,7 @@ int ric_socket_accept_incoming_connection(LIBRARY_PARAMS()) {
   stackval_t stv;
   int serverSocket;
   struct sockaddr_in cliAddr;
-  socklen_t sinLen;
+  socklen_t sinLen = sizeof(cliAddr);
   int32_t clientSocket;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;

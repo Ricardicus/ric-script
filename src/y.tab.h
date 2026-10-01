@@ -45,7 +45,15 @@
      RETURN = 261,
      FOREACH = 262,
      COMMENT = 263,
-     NEWLINE = 264
+     MEMBER = 264,
+     ADD_ASSIGN = 265,
+     SUB_ASSIGN = 266,
+     MUL_ASSIGN = 267,
+     DIV_ASSIGN = 268,
+     NEWLINE = 269,
+     QUOTED_CHAR = 270,
+     STATEMENT_END = 271,
+     ATOM = 272
    };
 #endif
 /* Tokens.  */
@@ -55,17 +63,25 @@
 #define RETURN 261
 #define FOREACH 262
 #define COMMENT 263
-#define NEWLINE 264
+#define MEMBER 264
+#define ADD_ASSIGN 265
+#define SUB_ASSIGN 266
+#define MUL_ASSIGN 267
+#define DIV_ASSIGN 268
+#define NEWLINE 269
+#define QUOTED_CHAR 270
+#define STATEMENT_END 271
+#define ATOM 272
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 39 "gram.y"
+#line 47 "gram.y"
 { int val_int; double val_double; char id[256]; void *data; }
 /* Line 1529 of yacc.c.  */
-#line 69 "y.tab.h"
+#line 85 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -74,3 +90,17 @@ typedef union YYSTYPE
 
 extern YYSTYPE yylval;
 
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+} YYLTYPE;
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
+extern YYLTYPE yylloc;

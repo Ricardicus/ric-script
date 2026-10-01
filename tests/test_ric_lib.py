@@ -66,3 +66,35 @@ def test_output():
 
   assert len(set(ric_result)) == len(set(output_lines))
 
+
+
+def test_file_checks_and_removal_in_clean_directory(tmp_path):
+  import subprocess
+  from pathlib import Path
+
+  script = tmp_path / "file-checks.ric"
+  script.write_text('\n'.join([
+    'print(isFile("missing.txt"))',
+    'print(isDir("missing.txt"))',
+    'print(rm("missing.txt"))',
+    'fp = fileOpen("present.txt")',
+    'fp.fileClose()',
+    'print(isFile("present.txt"))',
+    'print(isDir("present.txt"))',
+    'print(rm("present.txt"))',
+    'print(mkdir("present-dir"))',
+    'print(isFile("present-dir"))',
+    'print(isDir("present-dir"))',
+    'print(rm("present-dir"))',
+  ]), encoding="utf-8")
+  result = subprocess.run([str(Path(EXECUTABLE).resolve()), str(script)], cwd=tmp_path,
+                          capture_output=True, text=True, timeout=10)
+  assert result.returncode == 0, result.stderr
+  assert result.stderr == ""
+  # Windows exposes Win32 BOOL success (1); POSIX exposes syscall success (0).
+  success = "1" if os.name == "nt" else "0"
+  assert result.stdout.splitlines() == [
+    "0", "0", "-1", "1", "0", success, success, "0", "1", success,
+  ]
+  assert not (tmp_path / "present.txt").exists()
+  assert not (tmp_path / "present-dir").exists()

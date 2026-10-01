@@ -20,13 +20,17 @@ void *e_malloc(size_t size)
     return (void*)mem;
 }
 
-void yyerror(const char *s)
-{
-    fprintf(stderr,
-        "%s:%d: %s\n",
-        ParsedFile,
-        yylinenor,
-        s);
+void yyerror(const char *s);
+
+#define SOURCE_LOCATION(loc) ((source_location_t){sourceFile(ParsedFile), \
+  (loc).first_line, (loc).first_column, (loc).last_line, (loc).last_column})
+
+static statement_t *sourceStatement(int type, void *content, source_location_t location) {
+    statement_t *stmt = newStatement(type, content);
+    stmt->location = location;
+    stmt->file = location.file;
+    stmt->line = location.first_line;
+    return stmt;
 }
 
 int yylex(void);
@@ -36,6 +40,10 @@ statement_t *root = NULL;
 
 %}
 
+/* Fail parser generation if a future edit introduces a conflict. */
+%expect 0
+%locations
+
 %union { int val_int; double val_double; char id[256]; void *data; }
 
 %token<val_int> DIGIT
@@ -44,7 +52,9 @@ statement_t *root = NULL;
 %token RETURN
 %token FOREACH
 %token COMMENT
+%token MEMBER ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 %token NEWLINE
+%token<id> QUOTED_CHAR
 %type<id> otherChar
 %type<data> mathContentDigit
 %type<data> mathContentDouble
@@ -57,7 +67,7 @@ statement_t *root = NULL;
 %type<data> dictionary_keys_vals
 %type<data> dictionary_key_val
 %type<data> statements
-%type<data> statement statement_
+%type<data> statement
 %type<data> program
 %type<data> expressions
 %type<data> expression
@@ -65,7 +75,7 @@ statement_t *root = NULL;
 %type<data> parameters_list
 %type<data> body
 %type<data> function
-%type<data> indexer
+%type<data> indexer primaryExpression
 %type<data> class
 %type<data> classFunctionCall
 %type<data> functionCall
@@ -88,9 +98,14 @@ statement_t *root = NULL;
 %type<data> logical_b
 %type<data> logical_expression
 
+/* Prefer extending an expression over starting an adjacent statement. */
+%nonassoc STATEMENT_END
 %right'=' 
 %left '+' '-'
 %left '*' '/' '%'
+%nonassoc ATOM
+%nonassoc ID '(' '[' '.' ':' '!' MEMBER
+%nonassoc NEWLINE
 
 %%
 
@@ -110,53 +125,48 @@ program: statements {
     }
 };
 
-statements: 
-    _ statement_ statements {
+statements:
+    _ statement statements {
         statement_t *stmt = (statement_t*)$2;
         stmt->next = (statement_t*)$3;
         $$ = $2;
     }
     | _ { $$ = NULL; }
-    | { $$ = NULL; } /* EMPTY */
     ;
-
-statement_: statement _ {
-	$$ = $1;
-};
 
 statement:
     declaration {
-        $$ = newStatement(LANG_ENTITY_DECL, $1);
+        $$ = sourceStatement(LANG_ENTITY_DECL, $1, SOURCE_LOCATION(@$));
     } 
     | function {
-        $$ = newStatement(LANG_ENTITY_FUNCDECL, $1);
+        $$ = sourceStatement(LANG_ENTITY_FUNCDECL, $1, SOURCE_LOCATION(@$));
     }
     | forEachStatementFull {
-        $$ = newStatement(LANG_ENTITY_FOREACH, $1);
+        $$ = sourceStatement(LANG_ENTITY_FOREACH, $1, SOURCE_LOCATION(@$));
     }
-    | expressions {
-        $$ = newStatement(LANG_ENTITY_EXPR, $1);
+    | expressions %prec STATEMENT_END {
+        $$ = sourceStatement(LANG_ENTITY_EXPR, $1, SOURCE_LOCATION(@$));
     }
     | ifStatement {
-        $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
+        $$ = sourceStatement(LANG_ENTITY_CONDITIONAL, $1, SOURCE_LOCATION(@$));
     }
     | loopStatement {
-        $$ = newStatement(LANG_ENTITY_CONDITIONAL, $1);
+        $$ = sourceStatement(LANG_ENTITY_CONDITIONAL, $1, SOURCE_LOCATION(@$));
     }
     | continueStatement {
-        $$ = newStatement(LANG_ENTITY_CONTINUE, $1);
+        $$ = sourceStatement(LANG_ENTITY_CONTINUE, $1, SOURCE_LOCATION(@$));
     }
     | breakStatement {
-        $$ = newStatement(LANG_ENTITY_BREAK, $1);
+        $$ = sourceStatement(LANG_ENTITY_BREAK, $1, SOURCE_LOCATION(@$));
     }
     | returnStatement {
-        $$ = newStatement(LANG_ENTITY_RETURN, $1);
+        $$ = sourceStatement(LANG_ENTITY_RETURN, $1, SOURCE_LOCATION(@$));
     }
     | systemStatement {
-        $$ = newStatement(LANG_ENTITY_SYSTEM, $1);
+        $$ = sourceStatement(LANG_ENTITY_SYSTEM, $1, SOURCE_LOCATION(@$));
     }
     | class {
-        $$ = newStatement(LANG_ENTITY_CLASSDECL, $1);
+        $$ = sourceStatement(LANG_ENTITY_CLASSDECL, $1, SOURCE_LOCATION(@$));
     };
 
 _: _ NEWLINE {} | {};
@@ -173,17 +183,15 @@ forEachStatementFull:
 };
 
 forEachStatement: 
-    '(' expressions FOREACH ID _ ')' body {
-    $$ = newForEach($2, $4, $7);
-} | '(' _ expressions FOREACH ID _ ')' body {
+    '(' _ expressions FOREACH ID _ ')' body {
     $$ = newForEach($3, $5, $8);
 };
 
-returnStatement: RETURN expressions {
+returnStatement: RETURN expressions %prec STATEMENT_END {
     $$ = $2;
 };
 
-continueStatement: '@' {
+continueStatement: '@' %prec STATEMENT_END {
     $$ = NULL;
 };
 
@@ -192,7 +200,7 @@ breakStatement: '!' '@' {
 };
 
 expressions: 
-    expression {
+    expression %prec ATOM {
       $$ = $1;
     }
     | expressions '+' _ expressions {
@@ -200,65 +208,41 @@ expressions:
       expr_t *e2 = (expr_t*)$4;
 
       $$ = newExpr_OPAdd(e1,e2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '*' _ expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$4;
 
       $$ = newExpr_OPMul(e1,e2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '-' _ expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$4;
 
       $$ = newExpr_OPSub(e1,e2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '%' _ expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$4;
 
       $$ = newExpr_OPMod(e1,e2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '/' _ expressions {
       expr_t *e1 = (expr_t*)$1;
       expr_t *e2 = (expr_t*)$4;
 
       $$ = newExpr_OPDiv(e1,e2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 expression:
-    indexedVector {
-      $$ = $1;
-    }
-    | mathContent {
-      $$ = $1;
-    }
-    | dictionary {
-      $$ = $1;
-    }
-    | vector {
-      $$ = $1;
-    }
-    | functionCall {
-      $$ = $1;
-    }
-    | classFunctionCall {
-      $$ = $1;
-    }
-    | stringContent {
-      $$ = $1;
-    }
-    | ID {
-      $$ = newExpr_ID($1);
-    }
-    | '-' ID {
-      expr_t *id = newExpr_ID($2);
-      expr_t *neg = newExpr_Ival(-1);
-      $$ = newExpr_OPMul(neg, id);
-    }
-    | '(' expressions ')' {
-      $$ = $2;
-    };
+    primaryExpression %prec ATOM { $$ = $1; }
+    | classFunctionCall { $$ = $1; }
+    ;
 
 ifStatement:
     '?' '[' logical_a ']' body {
@@ -342,6 +326,7 @@ endIf:
 logical_a:
     logical_a '|' '|' _ logical_b {
       $$ = newExpr_Logical($1, NULL, $5);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | logical_b {
       $$ = $1;
@@ -350,6 +335,7 @@ logical_a:
 logical_b:
     logical_b '&' '&' _ logical_expression {
       $$ = newExpr_Logical($5, $1, NULL);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | logical_expression {
       $$ = $1;
@@ -363,6 +349,7 @@ logical_expression:
         expr_t *zero = newExpr_Ival(0);
         expr_t *cond = newConditional(CONDITION_EQ, zero, $2);
         $$ = cond;
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expression {
         $$ = $1;
@@ -371,24 +358,30 @@ logical_expression:
 condition:
     expressions '=' '=' expressions {
         $$ = newConditional(CONDITION_EQ, $1, $4);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '!' '=' expressions {
         $$ = newConditional(CONDITION_NEQ, $1, $4);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '<' '=' expressions {
         $$ = newConditional(CONDITION_LEQ, $1, $4);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expressions '>' '=' expressions {
         $$ = newConditional(CONDITION_GEQ, $1, $4);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
-    | expressions '<' expressions {
+    | expressions '<' expressions %prec STATEMENT_END {
         $$ = newConditional(CONDITION_LE, $1, $3);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
-    | expressions '>' expressions {
+    | expressions '>' expressions %prec STATEMENT_END {
         $$ = newConditional(CONDITION_GE, $1, $3);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
-    | '(' condition ')' {
-        $$ = $2;
+    | '(' _ condition ')' {
+        $$ = $3;
     };
 
 class: ';' ';' ID ';' ';' body {
@@ -402,8 +395,8 @@ class: ';' ';' ID ';' ';' body {
             walk->entity != LANG_ENTITY_BODY &&
             walk->entity != LANG_ENTITY_BODY_END
         ) {
-            fprintf(stderr, "Syntax error, class '%s':\r\n", $3);
-            fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
+            reportSourceError(&walk->location,
+                "SyntaxError: class '%s' may contain only variable and function declarations\n", $3);
             exit(1);
         }
 
@@ -413,8 +406,8 @@ class: ';' ';' ID ';' ';' body {
             /* Sanity check, constructor may not use arguments */
             if ( strcmp(funcDef->id.id, $3) == 0 ) {
                 if ( funcDef->params != NULL ) {
-                    fprintf(stderr, "Syntax error, class '%s':\r\n", $3);
-                    fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
+                    reportSourceError(&walk->location,
+                        "SyntaxError: constructor '%s' must not have parameters\n", $3);
                     exit(1);
                 }
             }
@@ -433,14 +426,17 @@ function:
     };
 
 classFunctionCall:
-    expression ':' ':' ID '(' arguments_list ')' {
-        $$ = newClassFunCall($1, $4, $6);
+    expression MEMBER ID '(' arguments_list ')' {
+        $$ = newClassFunCall($1, $3, $5);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
-    | expression ':' ':' ID '(' ')' {
-        $$ = newClassFunCall($1, $4, NULL);
+    | expression MEMBER ID '(' ')' {
+        $$ = newClassFunCall($1, $3, NULL);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
-    | expression ':' ':' ID {
-        $$ = newClassAccesser($1, $4);
+    | expression MEMBER ID %prec ATOM {
+        $$ = newClassAccesser($1, $3);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 
@@ -448,10 +444,12 @@ functionCall:
     ID '(' arguments_list ')' {
         expr_t *id = newExpr_ID($1);
         $$ = newFunCall(id,$3);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | ID '(' ')' {
         expr_t *id = newExpr_ID($1);
         $$ = newFunCall(id,NULL);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | namespacedFunctionCall {
         $$ = $1;
@@ -459,10 +457,12 @@ functionCall:
     | indexedVector '(' arguments_list ')' {
         expr_t *id = (expr_t*)$1;
         $$ = newFunCall(id,$3);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | indexedVector '(' ')' {
         expr_t *id = (expr_t*)$1;
         $$ = newFunCall(id,NULL);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 namespacedFunctionCall: 
@@ -471,6 +471,7 @@ namespacedFunctionCall:
         expr_t *expr = newExpr_ID($1);
         argsList_t *args = newArgument(expr, NULL);
         $$ = newFunCall(id, args);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | ID '.' ID '(' arguments_list ')' {
         expr_t *id = newExpr_ID($3);
@@ -483,62 +484,63 @@ namespacedFunctionCall:
         }
         walk->next = args;
         $$ = newFunCall(id, $5);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 declaration: 
-    ID '=' expressions {
+    ID '=' expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | ID '+' '=' expressions {
+    | ID ADD_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPAdd(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | ID '-' '=' expressions {
+    | ID SUB_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPSub(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | ID '*' '=' expressions {
+    | ID MUL_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPMul(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | ID '/' '=' expressions {
+    | ID DIV_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPDiv(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | indexedVector '+' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector ADD_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPAdd($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
     }
-    | indexedVector '-' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector SUB_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPSub($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
     }
-    | indexedVector '*' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector MUL_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPMul($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
     }
-    | indexedVector '/' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector DIV_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPDiv($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
@@ -548,7 +550,7 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | indexedVector '=' expressions {
+    | indexedVector '=' expressions %prec STATEMENT_END {
         $$ = newDeclaration($1,$3);
     }
     | indexedVector '=' condition {
@@ -556,20 +558,21 @@ declaration:
     };
 
 dictionary:
-    '{' dictionary_keys_vals _ '}' {
-      $$ = newExpr_Dictionary($2);
+    '{' _ dictionary_keys_vals '}' {
+      $$ = newExpr_Dictionary($3);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 dictionary_keys_vals:
-    dictionary_keys_vals ',' _ dictionary_key_val {
+    dictionary_keys_vals ',' _ dictionary_key_val _ {
       keyValList_t *left = (keyValList_t*)$1;
       keyValList_t *right = (keyValList_t*)$4;
 
       right->next = left;
       $$ = right;
     }
-    | _ dictionary_key_val _ {
-      $$ = $2;
+    | dictionary_key_val _ {
+      $$ = $1;
     }
     | {
         $$ = NULL;
@@ -595,14 +598,17 @@ vector:
     '[' _ arguments_list _ ']' {
       argsList_t *args = (argsList_t*) $3;
       $$ = newExpr_Vector(args);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     |
     '[' _ forEachStatement _ ']' {
-      statement_t* stmt = newStatement(LANG_ENTITY_FOREACH, $3);
+      statement_t* stmt = sourceStatement(LANG_ENTITY_FOREACH, $3, SOURCE_LOCATION(@3));
       $$ = newExpr_VectorFromForEach(stmt);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | '[' _ ']' {
       $$ = newExpr_Vector(NULL);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 arguments_list:
@@ -632,6 +638,7 @@ mathContent:
     | '-' mathContentDouble {
         expr_t *neg = newExpr_Ival(-1);
         $$ = newExpr_OPMul(neg, $2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | mathContentDigit {
         $$ = $1;
@@ -639,6 +646,7 @@ mathContent:
     | '-' mathContentDigit {
         expr_t *neg = newExpr_Ival(-1);
         $$ = newExpr_OPMul(neg, $2);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 indexedVector:
@@ -647,49 +655,88 @@ indexedVector:
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | expression '[' indexer ']' {
         expr_t *id = $1;
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
+    };
+
+/* A colon at the top level of an index denotes a slice. Parenthesize
+ * member access in an index, e.g. values[(object::field)], to distinguish
+ * it from a slice such as values[start::step]. */
+primaryExpression:
+    indexedVector %prec ATOM {
+      $$ = $1;
     }
-    | indexedVector '[' expressions ']' {
-      $$ = newExpr_VectorIndex($1, $3);
+    | mathContent {
+      $$ = $1;
     }
-    | indexedVector '[' indexer ']' {
-      expr_t *id = $1;
-      expr_t *index = $3;
-      $$ = newExpr_VectorIndex(id, index);
+    | dictionary {
+      $$ = $1;
+    }
+    | vector {
+      $$ = $1;
+    }
+    | functionCall {
+      $$ = $1;
+    }
+    | stringContent {
+      $$ = $1;
+    }
+    | ID %prec STATEMENT_END {
+      $$ = newExpr_ID($1);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
+    }
+    | '-' ID {
+      expr_t *id = newExpr_ID($2);
+      expr_t *neg = newExpr_Ival(-1);
+      $$ = newExpr_OPMul(neg, id);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
+    }
+    | '(' _ expressions ')' {
+      $$ = $3;
     };
 
 indexer:
-  expression ':' expression {
+  primaryExpression ':' primaryExpression {
     $$ = newExpr_Indexer($1, $3, NULL);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  | ':' expression {
+  | ':' primaryExpression {
     $$ = newExpr_Indexer(NULL, $2, NULL);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  | expression ':' {
+  | primaryExpression ':' {
     $$ = newExpr_Indexer($1, NULL, NULL);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
   | ':' {
     $$ = newExpr_Indexer(NULL, NULL, NULL);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  | expression ':' expression ':' expression {
+  | primaryExpression ':' primaryExpression ':' primaryExpression {
     $$ = newExpr_Indexer($1, $3, $5);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  | ':' expression ':' expression {
+  | ':' primaryExpression ':' primaryExpression {
     $$ = newExpr_Indexer(NULL, $2, $4);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  | expression ':' ':' expression {
-    $$ = newExpr_Indexer($1, NULL, $4);
+  | primaryExpression MEMBER primaryExpression {
+    $$ = newExpr_Indexer($1, NULL, $3);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  | ':' ':' expression {
-    $$ = newExpr_Indexer(NULL, NULL, $3);
+  | MEMBER primaryExpression {
+    $$ = newExpr_Indexer(NULL, NULL, $2);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
-  |  ':' ':' {
+  |  MEMBER {
     $$ = newExpr_Indexer(NULL, NULL, NULL);
+    ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
   }
 
 mathContentDigit:
@@ -703,11 +750,13 @@ mathContentDigit:
           $$ = newExpr_Ival(atoi(yyval.id));
         }
       }
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 mathContentDouble:
     DOUBLE {
         $$ = newExpr_Float(yyval.val_double);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 stringContent:
@@ -720,10 +769,12 @@ stringContent:
     | '"' '"' {
         /* Empty text */
         $$ = newExpr_Text("");
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | '\'' '\'' {
         /* Empty text */
         $$ = newExpr_Text("");
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 stringEditions:
@@ -754,6 +805,7 @@ stringEditions:
         $$ = newExpr_Text(textBuffer);
 
         free(textBuffer);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | stringEdition {
         $$ = $1;
@@ -762,13 +814,16 @@ stringEditions:
 stringEdition:
     ID {
         $$ = newExpr_Text(yyval.id);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | mathContentDouble {
         char buffer[256];
         expr_t *e = (expr_t*)$1;
         snprintf(buffer, sizeof(buffer), "%lf", e->fval);
         $$ = newExpr_Text(buffer);
+        free_expression($1);
         free($1);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | mathContentDigit {
         char buffer[256];
@@ -785,20 +840,25 @@ stringEdition:
           snprintf(buffer, sizeof(buffer), "%s", d->text);
         }
         $$ = newExpr_Text(buffer);
+        free_expression($1);
         free($1);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | RETURN {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "->");
         $$ = newExpr_Text(buffer);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | FOREACH {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "...");
         $$ = newExpr_Text(buffer);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
     | otherChar {
         $$ = newExpr_Text($1);
+      ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     };
 
 otherChar: 
@@ -860,13 +920,8 @@ otherChar:
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }
-    | '\'' {
-        $$[0] = yyval.id[0];
-        $$[1] = 0;
-    }
-    | '\"' {
-        $$[0] = yyval.id[0];
-        $$[1] = 0;
+    | QUOTED_CHAR {
+        strcpy($$, $1);
     }
     | '.' {
         $$[0] = yyval.id[0];
@@ -919,6 +974,11 @@ otherChar:
 
 %%
 
+void yyerror(const char *s) {
+    source_location_t location = SOURCE_LOCATION(yylloc);
+    reportSourceError(&location, "SyntaxError: %s\n", s);
+}
+
 #include <stdlib.h>
 #include <string.h>
 #include "hooks.h"
@@ -950,11 +1010,14 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
         }
 
         /* Parse from read line */
+        ParsedFile = "<stdin>";
+        resetLexerLocation();
+        root = NULL;
         buffer = yy_scan_string(lineBuffer);
-        yyparse();
+        int parsed = yyparse();
         yy_delete_buffer(buffer);
 
-        if ( root != NULL ) {
+        if ( parsed == 0 && root != NULL ) {
             func(argc, argv, root, 0, stacksize, heapsize);
         }
 
@@ -963,15 +1026,19 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
 }
 
 
-void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command, int stacksize, int heapsize) {
+int runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command, int stacksize, int heapsize) {
     YY_BUFFER_STATE buffer;
 
     /* Parse from provided command line */
+    ParsedFile = "<command>";
+    resetLexerLocation();
+    root = NULL;
     buffer = yy_scan_string(command);
-    yyparse();
+    int parsed = yyparse();
     yy_delete_buffer(buffer);
 
-    if ( root != NULL ) {
+    if ( parsed == 0 && root != NULL ) {
         func(argc, argv, root, 0, stacksize, heapsize);
     }
+    return parsed != 0;
 }

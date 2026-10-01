@@ -21,8 +21,8 @@ int ric_sha256(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -40,7 +40,6 @@ int ric_sha256(LIBRARY_PARAMS()) {
 
   if (stringArg != NULL) {
     heapval_t *hpv;
-    int dummy;
     void *hp = PROVIDE_CONTEXT()->hp;
     char *result = ast_ecalloc(SHA256_BLOCK_SIZE * 2 + 1);
     for (int i = 0; i < SHA256_BLOCK_SIZE; i++) {
@@ -50,20 +49,19 @@ int ric_sha256(LIBRARY_PARAMS()) {
     stv.type = TEXT;
     stv.t = result;
 
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     /* Pushing the parsed value */
     PUSH_STRING(result, sp, sc);
   } else if (rawdata != NULL) {
     heapval_t *hpv;
-    int dummy;
     void *hp = PROVIDE_CONTEXT()->hp;
     expr_t *e = newExpr_RawData(SHA256_BLOCK_SIZE);
 
     memcpy(e->rawdata->data, buf, SHA256_BLOCK_SIZE);
     stv.type = RAWDATATYPE;
     stv.rawdata = e->rawdata;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     free(e);
 
@@ -82,7 +80,6 @@ int ric_md5(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
@@ -95,8 +92,8 @@ int ric_md5(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -119,19 +116,18 @@ int ric_md5(LIBRARY_PARAMS()) {
     stv.type = TEXT;
     stv.t = result;
 
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     /* Pushing the parsed value */
     PUSH_STRING(result, sp, sc);
   } else if (rawdata != NULL) {
     heapval_t *hpv;
-    int dummy;
     expr_t *e = newExpr_RawData(MD5_BLOCK_SIZE);
 
     memcpy(e->rawdata->data, buf, MD5_BLOCK_SIZE);
     stv.type = RAWDATATYPE;
     stv.rawdata = e->rawdata;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     free(e);
 
@@ -150,7 +146,6 @@ int ric_base64_decode(LIBRARY_PARAMS()) {
   size_t input_length;
   size_t output_length;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
   expr_t *e = NULL;
 
@@ -161,9 +156,10 @@ int ric_base64_decode(LIBRARY_PARAMS()) {
       stringArg = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -180,7 +176,7 @@ int ric_base64_decode(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(e);
 
@@ -198,7 +194,6 @@ int ric_base64_encode(LIBRARY_PARAMS()) {
   size_t input_length;
   size_t output_length;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
@@ -211,8 +206,8 @@ int ric_base64_encode(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -232,7 +227,7 @@ int ric_base64_encode(LIBRARY_PARAMS()) {
     stv.type = TEXT;
     stv.t = (char *)result;
 
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_STRING((char *)result, sp, sc);
   } else if (rawdata != NULL) {
@@ -248,7 +243,7 @@ int ric_base64_encode(LIBRARY_PARAMS()) {
     stv.type = TEXT;
     stv.t = (char *)result;
 
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_STRING((char *)result, sp, sc);
   }
@@ -265,7 +260,6 @@ int ric_hex_decode(LIBRARY_PARAMS()) {
   size_t input_length;
   size_t output_length;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
   expr_t *e = NULL;
   size_t i = 0;
@@ -278,9 +272,10 @@ int ric_hex_decode(LIBRARY_PARAMS()) {
       stringArg = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -317,7 +312,7 @@ int ric_hex_decode(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(e);
 
@@ -333,7 +328,6 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
@@ -346,8 +340,8 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -366,7 +360,7 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
     stv.type = TEXT;
     stv.t = result;
 
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_STRING((char *)result, sp, sc);
   } else if (rawdata != NULL) {
@@ -381,7 +375,7 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
     stv.type = TEXT;
     stv.t = result;
 
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_STRING((char *)result, sp, sc);
   }
@@ -409,8 +403,8 @@ int ric_blowfish_keys(LIBRARY_PARAMS()) {
       user_key_len = stv.rawdata->size;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -439,7 +433,6 @@ int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
   size_t i;
   expr_t *e = NULL;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
@@ -449,8 +442,8 @@ int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
       key = (BLOWFISH_KEY *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -469,8 +462,8 @@ int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
       data_in_len = stv.rawdata->size;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, text or raw data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -496,7 +489,7 @@ int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
   stv.rawdata->data = data_out;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(e);
 
@@ -518,7 +511,6 @@ int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
   size_t i;
   expr_t *e = NULL;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   POP_VAL(&stv, sp, sc);
@@ -528,8 +520,8 @@ int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
       key = (BLOWFISH_KEY *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -544,8 +536,8 @@ int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
       data_in_len = stv.rawdata->size;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, raw data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -574,7 +566,7 @@ int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
   stv.rawdata->data = data_out;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(e);
 
@@ -596,8 +588,8 @@ int ric_blowfish_keys_destroy(LIBRARY_PARAMS()) {
       key = (BLOWFISH_KEY *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);

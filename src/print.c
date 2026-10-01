@@ -859,76 +859,79 @@ int snprint_dictionary(char **buf, size_t *bufSize, size_t *pos, dictionary_t *d
         continue;
       }
 
-      snprintf(tmpBuf, sizeof(tmpBuf), "%s\"%s\" : ", (keyCount > 0 ? ", " : ""), ptr->key);
-      tmpLen = strlen(tmpBuf);
+      while (ptr != NULL) {
+        snprintf(tmpBuf, sizeof(tmpBuf), "%s\"%s\" : ", (keyCount > 0 ? ", " : ""), ptr->key);
+        tmpLen = strlen(tmpBuf);
 
-      check_buf_size(buf, bufSize, pos, tmpLen);
-      snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", tmpBuf);
-      *pos += tmpLen;
-
-      hpv = ptr->data;
-      sv = hpv->sv;
-
-      tmpLen = 0;
-
-      switch (sv.type) {
-        case INT32TYPE: {
-          snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
-          tmpLen = strlen(tmpBuf);
-        } break;
-        case BIGINT: {
-          char buf[128];
-          char *c = NULL;
-
-          c = mpz_get_str(buf, 10, *sv.bigInt);
-          snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
-        } break;
-        case DOUBLETYPE: {
-          snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
-          tmpLen = strlen(tmpBuf);
-        } break;
-        case TEXT: {
-          snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
-          tmpLen = strlen(tmpBuf);
-        } break;
-        case POINTERTYPE: {
-          snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
-          tmpLen = strlen(tmpBuf);
-        } break;
-        case FUNCPTRTYPE: {
-          functionDef_t *funcDec = sv.func;
-          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
-          tmpLen = strlen(tmpBuf);
-        } break;
-        case LIBFUNCPTRTYPE: {
-          libFunction_t *libFunc = sv.libfunc;
-          snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
-          tmpLen = strlen(tmpBuf);
-        } break;
-        case VECTORTYPE: {
-          snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
-        } break;
-        case PRIOQUEUE: {
-          snprint_prioqueue(buf, bufSize, pos, sv.prioqueue, EXPRESSION_ARGS());
-        } break;
-        case DICTTYPE: {
-          snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
-        } break;
-        case CACHEPOT: {
-          snprint_cachepot(buf, bufSize, pos, sv.cachepot, EXPRESSION_ARGS());
-        } break;
-        default:
-          break;
-      }
-
-      if (tmpLen > 0) {
         check_buf_size(buf, bufSize, pos, tmpLen);
         snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", tmpBuf);
-
         *pos += tmpLen;
-      }
 
-      keyCount++;
+        hpv = ptr->data;
+        sv = hpv->sv;
+
+        tmpLen = 0;
+
+        switch (sv.type) {
+          case INT32TYPE: {
+            snprintf(tmpBuf, sizeof(tmpBuf), "%" PRIi32 "", sv.i);
+            tmpLen = strlen(tmpBuf);
+          } break;
+          case BIGINT: {
+            char buf[128];
+            char *c = NULL;
+
+            c = mpz_get_str(buf, 10, *sv.bigInt);
+            snprintf(tmpBuf, sizeof(tmpBuf), "%s", c);
+          } break;
+          case DOUBLETYPE: {
+            snprintf(tmpBuf, sizeof(tmpBuf), "%lf", sv.d);
+            tmpLen = strlen(tmpBuf);
+          } break;
+          case TEXT: {
+            snprintf(tmpBuf, sizeof(tmpBuf), "\"%s\"", sv.t);
+            tmpLen = strlen(tmpBuf);
+          } break;
+          case POINTERTYPE: {
+            snprintf(tmpBuf, sizeof(tmpBuf), "<Pointer: %" PRIxPTR ">", sv.p);
+            tmpLen = strlen(tmpBuf);
+          } break;
+          case FUNCPTRTYPE: {
+            functionDef_t *funcDec = sv.func;
+            snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", funcDec->id.id);
+            tmpLen = strlen(tmpBuf);
+          } break;
+          case LIBFUNCPTRTYPE: {
+            libFunction_t *libFunc = sv.libfunc;
+            snprintf(tmpBuf, sizeof(tmpBuf), "<Function: '%s'>", libFunc->libFuncName);
+            tmpLen = strlen(tmpBuf);
+          } break;
+          case VECTORTYPE: {
+            snprint_vector(buf, bufSize, pos, sv.vec, EXPRESSION_ARGS());
+          } break;
+          case PRIOQUEUE: {
+            snprint_prioqueue(buf, bufSize, pos, sv.prioqueue, EXPRESSION_ARGS());
+          } break;
+          case DICTTYPE: {
+            snprint_dictionary(buf, bufSize, pos, sv.dict, EXPRESSION_ARGS());
+          } break;
+          case CACHEPOT: {
+            snprint_cachepot(buf, bufSize, pos, sv.cachepot, EXPRESSION_ARGS());
+          } break;
+          default:
+            break;
+        }
+
+        if (tmpLen > 0) {
+          check_buf_size(buf, bufSize, pos, tmpLen);
+          snprintf(&(*buf)[*pos], (*bufSize - *pos), "%s", tmpBuf);
+
+          *pos += tmpLen;
+        }
+
+        keyCount++;
+        ptr = ptr->next;
+      }
       i++;
     }
     check_buf_size(buf, bufSize, pos, 1);

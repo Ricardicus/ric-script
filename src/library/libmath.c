@@ -23,8 +23,9 @@ int ric_power(LIBRARY_PARAMS()) {
       arg1BigInt = stv.bigInt;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -40,8 +41,9 @@ int ric_power(LIBRARY_PARAMS()) {
       arg2 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -52,11 +54,11 @@ int ric_power(LIBRARY_PARAMS()) {
     stackval_t stv;
     void *hp = PROVIDE_CONTEXT()->hp;
     heapval_t *hpv = NULL;
-    int dummy;
 
     if (expontent < 0) {
-      fprintf(stderr, "error %s: failed to raise a big int type to a negative expontent\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error %s: failed to raise a big int type to a negative expontent\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     }
 
@@ -66,7 +68,7 @@ int ric_power(LIBRARY_PARAMS()) {
 
     stv.type = BIGINT;
     stv.bigInt = n;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_BIGINT(n, sp, sc);
     return 0;
@@ -98,8 +100,9 @@ int ric_log(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -130,8 +133,9 @@ int ric_sqrt(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -162,8 +166,9 @@ int ric_sin(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -194,8 +199,9 @@ int ric_cos(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -226,8 +232,9 @@ int ric_tan(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -258,8 +265,9 @@ int ric_exp(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -294,8 +302,9 @@ int ric_abs(LIBRARY_PARAMS()) {
       arg1BigInt = stv.bigInt;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -305,7 +314,6 @@ int ric_abs(LIBRARY_PARAMS()) {
     stackval_t stv;
     void *hp = PROVIDE_CONTEXT()->hp;
     heapval_t *hpv = NULL;
-    int dummy;
 
     mpz_t *n = ast_emalloc(sizeof(mpz_t));
     mpz_init(*n);
@@ -313,7 +321,7 @@ int ric_abs(LIBRARY_PARAMS()) {
 
     stv.type = BIGINT;
     stv.bigInt = n;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_BIGINT(n, sp, sc);
     return 0;
@@ -345,8 +353,9 @@ int ric_floor(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -377,8 +386,9 @@ int ric_ceil(LIBRARY_PARAMS()) {
       arg1 = stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -410,8 +420,9 @@ int ric_random_uniform_int(LIBRARY_PARAMS()) {
       arg1 = (int)stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -427,8 +438,9 @@ int ric_random_uniform_int(LIBRARY_PARAMS()) {
       arg2 = (int32_t)stv.d;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -469,8 +481,9 @@ int ric_get_nbr_base_int(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -483,15 +496,17 @@ int ric_get_nbr_base_int(LIBRARY_PARAMS()) {
       arg2 = (int32_t)stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
 
   if (arg2 < 2 || arg2 > 16) {
-    fprintf(stderr, "error: function '%s' only supports bases [2, 16] (%" PRIi32 " given)\n",
-            LIBRARY_FUNC_NAME(), arg2);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' only supports bases [2, 16] (%" PRIi32 " given)\n",
+                       LIBRARY_FUNC_NAME(), arg2);
     return 1;
   }
 
@@ -531,7 +546,6 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  int dummy;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -544,8 +558,9 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
       arg1BigInt = stv.bigInt;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -558,15 +573,17 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
       arg2 = (int32_t)stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
 
   if (arg2 < 2 || arg2 > 16) {
-    fprintf(stderr, "error: function '%s' only supports bases [2, 16] (%" PRIi32 " given)\n",
-            LIBRARY_FUNC_NAME(), arg2);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' only supports bases [2, 16] (%" PRIi32 " given)\n",
+                       LIBRARY_FUNC_NAME(), arg2);
     return 1;
   }
 
@@ -613,7 +630,7 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = newText->text;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(newText);
 

@@ -2,6 +2,7 @@
 #define HOOKS_H
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "ast.h"
 
 typedef int (*MainParserFunc)(void);
@@ -18,8 +19,10 @@ statement_t *getMainRoot(void);
 void initParser(void);
 void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int stacksize,
                     int heapsize, const char *prompt);
-void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command,
-                int stacksize, int heapsize);
+int runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command,
+               int stacksize, int heapsize);
+void resetLexerLocation(void);
+int parseSourceFile(FILE *input, const char *file, statement_t **result);
 char *readCommand(char *lineBuffer, size_t size, const char *prompt);
 
 #endif

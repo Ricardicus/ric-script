@@ -73,6 +73,5 @@ enc = hexDec(ser_hex)
 dec = key.blowfishDec(enc)
 print(text(dec))
 
-
-
-
+# Release the key allocated by blowfishKeys.
+key.blowfishKeysDestroy()

@@ -9,10 +9,8 @@
   } while (0)
 #endif
 
-#define ERROR(format, ...)                                                         \
-  do {                                                                             \
-    fprintf(stderr, "error %s.%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__); \
-  } while (0)
+#define ERROR(format, ...) \
+  reportRuntimeError(PROVIDE_CONTEXT(), format "\n", __VA_ARGS__)
 
 void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -75,7 +73,7 @@ void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS()) {
       PUSH_PRIOQUEUE(sv.prioqueue, sp, sc);
     } break;
     default:
-      fprintf(stderr, "error: Unknown stackval_t type: %d\n", sv.type);
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: Unknown stackval_t type: %d\n", sv.type);
       exit(1);
       break;
   }
@@ -158,7 +156,8 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
     POP_VAL(&sv, sp, sc);
 
     if (sv.type != INT32TYPE) {
-      fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: expression for indexing must be an integer, was: %d\n", sv.type);
       if (!*interactive) {
         exit(1);
       }
@@ -176,7 +175,8 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
     POP_VAL(&sv, sp, sc);
 
     if (sv.type != INT32TYPE) {
-      fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: expression for indexing must be an integer, was: %d\n", sv.type);
       if (!*interactive) {
         exit(1);
       }
@@ -192,7 +192,8 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
     POP_VAL(&sv, sp, sc);
 
     if (sv.type != INT32TYPE) {
-      fprintf(stderr, "error: expression for indexing must be an integer, was: %d\n", sv.type);
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: expression for indexing must be an integer, was: %d\n", sv.type);
       if (!*interactive) {
         exit(1);
       }
@@ -211,8 +212,9 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
   }
 
   if (idxStart < 0 || idxStart > max || (idxEnd > 0 && idxStart > idxEnd)) {
-    fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-            idxStart, idxEnd, max);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                       idxStart, idxEnd, max);
     if (!*interactive) {
       exit(1);
     }
@@ -220,8 +222,9 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
   }
 
   if (idxEnd > max || (idxEnd > 0 && idxEnd < idxStart)) {
-    fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-            idxStart, idxEnd, max);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                       idxStart, idxEnd, max);
     if (!*interactive) {
       exit(1);
     }
@@ -233,8 +236,9 @@ int evaluate_indexer(indexer_t *indexer, int max, int *idxStart_, int *idxEnd_, 
     if (diff > idxStart) {
       idxEnd = diff;
     } else {
-      fprintf(stderr, "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
-              idxStart, idxEnd, max);
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: invalid value for indexing, %d:%d for list with interval [0, %d]\n",
+                         idxStart, idxEnd, max);
       if (!*interactive) {
         exit(1);
       }
@@ -343,7 +347,7 @@ expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
       newExp->cachepot = sv->cachepot;
     } break;
     case PRIOQUEUE: {
-      expr_t *e = ast_emalloc(sizeof(expr_t));
+      expr_t *e = ast_ecalloc(sizeof(expr_t));
       e->type = EXPR_TYPE_PRIOQUEUE;
       e->prioqueue = sv->prioqueue;
       newExp = newExpr_Copy(e, alloc, EXPRESSION_ARGS());
@@ -359,7 +363,7 @@ expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case DICTTYPE: {
-      newExp = ast_emalloc(sizeof(expr_t));
+      newExp = ast_ecalloc(sizeof(expr_t));
       newExp->type = EXPR_TYPE_DICT;
       if (alloc == EXPR_ALLOC) {
         newExp->dict = allocNewDictionary(sv->dict, EXPRESSION_ARGS());
@@ -373,7 +377,8 @@ expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     default:
-      fprintf(stderr, "%s.error: unknown type of value on the stack (%d)\n", __func__, sv->type);
+      reportRuntimeError(PROVIDE_CONTEXT(), "%s.error: unknown type of value on the stack (%d)\n",
+                         __func__, sv->type);
       GENERAL_REPORT_ISSUE_MSG();
       exit(1);
       break;
@@ -880,8 +885,7 @@ expr_t *copy_vector(vector_t *vec, int alloc, EXPRESSION_PARAMS()) {
       /* Get the stack dump vector */
       POP_VAL(&sv, sp, sc);
       if (sv.type != VECTORTYPE) {
-        fprintf(stderr, "%s.%d Unfold foreach expression\n", ((statement_t *)stmt)->file,
-                ((statement_t *)stmt)->line);
+        reportRuntimeError(PROVIDE_CONTEXT(), "Unfold foreach expression\n");
         exit(1);
       }
 
@@ -893,7 +897,18 @@ expr_t *copy_vector(vector_t *vec, int alloc, EXPRESSION_PARAMS()) {
   return newVec;
 }
 
+static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS());
+
 void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
+  source_location_t previous = PROVIDE_CONTEXT()->location;
+  if (expr != NULL && expr->location.file != NULL) {
+    PROVIDE_CONTEXT()->location = expr->location;
+  }
+  evaluate_expression_inner(expr, EXPRESSION_ARGS());
+  PROVIDE_CONTEXT()->location = previous;
+}
+
+static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -965,11 +980,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
                 stop = 1;
               }
             } else {
-              fprintf(stderr,
-                      "error: unknown, this is crazy. The interpreter is broken or something.\n\
-    Please report back to me.\n\
-    - %s\n",
-                      GENERAL_ERROR_ISSUE_URL);
+              reportRuntimeError(PROVIDE_CONTEXT(),
+                                 "error: unknown, this is crazy. The interpreter is broken or something.\n\
+                  Please report back to me.\n\
+                  - %s\n",
+                                 GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
@@ -1025,8 +1040,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
       }
 
       if (!stop) {
-        fprintf(stderr, "%s.%d Failed to find ID: '%s'\n", ((statement_t *)stmt)->file,
-                ((statement_t *)stmt)->line, expr->id.id);
+        reportRuntimeError(PROVIDE_CONTEXT(), "NameError: undefined identifier '%s'\n", expr->id.id);
         exit(1);
       }
 
@@ -1088,9 +1102,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
               break;
             }
             default: {
-              fprintf(stderr,
-                      "%s.%d error: Invalid conditional, expected numerical; got type '%d'\n",
-                      ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, sv.type);
+              reportRuntimeError(PROVIDE_CONTEXT(),
+                                 "error: Invalid conditional, expected numerical; got type '%d'\n", sv.type);
             }
           }
           walk++;
@@ -1121,8 +1134,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
               break;
             }
             default: {
-              fprintf(stderr, "%s.%d index error: datatype that does not support conditioning.\n",
-                      ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+              reportRuntimeError(PROVIDE_CONTEXT(),
+                                 "index error: datatype that does not support conditioning.\n");
               if (!*interactive) {
                 exit(1);
               }
@@ -1168,9 +1181,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         if (sv.type != VECTORTYPE && sv.type != DICTTYPE && sv.type != TEXT
             && sv.type != RAWDATATYPE && sv.type != CACHEPOT && sv.type != PRIOQUEUE) {
-          fprintf(stderr,
-                  "%s.%d index error: '%s' is a datatype (%d) that does not support indexing.\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, id->id.id, sv.type);
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "index error: '%s' is a datatype (%d) that does not support indexing.\n",
+                             id->id.id, sv.type);
           if (!*interactive) {
             exit(1);
           }
@@ -1191,7 +1204,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           prioqueue = sv.prioqueue;
         }
       } else {
-        fprintf(stderr, "error: Invalid indexing %d\n", id->type);
+        reportRuntimeError(PROVIDE_CONTEXT(), "error: Invalid indexing %d\n", id->type);
         exit(1);
       }
 
@@ -1205,7 +1218,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           if (sv.type != TEXT) {
-            fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "index error: Must provide an string as index for dictionaries\n");
             exit(1);
           }
 
@@ -1214,7 +1228,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           /* find heapval */
           hpv = hashtable_get(dict->hash, PROVIDE_CONTEXT()->syncCtx, key);
           if (hpv == NULL) {
-            fprintf(stderr, "error: key '%s' not present in dictionary\n", key);
+            reportRuntimeError(PROVIDE_CONTEXT(), "error: key '%s' not present in dictionary\n", key);
             exit(1);
           }
 
@@ -1229,7 +1243,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           if (sv.type != INT32TYPE && sv.type != INDEXER) {
-            fprintf(stderr, "index error: Must provide a correct indexer value as index\n");
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "index error: Must provide a correct indexer value as index\n");
             exit(1);
           }
 
@@ -1238,9 +1253,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
             /* check the limits */
             if (arrayIndex >= vec->length) {
-              fprintf(stderr,
-                      "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
-                      arrayIndex, vec->length);
+              reportRuntimeError(PROVIDE_CONTEXT(),
+                                 "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                                 arrayIndex, vec->length);
               exit(1);
             } else if (arrayIndex < 0) {
               arrayIndex = vec->length - ((vec->length - arrayIndex) % vec->length);
@@ -1254,11 +1269,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             }
 
             if (exp == NULL) {
-              fprintf(stderr, "Unexpected index error!\n");
-              fprintf(stderr,
-                      "Please include the script and file an error report to me here:\n    %s\n\
-      This is not supposed to happen, I hope I can fix the intepreter!\n",
-                      GENERAL_ERROR_ISSUE_URL);
+              reportRuntimeError(PROVIDE_CONTEXT(), "Unexpected index error!\n");
+              reportRuntimeError(PROVIDE_CONTEXT(),
+                                 "Please include the script and file an error report to me here:\n    %s\n\
+                    This is not supposed to happen, I hope I can fix the intepreter!\n",
+                                 GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
@@ -1276,7 +1291,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             argsList_t *vecContent = NULL;
             argsList_t *walk = NULL;
             heapval_t *hpv;
-            int dummy;
 
             (void)evaluate_indexer(indexer, vec->length, &idxStart, &idxEnd, &offset,
                                    EXPRESSION_ARGS());
@@ -1325,7 +1339,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.type = VECTORTYPE;
             sv.vec = newVec->vec;
 
-            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+            ALLOC_HEAP(&sv, hp, &hpv);
 
             PUSH_VECTOR(newVec->vec, sp, sc);
             free(newVec);
@@ -1335,7 +1349,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           size_t len = 1;
           stackval_t sv;
           heapval_t *hvp;
-          int heapUpdated;
           char *newText = NULL;
           size_t origLen = strlen(text);
 
@@ -1343,9 +1356,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           if (sv.type != INT32TYPE && sv.type != INDEXER) {
-            fprintf(stderr,
-                    "index error: Must provide a valid expression as indexer, value type: (%d)\n",
-                    sv.type);
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "index error: Must provide a valid expression as indexer, value type: (%d)\n",
+                               sv.type);
             exit(1);
           }
 
@@ -1355,8 +1368,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             if (arrayIndex < 0) {
               arrayIndex = origLen - ((origLen - arrayIndex) % origLen);
             } else if (arrayIndex >= origLen) {
-              fprintf(stderr, "index error: out of bounds (index: %d, size: %zu)\n", arrayIndex,
-                      origLen);
+              reportRuntimeError(PROVIDE_CONTEXT(), "index error: out of bounds (index: %d, size: %zu)\n",
+                                 arrayIndex, origLen);
               if (!*interactive) {
                 exit(1);
               }
@@ -1368,7 +1381,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.type = TEXT;
             sv.t = newText;
 
-            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            ALLOC_HEAP(&sv, hp, &hvp);
             PUSH_STRING(sv.t, sp, sc);
           } else if (sv.type == INDEXER) {
             indexer_t *indexer = sv.indexer;
@@ -1380,7 +1393,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             char *newText = NULL;
             expr_t *newTextExp = NULL;
             heapval_t *hpv;
-            int dummy;
 
             (void)evaluate_indexer(indexer, textLen, &idxStart, &idxEnd, &offset,
                                    EXPRESSION_ARGS());
@@ -1409,7 +1421,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.t = newTextExp->text;
             free(newTextExp);
 
-            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+            ALLOC_HEAP(&sv, hp, &hpv);
             PUSH_STRING(sv.t, sp, sc);
           }
         } break;
@@ -1420,9 +1432,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           if (sv.type != INT32TYPE && sv.type != INDEXER) {
-            fprintf(stderr,
-                    "index error: Must provide a valid expression as indexer, value type: (%d)\n",
-                    sv.type);
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "index error: Must provide a valid expression as indexer, value type: (%d)\n",
+                               sv.type);
             exit(1);
           }
 
@@ -1430,7 +1442,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             arrayIndex = sv.i;
 
             if (arrayIndex > rawdata->size) {
-              fprintf(stderr, "index error: out of bounds\n");
+              reportRuntimeError(PROVIDE_CONTEXT(), "index error: out of bounds\n");
               exit(1);
             }
 
@@ -1448,7 +1460,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             char *newData = NULL;
             expr_t *newDataExp = NULL;
             heapval_t *hvp;
-            int dummy;
 
             (void)evaluate_indexer(indexer, dataLen, &idxStart, &idxEnd, &offset,
                                    EXPRESSION_ARGS());
@@ -1477,7 +1488,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.rawdata = newDataExp->rawdata;
             free(newDataExp);
 
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
 
             PUSH_RAWDATA(sv.rawdata, sp, sc);
           }
@@ -1491,7 +1502,8 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           if (sv.type != TEXT) {
-            fprintf(stderr, "index error: Must provide an string as index for dictionaries\n");
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "index error: Must provide an string as index for dictionaries\n");
             exit(1);
           }
 
@@ -1500,7 +1512,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           /* find heapval */
           e = hashtable_get(cachepot->hash, PROVIDE_CONTEXT()->syncCtx, key);
           if (e == NULL) {
-            fprintf(stderr, "error: key '%s' not present in cachepot\n", key);
+            reportRuntimeError(PROVIDE_CONTEXT(), "error: key '%s' not present in cachepot\n", key);
             exit(1);
           }
 
@@ -1515,14 +1527,15 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           POP_VAL(&sv, sp, sc);
 
           if (sv.type != INT32TYPE) {
-            fprintf(stderr, "index error: Must provide an integer as index for prioqueues\n");
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "index error: Must provide an integer as index for prioqueues\n");
             exit(1);
           }
 
           idx = sv.i;
 
           if (idx >= prioqueue->size) {
-            fprintf(stderr, "index error: index out of bounds\n");
+            reportRuntimeError(PROVIDE_CONTEXT(), "index error: index out of bounds\n");
             exit(1);
           }
 
@@ -1581,7 +1594,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -1607,8 +1620,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error %s.%d: Unexpected stackval_t type: %d\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, svRight.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -1629,6 +1641,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.bigInt = e->bigInt;
 
         mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
+        heapval_t *hpv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        ALLOC_HEAP(&sv, hp, &hpv);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
@@ -1640,6 +1655,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
 
+        heapval_t *hpv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        ALLOC_HEAP(&sv, hp, &hpv);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
@@ -1650,6 +1668,9 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.bigInt = e->bigInt;
         mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
 
+        heapval_t *hpv;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        ALLOC_HEAP(&sv, hp, &hpv);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
@@ -1658,121 +1679,90 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         size_t len = strlen(svLeft.t) + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s%s", svLeft.t, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == DOUBLETYPE && svRight.type == TEXT) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%.4f%s", svLeft.d, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == DOUBLETYPE) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s%.4f", svLeft.t, svRight.d);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s%d", svLeft.t, svRight.i);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == INT32TYPE && svRight.type == TEXT) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%d%s", svLeft.i, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == POINTERTYPE && svRight.type == TEXT) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "<%" PRIuPTR ">%s", svLeft.p, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == BIGINT && svRight.type == TEXT) {
         size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
         char *bigIntStr = NULL;
@@ -1786,19 +1776,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == BIGINT) {
         size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
         char *bigIntStr = NULL;
@@ -1812,31 +1797,22 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == POINTERTYPE) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s<%" PRIuPTR ">", svLeft.t, svRight.p);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == VECTORTYPE
@@ -1847,7 +1823,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         argsList_t *vecContent = NULL;
         expr_t *newVec;
         argsList_t *walk = NULL;
-        int dummy;
         expr_t *newEntry = NULL;
 
         walk = svLeft.vec->content;
@@ -1899,7 +1874,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.vec = newVec->vec;
         free(newVec);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        ALLOC_HEAP(&sv, hp, &hvp);
         PUSH_VECTOR(sv.vec, sp, sc);
       } else if (svRight.type == VECTORTYPE && svLeft.type == VECTORTYPE) {
         stackval_t sv;
@@ -1907,7 +1882,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         argsList_t *vecContent = NULL;
         expr_t *newVec;
         argsList_t *walk = NULL;
-        int dummy;
 
         walk = svLeft.vec->content;
         while (walk != NULL) {
@@ -1940,7 +1914,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.vec = newVec->vec;
         free(newVec);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        ALLOC_HEAP(&sv, hp, &hvp);
         PUSH_VECTOR(sv.vec, sp, sc);
       }
 
@@ -1966,7 +1940,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Cannot substract strings..\n");
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Cannot substract strings..\n");
           exit(1);
           break;
         }
@@ -1974,7 +1948,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -1989,7 +1963,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Cannot substract strings..\n");
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Cannot substract strings..\n");
           exit(1);
           break;
         }
@@ -1997,7 +1971,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -2016,7 +1990,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_sub(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2024,12 +1997,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
@@ -2044,12 +2016,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
@@ -2063,7 +2034,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       }
 
       break;
@@ -2097,7 +2068,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -2111,7 +2082,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           *f1 = svRight.d;
 
           if (leftStr != NULL) {
-            fprintf(stderr, "error: Cannot multiply string with float\n");
+            reportRuntimeError(PROVIDE_CONTEXT(), "error: Cannot multiply string with float\n");
             exit(1);
           }
           break;
@@ -2124,7 +2095,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -2141,7 +2112,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2150,12 +2120,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
@@ -2163,12 +2132,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
@@ -2176,14 +2144,13 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
         heapval_t *hpv;
         stackval_t stv;
         size_t strLen = strlen(leftStr);
         int32_t mult = *r1;
         int32_t i = 0;
-        int dummy;
         char *newStr = ast_emalloc(strLen * mult + 2);
 
         while (i < mult) {
@@ -2197,7 +2164,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = TEXT;
         stv.t = newStr;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
 
         PUSH_STRING(stv.t, sp, sc);
       } else if (svRight.type == TEXT && svLeft.type == INT32TYPE) {
@@ -2206,7 +2173,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         size_t strLen = strlen(rightStr);
         int32_t mult = *r0;
         int32_t i = 0;
-        int dummy;
         char *newStr = ast_emalloc(strLen * mult + 2);
 
         while (i < mult) {
@@ -2220,7 +2186,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = TEXT;
         stv.t = newStr;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
 
         PUSH_STRING(stv.t, sp, sc);
       } else if ((svRight.type == VECTORTYPE && svLeft.type == INT32TYPE)
@@ -2233,7 +2199,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         vector_t *vec = NULL;
         heapval_t *hvp = NULL;
         stackval_t stv;
-        int dummy;
 
         if (svRight.type == INT32TYPE) {
           mult = svRight.i;
@@ -2300,16 +2265,16 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         /* Allocate this value on the heap, for garbage collection */
         stv.type = VECTORTYPE;
         stv.vec = newVec->vec;
-        ALLOC_HEAP(&stv, hp, &hvp, &dummy);
+        ALLOC_HEAP(&stv, hp, &hvp);
 
         PUSH_VECTOR(newVec->vec, sp, sc);
         free(newVec);
         free_expression(e);
         free(e);
       } else {
-        fprintf(stderr,
-                "Error: Invalid operands. Type %d and %d does not fit for multiplication.\n",
-                svRight.type, svLeft.type);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "Error: Invalid operands. Type %d and %d does not fit for multiplication.\n",
+                           svRight.type, svLeft.type);
         exit(2);
       }
 
@@ -2331,20 +2296,21 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           break;
         }
         case DOUBLETYPE: {
-          fprintf(stderr,
-                  "error: Invalid expression, cannot calculate modulus on floating point.\n");
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "error: Invalid expression, cannot calculate modulus on floating point.\n");
           exit(1);
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "error: Invalid expression, cannot calculate modulus on string.\n");
           exit(1);
           break;
         }
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -2355,20 +2321,21 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           break;
         }
         case DOUBLETYPE: {
-          fprintf(stderr,
-                  "error: Invalid expression, cannot calculate modulus on floating point.\n");
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "error: Invalid expression, cannot calculate modulus on floating point.\n");
           exit(1);
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Invalid expression, cannot calculate modulus on string.\n");
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "error: Invalid expression, cannot calculate modulus on string.\n");
           exit(1);
           break;
         }
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -2379,7 +2346,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mod(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2387,12 +2353,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
@@ -2407,12 +2372,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
@@ -2426,7 +2390,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       }
 
       break;
@@ -2451,14 +2415,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Not implemented string additions yet..\n");
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Not implemented string additions yet..\n");
           exit(1);
           break;
         }
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svLeft.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svLeft.type);
           exit(1);
           break;
       }
@@ -2473,14 +2437,14 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
           break;
         }
         case TEXT: {
-          fprintf(stderr, "error: Not implemented string additions yet..\n");
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Not implemented string additions yet..\n");
           exit(1);
           break;
         }
         case BIGINT:
           break;
         default:
-          fprintf(stderr, "error: Unexpected stackval_t type: %d\n", svRight.type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected stackval_t type: %d\n", svRight.type);
           exit(1);
           break;
       }
@@ -2497,7 +2461,6 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_fdiv_q(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2505,12 +2468,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
@@ -2524,12 +2486,11 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
@@ -2543,7 +2504,7 @@ void evaluate_expression(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       }
 
       break;
@@ -2728,7 +2689,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         break;
       }
       default:
-        fprintf(stderr, "%s.%d error: invalid function call (%d)\n", __FILE__, __LINE__, sv.type);
+        reportRuntimeError(PROVIDE_CONTEXT(), "error: invalid function call (%d)\n", sv.type);
         exit(1);
         break;
     }
@@ -2781,14 +2742,14 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         spBefore = *(uintptr_t *)sp;
 
         if (params == NULL && argsWalk != NULL) {
-          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n", funcID,
-                  argsWalk->length);
+          reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected 0 arguments, got: %u\n",
+                             funcID, argsWalk->length);
           exit(1);
         }
 
         if (params != NULL && argsWalk == NULL) {
-          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n", funcID,
-                  params->length);
+          reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected %u arguments, got: 0\n",
+                             funcID, params->length);
           exit(1);
         }
 
@@ -2796,8 +2757,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
           /* Verifying function definition parameters and function call arguments */
           if (params->length != argsWalk->length) {
             /* print error message */
-            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n", funcID,
-                    params->length, argsWalk->length);
+            reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected %u arguments, got: %u\n",
+                               funcID, params->length, argsWalk->length);
             exit(1);
           }
 
@@ -2808,8 +2769,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             if (params->arg->type != EXPR_TYPE_ID) {
               /* This is not supposed to happen */
-              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n",
-                      funcID);
+              reportRuntimeError(PROVIDE_CONTEXT(), "Error: parameter in function definition '%s' was invalid\n",
+                                 funcID);
             }
 
             /* Evaluate expression */
@@ -2866,7 +2827,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
             libFunc = expArg->func;
             break;
           default:
-            fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
+            reportRuntimeError(PROVIDE_CONTEXT(), "error: Invalid usage of identifier '%s'\n", expArg->id.id);
             exit(1);
             break;
         }
@@ -2889,7 +2850,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
             expArg = hashtable_get(argVals, PROVIDE_CONTEXT()->syncCtx, funcID);
 
             if (expArg == NULL) {
-              fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
+              reportRuntimeError(PROVIDE_CONTEXT(), "Error: Function call undefined: '%s'.\r\n", funcID);
               exit(1);
             }
 
@@ -2904,14 +2865,14 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
                   libFunc = expArg->func;
                   break;
                 default:
-                  fprintf(stderr, "error: Invalid usage of identifier '%s'\n", expArg->id.id);
+                  reportRuntimeError(PROVIDE_CONTEXT(), "error: Invalid usage of identifier '%s'\n", expArg->id.id);
                   exit(1);
                   break;
               }
             }
 
           } else if (hv->sv.type != FUNCPTRTYPE && hv->sv.type != LIBFUNCPTRTYPE) {
-            fprintf(stderr, "Error: Function call undefined: '%s'.\r\n", funcID);
+            reportRuntimeError(PROVIDE_CONTEXT(), "Error: Function call undefined: '%s'.\r\n", funcID);
             exit(1);
           } else {
             switch (hv->sv.type) {
@@ -2936,14 +2897,14 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         argsList_t *params = funcDef->params;
 
         if (params == NULL && argsWalk != NULL) {
-          fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n", funcID,
-                  argsWalk->length);
+          reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected 0 arguments, got: %u\n",
+                             funcID, argsWalk->length);
           exit(1);
         }
 
         if (params != NULL && argsWalk == NULL) {
-          fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n", funcID,
-                  params->length);
+          reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected %u arguments, got: 0\n",
+                             funcID, params->length);
           exit(1);
         }
 
@@ -2951,8 +2912,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
           /* Verifying function definition parameters and function call arguments */
           if (params->length != argsWalk->length) {
             /* print error message */
-            fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n", funcID,
-                    params->length, argsWalk->length);
+            reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected %u arguments, got: %u\n",
+                               funcID, params->length, argsWalk->length);
             exit(1);
           }
 
@@ -2963,8 +2924,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
             if (params->arg->type != EXPR_TYPE_ID) {
               /* This is not supposed to happen */
-              fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n",
-                      funcID);
+              reportRuntimeError(PROVIDE_CONTEXT(), "Error: parameter in function definition '%s' was invalid\n",
+                                 funcID);
             }
 
             /* Evaluate expression */
@@ -3017,16 +2978,18 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         argsList_t *argsWalkToFree = NULL;
 
         if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
-          fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
-                  libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
+                             libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
           if (!*PROVIDE_CONTEXT()->interactive) {
             exit(1);
           }
         }
 
         if (argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length) {
-          fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
-                  libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
+                             libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
           if (!*PROVIDE_CONTEXT()->interactive) {
             exit(1);
           }
@@ -3049,6 +3012,7 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           argsWalk = argsWalk->next;
         }
+        unsigned int diagnostics_before = PROVIDE_CONTEXT()->diagnostic_count;
         libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
         /* Free the argument value table */
         flush_arguments(newArgumentTable);
@@ -3063,8 +3027,11 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         }
 
         if (libfunc_ret != 0) {
-          fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
-                  funcID, libfunc_ret);
+          if (PROVIDE_CONTEXT()->diagnostic_count == diagnostics_before) {
+            reportRuntimeError(PROVIDE_CONTEXT(),
+                               "Error during execution of library function '%s', error code: %d\n", funcID,
+                               libfunc_ret);
+          }
           exit(libfunc_ret);
         }
       }
@@ -3089,14 +3056,15 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         classObj = sv.classObj;
         break;
       default:
-        fprintf(stderr, "error: invalid class function call, ID must point to a class object.\n");
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: invalid class function call, ID must point to a class object.\n");
         exit(1);
         break;
     }
 
     if (!classObj->initialized) {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: invalid class function call, ID must point to an initialized class object.\n");
       exit(1);
     }
@@ -3109,7 +3077,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
     libFunc = hashtable_get(classObj->funcDefsABI, PROVIDE_CONTEXT()->syncCtx, funcID);
 
     if (funcDef == NULL && libFunc == NULL) {
-      fprintf(stderr, "error: cannot find function '%s' in class '%s'.\n", funcID, classObj->id);
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: cannot find function '%s' in class '%s'.\n", funcID,
+                         classObj->id);
       exit(1);
     }
 
@@ -3128,14 +3097,14 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       class_t *tmp;
 
       if (params == NULL && argsWalk != NULL) {
-        fprintf(stderr, "Error: function '%s' expected 0 arguments, got: %u\n", funcID,
-                argsWalk->length);
+        reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected 0 arguments, got: %u\n",
+                           funcID, argsWalk->length);
         exit(1);
       }
 
       if (params != NULL && argsWalk == NULL) {
-        fprintf(stderr, "Error: function '%s' expected %u arguments, got: 0\n", funcID,
-                params->length);
+        reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected %u arguments, got: 0\n",
+                           funcID, params->length);
         exit(1);
       }
 
@@ -3143,8 +3112,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
         /* Verifying function definition parameters and function call arguments */
         if (params->length != argsWalk->length) {
           /* print error message */
-          fprintf(stderr, "Error: function '%s' expected %u arguments, got: %u\n", funcID,
-                  params->length, argsWalk->length);
+          reportRuntimeError(PROVIDE_CONTEXT(), "Error: function '%s' expected %u arguments, got: %u\n",
+                             funcID, params->length, argsWalk->length);
           exit(1);
         }
 
@@ -3155,7 +3124,8 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
 
           if (params->arg->type != EXPR_TYPE_ID) {
             /* This is not supposed to happen */
-            fprintf(stderr, "Error: parameter in function definition '%s' was invalid\n", funcID);
+            reportRuntimeError(PROVIDE_CONTEXT(), "Error: parameter in function definition '%s' was invalid\n",
+                               funcID);
           }
 
           /* Evaluate expression */
@@ -3189,8 +3159,9 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       class_t *tmp;
 
       if (libFunc->nbrArgs > 0 && argsWalk == NULL) {
-        fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
-                libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
+                           libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), 0);
         if (!*PROVIDE_CONTEXT()->interactive) {
           exit(1);
         } else {
@@ -3199,8 +3170,9 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       }
 
       if (argsWalk != NULL && libFunc->nbrArgs != (int)argsWalk->length) {
-        fprintf(stderr, "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
-                libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: library function '%s' need %d agument%s, %d provided.\n", funcID,
+                           libFunc->nbrArgs, (libFunc->nbrArgs == 1 ? "" : "s"), (int)argsWalk->length);
         if (!*PROVIDE_CONTEXT()->interactive) {
           exit(1);
         } else {
@@ -3224,12 +3196,16 @@ void call_func(functionCallContainer_t *func, EXPRESSION_PARAMS()) {
       }
       tmp = PROVIDE_CONTEXT()->classCtx;
       PROVIDE_CONTEXT()->classCtx = classObj; // Set class context
+      unsigned int diagnostics_before = PROVIDE_CONTEXT()->diagnostic_count;
       libfunc_ret = libFunc->func(funcID, EXPRESSION_ARGS());
       PROVIDE_CONTEXT()->classCtx = tmp;
 
       if (libfunc_ret != 0) {
-        fprintf(stderr, "Error during execution of library function '%s', error code: %d\n",
-                funcID, libfunc_ret);
+        if (PROVIDE_CONTEXT()->diagnostic_count == diagnostics_before) {
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "Error during execution of library function '%s', error code: %d\n", funcID,
+                             libfunc_ret);
+        }
         exit(libfunc_ret);
       }
     }
@@ -3261,11 +3237,11 @@ heapval_t *locals_lookup(locals_stack_t *stack, char *id) {
   return NULL;
 }
 
-void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
+void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv, PROVIDE_CONTEXT_ARGS()) {
   int i;
   if (stack->sp >= MAX_NBR_LOCALS) {
-    fprintf(
-        stderr,
+    reportRuntimeError(
+        PROVIDE_CONTEXT(),
         "error: You are defining over %d locals, this is more than the ric-script interpreter can handle unfortunately. Is the program heavily recursive perhaps? The interpreter will not cooperate... Sorry.\n",
         MAX_NBR_LOCALS);
     exit(1);
@@ -3286,11 +3262,11 @@ void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv) {
   stack->sp++;
 }
 
-void locals_remove(locals_stack_t *stack, char *id) {
+void locals_remove(locals_stack_t *stack, char *id, PROVIDE_CONTEXT_ARGS()) {
   int i;
   if (stack->sp >= MAX_NBR_LOCALS) {
-    fprintf(
-        stderr,
+    reportRuntimeError(
+        PROVIDE_CONTEXT(),
         "You are defining over %d locals, what are you doin? I will not cooperate with you. Sorry.\n",
         MAX_NBR_LOCALS);
     exit(1);
@@ -3348,7 +3324,6 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
 
         switch (id->type) {
           case EXPR_TYPE_ID: {
-            int heapUpdated;
             char *idStr = id->id.id;
 
             /* Evaluating the expression among global variables */
@@ -3376,7 +3351,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
               free(e);
             }
 
-            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            ALLOC_HEAP(&sv, hp, &hvp);
 
             /* Placing variable declaration in class variable member namespace */
             hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
@@ -3401,13 +3376,12 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 /* Assigning a dictionary */
                 char *key = NULL;
                 heapval_t *hvp = NULL;
-                int dummy;
 
                 evaluate_expression(index, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != TEXT) {
-                  fprintf(stderr, "index error: Must provide a string as key\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide a string as key\n");
                   exit(1);
                 }
 
@@ -3439,7 +3413,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                   free(e);
                 }
 
-                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+                ALLOC_HEAP(&sv, hp, &hvp);
 
                 // Check if collision, if so, free key
                 hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
@@ -3452,7 +3426,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != INT32TYPE) {
-                  fprintf(stderr, "index error: Must provide an integer as index\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide an integer as index\n");
                   exit(1);
                 }
 
@@ -3460,10 +3434,9 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
 
                 /* check the limits */
                 if (arrayIndex >= vec->length) {
-                  fprintf(stderr,
-                          "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32
-                          "'\n",
-                          arrayIndex, vec->length);
+                  reportRuntimeError(PROVIDE_CONTEXT(),
+                                     "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                                     arrayIndex, vec->length);
                   exit(1);
                 } else if (arrayIndex < 0) {
                   arrayIndex = vec->length - ((vec->length - arrayIndex) % vec->length);
@@ -3477,7 +3450,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 }
 
                 if (*expToSet == NULL) {
-                  fprintf(stderr, "Unexpected index error!\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "Unexpected index error!\n");
                   GENERAL_REPORT_ISSUE_MSG();
                   exit(1);
                 }
@@ -3504,7 +3477,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != INT32TYPE) {
-                  fprintf(stderr, "index error: Must provide an integer as index\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide an integer as index\n");
                   exit(1);
                 }
 
@@ -3513,7 +3486,8 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 if (arrayIndex < 0) {
                   arrayIndex = origLen - ((origLen - arrayIndex) % origLen);
                 } else if (arrayIndex >= origLen) {
-                  fprintf(stderr, "index error: index out of bounds (index: %d)\n", arrayIndex);
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: index out of bounds (index: %d)\n",
+                                     arrayIndex);
                   exit(1);
                 }
 
@@ -3522,7 +3496,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != TEXT) {
-                  fprintf(stderr, "string index error: Can only assign text to text.\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "string index error: Can only assign text to text.\n");
                   exit(1);
                 }
 
@@ -3539,7 +3513,8 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 }
               } break;
               default: {
-                fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
+                reportRuntimeError(PROVIDE_CONTEXT(), "index error: '%s' is not an indexable object.\n",
+                                   id->id.id);
                 GENERAL_REPORT_ISSUE_MSG();
                 exit(1);
                 break;
@@ -3564,7 +3539,7 @@ void check_buf_size(char **buf, size_t *bufSize, size_t *pos, size_t require) {
   size_t expandFactor = 2; // Arbitrary
   while (*bufSize <= *pos + require) {
     size_t newSize = *bufSize * expandFactor;
-    char *newBuf = (char *)ast_remalloc(buf, newSize);
+    char *newBuf = (char *)ast_remalloc(*buf, newSize);
     *buf = newBuf;
     *bufSize = newSize;
   }
@@ -3574,7 +3549,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   void *hp = PROVIDE_CONTEXT()->hp;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  dictionary_t *newDict = ast_ecalloc(sizeof(dictionary_t));
   newDict->type = dict->type;
   newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   newDict->hash->allocated_key = 1;
@@ -3588,7 +3563,6 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       char *newKeyStr = NULL; // Storing the key
       heapval_t *hvp = NULL;  // Storing the value
       stackval_t sv;
-      int dummy; // todo: remove the need for this..
 
       evaluate_expression(expKey, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
@@ -3601,8 +3575,8 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         default:
-          fprintf(stderr,
-                  "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
           exit(1);
           break;
       }
@@ -3617,16 +3591,17 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case LIBFUNCPTRTYPE:
         case FUNCPTRTYPE:
         case TIMETYPE:
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          ALLOC_HEAP(&sv, hp, &hvp);
           break;
         case BIGINT: {
           expr_t *e = newExpr_BigInt(sv.bigInt);
           sv.bigInt = e->bigInt;
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          free(e);
+          ALLOC_HEAP(&sv, hp, &hvp);
           break;
         }
         case VECTORTYPE: {
-          expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+          expr_t *eTemp = ast_ecalloc(sizeof(expr_t));
           expr_t *newVecExpr = NULL;
           stackval_t newStackVal;
 
@@ -3641,7 +3616,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
           free(newVecExpr);
 
-          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          ALLOC_HEAP(&newStackVal, hp, &hvp);
           break;
         }
         case TEXT: {
@@ -3654,21 +3629,21 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           newStackVal = sv;
           newStackVal.t = newText;
 
-          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          ALLOC_HEAP(&newStackVal, hp, &hvp);
           break;
         }
         case DICTTYPE: {
-          dictionary_t *newDict = allocNewDictionary(expVal->dict, EXPRESSION_ARGS());
+          dictionary_t *newDict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
           stackval_t newStackVal = sv;
 
           newStackVal.dict = newDict;
 
-          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          ALLOC_HEAP(&newStackVal, hp, &hvp);
           break;
         }
         default:
-          fprintf(
-              stderr,
+          reportRuntimeError(
+              PROVIDE_CONTEXT(),
               "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
           exit(1);
           break;
@@ -3693,7 +3668,6 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         char *newKeyStr = NULL; // Storing the key
         heapval_t *hvp = NULL;  // Storing the value
         stackval_t sv;
-        int dummy; // todo: remove the need for this..
         size_t len = strlen(key);
         newKeyStr = ast_emalloc(len + 2);
         snprintf(newKeyStr, len + 2, "%s", key);
@@ -3707,16 +3681,17 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case LIBFUNCPTRTYPE:
           case FUNCPTRTYPE:
           case TIMETYPE:
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             break;
           case BIGINT: {
             expr_t *e = newExpr_BigInt(sv.bigInt);
             sv.bigInt = e->bigInt;
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            free(e);
+            ALLOC_HEAP(&sv, hp, &hvp);
             break;
           }
           case VECTORTYPE: {
-            expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+            expr_t *eTemp = ast_ecalloc(sizeof(expr_t));
             expr_t *newVecExpr = NULL;
             stackval_t newStackVal;
 
@@ -3731,7 +3706,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
             free(newVecExpr);
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            ALLOC_HEAP(&newStackVal, hp, &hvp);
             break;
           }
           case TEXT: {
@@ -3744,7 +3719,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
             newStackVal = sv;
             newStackVal.t = newText;
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            ALLOC_HEAP(&newStackVal, hp, &hvp);
             break;
           }
           case DICTTYPE: {
@@ -3753,12 +3728,12 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
             newStackVal.dict = newDict;
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            ALLOC_HEAP(&newStackVal, hp, &hvp);
             break;
           }
           default:
-            fprintf(
-                stderr,
+            reportRuntimeError(
+                PROVIDE_CONTEXT(),
                 "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
             exit(1);
             break;
@@ -3779,7 +3754,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  dictionary_t *newDict = ast_ecalloc(sizeof(dictionary_t));
   newDict->type = dict->type;
   newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   newDict->hash->allocated_key = 1;
@@ -3792,7 +3767,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       expr_t *expKey = walk->key;
       expr_t *expVal = walk->val;
       char *newKeyStr = NULL;                          // Storing the key
-      heapval_t *hvp = ast_emalloc(sizeof(heapval_t)); // Storing the value
+      heapval_t *hvp = ast_ecalloc(sizeof(heapval_t)); // Storing the value
       stackval_t sv;
 
       evaluate_expression(expKey, EXPRESSION_ARGS());
@@ -3806,8 +3781,8 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         default:
-          fprintf(stderr,
-                  "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
+          reportRuntimeError(PROVIDE_CONTEXT(),
+                             "Error: Invalid dictionary expression, keys must be given as strings.\r\n");
           exit(1);
           break;
       }
@@ -3827,11 +3802,12 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case BIGINT: {
           expr_t *e = newExpr_BigInt(sv.bigInt);
           sv.bigInt = e->bigInt;
+          free(e);
           hvp->sv = sv;
           break;
         }
         case VECTORTYPE: {
-          expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+          expr_t *eTemp = ast_ecalloc(sizeof(expr_t));
           expr_t *newVecExpr = NULL;
           stackval_t newStackVal;
 
@@ -3863,7 +3839,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         case DICTTYPE: {
-          dictionary_t *newDict = copyNewDictionary(expVal->dict, EXPRESSION_ARGS());
+          dictionary_t *newDict = copyNewDictionary(sv.dict, EXPRESSION_ARGS());
           stackval_t newStackVal = sv;
 
           newStackVal.dict = newDict;
@@ -3872,8 +3848,8 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         default:
-          fprintf(
-              stderr,
+          reportRuntimeError(
+              PROVIDE_CONTEXT(),
               "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
           exit(1);
           break;
@@ -3896,7 +3872,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         char *key = walk->key;
         heapval_t *hpVal = (heapval_t *)walk->data;
         char *newKeyStr = NULL;                          // Storing the key
-        heapval_t *hvp = ast_emalloc(sizeof(heapval_t)); // Storing the value
+        heapval_t *hvp = ast_ecalloc(sizeof(heapval_t)); // Storing the value
         stackval_t sv;
         size_t len = strlen(key);
         newKeyStr = ast_emalloc(len + 2);
@@ -3916,11 +3892,12 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case BIGINT: {
             expr_t *e = newExpr_BigInt(sv.bigInt);
             sv.bigInt = e->bigInt;
+            free(e);
             hvp->sv = sv;
             break;
           }
           case VECTORTYPE: {
-            expr_t *eTemp = ast_emalloc(sizeof(expr_t));
+            expr_t *eTemp = ast_ecalloc(sizeof(expr_t));
             expr_t *newVecExpr = NULL;
             stackval_t newStackVal;
 
@@ -3961,8 +3938,8 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
             break;
           }
           default:
-            fprintf(
-                stderr,
+            reportRuntimeError(
+                PROVIDE_CONTEXT(),
                 "Error: Unexpected dictionary expression, value provided not valid in dictionary expressions.\r\n");
             exit(1);
             break;

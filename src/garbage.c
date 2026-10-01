@@ -122,13 +122,7 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
           free_expression(e);
           free(e);
         } else if (heap[i].sv.type == DICTTYPE) {
-          if (((heapval_t *)hp)[i].sv.dict->hash) {
-            hashtable_free(((heapval_t *)hp)[i].sv.dict->hash);
-          }
-          if (((heapval_t *)hp)[i].sv.dict->type == RIC_DICTIONARY_DYN) {
-            free_keyvals(((heapval_t *)hp)[i].sv.dict);
-          }
-          free(heap[i].sv.dict);
+          free_dictionary(heap[i].sv.dict);
         } else if (heap[i].sv.type == BIGINT) {
           mpz_clear(*heap[i].sv.bigInt);
           free(heap[i].sv.bigInt);
@@ -141,13 +135,12 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
           free(heap[i].sv.rawdata->data);
           free(heap[i].sv.rawdata);
         } else if (heap[i].sv.type == PRIOQUEUE) {
-          int i = 0;
           priority_queue_t *pq = heap[i].sv.prioqueue;
-          while (i < pq->size) {
-            free_expression(pq->items[i].value);
-            free(pq->items[i].value);
-            i++;
+          for (int item = 0; item < pq->size; ++item) {
+            free_expression(pq->items[item].value);
+            free(pq->items[item].value);
           }
+          free_priority_queue(pq);
         } else if (heap[i].sv.type == CLASSTYPE) {
           if (((heapval_t *)hp)[i].sv.classObj->initialized) {
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->varMembers);
@@ -202,8 +195,7 @@ void free_heap(void *hp, void *hbp) {
         free_expression(e);
         free(e);
       } else if (((heapval_t *)hp)[i].sv.type == DICTTYPE) {
-        hashtable_free(((heapval_t *)hp)[i].sv.dict->hash);
-        free(((heapval_t *)hp)[i].sv.dict);
+        free_dictionary(((heapval_t *)hp)[i].sv.dict);
       } else if (((heapval_t *)hp)[i].sv.type == CACHEPOT) {
         expr_t e;
         e.type = EXPR_TYPE_CACHEPOT;

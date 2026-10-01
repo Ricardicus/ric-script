@@ -2,9 +2,7 @@
 #include "eval.h"
 #include "hashtable.h"
 #include "prioqueue.h"
-
-extern int yylinenor;
-extern char *ParsedFile;
+#include <stdarg.h>
 
 void *ast_emalloc(size_t size) {
   char *p = (char *)malloc(size);
@@ -37,14 +35,14 @@ void *ast_ecalloc(size_t size) {
 }
 
 expr_t *newExpr_Time(time_t time) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   expr->type = EXPR_TYPE_TIME;
   expr->time = time;
   return expr;
 }
 
 expr_t *newExpr_ClassPtr(class_t *class) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   class_t *cls = ast_emalloc(sizeof(class_t));
 
   cls->id = class->id;
@@ -59,7 +57,7 @@ expr_t *newExpr_ClassPtr(class_t *class) {
 }
 
 expr_t *newExpr_ClassPtrCopy(class_t *class) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   class_t *cls = ast_emalloc(sizeof(class_t));
 
   cls->id = class->id;
@@ -75,7 +73,7 @@ expr_t *newExpr_ClassPtrCopy(class_t *class) {
 }
 
 expr_t *newExpr_Cond(ifCondition_t *cond) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_COND;
   expr->cond = cond;
@@ -84,7 +82,7 @@ expr_t *newExpr_Cond(ifCondition_t *cond) {
 }
 
 expr_t *newExpr_Pointer(uintptr_t val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_POINTER;
   expr->p = val;
@@ -93,7 +91,7 @@ expr_t *newExpr_Pointer(uintptr_t val) {
 }
 
 expr_t *newExpr_FuncPtr(void *func) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FUNCPTR;
   expr->func = func;
@@ -102,7 +100,7 @@ expr_t *newExpr_FuncPtr(void *func) {
 }
 
 expr_t *newExpr_BigIntFromStr(const char *intStr) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   mpz_t *n = ast_emalloc(sizeof(mpz_t));
 
   mpz_init_set_str(*n, intStr, 10);
@@ -114,7 +112,7 @@ expr_t *newExpr_BigIntFromStr(const char *intStr) {
 }
 
 expr_t *newExpr_BigIntFromInt(intptr_t val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   mpz_t *n = ast_emalloc(sizeof(mpz_t));
 
   mpz_init_set_si(*n, (signed long)val);
@@ -126,7 +124,7 @@ expr_t *newExpr_BigIntFromInt(intptr_t val) {
 }
 
 expr_t *newExpr_BigInt(mpz_t *n_) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   mpz_t *n = ast_emalloc(sizeof(mpz_t));
 
   mpz_init_set(*n, *n_);
@@ -138,7 +136,7 @@ expr_t *newExpr_BigInt(mpz_t *n_) {
 }
 
 expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   indexer_t *indexer = ast_emalloc(sizeof(indexer_t));
 
   indexer->left = left;
@@ -151,7 +149,7 @@ expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset) {
 }
 
 expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   logical_t *logical = ast_emalloc(sizeof(logical_t));
   int appendPrev = 0;
 
@@ -207,7 +205,7 @@ expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
 expr_t *newExpr_Vector(argsList_t *args) {
   int32_t length = 0;
   argsList_t *walk;
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
 
   if (args != NULL) {
@@ -244,7 +242,7 @@ expr_t *newExpr_Vector(argsList_t *args) {
 
 expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
   int32_t length = 0;
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
 
   vec->length = length;
@@ -258,7 +256,7 @@ expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
 }
 
 expr_t *newExpr_Dictionary(keyValList_t *keyVals) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   expr->dict = ast_emalloc(sizeof(dictionary_t));
 
   expr->type = EXPR_TYPE_DICT;
@@ -272,7 +270,7 @@ expr_t *newExpr_Dictionary(keyValList_t *keyVals) {
 }
 
 expr_t *newExpr_Cachepot(void) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   cachepot_t *cachepot = ast_emalloc(sizeof(expr_t));
 
   cachepot->hash = hashtable_new(CACHEPOT_STANDARD_SIZE, CACHEPOT_STANDARD_LOAD);
@@ -283,7 +281,7 @@ expr_t *newExpr_Cachepot(void) {
 }
 
 expr_t *newExpr_PriorityQueue(int capacity, int is_minimum) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   priority_queue_t *prioqueue = new_priority_queue(capacity, is_minimum);
 
   expr->type = EXPR_TYPE_PRIOQUEUE;
@@ -294,7 +292,7 @@ expr_t *newExpr_PriorityQueue(int capacity, int is_minimum) {
 
 expr_t *newExpr_Text(char *text) {
   size_t textLen = strlen(text);
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_TEXT;
   expr->text = (char *)ast_emalloc(textLen + 1);
@@ -306,7 +304,7 @@ expr_t *newExpr_Text(char *text) {
 }
 
 expr_t *newExpr_Ival(int val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_IVAL;
   expr->ival = (int32_t)val;
@@ -315,7 +313,7 @@ expr_t *newExpr_Ival(int val) {
 }
 
 expr_t *newExpr_Uval(unsigned val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_UVAL;
   expr->ival = (uint32_t)val;
@@ -324,7 +322,7 @@ expr_t *newExpr_Uval(unsigned val) {
 }
 
 expr_t *newExpr_Float(double val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FVAL;
   expr->fval = val;
@@ -333,7 +331,7 @@ expr_t *newExpr_Float(double val) {
 }
 
 expr_t *newExpr_RawData(size_t size) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   rawdata_t *rawdata = ast_emalloc(sizeof(rawdata_t));
 
   rawdata->data = ast_ecalloc(size + 1);
@@ -347,7 +345,7 @@ expr_t *newExpr_RawData(size_t size) {
 
 expr_t *newExpr_ID(char *id) {
   size_t textLen = strlen(id);
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_ID;
   expr->id.id = (char *)ast_emalloc(textLen + 1);
@@ -359,7 +357,7 @@ expr_t *newExpr_ID(char *id) {
 }
 
 expr_t *newExpr_FuncCall(functionCall_t *func) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FUNCCALL;
   expr->func = func;
@@ -368,7 +366,7 @@ expr_t *newExpr_FuncCall(functionCall_t *func) {
 }
 
 expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_LIBFUNCPTR;
   expr->func = func;
@@ -377,7 +375,7 @@ expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
 }
 
 expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPADD;
   expr->add.left = left;
@@ -387,7 +385,7 @@ expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPSub(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPSUB;
   expr->add.left = left;
@@ -397,7 +395,7 @@ expr_t *newExpr_OPSub(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPMul(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPMUL;
   expr->add.left = left;
@@ -407,7 +405,7 @@ expr_t *newExpr_OPMul(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPMod(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPMOD;
   expr->add.left = left;
@@ -417,7 +415,7 @@ expr_t *newExpr_OPMod(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPDIV;
   expr->add.left = left;
@@ -427,7 +425,7 @@ expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_VectorIndex(expr_t *id_expr, expr_t *index) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   expr->vecIdx = ast_emalloc(sizeof(vectorIndex_t));
 
   expr->type = EXPR_TYPE_VECTOR_IDX;
@@ -439,7 +437,7 @@ expr_t *newExpr_VectorIndex(expr_t *id_expr, expr_t *index) {
 }
 
 expr_t *newConditional(int type, expr_t *left, expr_t *right) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   ifCondition_t *cond = ast_emalloc(sizeof(ifCondition_t));
 
   cond->type = type;
@@ -465,14 +463,9 @@ statement_t *newStatement(int type, void *content) {
   statement_t *stmt = ast_emalloc(sizeof(statement_t));
   stmt->entity = type;
   stmt->next = NULL;
-  stmt->line = yylinenor - 1;
-
-  stmt->file[0] = 0;
-  if (ParsedFile != NULL) {
-    snprintf(stmt->file, sizeof(stmt->file), "%s", ParsedFile);
-  } else {
-    snprintf(stmt->file, sizeof(stmt->file), "%s", "stdin");
-  }
+  stmt->line = 0;
+  stmt->file = "<runtime>";
+  stmt->location = (source_location_t){0};
 
   switch (type) {
     case LANG_ENTITY_DECL:
@@ -530,7 +523,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case EXPR_TYPE_FVAL:
-      newExp = newExpr_Ival(expr->fval);
+      newExp = newExpr_Float(expr->fval);
       break;
     case EXPR_TYPE_IVAL:
       newExp = newExpr_Ival(expr->ival);
@@ -547,32 +540,32 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case EXPR_TYPE_OPADD: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPAdd(left, right);
       break;
     }
     case EXPR_TYPE_OPSUB: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPSub(left, right);
       break;
     }
     case EXPR_TYPE_OPMUL: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPMul(left, right);
       break;
     }
     case EXPR_TYPE_OPMOD: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPMod(left, right);
       break;
     } break;
     case EXPR_TYPE_OPDIV: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPDiv(left, right);
       break;
     }
@@ -589,7 +582,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case EXPR_TYPE_DICT: {
-      newExp = ast_emalloc(sizeof(expr_t));
+      newExp = ast_ecalloc(sizeof(expr_t));
       newExp->type = EXPR_TYPE_DICT;
       if (alloc == EXPR_ALLOC) {
         newExp->dict = allocNewDictionary(expr->dict, EXPRESSION_ARGS());
@@ -612,6 +605,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
   }
 
+  if (newExp != NULL) newExp->location = expr->location;
   return newExp;
 }
 
@@ -672,7 +666,7 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
 }
 
 expr_t *newClassFunCall(expr_t *classID, char *funcID, void *args) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   classFunctionCall_t *func = ast_emalloc(sizeof(classFunctionCall_t));
   char *newTxt = ast_emalloc(strlen(funcID) + 2);
   snprintf(newTxt, strlen(funcID) + 2, "%s", funcID);
@@ -688,7 +682,7 @@ expr_t *newClassFunCall(expr_t *classID, char *funcID, void *args) {
 }
 
 expr_t *newClassAccesser(expr_t *classID, char *memberID) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   classAccesser_t *func = ast_emalloc(sizeof(classAccesser_t));
   char *newTxt = ast_emalloc(strlen(memberID) + 2);
   snprintf(newTxt, strlen(memberID) + 2, "%s", memberID);
@@ -703,7 +697,7 @@ expr_t *newClassAccesser(expr_t *classID, char *memberID) {
 }
 
 expr_t *newFunCall(expr_t *id, void *args) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
 
   func->entity = LANG_ENTITY_FUNCCALL;
@@ -755,6 +749,10 @@ void free_expression(expr_t *expr) {
   if (expr == NULL) return;
 
   switch (expr->type) {
+    case EXPR_TYPE_DICT: {
+      free_dictionary(expr->dict);
+      break;
+    }
     case EXPR_TYPE_ID: {
       free(expr->id.id);
       break;
@@ -807,12 +805,29 @@ void free_expression(expr_t *expr) {
     case EXPR_TYPE_CLASSACCESSER: {
       classAccesser_t *cls = expr->classAccess;
       free_expression(cls->classID);
+      free(cls->classID);
       free(cls->memberID);
+      free(cls);
     } break;
 
     case EXPR_TYPE_FVAL:
     case EXPR_TYPE_IVAL:
     case EXPR_TYPE_UVAL:
+      break;
+    case EXPR_TYPE_INDEXER: {
+      indexer_t *index = expr->indexer;
+      free_expression(index->left);
+      free(index->left);
+      free_expression(index->right);
+      free(index->right);
+      free_expression(index->offset);
+      free(index->offset);
+      free(index);
+      break;
+    }
+    case EXPR_TYPE_RAWDATA:
+      free(expr->rawdata->data);
+      free(expr->rawdata);
       break;
     case EXPR_TYPE_VECTOR_IDX: {
       vectorIndex_t *vecIdx = expr->vecIdx;
@@ -827,35 +842,20 @@ void free_expression(expr_t *expr) {
       free(expr->text);
       break;
     }
-    case EXPR_TYPE_OPADD: {
+    case EXPR_TYPE_OPADD:
+    case EXPR_TYPE_OPSUB:
+    case EXPR_TYPE_OPMUL:
+    case EXPR_TYPE_OPMOD:
+    case EXPR_TYPE_OPDIV: {
       free_expression((expr_t *)expr->add.left);
+      free(expr->add.left);
       free_expression((expr_t *)expr->add.right);
+      free(expr->add.right);
       break;
     }
-    case EXPR_TYPE_OPSUB: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-
-      break;
-    }
-    case EXPR_TYPE_OPMUL: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-      break;
-    }
-    case EXPR_TYPE_OPMOD: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-      break;
-    } break;
     case EXPR_TYPE_PRIOQUEUE: {
       free_priority_queue(expr->prioqueue);
     } break;
-    case EXPR_TYPE_OPDIV: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-      break;
-    }
     case EXPR_TYPE_CACHEPOT: {
       cachepot_t *cachepot = expr->cachepot;
       hashtable_t *hash = cachepot->hash;
@@ -884,28 +884,6 @@ void free_expression(expr_t *expr) {
       hashtable_free(hash);
       free(cachepot);
     } break;
-    case EXPR_TYPE_DICT: {
-      dictionary_t *dict = expr->dict;
-      if (dict->initialized) {
-        hashtable_free(dict->hash);
-        free(dict->hash);
-      } else {
-        keyValList_t *walk = dict->keyVals;
-        keyValList_t *walk_next;
-
-        while (walk != NULL) {
-          walk_next = walk->next;
-          free_expression(walk->key);
-          free(walk->key);
-          free_expression(walk->val);
-          free(walk->val);
-          free(walk);
-          walk = walk_next;
-        }
-      }
-      free(dict);
-      break;
-    }
     case EXPR_TYPE_FUNCCALL: {
       functionCall_t *call = expr->func;
       argsList_t *args = call->args;
@@ -924,7 +902,10 @@ void free_expression(expr_t *expr) {
     case EXPR_TYPE_COND: {
       ifCondition_t *cond = expr->cond;
       free_expression((expr_t *)cond->left);
+      free(cond->left);
       free_expression((expr_t *)cond->right);
+      free(cond->right);
+      free(cond);
     } break;
     case EXPR_TYPE_VECTOR: {
       vector_t *vec = expr->vec;
@@ -935,12 +916,7 @@ void free_expression(expr_t *expr) {
 
       while (vecWalk < len) {
         if (v->arg != NULL) {
-          if (v->arg->type != EXPR_TYPE_DICT) {
-            free_expression(v->arg);
-          } else {
-            hashtable_free(v->arg->dict->hash);
-            free(v->arg->dict);
-          }
+          free_expression(v->arg);
           free(v->arg);
           v->arg = NULL;
         }
@@ -952,7 +928,6 @@ void free_expression(expr_t *expr) {
 
       if (vec->forEach != NULL) {
         free_ast(vec->forEach);
-        free(vec->forEach);
       }
 
       free(vec);
@@ -965,126 +940,105 @@ void free_expression(expr_t *expr) {
   }
 }
 
-void free_ast(statement_t *stmt) {
-  entity_eval_t *eval = (entity_eval_t *)stmt;
-  void *next = NULL;
+static void free_arguments(argsList_t *args) {
+  while (args != NULL) {
+    argsList_t *next = args->next;
+    free_expression(args->arg);
+    free(args->arg);
+    free(args);
+    args = next;
+  }
+}
 
+static void free_if_statement(ifStmt_t *stmt) {
   if (stmt == NULL) return;
+  free_expression(stmt->cond);
+  free(stmt->cond);
+  free_ast((statement_t *)stmt->body);
+  free_if_statement(stmt->elif);
+  free_if_statement(stmt->endif);
+  free(stmt);
+}
 
-  switch (eval->entity) {
-    case LANG_ENTITY_DECL:
-    case LANG_ENTITY_FUNCDECL:
-    case LANG_ENTITY_FUNCCALL:
-    case LANG_ENTITY_CONDITIONAL:
-    case LANG_ENTITY_CONTINUE:
-    case LANG_ENTITY_BREAK:
-    case LANG_ENTITY_SYSTEM:
-    case LANG_ENTITY_CLASSDECL:
-    case LANG_ENTITY_FIN:
-    case LANG_ENTITY_FOREACH:
-    case LANG_ENTITY_RETURN:
-      // case LANG_ENTITY_EXPR:
-      next = ((statement_t *)stmt)->next;
-      break;
-    case LANG_ENTITY_EMPTY_MATH:
-    case LANG_ENTITY_EMPTY_STR: {
-      next = ((statement_t *)stmt)->next;
-      break;
+void free_ast(statement_t *stmt) {
+  while (stmt != NULL) {
+    if (stmt->entity == LANG_ENTITY_BODY) {
+      body_t *body = (body_t *)stmt;
+      free_ast(body->content);
+      free(body);
+      return;
     }
-    case LANG_ENTITY_BODY: {
-      next = ((body_t *)stmt)->content;
-    } break;
-    default:
-      break;
+    statement_t *next = stmt->next;
+    switch (stmt->entity) {
+      case LANG_ENTITY_DECL: {
+        declaration_t *decl = stmt->content;
+        /* Compound assignments share their target with the left operand. */
+        expr_t *value = decl->val;
+        int sharedTarget = value != NULL &&
+            (value->type == EXPR_TYPE_OPADD || value->type == EXPR_TYPE_OPSUB ||
+             value->type == EXPR_TYPE_OPMUL || value->type == EXPR_TYPE_OPDIV) &&
+            value->add.left == decl->id;
+        if (!sharedTarget) {
+          free_expression(decl->id);
+          free(decl->id);
+        }
+        free_expression(decl->val);
+        free(decl->val);
+        free(decl);
+        break;
+      }
+      case LANG_ENTITY_EXPR:
+      case LANG_ENTITY_RETURN:
+      case LANG_ENTITY_SYSTEM:
+      case LANG_ENTITY_EMPTY_MATH:
+      case LANG_ENTITY_EMPTY_STR:
+        free_expression(stmt->content);
+        free(stmt->content);
+        break;
+      case LANG_ENTITY_FOREACH: {
+        forEachStmt_t *foreach = stmt->content;
+        free_expression(foreach->root);
+        free(foreach->root);
+        free_expression(foreach->entry);
+        free(foreach->entry);
+        free(foreach->uniqueUnfoldIncID);
+        free(foreach->uniqueUnfoldRootID);
+        free_ast((statement_t *)foreach->body);
+        free(foreach);
+        break;
+      }
+      case LANG_ENTITY_CLASSDECL: {
+        class_t *class = stmt->content;
+        free_ast(class->defines);
+        free(class->id);
+        free(class);
+        break;
+      }
+      case LANG_ENTITY_FUNCDECL: {
+        functionDef_t *func = stmt->content;
+        free(func->id.id);
+        free_arguments(func->params);
+        free_ast(func->body);
+        free(func);
+        break;
+      }
+      case LANG_ENTITY_FUNCCALL: {
+        functionCall_t *call = stmt->content;
+        free_expression(call->id);
+        free(call->id);
+        free_arguments(call->args);
+        free(call);
+        break;
+      }
+      case LANG_ENTITY_CONDITIONAL:
+        free_if_statement(stmt->content);
+        break;
+      default:
+        break;
+    }
+    free(stmt);
+    stmt = next;
   }
-
-  switch (eval->entity) {
-    case LANG_ENTITY_DECL: {
-      declaration_t *decl = ((statement_t *)stmt)->content;
-      /* Evaluating the expression among global variables */
-      // free_expression(decl->val);
-      free_expression(decl->id);
-    } break;
-    case LANG_ENTITY_EXPR: {
-      expr_t *e = ((statement_t *)stmt)->content;
-
-      free_expression(e);
-      free(e);
-    } break;
-    case LANG_ENTITY_FOREACH: {
-      forEachStmt_t *foreach = ((statement_t *)stmt)->content;
-
-      free_expression(foreach->root);
-      free_expression(foreach->entry);
-      free(foreach->uniqueUnfoldIncID);
-      free_ast(foreach->body->content);
-    } break;
-    case LANG_ENTITY_EMPTY_STR: {
-      free_expression(((statement_t *)stmt)->content);
-      break;
-    }
-    case LANG_ENTITY_CLASSDECL: {
-      class_t *class = ((statement_t *)stmt)->content;
-      free_ast(class->defines);
-      break;
-    }
-    case LANG_ENTITY_FUNCDECL: {
-      functionDef_t *funcDef = ((statement_t *)stmt)->content;
-      argsList_t *args = funcDef->params;
-      free(funcDef->id.id);
-      while (args != NULL) {
-        free_expression(args->arg);
-        free(args->arg);
-        args = args->next;
-      }
-      free_ast(funcDef->body);
-    } break;
-    case LANG_ENTITY_FUNCCALL: {
-      functionCall_t *funcCall = ((statement_t *)stmt)->content;
-      argsList_t *args = funcCall->args;
-
-      free_expression(funcCall->id);
-      while (args != NULL) {
-        free_expression(args->arg);
-        free(args->arg);
-        args = args->next;
-      }
-    } break;
-    case LANG_ENTITY_CONDITIONAL: {
-      ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
-      ifStmt_t *ifstmtWalk;
-      expr_t *cond = ifstmt->cond;
-
-      free_expression(cond);
-      free_ast(ifstmt->body->content);
-
-      // Walk through the elifs.
-      ifstmtWalk = ifstmt->elif;
-
-      while (ifstmtWalk != NULL) {
-        free_expression(ifstmtWalk->cond);
-        free_ast(ifstmtWalk->body->content);
-        ifstmtWalk = ifstmtWalk->elif;
-      }
-
-      // Print the else if it is not NULL
-      if (ifstmt->endif != NULL) {
-        ifstmtWalk = ifstmt->endif;
-        free_ast(ifstmtWalk->body->content);
-      }
-      break;
-    }
-    case LANG_ENTITY_SYSTEM:
-      free_expression(((statement_t *)stmt)->content);
-      break;
-    case LANG_ENTITY_FIN:
-      free(stmt);
-      break;
-    default:
-      break;
-  }
-
-  free_ast(next);
 }
 
 argsList_t *copy_argsList(argsList_t *args) {
@@ -1105,28 +1059,109 @@ argsList_t *copy_argsList(argsList_t *args) {
 
 void free_keyvals(dictionary_t *dict) {
   keyValList_t *keyVals = dict->keyVals;
-  while (keyVals) {
-    keyValList_t *kv = keyVals;
-    if (kv->val->type == EXPR_TYPE_DICT) {
-      free_keyvals(kv->val->dict);
-      free(kv->val->dict);
-    } else if (kv->val->type == EXPR_TYPE_VECTOR) {
-      argsList_t *args = kv->val->vec->content;
-      while (args) {
-        argsList_t *arg = args;
-        args = args->next;
-        free(arg);
-      }
-      free(kv->val->vec);
-    } else if (kv->val->type == EXPR_TYPE_TEXT) {
-      free(kv->val->text);
-    }
-
-    free(kv->key->text);
-    free(kv->val);
-    free(kv->key);
-
-    keyVals = keyVals->next;
-    free(kv);
+  while (keyVals != NULL) {
+    keyValList_t *next = keyVals->next;
+    free_expression(keyVals->key);
+    free(keyVals->key);
+    free_expression(keyVals->val);
+    free(keyVals->val);
+    free(keyVals);
+    keyVals = next;
   }
+  dict->keyVals = NULL;
+}
+
+void free_dictionary(dictionary_t *dict) {
+  if (dict == NULL) return;
+  if (!dict->initialized) {
+    free_keyvals(dict);
+  } else if (dict->hash != NULL) {
+    /* Copies own their values; runtime dictionaries reference GC heap values. */
+    if (dict->hash->allocated_data) {
+      for (int i = 0; i < dict->hash->size; ++i) {
+        for (entry_t *entry = dict->hash->table[i]; entry != NULL; entry = entry->next) {
+          heapval_t *value = entry->data;
+          expr_t expr = {0};
+          switch (value->sv.type) {
+            case TEXT:
+              expr.type = EXPR_TYPE_TEXT;
+              expr.text = value->sv.t;
+              break;
+            case BIGINT:
+              expr.type = EXPR_TYPE_BIGINT;
+              expr.bigInt = value->sv.bigInt;
+              break;
+            case VECTORTYPE:
+              expr.type = EXPR_TYPE_VECTOR;
+              expr.vec = value->sv.vec;
+              break;
+            case DICTTYPE:
+              expr.type = EXPR_TYPE_DICT;
+              expr.dict = value->sv.dict;
+              break;
+            default:
+              continue;
+          }
+          free_expression(&expr);
+        }
+      }
+    }
+    hashtable_free(dict->hash);
+  }
+  free(dict);
+}
+
+/* Source names outlive loaded strings and interactive command buffers. */
+typedef struct source_file_t {
+  char *name;
+  struct source_file_t *next;
+} source_file_t;
+static source_file_t *source_files;
+
+static void free_source_files(void) {
+  while (source_files != NULL) {
+    source_file_t *next = source_files->next;
+    free(source_files->name);
+    free(source_files);
+    source_files = next;
+  }
+}
+
+const char *sourceFile(const char *file) {
+  source_file_t *entry;
+  if (file == NULL) file = "<stdin>";
+  for (entry = source_files; entry != NULL; entry = entry->next) {
+    if (strcmp(entry->name, file) == 0) return entry->name;
+  }
+  if (source_files == NULL) atexit(free_source_files);
+  entry = ast_emalloc(sizeof(*entry));
+  entry->name = ast_emalloc(strlen(file) + 1);
+  strcpy(entry->name, file);
+  entry->next = source_files;
+  source_files = entry;
+  return entry->name;
+}
+
+static void report_source_error(const source_location_t *location,
+                                const char *format, va_list args) {
+  if (location != NULL && location->file != NULL && location->first_line > 0) {
+    fprintf(stderr, "%s:%d:%d: ", location->file,
+            location->first_line, location->first_column);
+  }
+  vfprintf(stderr, format, args);
+}
+
+void reportSourceError(const source_location_t *location, const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  report_source_error(location, format, args);
+  va_end(args);
+}
+
+void reportRuntimeError(context_full_t *context, const char *format, ...) {
+  va_list args;
+  if (context != NULL) ++context->diagnostic_count;
+  va_start(args, format);
+  report_source_error(context != NULL ? &context->location : NULL, format, args);
+  va_end(args);
 }

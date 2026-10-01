@@ -55,8 +55,8 @@ typedef struct ctx_table_t {
 } ctx_table_t;
 
 heapval_t *locals_lookup(locals_stack_t *stack, char *id);
-void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv);
-void locals_remove(locals_stack_t *stack, char *id);
+void locals_push(locals_stack_t *stack, char *id, heapval_t *hpv, PROVIDE_CONTEXT_ARGS());
+void locals_remove(locals_stack_t *stack, char *id, PROVIDE_CONTEXT_ARGS());
 
 expr_t *stackval_to_expression(stackval_t *sv, int alloc, EXPRESSION_PARAMS());
 void push_stackval(stackval_t *stackval, PROVIDE_CONTEXT_ARGS());

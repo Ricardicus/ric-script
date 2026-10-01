@@ -46,7 +46,6 @@ int main(int argc, char *argv[]) {
   mission_t mission = runAsInteractive;
   statement_t *root = NULL;
   char *commandString = NULL;
-  MainParserFunc parse;
   int stacksize = RIC_STACKSIZE;
   int heapsize = RIC_HEAPSIZE;
   int ret = 0;
@@ -112,9 +111,6 @@ int main(int argc, char *argv[]) {
   /* Initialize hooks */
   initParser();
 
-  /* Get parser function */
-  parse = getParser();
-
   switch (mission) {
     case runAsInteractive: {
       /* Unbuffered mode */
@@ -130,29 +126,22 @@ int main(int argc, char *argv[]) {
     } break;
     case runAsCommand: {
       /* Run the interactive mode */
-      runCommand(argc, argv, interpret_statements_interactive, commandString, stacksize, heapsize);
+      ret = runCommand(argc, argv, interpret_statements_interactive, commandString, stacksize, heapsize);
     } break;
     case runAsIntepreter:
       /* Parse the program */
-      parse();
-      /* Get the root statement */
-      root = getRoot();
+      ret = parseSourceFile(fp, ParsedFile, &root);
       /* Set main root statement */
       setMainRoot(root);
       if (root != NULL) {
         /* Interpret the program */
         interpret_statements(argc, argv, root, stacksize, heapsize);
-      } else {
-        fprintf(stderr, "Failed to parse program!\r\n");
-        ret = 1;
       }
       break;
     case runAsASTPrinter:
       /* Parse the program */
-      parse();
+      ret = parseSourceFile(fp, ParsedFile, &root);
 
-      /* Get the root statement */
-      root = getRoot();
       /* Set main root statement */
       setMainRoot(root);
 
@@ -160,17 +149,12 @@ int main(int argc, char *argv[]) {
         /* Printt the program */
         printf("AST:\n\n");
         print_statements(root);
-      } else {
-        fprintf(stderr, "Failed to parse program!\r\n");
-        ret = 1;
       }
       break;
     case runAsASTPrinterAndInterpreter:
       /* Parse the program */
-      parse();
+      ret = parseSourceFile(fp, ParsedFile, &root);
 
-      /* Get the root statement */
-      root = getRoot();
       /* Set main root statement */
       setMainRoot(root);
       if (root != NULL) {
@@ -180,9 +164,6 @@ int main(int argc, char *argv[]) {
         /* Interpret the program */
         printf("\n\nOUTPUT:\n\n");
         interpret_statements(argc, argv, root, stacksize, heapsize);
-      } else {
-        fprintf(stderr, "Failed to parse program!\r\n");
-        ret = 1;
       }
       break;
     default:

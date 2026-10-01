@@ -4,13 +4,10 @@
  * This function imports the function definitions
  * of other ric scripts into the one executing
  */
-extern FILE *yyin;
-extern char *ParsedFile;
 int ric_load(LIBRARY_PARAMS()) {
   statement_t *root = NULL;
   statement_t *walk = NULL;
   statement_t *walkPrev = NULL;
-  MainParserFunc parse;
   stackval_t stv;
   int result = 0;
   FILE *fp = NULL;
@@ -25,32 +22,23 @@ int ric_load(LIBRARY_PARAMS()) {
   POP_VAL(&stv, sp, sc);
 
   if (stv.type != TEXT) {
-    fprintf(stderr, "load error: Need to provide a string as first argument.\n");
+    reportRuntimeError(PROVIDE_CONTEXT(), "load error: Need to provide a string as first argument.\n");
     return 1;
   }
 
   loadFile = stv.t;
 
-  ParsedFile = loadFile;
-
   fp = fopen(loadFile, "r");
 
   if (fp == NULL) {
-    fprintf(stderr, "load error: File '%s' not found.\n", loadFile);
+    reportRuntimeError(PROVIDE_CONTEXT(), "load error: File '%s' not found.\n", loadFile);
     return 1;
   }
 
-  /* Set yacc to parse this file */
-  yyin = fp;
-
-  /* Get parser function */
-  parse = getParser();
-
-  /* Parse the program */
-  parse();
-
-  /* Get the root statement */
-  root = getRoot();
+  if (parseSourceFile(fp, loadFile, &root) != 0) {
+    fclose(fp);
+    return 1;
+  }
 
   /* Get main root statement */
   mainRoot = getMainRoot();
@@ -64,7 +52,7 @@ int ric_load(LIBRARY_PARAMS()) {
       if (importedFuncDecs == NULL) {
         importedFuncDecs = malloc(sizeof(statement_t));
         if (importedFuncDecs == NULL) {
-          fprintf(stderr, "error: failed to allocate memory\n");
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: failed to allocate memory\n");
           exit(1);
         }
 
@@ -75,7 +63,7 @@ int ric_load(LIBRARY_PARAMS()) {
       } else {
         statement_t *newImport = malloc(sizeof(statement_t));
         if (newImport == NULL) {
-          fprintf(stderr, "error: failed to allocate memory\n");
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: failed to allocate memory\n");
           exit(1);
         }
 

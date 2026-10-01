@@ -1,11 +1,10 @@
 #include "libjson.h"
 
-static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS()) {
+static void loadCJSON(cJSON *json, int depth, int isArray, expr_t **out, EXPRESSION_PARAMS()) {
   cJSON *walk = json;
   int i = 0;
   keyValList_t *keyVals = NULL;
   keyValList_t *keyValsHead = NULL;
-  int isArray = 0;
 
   walk = json;
   i = 0;
@@ -36,10 +35,10 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
         val = newExpr_Text(walk->valuestring);
         break;
       case cJSON_Array:
-        loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+        loadCJSON(walk->child, depth + 1, 1, &val, EXPRESSION_ARGS());
         break;
       case cJSON_Object: {
-        loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+        loadCJSON(walk->child, depth + 1, 0, &val, EXPRESSION_ARGS());
         if (depth == 0) {
           *out = val;
           free(keyVal);
@@ -80,10 +79,6 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
 
   if (isArray && out != NULL) {
     expr_t *newVec = NULL;
-    stackval_t stv;
-    int dummy;
-    heapval_t *hpv = NULL;
-    heapval_t *hp = PROVIDE_CONTEXT()->hp;
     argsList_t *args = NULL;
     argsList_t *argsHead = NULL;
     keyValList_t *keyValsWalk = keyVals;
@@ -131,20 +126,9 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
       free(kvw);
     }
     newVec = newExpr_Vector(args);
-    stv.type = VECTORTYPE;
-    stv.vec = newVec->vec;
-
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
     *out = newVec;
   } else if (out != NULL) {
-    expr_t *outE = newExpr_Dictionary(keyVals);
-    dictionary_t *outEHead = allocNewDictionary(outE->dict, EXPRESSION_ARGS());
-    free(outE->dict);
-    expr_t *newExp = ast_emalloc(sizeof(expr_t));
-    newExp->type = EXPR_TYPE_DICT;
-    newExp->dict = outEHead;
-    free(outE);
-    *out = newExp;
+    *out = newExpr_Dictionary(keyVals);
   }
 }
 
@@ -154,7 +138,6 @@ int ric_json_convert(LIBRARY_PARAMS()) {
   class_t *argClass = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  int dummy;
   heapval_t *hpv = NULL;
   void *hp = PROVIDE_CONTEXT()->hp;
   char *resultBuf = NULL;
@@ -172,8 +155,8 @@ int ric_json_convert(LIBRARY_PARAMS()) {
       argClass = stv.classObj;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function '%s' got unexpected data type as argument, expected string or file.\n",
           LIBRARY_FUNC_NAME());
       return 1;
@@ -196,7 +179,7 @@ int ric_json_convert(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = resultBuf;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   PUSH_STRING(stv.t, sp, sc);
   return 0;
@@ -210,7 +193,6 @@ int ric_json_load(LIBRARY_PARAMS()) {
   char *argText = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  int dummy;
   heapval_t *hpv = NULL;
   void *hp = PROVIDE_CONTEXT()->hp;
 
@@ -225,8 +207,8 @@ int ric_json_load(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function '%s' got unexpected data type as argument, expected string or file.\n",
           LIBRARY_FUNC_NAME());
       return 1;
@@ -254,14 +236,15 @@ int ric_json_load(LIBRARY_PARAMS()) {
 
   /* Convert the cJSON object */
   result = NULL;
-  loadCJSON(json, 0, &result, EXPRESSION_ARGS());
+  loadCJSON(json, 0, 0, &result, EXPRESSION_ARGS());
 
   stv.type = DICTTYPE;
-  stv.dict = result->dict;
+  stv.dict = allocNewDictionary(result->dict, EXPRESSION_ARGS());
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
-  PUSH_DICTIONARY(result->dict, sp, sc);
+  PUSH_DICTIONARY(stv.dict, sp, sc);
+  free_expression(result);
   free(result);
 
   cJSON_Delete(json);

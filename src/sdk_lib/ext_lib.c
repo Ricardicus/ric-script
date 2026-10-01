@@ -180,7 +180,6 @@ int example_class_sub(LIBRARY_PARAMS()) {
 int example_class_init(LIBRARY_PARAMS()) {
   stackval_t stv;
   heapval_t *hvp = NULL;
-  int dummy;
   libFunction_t *classFuncABIadd = ast_ecalloc(sizeof(libFunction_t));
   libFunction_t *classFuncABIsub = ast_ecalloc(sizeof(libFunction_t));
   static char *class_name = "example_class";
@@ -219,7 +218,7 @@ int example_class_init(LIBRARY_PARAMS()) {
 
   stv.type = INT32TYPE;
   stv.i = 0;
-  ALLOC_HEAP(&stv, hp, &hvp, &dummy);
+  ALLOC_HEAP(&stv, hp, &hvp);
 
   /* Placing variable declaration in class variable member namespace */
   hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, class_var_member, hvp);

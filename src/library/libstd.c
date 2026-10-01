@@ -13,8 +13,9 @@ int ric_exit(LIBRARY_PARAMS()) {
       exitCode = (int)stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' expects a single integer as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' expects a single integer as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -39,7 +40,6 @@ int ric_type(LIBRARY_PARAMS()) {
 
 int ric_type_text(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   size_t strSize = 100;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -94,7 +94,7 @@ int ric_type_text(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = resultText;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);
@@ -104,7 +104,6 @@ int ric_type_text(LIBRARY_PARAMS()) {
 
 int ric_create_list(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   char *inText = NULL;
   char *c;
@@ -130,8 +129,9 @@ int ric_create_list(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text, int or data\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: %s unexpected input argument; expected text, int or data\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -182,7 +182,7 @@ int ric_create_list(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -193,7 +193,6 @@ int ric_create_list(LIBRARY_PARAMS()) {
 
 int ric_create_data(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   char *inText = NULL;
   vector_t *vec = NULL;
@@ -213,8 +212,9 @@ int ric_create_data(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text or list\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: %s unexpected input argument; expected text or list\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -240,20 +240,17 @@ int ric_create_data(LIBRARY_PARAMS()) {
 
       if (stv.type != INT32TYPE) {
         /* This is not ok */
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create data out of this list, only integer values acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: Cannot create data out of this list, only integer values acceptable\n");
         exit(1);
       }
 
       val = stv.i;
 
       if (val > 255 || val < 0) {
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create data out of this list, only integer values in the range [0, 255] acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(
+            PROVIDE_CONTEXT(),
+            "error: Cannot create data out of this list, only integer values in the range [0, 255] acceptable\n");
         exit(1);
       }
 
@@ -266,7 +263,7 @@ int ric_create_data(LIBRARY_PARAMS()) {
   stv.type = RAWDATATYPE;
   stv.rawdata = newRawData->rawdata;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(newRawData);
   /* Pushing the parsed value */
@@ -277,7 +274,6 @@ int ric_create_data(LIBRARY_PARAMS()) {
 
 int ric_create_text(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   char *inText = NULL;
   int32_t inInt;
@@ -311,8 +307,9 @@ int ric_create_text(LIBRARY_PARAMS()) {
       rawData = stv.rawdata;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected vector, data or text\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: %s unexpected input argument; expected vector, data or text\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -349,20 +346,17 @@ int ric_create_text(LIBRARY_PARAMS()) {
 
       if (stv.type != INT32TYPE) {
         /* This is not ok */
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create text out of this list, only integer values acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: Cannot create text out of this list, only integer values acceptable\n");
         exit(1);
       }
 
       val = stv.i;
 
       if (val > 255 || val < 0) {
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create text out of this list, only integer values in the range [0, 255] acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(
+            PROVIDE_CONTEXT(),
+            "error: Cannot create text out of this list, only integer values in the range [0, 255] acceptable\n");
         exit(1);
       }
 
@@ -377,7 +371,7 @@ int ric_create_text(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = newText->text;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(newText);
 
@@ -514,8 +508,9 @@ int ric_print(LIBRARY_PARAMS()) {
       printf("\n");
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -645,8 +640,9 @@ int ric_printf(LIBRARY_PARAMS()) {
       }
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -672,8 +668,9 @@ int ric_append(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument. (%d)\n",
-              LIBRARY_FUNC_NAME(), stv.type);
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument. (%d)\n",
+                         LIBRARY_FUNC_NAME(), stv.type);
       exit(1);
     } break;
   }
@@ -702,7 +699,7 @@ int ric_append(LIBRARY_PARAMS()) {
       entry = newExpr_ClassPtrCopy(stv.classObj);
       break;
     case DICTTYPE: {
-      entry = ast_emalloc(sizeof(expr_t));
+      entry = ast_ecalloc(sizeof(expr_t));
       entry->type = EXPR_TYPE_DICT;
       entry->dict = allocNewDictionary(stv.dict, EXPRESSION_ARGS());
     } break;
@@ -716,8 +713,9 @@ int ric_append(LIBRARY_PARAMS()) {
       entry = copy_vector(stv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -755,8 +753,9 @@ int ric_push(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -790,8 +789,9 @@ int ric_push(LIBRARY_PARAMS()) {
       entry = copy_vector(stv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -814,7 +814,6 @@ int ric_pop(LIBRARY_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
 
   /* Get vector reference */
   POP_VAL(&stv, sp, sc);
@@ -824,8 +823,9 @@ int ric_pop(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -851,8 +851,12 @@ int ric_pop(LIBRARY_PARAMS()) {
   evaluate_expression(walk->arg, EXPRESSION_ARGS());
   POP_VAL(&stv, sp, sc);
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   push_stackval(&stv, PROVIDE_CONTEXT());
+
+  /* The heap owns the returned value after removal from the vector. */
+  free(walk->arg);
+  free(walk);
 
   // Decrease vector size
   vec->length--;
@@ -869,7 +873,6 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
   int walk_count = 0;
 
   /* Get vector reference */
@@ -880,8 +883,9 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -894,8 +898,9 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
       idx = stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -931,8 +936,12 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
   evaluate_expression(walk->arg, EXPRESSION_ARGS());
   POP_VAL(&stv, sp, sc);
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   push_stackval(&stv, PROVIDE_CONTEXT());
+
+  /* The heap owns the returned value after removal from the vector. */
+  free(walk->arg);
+  free(walk);
 
   // Decrease vector size
   vec->length--;
@@ -946,7 +955,6 @@ int ric_pop_first(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Get vector reference */
@@ -957,8 +965,9 @@ int ric_pop_first(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -976,8 +985,12 @@ int ric_pop_first(LIBRARY_PARAMS()) {
   evaluate_expression(walk->arg, EXPRESSION_ARGS());
   POP_VAL(&stv, sp, sc);
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   push_stackval(&stv, PROVIDE_CONTEXT());
+
+  /* The heap owns the returned value after removal from the vector. */
+  free(walk->arg);
+  free(walk);
 
   // Decrease vector size
   vec->length--;
@@ -1015,9 +1028,9 @@ int ric_contains(LIBRARY_PARAMS()) {
       cachepot = stv.cachepot;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' expected string, dictionary or list as first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' expected string, dictionary or list as first argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1039,8 +1052,9 @@ int ric_contains(LIBRARY_PARAMS()) {
       containVec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' expected text or integer as first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' expected text or integer as first argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1171,8 +1185,9 @@ int ric_len(LIBRARY_PARAMS()) {
       argCachepot = stv.cachepot;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1207,7 +1222,6 @@ int ric_keys(LIBRARY_PARAMS()) {
   expr_t *resultVec = NULL;
   int32_t result = 0;
   heapval_t *hpv = NULL;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -1220,8 +1234,9 @@ int ric_keys(LIBRARY_PARAMS()) {
       argDict = stv.dict;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' expected dictionary as first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' expected dictionary as first argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1248,7 +1263,7 @@ int ric_keys(LIBRARY_PARAMS()) {
     }
 
   } else {
-    fprintf(stderr, "error %s: unexpected error\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "error %s: unexpected error\n", LIBRARY_FUNC_NAME());
     return 1;
   }
 
@@ -1256,7 +1271,7 @@ int ric_keys(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = resultVec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(resultVec);
 
   /* Pushing the list of keys */
@@ -1280,9 +1295,9 @@ int ric_is_defined(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected string.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected string.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1311,9 +1326,9 @@ int ric_sum(LIBRARY_PARAMS()) {
       arg1 = stv.vec;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected vector\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected vector\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1339,9 +1354,9 @@ int ric_sum(LIBRARY_PARAMS()) {
       mpz_add(*resultBigInt, left, *sv.bigInt);
       mpz_clear(left);
     } else {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type in vector, expected integers\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type in vector, expected integers\n",
+                         LIBRARY_FUNC_NAME());
     }
     walk = walk->next;
   }
@@ -1425,7 +1440,6 @@ static int _cmp_func_chars(const void *a, const void *b) {
 
 int ric_sort(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   int i = 0;
   vector_t *vec = NULL;
@@ -1446,8 +1460,8 @@ int ric_sort(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected list\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected input argument; expected list\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1462,9 +1476,8 @@ int ric_sort(LIBRARY_PARAMS()) {
       while (vecContent != NULL) {
         if (vecContent->arg->type != EXPR_TYPE_IVAL) {
           free(outSort);
-          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
-                  vecContent->arg->type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected datatype in list (%d)",
+                             LIBRARY_FUNC_NAME(), vecContent->arg->type);
           exit(1);
         }
 
@@ -1482,9 +1495,8 @@ int ric_sort(LIBRARY_PARAMS()) {
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         if (vecContent->arg->type != EXPR_TYPE_BIGINT) {
           free(outSortBigInt);
-          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
-                  vecContent->arg->type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected datatype in list (%d)",
+                             LIBRARY_FUNC_NAME(), vecContent->arg->type);
           exit(1);
         }
 
@@ -1502,9 +1514,8 @@ int ric_sort(LIBRARY_PARAMS()) {
       while (vecContent != NULL) {
         if (vecContent->arg->type != EXPR_TYPE_TEXT) {
           free(outSortBigInt);
-          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
-                  vecContent->arg->type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected datatype in list (%d)",
+                             LIBRARY_FUNC_NAME(), vecContent->arg->type);
           exit(1);
         }
 
@@ -1526,6 +1537,7 @@ int ric_sort(LIBRARY_PARAMS()) {
       e = newExpr_Ival(outSort[i]);
     } else if (outSortBigInt != NULL) {
       e = newExpr_BigInt(outSortBigInt[i]);
+      mpz_clear(*outSortBigInt[i]);
       free(outSortBigInt[i]);
     } else if (outSortChars != NULL) {
       e = newExpr_Text(outSortChars[i]);
@@ -1549,7 +1561,7 @@ int ric_sort(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = newVec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(newVec);
 
   /* Pushing the parsed value */
@@ -1560,7 +1572,6 @@ int ric_sort(LIBRARY_PARAMS()) {
 
 int ric_join(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   int i = 0;
   int first_iteration = 1;
@@ -1582,8 +1593,8 @@ int ric_join(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected list\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected input argument; expected list\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1597,8 +1608,8 @@ int ric_join(LIBRARY_PARAMS()) {
       joinArgLen = strlen(joinArg);
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected string\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected input argument; expected string\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1609,8 +1620,8 @@ int ric_join(LIBRARY_PARAMS()) {
     evaluate_expression(vecContent->arg, EXPRESSION_ARGS());
     POP_VAL(&stv, sp, sc);
     if (stv.type != TEXT) {
-      fprintf(stderr, "error %s.%d: %s unexpected list member type; expected string\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected list member type; expected string\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     }
     if (outputStringSize == 0) {
@@ -1653,7 +1664,7 @@ int ric_join(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = outChars;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_STRING(stv.t, sp, sc);
@@ -1675,12 +1686,11 @@ int ric_cachepot(LIBRARY_PARAMS()) {
 
 int ric_get_env(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
-  size_t strSize = 100;
+  size_t strSize;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  char *resultText = ast_ecalloc(strSize);
+  char *resultText;
   void *hp = PROVIDE_CONTEXT()->hp;
   char *env_requested = NULL;
   char *result = NULL;
@@ -1692,8 +1702,9 @@ int ric_get_env(LIBRARY_PARAMS()) {
       env_requested = stv.t;
       break;
     default:
-      fprintf(stderr, "error: function call '%s' expects a single string as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' expects a single string as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1704,12 +1715,12 @@ int ric_get_env(LIBRARY_PARAMS()) {
     resultText = ast_ecalloc(strSize + 1);
     snprintf(resultText, strSize + 1, "%s", result);
   } else {
-    result = ast_ecalloc(1);
+    resultText = ast_ecalloc(1);
   }
 
   stv.type = TEXT;
   stv.t = resultText;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);
@@ -1732,9 +1743,10 @@ int ric_system(LIBRARY_PARAMS()) {
       argText = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }

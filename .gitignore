@@ -24,6 +24,7 @@ venv
 node/node_modules
 
 # Python cache
+scripts/__pycache__
 tests/__pycache__
 src/sdk_lib/tests/__pycache__
 
@@ -39,3 +40,6 @@ cscope.files
 
 # Test files
 tests/testfile.txt
+
+# Per-sample memory-check reports
+memory-reports/

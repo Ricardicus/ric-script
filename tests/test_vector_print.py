@@ -1,3 +1,8 @@
+import subprocess
+from pathlib import Path
+
+import pytest
+
 import os
 from settings import *
 
@@ -68,3 +73,19 @@ def test_vector_print():
   for i in range(0,len(ric_result)):
     assert output_lines[i] == ric_result[i]
 
+
+
+@pytest.mark.parametrize("operation", ["pop()", "popFirst()", "popIdx(0)"])
+@pytest.mark.parametrize("value,expected", [
+    ('"kept"', "kept"),
+    ('bigInt("12345678901234567890")', "12345678901234567890"),
+    ('[1,2]', "[1,2]"),
+])
+def test_popped_value_survives_vector_removal(tmp_path, operation, value, expected):
+    script = tmp_path / "pop.ric"
+    script.write_text(f"v = [{value}]\nr = v.{operation}\nprint(v)\nprint(r)\n")
+    result = subprocess.run([str(Path(EXECUTABLE).resolve()), str(script)],
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert result.stdout.splitlines() == ["[]", expected]

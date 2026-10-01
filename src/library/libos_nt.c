@@ -17,8 +17,8 @@ int ric_sleep(LIBRARY_PARAMS()) {
       sleepTime = stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, integer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -48,9 +48,10 @@ int ric_is_directory(LIBRARY_PARAMS()) {
       string = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -78,7 +79,6 @@ int ric_ls(LIBRARY_PARAMS()) {
   argsList_t *vecContent = NULL;
   stackval_t stv;
   heapval_t *hpv;
-  int dummy;
   char *argText;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -92,9 +92,10 @@ int ric_ls(LIBRARY_PARAMS()) {
       argText = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -102,7 +103,8 @@ int ric_ls(LIBRARY_PARAMS()) {
   snprintf(sPath, sizeof(sPath), "%s\\*.*", argText);
 
   if ((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
-    fprintf(stderr, "error %s: Failed to open folder '%s'\n", LIBRARY_FUNC_NAME(), argText);
+    reportRuntimeError(PROVIDE_CONTEXT(), "error %s: Failed to open folder '%s'\n",
+                       LIBRARY_FUNC_NAME(), argText);
   } else {
     do {
       if (strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0) {
@@ -122,7 +124,7 @@ int ric_ls(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -145,9 +147,10 @@ int ric_cd(LIBRARY_PARAMS()) {
       argText = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -173,9 +176,10 @@ int ric_is_file(LIBRARY_PARAMS()) {
       filename = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -210,9 +214,10 @@ int ric_rm(LIBRARY_PARAMS()) {
       file = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -247,9 +252,9 @@ int ric_mkdir(LIBRARY_PARAMS()) {
       dir = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected string.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected string.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -344,7 +349,6 @@ int ric_find_files(LIBRARY_PARAMS()) {
   stackval_t stv;
   pcre *re;
   heapval_t *hpv;
-  int dummy;
   const char *pcre_error;
   int pcre_erroffset;
   char *pattern = NULL;
@@ -365,9 +369,9 @@ int ric_find_files(LIBRARY_PARAMS()) {
       pattern = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected string.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected string.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -375,15 +379,17 @@ int ric_find_files(LIBRARY_PARAMS()) {
   re = pcre_compile(pattern, 0, &pcre_error, &pcre_erroffset, NULL);
 
   if (re == NULL) {
-    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
-            LIBRARY_FUNC_NAME(), pattern);
-    fprintf(stderr, "       compilation failed at offset %d: %s\r\n", pcre_erroffset, pcre_error);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
+                       LIBRARY_FUNC_NAME(), pattern);
+    reportRuntimeError(PROVIDE_CONTEXT(), "       compilation failed at offset %d: %s\r\n",
+                       pcre_erroffset, pcre_error);
 
     vec = newExpr_Vector(NULL);
 
     stv.type = VECTORTYPE;
     stv.vec = vec->vec;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
     free(vec);
 
     /* Pushing the parsed value */
@@ -403,7 +409,7 @@ int ric_find_files(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -420,7 +426,6 @@ int ric_os_name(LIBRARY_PARAMS()) {
   void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   char *fixer = NULL;
-  int dummy;
   heapval_t *hpv = NULL;
 
   resultText = ast_ecalloc(resultTextLen);
@@ -455,7 +460,7 @@ int ric_os_name(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = resultText;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);
@@ -465,7 +470,8 @@ int ric_os_name(LIBRARY_PARAMS()) {
 int ric_env_keys(LIBRARY_PARAMS()) {
   LPCH envStrings = GetEnvironmentStrings();
   if (envStrings == NULL) {
-    fprintf(stderr, "error %s: GetEnvironmentStrings failed\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "error %s: GetEnvironmentStrings failed\n",
+                       LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -473,7 +479,6 @@ int ric_env_keys(LIBRARY_PARAMS()) {
   argsList_t *vecContent = NULL;
   stackval_t stv;
   heapval_t *hpv;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -503,7 +508,7 @@ int ric_env_keys(LIBRARY_PARAMS()) {
   vec = newExpr_Vector(vecContent);
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   PUSH_VECTOR(stv.vec, sp, sc);
@@ -513,7 +518,6 @@ int ric_env_keys(LIBRARY_PARAMS()) {
 int ric_set_env(LIBRARY_PARAMS()) {
   stackval_t stv_key, stv_val;
   heapval_t *hpv;
-  int dummy;
   expr_t *ret = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -524,8 +528,9 @@ int ric_set_env(LIBRARY_PARAMS()) {
   POP_VAL(&stv_val, sp, sc);
 
   if (stv_key.type != TEXT || stv_val.type != TEXT) {
-    fprintf(stderr, "error: function '%s' expected (string, string) as arguments.\n",
-            LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' expected (string, string) as arguments.\n",
+                       LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -533,7 +538,8 @@ int ric_set_env(LIBRARY_PARAMS()) {
   char *val = stv_val.t;
 
   if (_putenv_s(key, val) != 0) {
-    fprintf(stderr, "error: _putenv_s failed in '%s' for key='%s'\n", LIBRARY_FUNC_NAME(), key);
+    reportRuntimeError(PROVIDE_CONTEXT(), "error: _putenv_s failed in '%s' for key='%s'\n",
+                       LIBRARY_FUNC_NAME(), key);
     exit(1);
   }
 
@@ -541,7 +547,7 @@ int ric_set_env(LIBRARY_PARAMS()) {
   stackval_t stv;
   stv.type = TEXT;
   stv.t = strdup("");
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   PUSH_STRING(stv.t, sp, sc);
 
   return 0;

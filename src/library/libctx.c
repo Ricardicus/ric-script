@@ -15,8 +15,9 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
       func = stv.func;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -29,8 +30,9 @@ int ric_set_timeout(LIBRARY_PARAMS()) {
       timeout = stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -58,8 +60,9 @@ int ric_set_interval(LIBRARY_PARAMS()) {
       func = stv.func;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -72,8 +75,9 @@ int ric_set_interval(LIBRARY_PARAMS()) {
       timeout = stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }

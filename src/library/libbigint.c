@@ -19,8 +19,8 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
       intArg = stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -39,6 +39,10 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
 
   stv.type = BIGINT;
   stv.bigInt = n;
+
+  heapval_t *hpv;
+  void *hp = PROVIDE_CONTEXT()->hp;
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_BIGINT(n, sp, sc);

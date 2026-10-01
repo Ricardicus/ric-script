@@ -45,8 +45,8 @@ int ric_heap_insert(LIBRARY_PARAMS()) {
       arg = stv.prioqueue;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, expected a priority queue.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -64,8 +64,8 @@ int ric_heap_insert(LIBRARY_PARAMS()) {
       priority = stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, expected an integer.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -83,7 +83,6 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
   expr_t *popped = NULL;
   heapval_t *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -95,8 +94,8 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
       arg = stv.prioqueue;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, expected a priority queue.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -105,7 +104,8 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
 
   // check if size is larger than zero
   if (arg->size == 0) {
-    fprintf(stderr, "error: function call '%s' got empty priority queue.\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "error: function call '%s' got empty priority queue.\n",
+                       LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -117,7 +117,7 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
   // allocate the popped argument to the heap so that it
   // can be freed later
   POP_VAL(&stv, sp, sc);
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   push_expression(popped, EXPRESSION_ARGS());
 

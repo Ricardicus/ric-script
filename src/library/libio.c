@@ -14,9 +14,10 @@ int ric_open_file(LIBRARY_PARAMS()) {
       filename = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -56,8 +57,8 @@ int ric_close_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -78,7 +79,6 @@ int ric_read_file(LIBRARY_PARAMS()) {
   size_t datasize = 0;
   expr_t *e;
   size_t readBytes = 0;
-  int dummy;
   heapval_t *hpv;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -91,8 +91,8 @@ int ric_read_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -106,8 +106,8 @@ int ric_read_file(LIBRARY_PARAMS()) {
       datasize = (size_t)stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, integer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -124,7 +124,7 @@ int ric_read_file(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the raw data read */
   PUSH_RAWDATA(stv.rawdata, sp, sc);
@@ -140,7 +140,6 @@ int ric_read_file_all(LIBRARY_PARAMS()) {
   size_t datasize = 0;
   expr_t *e;
   size_t readBytes = 0;
-  int dummy;
   heapval_t *hpv;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -153,8 +152,8 @@ int ric_read_file_all(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -175,7 +174,7 @@ int ric_read_file_all(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the raw data read */
   PUSH_RAWDATA(stv.rawdata, sp, sc);
@@ -202,8 +201,8 @@ int ric_write_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -220,9 +219,10 @@ int ric_write_file(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -285,7 +285,6 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
   FILE *fp = NULL;
   char *buffer = NULL;
   heapval_t *hpv;
-  int dummy;
   size_t fz = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -298,8 +297,8 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -312,7 +311,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
 
   buffer = calloc(fz + 1, 1);
   if (buffer == NULL) {
-    fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -340,7 +339,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -356,7 +355,6 @@ int ric_read_input(LIBRARY_PARAMS()) {
   char *buffer = NULL;
   char *c = NULL;
   heapval_t *hpv;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -368,8 +366,8 @@ int ric_read_input(LIBRARY_PARAMS()) {
       inputText = stv.t;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -378,7 +376,7 @@ int ric_read_input(LIBRARY_PARAMS()) {
 
   buffer = calloc(MAX_LINE_LENGTH, 1);
   if (buffer == NULL) {
-    fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -397,7 +395,7 @@ int ric_read_input(LIBRARY_PARAMS()) {
 
     t = calloc(strlen(buffer) + 1, 1);
     if (t == NULL) {
-      fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
       exit(1);
     }
     snprintf(t, strlen(buffer) + 1, "%s", buffer);
@@ -407,7 +405,7 @@ int ric_read_input(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = t;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_STRING(stv.t, sp, sc);

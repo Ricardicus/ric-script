@@ -62,10 +62,29 @@ RETURN_AS_IS     [\"\'&|+<>:;?\-/()\.{}\*%\[\]^~!=_,@$\\{}]
 	return DOUBLE;
 }
 
+ /* Keep compound operators atomic so arithmetic and slices are unambiguous. */
+"::"|"+="|"-="|"*="|"/=" {
+    strcpy(yylval.id, yytext);
+    if (double_citation || simple_citation) {
+        return QUOTED_CHAR;
+    }
+    switch (yytext[0]) {
+        case ':': return MEMBER;
+        case '+': return ADD_ASSIGN;
+        case '-': return SUB_ASSIGN;
+        case '*': return MUL_ASSIGN;
+        case '/': return DIV_ASSIGN;
+    }
+}
+
 {RETURN_AS_IS} {
 	yylval.id[0] = yytext[0];
 	yylval.id[1] = 0;
 
+	if ( (yytext[0] == '\'' && double_citation) ||
+         (yytext[0] == '\"' && simple_citation) ) {
+        return QUOTED_CHAR;
+    }
 	if ( yytext[0] == '\'' && !double_citation ){
 		simple_citation = (simple_citation+1) % 2;
 	} else if ( yytext[0] == '\"' && !simple_citation ) {

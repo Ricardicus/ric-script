@@ -36,6 +36,9 @@ statement_t *root = NULL;
 
 %}
 
+/* Fail parser generation if a future edit introduces a conflict. */
+%expect 0
+
 %union { int val_int; double val_double; char id[256]; void *data; }
 
 %token<val_int> DIGIT
@@ -44,7 +47,9 @@ statement_t *root = NULL;
 %token RETURN
 %token FOREACH
 %token COMMENT
+%token MEMBER ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 %token NEWLINE
+%token<id> QUOTED_CHAR
 %type<id> otherChar
 %type<data> mathContentDigit
 %type<data> mathContentDouble
@@ -57,7 +62,7 @@ statement_t *root = NULL;
 %type<data> dictionary_keys_vals
 %type<data> dictionary_key_val
 %type<data> statements
-%type<data> statement statement_
+%type<data> statement
 %type<data> program
 %type<data> expressions
 %type<data> expression
@@ -65,7 +70,7 @@ statement_t *root = NULL;
 %type<data> parameters_list
 %type<data> body
 %type<data> function
-%type<data> indexer
+%type<data> indexer primaryExpression
 %type<data> class
 %type<data> classFunctionCall
 %type<data> functionCall
@@ -88,9 +93,14 @@ statement_t *root = NULL;
 %type<data> logical_b
 %type<data> logical_expression
 
+/* Prefer extending an expression over starting an adjacent statement. */
+%nonassoc STATEMENT_END
 %right'=' 
 %left '+' '-'
 %left '*' '/' '%'
+%nonassoc ATOM
+%nonassoc ID '(' '[' '.' ':' '!' MEMBER
+%nonassoc NEWLINE
 
 %%
 
@@ -110,19 +120,14 @@ program: statements {
     }
 };
 
-statements: 
-    _ statement_ statements {
+statements:
+    _ statement statements {
         statement_t *stmt = (statement_t*)$2;
         stmt->next = (statement_t*)$3;
         $$ = $2;
     }
     | _ { $$ = NULL; }
-    | { $$ = NULL; } /* EMPTY */
     ;
-
-statement_: statement _ {
-	$$ = $1;
-};
 
 statement:
     declaration {
@@ -134,7 +139,7 @@ statement:
     | forEachStatementFull {
         $$ = newStatement(LANG_ENTITY_FOREACH, $1);
     }
-    | expressions {
+    | expressions %prec STATEMENT_END {
         $$ = newStatement(LANG_ENTITY_EXPR, $1);
     }
     | ifStatement {
@@ -173,17 +178,15 @@ forEachStatementFull:
 };
 
 forEachStatement: 
-    '(' expressions FOREACH ID _ ')' body {
-    $$ = newForEach($2, $4, $7);
-} | '(' _ expressions FOREACH ID _ ')' body {
+    '(' _ expressions FOREACH ID _ ')' body {
     $$ = newForEach($3, $5, $8);
 };
 
-returnStatement: RETURN expressions {
+returnStatement: RETURN expressions %prec STATEMENT_END {
     $$ = $2;
 };
 
-continueStatement: '@' {
+continueStatement: '@' %prec STATEMENT_END {
     $$ = NULL;
 };
 
@@ -192,7 +195,7 @@ breakStatement: '!' '@' {
 };
 
 expressions: 
-    expression {
+    expression %prec ATOM {
       $$ = $1;
     }
     | expressions '+' _ expressions {
@@ -227,38 +230,9 @@ expressions:
     };
 
 expression:
-    indexedVector {
-      $$ = $1;
-    }
-    | mathContent {
-      $$ = $1;
-    }
-    | dictionary {
-      $$ = $1;
-    }
-    | vector {
-      $$ = $1;
-    }
-    | functionCall {
-      $$ = $1;
-    }
-    | classFunctionCall {
-      $$ = $1;
-    }
-    | stringContent {
-      $$ = $1;
-    }
-    | ID {
-      $$ = newExpr_ID($1);
-    }
-    | '-' ID {
-      expr_t *id = newExpr_ID($2);
-      expr_t *neg = newExpr_Ival(-1);
-      $$ = newExpr_OPMul(neg, id);
-    }
-    | '(' expressions ')' {
-      $$ = $2;
-    };
+    primaryExpression %prec ATOM { $$ = $1; }
+    | classFunctionCall { $$ = $1; }
+    ;
 
 ifStatement:
     '?' '[' logical_a ']' body {
@@ -381,14 +355,14 @@ condition:
     | expressions '>' '=' expressions {
         $$ = newConditional(CONDITION_GEQ, $1, $4);
     }
-    | expressions '<' expressions {
+    | expressions '<' expressions %prec STATEMENT_END {
         $$ = newConditional(CONDITION_LE, $1, $3);
     }
-    | expressions '>' expressions {
+    | expressions '>' expressions %prec STATEMENT_END {
         $$ = newConditional(CONDITION_GE, $1, $3);
     }
-    | '(' condition ')' {
-        $$ = $2;
+    | '(' _ condition ')' {
+        $$ = $3;
     };
 
 class: ';' ';' ID ';' ';' body {
@@ -433,14 +407,14 @@ function:
     };
 
 classFunctionCall:
-    expression ':' ':' ID '(' arguments_list ')' {
-        $$ = newClassFunCall($1, $4, $6);
+    expression MEMBER ID '(' arguments_list ')' {
+        $$ = newClassFunCall($1, $3, $5);
     }
-    | expression ':' ':' ID '(' ')' {
-        $$ = newClassFunCall($1, $4, NULL);
+    | expression MEMBER ID '(' ')' {
+        $$ = newClassFunCall($1, $3, NULL);
     }
-    | expression ':' ':' ID {
-        $$ = newClassAccesser($1, $4);
+    | expression MEMBER ID %prec ATOM {
+        $$ = newClassAccesser($1, $3);
     };
 
 
@@ -486,59 +460,59 @@ namespacedFunctionCall:
     };
 
 declaration: 
-    ID '=' expressions {
+    ID '=' expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | ID '+' '=' expressions {
+    | ID ADD_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPAdd(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | ID '-' '=' expressions {
+    | ID SUB_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPSub(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | ID '*' '=' expressions {
+    | ID MUL_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPMul(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | ID '/' '=' expressions {
+    | ID DIV_ASSIGN expressions %prec STATEMENT_END {
         expr_t *idexpr = newExpr_ID($1);
-        expr_t *valexpr = $4;
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPDiv(idexpr, valexpr);
 
         $$ = newDeclaration(idexpr,opadd);
     }
-    | indexedVector '+' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector ADD_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPAdd($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
     }
-    | indexedVector '-' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector SUB_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPSub($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
     }
-    | indexedVector '*' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector MUL_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPMul($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
     }
-    | indexedVector '/' '=' expressions {
-        expr_t *valexpr = $4;
+    | indexedVector DIV_ASSIGN expressions %prec STATEMENT_END {
+        expr_t *valexpr = $3;
         expr_t *opadd = newExpr_OPDiv($1, valexpr);
 
         $$ = newDeclaration($1,opadd);
@@ -548,7 +522,7 @@ declaration:
 
         $$ = newDeclaration(idexpr,$3);
     }
-    | indexedVector '=' expressions {
+    | indexedVector '=' expressions %prec STATEMENT_END {
         $$ = newDeclaration($1,$3);
     }
     | indexedVector '=' condition {
@@ -556,20 +530,20 @@ declaration:
     };
 
 dictionary:
-    '{' dictionary_keys_vals _ '}' {
-      $$ = newExpr_Dictionary($2);
+    '{' _ dictionary_keys_vals '}' {
+      $$ = newExpr_Dictionary($3);
     };
 
 dictionary_keys_vals:
-    dictionary_keys_vals ',' _ dictionary_key_val {
+    dictionary_keys_vals ',' _ dictionary_key_val _ {
       keyValList_t *left = (keyValList_t*)$1;
       keyValList_t *right = (keyValList_t*)$4;
 
       right->next = left;
       $$ = right;
     }
-    | _ dictionary_key_val _ {
-      $$ = $2;
+    | dictionary_key_val _ {
+      $$ = $1;
     }
     | {
         $$ = NULL;
@@ -653,42 +627,68 @@ indexedVector:
         expr_t *index = $3;
 
         $$ = newExpr_VectorIndex(id, index);
+    };
+
+/* A colon at the top level of an index denotes a slice. Parenthesize
+ * member access in an index, e.g. values[(object::field)], to distinguish
+ * it from a slice such as values[start::step]. */
+primaryExpression:
+    indexedVector %prec ATOM {
+      $$ = $1;
     }
-    | indexedVector '[' expressions ']' {
-      $$ = newExpr_VectorIndex($1, $3);
+    | mathContent {
+      $$ = $1;
     }
-    | indexedVector '[' indexer ']' {
-      expr_t *id = $1;
-      expr_t *index = $3;
-      $$ = newExpr_VectorIndex(id, index);
+    | dictionary {
+      $$ = $1;
+    }
+    | vector {
+      $$ = $1;
+    }
+    | functionCall {
+      $$ = $1;
+    }
+    | stringContent {
+      $$ = $1;
+    }
+    | ID %prec STATEMENT_END {
+      $$ = newExpr_ID($1);
+    }
+    | '-' ID {
+      expr_t *id = newExpr_ID($2);
+      expr_t *neg = newExpr_Ival(-1);
+      $$ = newExpr_OPMul(neg, id);
+    }
+    | '(' _ expressions ')' {
+      $$ = $3;
     };
 
 indexer:
-  expression ':' expression {
+  primaryExpression ':' primaryExpression {
     $$ = newExpr_Indexer($1, $3, NULL);
   }
-  | ':' expression {
+  | ':' primaryExpression {
     $$ = newExpr_Indexer(NULL, $2, NULL);
   }
-  | expression ':' {
+  | primaryExpression ':' {
     $$ = newExpr_Indexer($1, NULL, NULL);
   }
   | ':' {
     $$ = newExpr_Indexer(NULL, NULL, NULL);
   }
-  | expression ':' expression ':' expression {
+  | primaryExpression ':' primaryExpression ':' primaryExpression {
     $$ = newExpr_Indexer($1, $3, $5);
   }
-  | ':' expression ':' expression {
+  | ':' primaryExpression ':' primaryExpression {
     $$ = newExpr_Indexer(NULL, $2, $4);
   }
-  | expression ':' ':' expression {
-    $$ = newExpr_Indexer($1, NULL, $4);
+  | primaryExpression MEMBER primaryExpression {
+    $$ = newExpr_Indexer($1, NULL, $3);
   }
-  | ':' ':' expression {
-    $$ = newExpr_Indexer(NULL, NULL, $3);
+  | MEMBER primaryExpression {
+    $$ = newExpr_Indexer(NULL, NULL, $2);
   }
-  |  ':' ':' {
+  |  MEMBER {
     $$ = newExpr_Indexer(NULL, NULL, NULL);
   }
 
@@ -860,13 +860,8 @@ otherChar:
         $$[0] = yyval.id[0];
         $$[1] = 0;
     }
-    | '\'' {
-        $$[0] = yyval.id[0];
-        $$[1] = 0;
-    }
-    | '\"' {
-        $$[0] = yyval.id[0];
-        $$[1] = 0;
+    | QUOTED_CHAR {
+        strcpy($$, $1);
     }
     | '.' {
         $$[0] = yyval.id[0];

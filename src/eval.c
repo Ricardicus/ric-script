@@ -1645,6 +1645,10 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.bigInt = e->bigInt;
 
         mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
+        heapval_t *hpv;
+        int heapUpdated;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        ALLOC_HEAP(&sv, hp, &hpv, &heapUpdated);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
@@ -1656,6 +1660,10 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
 
+        heapval_t *hpv;
+        int heapUpdated;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        ALLOC_HEAP(&sv, hp, &hpv, &heapUpdated);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
@@ -1666,6 +1674,10 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.bigInt = e->bigInt;
         mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
 
+        heapval_t *hpv;
+        int heapUpdated;
+        void *hp = PROVIDE_CONTEXT()->hp;
+        ALLOC_HEAP(&sv, hp, &hpv, &heapUpdated);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
@@ -3608,7 +3620,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   void *hp = PROVIDE_CONTEXT()->hp;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  dictionary_t *newDict = ast_ecalloc(sizeof(dictionary_t));
   newDict->type = dict->type;
   newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   newDict->hash->allocated_key = 1;
@@ -3656,6 +3668,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case BIGINT: {
           expr_t *e = newExpr_BigInt(sv.bigInt);
           sv.bigInt = e->bigInt;
+          free(e);
           ALLOC_HEAP(&sv, hp, &hvp, &dummy);
           break;
         }
@@ -3692,7 +3705,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         case DICTTYPE: {
-          dictionary_t *newDict = allocNewDictionary(expVal->dict, EXPRESSION_ARGS());
+          dictionary_t *newDict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
           stackval_t newStackVal = sv;
 
           newStackVal.dict = newDict;
@@ -3746,6 +3759,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case BIGINT: {
             expr_t *e = newExpr_BigInt(sv.bigInt);
             sv.bigInt = e->bigInt;
+            free(e);
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
             break;
           }
@@ -3813,7 +3827,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  dictionary_t *newDict = ast_emalloc(sizeof(dictionary_t));
+  dictionary_t *newDict = ast_ecalloc(sizeof(dictionary_t));
   newDict->type = dict->type;
   newDict->hash = hashtable_new(DICTIONARY_STANDARD_SIZE, DICTIONARY_STANDARD_LOAD);
   newDict->hash->allocated_key = 1;
@@ -3826,7 +3840,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       expr_t *expKey = walk->key;
       expr_t *expVal = walk->val;
       char *newKeyStr = NULL;                          // Storing the key
-      heapval_t *hvp = ast_emalloc(sizeof(heapval_t)); // Storing the value
+      heapval_t *hvp = ast_ecalloc(sizeof(heapval_t)); // Storing the value
       stackval_t sv;
 
       evaluate_expression(expKey, EXPRESSION_ARGS());
@@ -3861,6 +3875,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case BIGINT: {
           expr_t *e = newExpr_BigInt(sv.bigInt);
           sv.bigInt = e->bigInt;
+          free(e);
           hvp->sv = sv;
           break;
         }
@@ -3897,7 +3912,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           break;
         }
         case DICTTYPE: {
-          dictionary_t *newDict = copyNewDictionary(expVal->dict, EXPRESSION_ARGS());
+          dictionary_t *newDict = copyNewDictionary(sv.dict, EXPRESSION_ARGS());
           stackval_t newStackVal = sv;
 
           newStackVal.dict = newDict;
@@ -3930,7 +3945,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         char *key = walk->key;
         heapval_t *hpVal = (heapval_t *)walk->data;
         char *newKeyStr = NULL;                          // Storing the key
-        heapval_t *hvp = ast_emalloc(sizeof(heapval_t)); // Storing the value
+        heapval_t *hvp = ast_ecalloc(sizeof(heapval_t)); // Storing the value
         stackval_t sv;
         size_t len = strlen(key);
         newKeyStr = ast_emalloc(len + 2);
@@ -3950,6 +3965,7 @@ dictionary_t *copyNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case BIGINT: {
             expr_t *e = newExpr_BigInt(sv.bigInt);
             sv.bigInt = e->bigInt;
+            free(e);
             hvp->sv = sv;
             break;
           }

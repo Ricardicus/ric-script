@@ -113,3 +113,18 @@ def test_newlines_empty_containers_and_foreach():
             1 < 2) ] { print("yes") }
 
     """) == ["{}", "2", "1", "[0,1,2]", "3", "yes"]
+
+
+@pytest.mark.parametrize("source,output", [
+    ("v = [12] v[0] += 6 v[0] -= 2 v[0] *= 3 v[0] /= 4 print(v[0])", "12"),
+    ('print([(3 ... i) { ? [ i > 0 ] { i } ~ { 0 } }])', "[0,1,2]"),
+    ('a = bigInt(2) print(a + a) print(a + 1) print(1 + a)', "4\n3\n3"),
+])
+def test_file_execution_cleans_up_owned_and_shared_ast_nodes(tmp_path, source, output):
+    script = tmp_path / "cleanup.ric"
+    script.write_text(source)
+    result = subprocess.run([EXECUTABLE, str(script)], capture_output=True,
+                            text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert result.stderr == ""
+    assert result.stdout.strip() == output

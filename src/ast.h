@@ -415,6 +415,7 @@ void interpret_statements_interactive(int argc, char *argv[], statement_t *stmt,
                                       int stacksize, int heapsize);
 void free_expression(expr_t *expr);
 void free_keyvals(dictionary_t *dict);
+void free_dictionary(dictionary_t *dict);
 
 typedef enum stackvaltypes {
   INT32TYPE = 1,
@@ -615,7 +616,7 @@ typedef struct libFunction {
 #define SETUP_HEAP(hp, hb, hz)                         \
   do {                                                 \
     intptr_t p;                                        \
-    heapval_t hpbv;                                    \
+    heapval_t hpbv = {0};                              \
     *hb = calloc(hz + 2, sizeof(heapval_t));           \
     assert(*hb != NULL);                               \
     p = ((intptr_t)*hb) % sizeof(heapval_t);           \
@@ -900,7 +901,7 @@ extern void releaseContext(void *);
   do {                                                                                  \
     int32_t size = (*(heapval_t *)hp).sv.i;                                             \
     int32_t i = 0;                                                                      \
-    heapval_t hv;                                                                       \
+    heapval_t hv = {0};                                                                 \
     getContext(PROVIDE_CONTEXT()->syncCtx);                                             \
     if (upd != NULL) {                                                                  \
       *(int *)upd = 1;                                                                  \
@@ -935,7 +936,7 @@ extern void releaseContext(void *);
   do {                                                                                     \
     int32_t size = (*(heapval_t *)hp).sv.i;                                                \
     int32_t i = 0;                                                                         \
-    heapval_t hv;                                                                          \
+    heapval_t hv = {0};                                                                    \
     if (upd != NULL) {                                                                     \
       *(int *)upd = 1;                                                                     \
     }                                                                                      \

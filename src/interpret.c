@@ -1445,8 +1445,7 @@ static void flush_arg(void *key, void *val) {
   if (e->type == EXPR_TYPE_TEXT) {
     free(e->text);
   } else if (e->type == EXPR_TYPE_DICT) {
-    hashtable_free(e->dict->hash);
-    free(e->dict);
+    free_dictionary(e->dict);
   } else if (e->type == EXPR_TYPE_RAWDATA) {
     free(e->rawdata->data);
     free(e->rawdata);
@@ -1464,12 +1463,7 @@ static void flush_arg(void *key, void *val) {
     argsList_t *next;
     while (walk != NULL) {
       next = walk->next;
-      if (walk->arg->type != EXPR_TYPE_DICT) {
-        free_expression(walk->arg);
-      } else {
-        free_hashtable_table(walk->arg->dict->hash);
-        free(walk->arg->dict);
-      }
+      free_expression(walk->arg);
       free(walk->arg);
       free(walk);
       walk = next;

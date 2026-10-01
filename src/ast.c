@@ -540,32 +540,32 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case EXPR_TYPE_OPADD: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPAdd(left, right);
       break;
     }
     case EXPR_TYPE_OPSUB: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPSub(left, right);
       break;
     }
     case EXPR_TYPE_OPMUL: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPMul(left, right);
       break;
     }
     case EXPR_TYPE_OPMOD: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPMod(left, right);
       break;
     } break;
     case EXPR_TYPE_OPDIV: {
-      expr_t *left = (expr_t *)expr->add.left;
-      expr_t *right = (expr_t *)expr->add.right;
+      expr_t *left = newExpr_Copy(expr->add.left, alloc, EXPRESSION_ARGS());
+      expr_t *right = newExpr_Copy(expr->add.right, alloc, EXPRESSION_ARGS());
       newExp = newExpr_OPDiv(left, right);
       break;
     }
@@ -749,6 +749,10 @@ void free_expression(expr_t *expr) {
   if (expr == NULL) return;
 
   switch (expr->type) {
+    case EXPR_TYPE_DICT: {
+      free_dictionary(expr->dict);
+      break;
+    }
     case EXPR_TYPE_ID: {
       free(expr->id.id);
       break;
@@ -801,12 +805,29 @@ void free_expression(expr_t *expr) {
     case EXPR_TYPE_CLASSACCESSER: {
       classAccesser_t *cls = expr->classAccess;
       free_expression(cls->classID);
+      free(cls->classID);
       free(cls->memberID);
+      free(cls);
     } break;
 
     case EXPR_TYPE_FVAL:
     case EXPR_TYPE_IVAL:
     case EXPR_TYPE_UVAL:
+      break;
+    case EXPR_TYPE_INDEXER: {
+      indexer_t *index = expr->indexer;
+      free_expression(index->left);
+      free(index->left);
+      free_expression(index->right);
+      free(index->right);
+      free_expression(index->offset);
+      free(index->offset);
+      free(index);
+      break;
+    }
+    case EXPR_TYPE_RAWDATA:
+      free(expr->rawdata->data);
+      free(expr->rawdata);
       break;
     case EXPR_TYPE_VECTOR_IDX: {
       vectorIndex_t *vecIdx = expr->vecIdx;
@@ -821,35 +842,20 @@ void free_expression(expr_t *expr) {
       free(expr->text);
       break;
     }
-    case EXPR_TYPE_OPADD: {
+    case EXPR_TYPE_OPADD:
+    case EXPR_TYPE_OPSUB:
+    case EXPR_TYPE_OPMUL:
+    case EXPR_TYPE_OPMOD:
+    case EXPR_TYPE_OPDIV: {
       free_expression((expr_t *)expr->add.left);
+      free(expr->add.left);
       free_expression((expr_t *)expr->add.right);
+      free(expr->add.right);
       break;
     }
-    case EXPR_TYPE_OPSUB: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-
-      break;
-    }
-    case EXPR_TYPE_OPMUL: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-      break;
-    }
-    case EXPR_TYPE_OPMOD: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-      break;
-    } break;
     case EXPR_TYPE_PRIOQUEUE: {
       free_priority_queue(expr->prioqueue);
     } break;
-    case EXPR_TYPE_OPDIV: {
-      free_expression((expr_t *)expr->add.left);
-      free_expression((expr_t *)expr->add.right);
-      break;
-    }
     case EXPR_TYPE_CACHEPOT: {
       cachepot_t *cachepot = expr->cachepot;
       hashtable_t *hash = cachepot->hash;
@@ -878,28 +884,6 @@ void free_expression(expr_t *expr) {
       hashtable_free(hash);
       free(cachepot);
     } break;
-    case EXPR_TYPE_DICT: {
-      dictionary_t *dict = expr->dict;
-      if (dict->initialized) {
-        hashtable_free(dict->hash);
-        free(dict->hash);
-      } else {
-        keyValList_t *walk = dict->keyVals;
-        keyValList_t *walk_next;
-
-        while (walk != NULL) {
-          walk_next = walk->next;
-          free_expression(walk->key);
-          free(walk->key);
-          free_expression(walk->val);
-          free(walk->val);
-          free(walk);
-          walk = walk_next;
-        }
-      }
-      free(dict);
-      break;
-    }
     case EXPR_TYPE_FUNCCALL: {
       functionCall_t *call = expr->func;
       argsList_t *args = call->args;
@@ -918,7 +902,10 @@ void free_expression(expr_t *expr) {
     case EXPR_TYPE_COND: {
       ifCondition_t *cond = expr->cond;
       free_expression((expr_t *)cond->left);
+      free(cond->left);
       free_expression((expr_t *)cond->right);
+      free(cond->right);
+      free(cond);
     } break;
     case EXPR_TYPE_VECTOR: {
       vector_t *vec = expr->vec;
@@ -929,12 +916,7 @@ void free_expression(expr_t *expr) {
 
       while (vecWalk < len) {
         if (v->arg != NULL) {
-          if (v->arg->type != EXPR_TYPE_DICT) {
-            free_expression(v->arg);
-          } else {
-            hashtable_free(v->arg->dict->hash);
-            free(v->arg->dict);
-          }
+          free_expression(v->arg);
           free(v->arg);
           v->arg = NULL;
         }
@@ -946,7 +928,6 @@ void free_expression(expr_t *expr) {
 
       if (vec->forEach != NULL) {
         free_ast(vec->forEach);
-        free(vec->forEach);
       }
 
       free(vec);
@@ -959,126 +940,105 @@ void free_expression(expr_t *expr) {
   }
 }
 
-void free_ast(statement_t *stmt) {
-  entity_eval_t *eval = (entity_eval_t *)stmt;
-  void *next = NULL;
+static void free_arguments(argsList_t *args) {
+  while (args != NULL) {
+    argsList_t *next = args->next;
+    free_expression(args->arg);
+    free(args->arg);
+    free(args);
+    args = next;
+  }
+}
 
+static void free_if_statement(ifStmt_t *stmt) {
   if (stmt == NULL) return;
+  free_expression(stmt->cond);
+  free(stmt->cond);
+  free_ast((statement_t *)stmt->body);
+  free_if_statement(stmt->elif);
+  free_if_statement(stmt->endif);
+  free(stmt);
+}
 
-  switch (eval->entity) {
-    case LANG_ENTITY_DECL:
-    case LANG_ENTITY_FUNCDECL:
-    case LANG_ENTITY_FUNCCALL:
-    case LANG_ENTITY_CONDITIONAL:
-    case LANG_ENTITY_CONTINUE:
-    case LANG_ENTITY_BREAK:
-    case LANG_ENTITY_SYSTEM:
-    case LANG_ENTITY_CLASSDECL:
-    case LANG_ENTITY_FIN:
-    case LANG_ENTITY_FOREACH:
-    case LANG_ENTITY_RETURN:
-      // case LANG_ENTITY_EXPR:
-      next = ((statement_t *)stmt)->next;
-      break;
-    case LANG_ENTITY_EMPTY_MATH:
-    case LANG_ENTITY_EMPTY_STR: {
-      next = ((statement_t *)stmt)->next;
-      break;
+void free_ast(statement_t *stmt) {
+  while (stmt != NULL) {
+    if (stmt->entity == LANG_ENTITY_BODY) {
+      body_t *body = (body_t *)stmt;
+      free_ast(body->content);
+      free(body);
+      return;
     }
-    case LANG_ENTITY_BODY: {
-      next = ((body_t *)stmt)->content;
-    } break;
-    default:
-      break;
+    statement_t *next = stmt->next;
+    switch (stmt->entity) {
+      case LANG_ENTITY_DECL: {
+        declaration_t *decl = stmt->content;
+        /* Compound assignments share their target with the left operand. */
+        expr_t *value = decl->val;
+        int sharedTarget = value != NULL &&
+            (value->type == EXPR_TYPE_OPADD || value->type == EXPR_TYPE_OPSUB ||
+             value->type == EXPR_TYPE_OPMUL || value->type == EXPR_TYPE_OPDIV) &&
+            value->add.left == decl->id;
+        if (!sharedTarget) {
+          free_expression(decl->id);
+          free(decl->id);
+        }
+        free_expression(decl->val);
+        free(decl->val);
+        free(decl);
+        break;
+      }
+      case LANG_ENTITY_EXPR:
+      case LANG_ENTITY_RETURN:
+      case LANG_ENTITY_SYSTEM:
+      case LANG_ENTITY_EMPTY_MATH:
+      case LANG_ENTITY_EMPTY_STR:
+        free_expression(stmt->content);
+        free(stmt->content);
+        break;
+      case LANG_ENTITY_FOREACH: {
+        forEachStmt_t *foreach = stmt->content;
+        free_expression(foreach->root);
+        free(foreach->root);
+        free_expression(foreach->entry);
+        free(foreach->entry);
+        free(foreach->uniqueUnfoldIncID);
+        free(foreach->uniqueUnfoldRootID);
+        free_ast((statement_t *)foreach->body);
+        free(foreach);
+        break;
+      }
+      case LANG_ENTITY_CLASSDECL: {
+        class_t *class = stmt->content;
+        free_ast(class->defines);
+        free(class->id);
+        free(class);
+        break;
+      }
+      case LANG_ENTITY_FUNCDECL: {
+        functionDef_t *func = stmt->content;
+        free(func->id.id);
+        free_arguments(func->params);
+        free_ast(func->body);
+        free(func);
+        break;
+      }
+      case LANG_ENTITY_FUNCCALL: {
+        functionCall_t *call = stmt->content;
+        free_expression(call->id);
+        free(call->id);
+        free_arguments(call->args);
+        free(call);
+        break;
+      }
+      case LANG_ENTITY_CONDITIONAL:
+        free_if_statement(stmt->content);
+        break;
+      default:
+        break;
+    }
+    free(stmt);
+    stmt = next;
   }
-
-  switch (eval->entity) {
-    case LANG_ENTITY_DECL: {
-      declaration_t *decl = ((statement_t *)stmt)->content;
-      /* Evaluating the expression among global variables */
-      // free_expression(decl->val);
-      free_expression(decl->id);
-    } break;
-    case LANG_ENTITY_EXPR: {
-      expr_t *e = ((statement_t *)stmt)->content;
-
-      free_expression(e);
-      free(e);
-    } break;
-    case LANG_ENTITY_FOREACH: {
-      forEachStmt_t *foreach = ((statement_t *)stmt)->content;
-
-      free_expression(foreach->root);
-      free_expression(foreach->entry);
-      free(foreach->uniqueUnfoldIncID);
-      free_ast(foreach->body->content);
-    } break;
-    case LANG_ENTITY_EMPTY_STR: {
-      free_expression(((statement_t *)stmt)->content);
-      break;
-    }
-    case LANG_ENTITY_CLASSDECL: {
-      class_t *class = ((statement_t *)stmt)->content;
-      free_ast(class->defines);
-      break;
-    }
-    case LANG_ENTITY_FUNCDECL: {
-      functionDef_t *funcDef = ((statement_t *)stmt)->content;
-      argsList_t *args = funcDef->params;
-      free(funcDef->id.id);
-      while (args != NULL) {
-        free_expression(args->arg);
-        free(args->arg);
-        args = args->next;
-      }
-      free_ast(funcDef->body);
-    } break;
-    case LANG_ENTITY_FUNCCALL: {
-      functionCall_t *funcCall = ((statement_t *)stmt)->content;
-      argsList_t *args = funcCall->args;
-
-      free_expression(funcCall->id);
-      while (args != NULL) {
-        free_expression(args->arg);
-        free(args->arg);
-        args = args->next;
-      }
-    } break;
-    case LANG_ENTITY_CONDITIONAL: {
-      ifStmt_t *ifstmt = ((statement_t *)stmt)->content;
-      ifStmt_t *ifstmtWalk;
-      expr_t *cond = ifstmt->cond;
-
-      free_expression(cond);
-      free_ast(ifstmt->body->content);
-
-      // Walk through the elifs.
-      ifstmtWalk = ifstmt->elif;
-
-      while (ifstmtWalk != NULL) {
-        free_expression(ifstmtWalk->cond);
-        free_ast(ifstmtWalk->body->content);
-        ifstmtWalk = ifstmtWalk->elif;
-      }
-
-      // Print the else if it is not NULL
-      if (ifstmt->endif != NULL) {
-        ifstmtWalk = ifstmt->endif;
-        free_ast(ifstmtWalk->body->content);
-      }
-      break;
-    }
-    case LANG_ENTITY_SYSTEM:
-      free_expression(((statement_t *)stmt)->content);
-      break;
-    case LANG_ENTITY_FIN:
-      free(stmt);
-      break;
-    default:
-      break;
-  }
-
-  free_ast(next);
 }
 
 argsList_t *copy_argsList(argsList_t *args) {
@@ -1099,30 +1059,56 @@ argsList_t *copy_argsList(argsList_t *args) {
 
 void free_keyvals(dictionary_t *dict) {
   keyValList_t *keyVals = dict->keyVals;
-  while (keyVals) {
-    keyValList_t *kv = keyVals;
-    if (kv->val->type == EXPR_TYPE_DICT) {
-      free_keyvals(kv->val->dict);
-      free(kv->val->dict);
-    } else if (kv->val->type == EXPR_TYPE_VECTOR) {
-      argsList_t *args = kv->val->vec->content;
-      while (args) {
-        argsList_t *arg = args;
-        args = args->next;
-        free(arg);
-      }
-      free(kv->val->vec);
-    } else if (kv->val->type == EXPR_TYPE_TEXT) {
-      free(kv->val->text);
-    }
-
-    free(kv->key->text);
-    free(kv->val);
-    free(kv->key);
-
-    keyVals = keyVals->next;
-    free(kv);
+  while (keyVals != NULL) {
+    keyValList_t *next = keyVals->next;
+    free_expression(keyVals->key);
+    free(keyVals->key);
+    free_expression(keyVals->val);
+    free(keyVals->val);
+    free(keyVals);
+    keyVals = next;
   }
+  dict->keyVals = NULL;
+}
+
+void free_dictionary(dictionary_t *dict) {
+  if (dict == NULL) return;
+  if (!dict->initialized) {
+    free_keyvals(dict);
+  } else if (dict->hash != NULL) {
+    /* Copies own their values; runtime dictionaries reference GC heap values. */
+    if (dict->hash->allocated_data) {
+      for (int i = 0; i < dict->hash->size; ++i) {
+        for (entry_t *entry = dict->hash->table[i]; entry != NULL; entry = entry->next) {
+          heapval_t *value = entry->data;
+          expr_t expr = {0};
+          switch (value->sv.type) {
+            case TEXT:
+              expr.type = EXPR_TYPE_TEXT;
+              expr.text = value->sv.t;
+              break;
+            case BIGINT:
+              expr.type = EXPR_TYPE_BIGINT;
+              expr.bigInt = value->sv.bigInt;
+              break;
+            case VECTORTYPE:
+              expr.type = EXPR_TYPE_VECTOR;
+              expr.vec = value->sv.vec;
+              break;
+            case DICTTYPE:
+              expr.type = EXPR_TYPE_DICT;
+              expr.dict = value->sv.dict;
+              break;
+            default:
+              continue;
+          }
+          free_expression(&expr);
+        }
+      }
+    }
+    hashtable_free(dict->hash);
+  }
+  free(dict);
 }
 
 /* Source names outlive loaded strings and interactive command buffers. */

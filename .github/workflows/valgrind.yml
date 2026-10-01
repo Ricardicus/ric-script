@@ -9,54 +9,20 @@ on:
 
 jobs:
   valgrind:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Install build tools and Valgrind
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential flex bison valgrind libcurl4-openssl-dev
     - name: Build project
       run: make
-    - name: Update packet manager
-      run: sudo apt-get update
-    - name: Install Valgrind
-      run: sudo apt-get install valgrind
-    - name: Run valgrind on example.ric
-      run: valgrind --leak-check=full ./ric samples/example.ric
-    - name: Run valgrind on vector_print.ric
-      run: valgrind --leak-check=full ./ric samples/vector_print.ric
-    - name: Run valgrind on func_ptr.ric
-      run: valgrind --leak-check=full ./ric samples/func_ptr.ric
-    - name: Run valgrind on function_within_function.ric
-      run: valgrind --leak-check=full ./ric samples/function_within_function.ric
-    - name: Run valgrind on gcd.ric with arguments
-      run: valgrind --leak-check=full ./ric samples/gcd.ric 21390 3210
-    - name: Run valgrind on demo.ric
-      run: valgrind --leak-check=full ./ric samples/demo.ric
-    - name: Run valgrind on args.ric with arguments
-      run: valgrind --leak-check=full ./ric samples/args.ric 1 2 3 hello
-    - name: Run valgrind on dictionary.ric
-      run: valgrind --leak-check=full ./ric samples/dictionary.ric
-    - name: Run valgrind on load.ric
-      run: cd tests && valgrind --leak-check=full ../ric ../samples/load.ric
-    - name: Run valgrind on locals_globals.ric
-      run: valgrind --leak-check=full ./ric samples/locals_globals.ric
-    - name: Run valgrind on listFiles.ric
-      run: valgrind --leak-check=full ./ric samples/listFiles.ric samples
-    - name: Run valgrind on class.ric
-      run: valgrind --leak-check=full ./ric samples/class.ric
-    - name: Run valgrind on rpn_classes.ric
-      run: printf "2 1000 * 10 5 + + 19 100 * 8 10 * 5 + + -\nq" | valgrind ./ric samples/rpn_classes.ric
-    - name: Run valgrind on time_of_day.ric
-      run: valgrind --leak-check=full ./ric samples/time_of_day.ric
-    - name: Run valgrind on types.ric
-      run: valgrind --leak-check=full ./ric samples/types.ric
-    - name: Run valgrind on threads.ric
-      run: valgrind --leak-check=full ./ric samples/threads.ric
-    - name: Run valgrind on forEaching.ric
-      run: valgrind --leak-check=full ./ric samples/forEaching.ric
-    - name: Run valgrind on raw data data_print.ric
-      run: valgrind --leak-check=full ./ric samples/data_print.ric
-    - name: Run valgrind on JSON test json.ric
-      run: valgrind --leak-check=full ./ric samples/json.ric
-    - name: Run valgrind on big integer test
-      run: valgrind --leak-check=full ./ric samples/bigIntegers.ric
+    - name: Check every supported sample
+      run: python3 scripts/check_sample_memory.py --tool valgrind
+    - name: Save per-sample memory reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: sample-memory-reports
+        path: memory-reports/*.log

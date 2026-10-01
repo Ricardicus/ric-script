@@ -821,6 +821,7 @@ stringEdition:
         expr_t *e = (expr_t*)$1;
         snprintf(buffer, sizeof(buffer), "%lf", e->fval);
         $$ = newExpr_Text(buffer);
+        free_expression($1);
         free($1);
       ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }
@@ -839,6 +840,7 @@ stringEdition:
           snprintf(buffer, sizeof(buffer), "%s", d->text);
         }
         $$ = newExpr_Text(buffer);
+        free_expression($1);
         free($1);
       ((expr_t*)$$)->location = SOURCE_LOCATION(@$);
     }

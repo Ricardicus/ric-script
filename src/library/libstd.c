@@ -859,6 +859,10 @@ int ric_pop(LIBRARY_PARAMS()) {
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
   push_stackval(&stv, PROVIDE_CONTEXT());
 
+  /* The heap owns the returned value after removal from the vector. */
+  free(walk->arg);
+  free(walk);
+
   // Decrease vector size
   vec->length--;
   return 0;
@@ -941,6 +945,10 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
   push_stackval(&stv, PROVIDE_CONTEXT());
 
+  /* The heap owns the returned value after removal from the vector. */
+  free(walk->arg);
+  free(walk);
+
   // Decrease vector size
   vec->length--;
   return 0;
@@ -986,6 +994,10 @@ int ric_pop_first(LIBRARY_PARAMS()) {
 
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
   push_stackval(&stv, PROVIDE_CONTEXT());
+
+  /* The heap owns the returned value after removal from the vector. */
+  free(walk->arg);
+  free(walk);
 
   // Decrease vector size
   vec->length--;
@@ -1534,6 +1546,7 @@ int ric_sort(LIBRARY_PARAMS()) {
       e = newExpr_Ival(outSort[i]);
     } else if (outSortBigInt != NULL) {
       e = newExpr_BigInt(outSortBigInt[i]);
+      mpz_clear(*outSortBigInt[i]);
       free(outSortBigInt[i]);
     } else if (outSortChars != NULL) {
       e = newExpr_Text(outSortChars[i]);
@@ -1685,10 +1698,10 @@ int ric_get_env(LIBRARY_PARAMS()) {
   stackval_t stv;
   int dummy;
   heapval_t *hpv;
-  size_t strSize = 100;
+  size_t strSize;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  char *resultText = ast_ecalloc(strSize);
+  char *resultText;
   void *hp = PROVIDE_CONTEXT()->hp;
   char *env_requested = NULL;
   char *result = NULL;
@@ -1713,7 +1726,7 @@ int ric_get_env(LIBRARY_PARAMS()) {
     resultText = ast_ecalloc(strSize + 1);
     snprintf(resultText, strSize + 1, "%s", result);
   } else {
-    result = ast_ecalloc(1);
+    resultText = ast_ecalloc(1);
   }
 
   stv.type = TEXT;

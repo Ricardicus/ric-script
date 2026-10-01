@@ -80,10 +80,6 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
 
   if (isArray && out != NULL) {
     expr_t *newVec = NULL;
-    stackval_t stv;
-    int dummy;
-    heapval_t *hpv = NULL;
-    heapval_t *hp = PROVIDE_CONTEXT()->hp;
     argsList_t *args = NULL;
     argsList_t *argsHead = NULL;
     keyValList_t *keyValsWalk = keyVals;
@@ -131,20 +127,9 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
       free(kvw);
     }
     newVec = newExpr_Vector(args);
-    stv.type = VECTORTYPE;
-    stv.vec = newVec->vec;
-
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
     *out = newVec;
   } else if (out != NULL) {
-    expr_t *outE = newExpr_Dictionary(keyVals);
-    dictionary_t *outEHead = allocNewDictionary(outE->dict, EXPRESSION_ARGS());
-    free(outE->dict);
-    expr_t *newExp = ast_ecalloc(sizeof(expr_t));
-    newExp->type = EXPR_TYPE_DICT;
-    newExp->dict = outEHead;
-    free(outE);
-    *out = newExp;
+    *out = newExpr_Dictionary(keyVals);
   }
 }
 
@@ -257,11 +242,12 @@ int ric_json_load(LIBRARY_PARAMS()) {
   loadCJSON(json, 0, &result, EXPRESSION_ARGS());
 
   stv.type = DICTTYPE;
-  stv.dict = result->dict;
+  stv.dict = allocNewDictionary(result->dict, EXPRESSION_ARGS());
 
   ALLOC_HEAP(&stv, hp, &hpv, &dummy);
 
-  PUSH_DICTIONARY(result->dict, sp, sc);
+  PUSH_DICTIONARY(stv.dict, sp, sc);
+  free_expression(result);
   free(result);
 
   cJSON_Delete(json);

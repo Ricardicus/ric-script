@@ -564,10 +564,10 @@ static const yytype_uint16 yyrline[] =
      646,   653,   660,   672,   675,   678,   681,   684,   687,   690,
      694,   700,   705,   709,   713,   717,   721,   725,   729,   733,
      737,   743,   757,   763,   766,   769,   774,   781,   810,   815,
-     819,   827,   845,   851,   857,   863,   868,   873,   877,   881,
-     885,   889,   893,   897,   901,   905,   909,   913,   917,   921,
-     924,   928,   932,   936,   940,   944,   948,   952,   956,   960,
-     964,   968
+     819,   828,   847,   853,   859,   865,   870,   875,   879,   883,
+     887,   891,   895,   899,   903,   907,   911,   915,   919,   923,
+     926,   930,   934,   938,   942,   946,   950,   954,   958,   962,
+     966,   970
 };
 #endif
 
@@ -2911,13 +2911,14 @@ yyreduce:
         expr_t *e = (expr_t*)(yyvsp[(1) - (1)].data);
         snprintf(buffer, sizeof(buffer), "%lf", e->fval);
         (yyval.data) = newExpr_Text(buffer);
+        free_expression((yyvsp[(1) - (1)].data));
         free((yyvsp[(1) - (1)].data));
       ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 131:
-#line 827 "gram.y"
+#line 828 "gram.y"
     {
         char buffer[256];
         expr_t *d = (expr_t*)(yyvsp[(1) - (1)].data);
@@ -2933,13 +2934,14 @@ yyreduce:
           snprintf(buffer, sizeof(buffer), "%s", d->text);
         }
         (yyval.data) = newExpr_Text(buffer);
+        free_expression((yyvsp[(1) - (1)].data));
         free((yyvsp[(1) - (1)].data));
       ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 132:
-#line 845 "gram.y"
+#line 847 "gram.y"
     {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "->");
@@ -2949,7 +2951,7 @@ yyreduce:
     break;
 
   case 133:
-#line 851 "gram.y"
+#line 853 "gram.y"
     {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "...");
@@ -2959,7 +2961,7 @@ yyreduce:
     break;
 
   case 134:
-#line 857 "gram.y"
+#line 859 "gram.y"
     {
         (yyval.data) = newExpr_Text((yyvsp[(1) - (1)].id));
       ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
@@ -2967,7 +2969,7 @@ yyreduce:
     break;
 
   case 135:
-#line 863 "gram.y"
+#line 865 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2975,7 +2977,7 @@ yyreduce:
     break;
 
   case 136:
-#line 868 "gram.y"
+#line 870 "gram.y"
     {
         (yyval.id)[0] = ' ';
         (yyval.id)[1] = 0;
@@ -2983,7 +2985,7 @@ yyreduce:
     break;
 
   case 137:
-#line 873 "gram.y"
+#line 875 "gram.y"
     {
         (yyval.id)[0] = '?';
         (yyval.id)[1] = 0;
@@ -2991,7 +2993,7 @@ yyreduce:
     break;
 
   case 138:
-#line 877 "gram.y"
+#line 879 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2999,7 +3001,7 @@ yyreduce:
     break;
 
   case 139:
-#line 881 "gram.y"
+#line 883 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3007,7 +3009,7 @@ yyreduce:
     break;
 
   case 140:
-#line 885 "gram.y"
+#line 887 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3015,7 +3017,7 @@ yyreduce:
     break;
 
   case 141:
-#line 889 "gram.y"
+#line 891 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3023,7 +3025,7 @@ yyreduce:
     break;
 
   case 142:
-#line 893 "gram.y"
+#line 895 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3031,7 +3033,7 @@ yyreduce:
     break;
 
   case 143:
-#line 897 "gram.y"
+#line 899 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3039,7 +3041,7 @@ yyreduce:
     break;
 
   case 144:
-#line 901 "gram.y"
+#line 903 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3047,7 +3049,7 @@ yyreduce:
     break;
 
   case 145:
-#line 905 "gram.y"
+#line 907 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3055,7 +3057,7 @@ yyreduce:
     break;
 
   case 146:
-#line 909 "gram.y"
+#line 911 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3063,7 +3065,7 @@ yyreduce:
     break;
 
   case 147:
-#line 913 "gram.y"
+#line 915 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3071,7 +3073,7 @@ yyreduce:
     break;
 
   case 148:
-#line 917 "gram.y"
+#line 919 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3079,14 +3081,14 @@ yyreduce:
     break;
 
   case 149:
-#line 921 "gram.y"
+#line 923 "gram.y"
     {
         strcpy((yyval.id), (yyvsp[(1) - (1)].id));
     }
     break;
 
   case 150:
-#line 924 "gram.y"
+#line 926 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3094,7 +3096,7 @@ yyreduce:
     break;
 
   case 151:
-#line 928 "gram.y"
+#line 930 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3102,7 +3104,7 @@ yyreduce:
     break;
 
   case 152:
-#line 932 "gram.y"
+#line 934 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3110,7 +3112,7 @@ yyreduce:
     break;
 
   case 153:
-#line 936 "gram.y"
+#line 938 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3118,7 +3120,7 @@ yyreduce:
     break;
 
   case 154:
-#line 940 "gram.y"
+#line 942 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3126,7 +3128,7 @@ yyreduce:
     break;
 
   case 155:
-#line 944 "gram.y"
+#line 946 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3134,7 +3136,7 @@ yyreduce:
     break;
 
   case 156:
-#line 948 "gram.y"
+#line 950 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3142,7 +3144,7 @@ yyreduce:
     break;
 
   case 157:
-#line 952 "gram.y"
+#line 954 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3150,7 +3152,7 @@ yyreduce:
     break;
 
   case 158:
-#line 956 "gram.y"
+#line 958 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3158,7 +3160,7 @@ yyreduce:
     break;
 
   case 159:
-#line 960 "gram.y"
+#line 962 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3166,7 +3168,7 @@ yyreduce:
     break;
 
   case 160:
-#line 964 "gram.y"
+#line 966 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3174,7 +3176,7 @@ yyreduce:
     break;
 
   case 161:
-#line 968 "gram.y"
+#line 970 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3183,7 +3185,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3187 "y.tab.c"
+#line 3189 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3403,7 +3405,7 @@ yyreturn:
 }
 
 
-#line 973 "gram.y"
+#line 975 "gram.y"
 
 
 void yyerror(const char *s) {

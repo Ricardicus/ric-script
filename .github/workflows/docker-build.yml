@@ -5,6 +5,9 @@ name: Building docker image
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   setup-build:

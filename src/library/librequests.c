@@ -82,7 +82,8 @@ static struct curl_slist *build_headers_from_dict(dictionary_t *dict, int *len,
       POP_VAL(&sv, sp, sc);
 
       if (sv.type != TEXT) {
-        fprintf(stderr, "error: expression for headers must be a string, was: %d\n", sv.type);
+        reportRuntimeError(PROVIDE_CONTEXT(), "error: expression for headers must be a string, was: %d\n",
+                           sv.type);
         if (!*interactive) {
           exit(1);
         }
@@ -94,7 +95,8 @@ static struct curl_slist *build_headers_from_dict(dictionary_t *dict, int *len,
       POP_VAL(&sv, sp, sc);
 
       if (sv.type != TEXT) {
-        fprintf(stderr, "error: expression for headers must be a string, was: %d\n", sv.type);
+        reportRuntimeError(PROVIDE_CONTEXT(), "error: expression for headers must be a string, was: %d\n",
+                           sv.type);
         if (!*interactive) {
           exit(1);
         }
@@ -130,15 +132,16 @@ static int perform_request(const char *method, EXPRESSION_PARAMS()) {
   if (strcmp(method, "POST") == 0) {
     POP_VAL(&stv_body, sp, sc);
     if (stv_body.type != TEXT) {
-      fprintf(stderr, "error: POST body must be a string.\n");
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: POST body must be a string.\n");
       return 1;
     }
     post_body = stv_body.t;
   }
 
   if (stv_url.type != TEXT || stv_headers.type != DICTTYPE) {
-    fprintf(stderr, "error: '%s' request expects a string (url) and a dictionary (headers).\n",
-            method);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: '%s' request expects a string (url) and a dictionary (headers).\n",
+                       method);
     return 1;
   }
 
@@ -154,8 +157,8 @@ static int perform_request(const char *method, EXPRESSION_PARAMS()) {
   curl_slist_free_all(curl_headers);
 
   if (res != CURLE_OK) {
-    fprintf(stderr, "error: %s HTTP %s request failed: %s\n", url, method,
-            curl_easy_strerror(res));
+    reportRuntimeError(PROVIDE_CONTEXT(), "error: %s HTTP %s request failed: %s\n", url, method,
+                       curl_easy_strerror(res));
     PUSH_INT(-1, sp, sc);
     return 0;
   }

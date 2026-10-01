@@ -64,11 +64,11 @@ char *readCommand(char *lineBuffer, size_t size, const char *prompt) {
 
   if (size == 0) return NULL;
   lineBuffer[0] = '\0';
-  printf("%s", prompt);
-  fflush(stdout);
 
   /* Pipes and redirected input use ordinary line input, without terminal edits. */
   if (!isatty(STDIN_FILENO) || tcgetattr(STDIN_FILENO, &original) < 0) {
+    printf("%s", prompt);
+    fflush(stdout);
     if (fgets(lineBuffer, size, stdin) == NULL) return NULL;
     lineBuffer[strcspn(lineBuffer, "\r\n")] = '\0';
     save_history(lineBuffer);
@@ -87,6 +87,10 @@ char *readCommand(char *lineBuffer, size_t size, const char *prompt) {
     free(draft);
     return NULL;
   }
+
+  /* Show the prompt only after arrow keys can be read without canonical edits. */
+  printf("%s", prompt);
+  fflush(stdout);
 
   while (1) {
     c = read_character();

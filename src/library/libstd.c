@@ -13,8 +13,9 @@ int ric_exit(LIBRARY_PARAMS()) {
       exitCode = (int)stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' expects a single integer as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' expects a single integer as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -130,8 +131,9 @@ int ric_create_list(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text, int or data\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: %s unexpected input argument; expected text, int or data\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -213,8 +215,9 @@ int ric_create_data(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected text or list\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: %s unexpected input argument; expected text or list\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -240,20 +243,17 @@ int ric_create_data(LIBRARY_PARAMS()) {
 
       if (stv.type != INT32TYPE) {
         /* This is not ok */
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create data out of this list, only integer values acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: Cannot create data out of this list, only integer values acceptable\n");
         exit(1);
       }
 
       val = stv.i;
 
       if (val > 255 || val < 0) {
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create data out of this list, only integer values in the range [0, 255] acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(
+            PROVIDE_CONTEXT(),
+            "error: Cannot create data out of this list, only integer values in the range [0, 255] acceptable\n");
         exit(1);
       }
 
@@ -311,8 +311,9 @@ int ric_create_text(LIBRARY_PARAMS()) {
       rawData = stv.rawdata;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected vector, data or text\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: %s unexpected input argument; expected vector, data or text\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -349,20 +350,17 @@ int ric_create_text(LIBRARY_PARAMS()) {
 
       if (stv.type != INT32TYPE) {
         /* This is not ok */
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create text out of this list, only integer values acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "error: Cannot create text out of this list, only integer values acceptable\n");
         exit(1);
       }
 
       val = stv.i;
 
       if (val > 255 || val < 0) {
-        fprintf(
-            stderr,
-            "error %s.%d: Cannot create text out of this list, only integer values in the range [0, 255] acceptable\n",
-            ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+        reportRuntimeError(
+            PROVIDE_CONTEXT(),
+            "error: Cannot create text out of this list, only integer values in the range [0, 255] acceptable\n");
         exit(1);
       }
 
@@ -514,8 +512,9 @@ int ric_print(LIBRARY_PARAMS()) {
       printf("\n");
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -645,8 +644,9 @@ int ric_printf(LIBRARY_PARAMS()) {
       }
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -672,8 +672,9 @@ int ric_append(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument. (%d)\n",
-              LIBRARY_FUNC_NAME(), stv.type);
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument. (%d)\n",
+                         LIBRARY_FUNC_NAME(), stv.type);
       exit(1);
     } break;
   }
@@ -702,7 +703,7 @@ int ric_append(LIBRARY_PARAMS()) {
       entry = newExpr_ClassPtrCopy(stv.classObj);
       break;
     case DICTTYPE: {
-      entry = ast_emalloc(sizeof(expr_t));
+      entry = ast_ecalloc(sizeof(expr_t));
       entry->type = EXPR_TYPE_DICT;
       entry->dict = allocNewDictionary(stv.dict, EXPRESSION_ARGS());
     } break;
@@ -716,8 +717,9 @@ int ric_append(LIBRARY_PARAMS()) {
       entry = copy_vector(stv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -755,8 +757,9 @@ int ric_push(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -790,8 +793,9 @@ int ric_push(LIBRARY_PARAMS()) {
       entry = copy_vector(stv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
     } break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -824,8 +828,9 @@ int ric_pop(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -880,8 +885,9 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -894,8 +900,9 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
       idx = stv.i;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -957,8 +964,9 @@ int ric_pop_first(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function call '%s' got an unexpected first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' got an unexpected first argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -1015,9 +1023,9 @@ int ric_contains(LIBRARY_PARAMS()) {
       cachepot = stv.cachepot;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' expected string, dictionary or list as first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' expected string, dictionary or list as first argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1039,8 +1047,9 @@ int ric_contains(LIBRARY_PARAMS()) {
       containVec = stv.vec;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' expected text or integer as first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' expected text or integer as first argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1171,8 +1180,9 @@ int ric_len(LIBRARY_PARAMS()) {
       argCachepot = stv.cachepot;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' got unexpected data type as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1220,8 +1230,9 @@ int ric_keys(LIBRARY_PARAMS()) {
       argDict = stv.dict;
       break;
     default: {
-      fprintf(stderr, "error: function '%s' expected dictionary as first argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' expected dictionary as first argument.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1248,7 +1259,7 @@ int ric_keys(LIBRARY_PARAMS()) {
     }
 
   } else {
-    fprintf(stderr, "error %s: unexpected error\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "error %s: unexpected error\n", LIBRARY_FUNC_NAME());
     return 1;
   }
 
@@ -1280,9 +1291,9 @@ int ric_is_defined(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected string.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected string.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1311,9 +1322,9 @@ int ric_sum(LIBRARY_PARAMS()) {
       arg1 = stv.vec;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected vector\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected vector\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -1339,9 +1350,9 @@ int ric_sum(LIBRARY_PARAMS()) {
       mpz_add(*resultBigInt, left, *sv.bigInt);
       mpz_clear(left);
     } else {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type in vector, expected integers\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type in vector, expected integers\n",
+                         LIBRARY_FUNC_NAME());
     }
     walk = walk->next;
   }
@@ -1446,8 +1457,8 @@ int ric_sort(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected list\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected input argument; expected list\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1462,9 +1473,8 @@ int ric_sort(LIBRARY_PARAMS()) {
       while (vecContent != NULL) {
         if (vecContent->arg->type != EXPR_TYPE_IVAL) {
           free(outSort);
-          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
-                  vecContent->arg->type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected datatype in list (%d)",
+                             LIBRARY_FUNC_NAME(), vecContent->arg->type);
           exit(1);
         }
 
@@ -1482,9 +1492,8 @@ int ric_sort(LIBRARY_PARAMS()) {
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         if (vecContent->arg->type != EXPR_TYPE_BIGINT) {
           free(outSortBigInt);
-          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
-                  vecContent->arg->type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected datatype in list (%d)",
+                             LIBRARY_FUNC_NAME(), vecContent->arg->type);
           exit(1);
         }
 
@@ -1502,9 +1511,8 @@ int ric_sort(LIBRARY_PARAMS()) {
       while (vecContent != NULL) {
         if (vecContent->arg->type != EXPR_TYPE_TEXT) {
           free(outSortBigInt);
-          fprintf(stderr, "error %s.%d: %s unexpected datatype in list (%d)",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME(),
-                  vecContent->arg->type);
+          reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected datatype in list (%d)",
+                             LIBRARY_FUNC_NAME(), vecContent->arg->type);
           exit(1);
         }
 
@@ -1582,8 +1590,8 @@ int ric_join(LIBRARY_PARAMS()) {
       vec = stv.vec;
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected list\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected input argument; expected list\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1597,8 +1605,8 @@ int ric_join(LIBRARY_PARAMS()) {
       joinArgLen = strlen(joinArg);
       break;
     default:
-      fprintf(stderr, "error %s.%d: %s unexpected input argument; expected string\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected input argument; expected string\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1609,8 +1617,8 @@ int ric_join(LIBRARY_PARAMS()) {
     evaluate_expression(vecContent->arg, EXPRESSION_ARGS());
     POP_VAL(&stv, sp, sc);
     if (stv.type != TEXT) {
-      fprintf(stderr, "error %s.%d: %s unexpected list member type; expected string\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "error: %s unexpected list member type; expected string\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
     }
     if (outputStringSize == 0) {
@@ -1692,8 +1700,9 @@ int ric_get_env(LIBRARY_PARAMS()) {
       env_requested = stv.t;
       break;
     default:
-      fprintf(stderr, "error: function call '%s' expects a single string as argument.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function call '%s' expects a single string as argument.\n",
+                         LIBRARY_FUNC_NAME());
       exit(1);
       break;
   }
@@ -1732,9 +1741,10 @@ int ric_system(LIBRARY_PARAMS()) {
       argText = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }

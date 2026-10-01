@@ -28,16 +28,17 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
 
   buffer = calloc(bufferSize, 1);
   if (buffer == NULL) {
-    fprintf(stderr, "error: Memory error, failed to list xattr.\n");
+    reportRuntimeError(PROVIDE_CONTEXT(), "error: Memory error, failed to list xattr.\n");
     exit(1);
   }
 
@@ -88,9 +89,10 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -103,9 +105,10 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
       arg2 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -118,9 +121,10 @@ int ric_set_xattr(LIBRARY_PARAMS()) {
       arg3 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -182,9 +186,10 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -197,18 +202,20 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
       arg2 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
 
   resultValue = calloc(valueMaxLen + 1, 1);
   if (resultValue == NULL) {
-    fprintf(stderr,
-            "error: calloc memory error during function call '%s', sorry I will terminate.\n",
-            LIBRARY_FUNC_NAME());
+    reportRuntimeError(
+        PROVIDE_CONTEXT(),
+        "error: calloc memory error during function call '%s', sorry I will terminate.\n",
+        LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -240,9 +247,10 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -255,9 +263,10 @@ int ric_remove_xattr(LIBRARY_PARAMS()) {
       arg2 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -358,17 +367,19 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
       arg1 = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
 
   rc = regcomp(&re, arg1, REG_EXTENDED | REG_NOSUB);
   if (rc != 0) {
-    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
-            LIBRARY_FUNC_NAME(), arg1);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
+                       LIBRARY_FUNC_NAME(), arg1);
 
     vec = newExpr_Vector(NULL);
 

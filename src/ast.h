@@ -216,8 +216,21 @@ typedef struct cachepot {
   hashtable_t *hash;
 } cachepot_t;
 
+/* Filenames are interned for the lifetime of the interpreter. */
+typedef struct source_location_t {
+  const char *file;
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+} source_location_t;
+
+const char *sourceFile(const char *file);
+void reportSourceError(const source_location_t *location, const char *format, ...);
+
 typedef struct expr_s {
   int type;
+  source_location_t location;
 
   union {
     ID_t id;
@@ -268,7 +281,8 @@ typedef struct keyValList {
 typedef struct statement_s {
   int entity;
   int line;
-  char file[25];
+  const char *file;
+  source_location_t location;
   void *content;
   struct statement_s *next;
 } statement_t;
@@ -485,7 +499,11 @@ typedef struct context_full_t {
   hashtable_t *funcDecs;
   hashtable_t *varDecs;
   int *stacksize;
+  source_location_t location;
+  unsigned int diagnostic_count;
 } context_full_t;
+
+void reportRuntimeError(context_full_t *context, const char *format, ...);
 
 #define DEF_NEW_CONTEXT()        \
   context_full_t exeCtx;         \
@@ -523,7 +541,7 @@ typedef struct context_full_t {
 
 #define PROVIDE_CONTEXT_INIT_MEMBERS()                                                   \
   &r0, &r1, &r2, &ax, &f0, &f1, &f2, &sp, &sb, hp, hb, &st, &ed, &sc, &depth, varLocals, \
-      &interactive, classCtx, syncCtx, classDecs, funcDecs, varDecs, &stacksize
+      &interactive, classCtx, syncCtx, classDecs, funcDecs, varDecs, &stacksize, {0}, 0
 #define PROVIDE_CONTEXT_MEMBERS()                                                        \
   r0, r1, r2, ax, f0, f1, f2, sp, sb, hp, hb, st, ed, sc, depth, varLocals, interactive, \
       classCtx, syncCtx, classDecs, funcDecs, varDecs, stacksize
@@ -614,7 +632,7 @@ typedef struct libFunction {
   do {                                                   \
     stackval_t stackval;                                 \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {          \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix it!\n", \
               GENERAL_ERROR_ISSUE_URL);                  \
@@ -630,7 +648,7 @@ This is not supposed to happen, I hope I can fix it!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -646,7 +664,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -662,7 +680,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -678,7 +696,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -694,7 +712,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -711,7 +729,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -728,7 +746,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -745,7 +763,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -762,7 +780,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -779,7 +797,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -796,7 +814,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -813,7 +831,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -830,7 +848,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -847,7 +865,7 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
   do {                                                               \
     stackval_t stackval;                                             \
     if (*sc >= *PROVIDE_CONTEXT()->stacksize) {                      \
-      fprintf(stderr, "Error: Interpreter stack overflow\n\
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Interpreter stack overflow\n\
 Please include the script and file an error report to me here:\n    %s\n\
 This is not supposed to happen, I hope I can fix the intepreter!\n", \
               GENERAL_ERROR_ISSUE_URL);                              \
@@ -905,7 +923,7 @@ extern void releaseContext(void *);
       ++i;                                                                              \
     }                                                                                   \
     if (i == size) {                                                                    \
-      fprintf(stderr, "Error: Heap full (size: %d)\n", size);                           \
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Heap full (size: %d)\n", size);                           \
       fprintf(stderr, "       The heap size can be increased with the -ah flag\n");     \
       fprintf(stderr, "       For more information, see: ric -h\n");                    \
       exit(1);                                                                          \
@@ -938,7 +956,7 @@ extern void releaseContext(void *);
       ++i;                                                                                 \
     }                                                                                      \
     if (i == size) {                                                                       \
-      fprintf(stderr, "Error: Heap full (size: %d)\n", size);                              \
+      reportRuntimeError(PROVIDE_CONTEXT(), "Error: Heap full (size: %d)\n", size);                              \
       exit(1);                                                                             \
     }                                                                                      \
   } while (0);

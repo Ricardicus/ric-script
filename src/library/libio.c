@@ -14,9 +14,10 @@ int ric_open_file(LIBRARY_PARAMS()) {
       filename = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -56,8 +57,8 @@ int ric_close_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -91,8 +92,8 @@ int ric_read_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -106,8 +107,8 @@ int ric_read_file(LIBRARY_PARAMS()) {
       datasize = (size_t)stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, integer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -153,8 +154,8 @@ int ric_read_file_all(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -202,8 +203,8 @@ int ric_write_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -220,9 +221,10 @@ int ric_write_file(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -298,8 +300,8 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -312,7 +314,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
 
   buffer = calloc(fz + 1, 1);
   if (buffer == NULL) {
-    fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -368,8 +370,8 @@ int ric_read_input(LIBRARY_PARAMS()) {
       inputText = stv.t;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -378,7 +380,7 @@ int ric_read_input(LIBRARY_PARAMS()) {
 
   buffer = calloc(MAX_LINE_LENGTH, 1);
   if (buffer == NULL) {
-    fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
     exit(1);
   }
 
@@ -397,7 +399,7 @@ int ric_read_input(LIBRARY_PARAMS()) {
 
     t = calloc(strlen(buffer) + 1, 1);
     if (t == NULL) {
-      fprintf(stderr, "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(), "%s error: Memory allocation failed\n", LIBRARY_FUNC_NAME());
       exit(1);
     }
     snprintf(t, strlen(buffer) + 1, "%s", buffer);

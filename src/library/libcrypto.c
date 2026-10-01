@@ -21,8 +21,8 @@ int ric_sha256(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -95,8 +95,8 @@ int ric_md5(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -161,9 +161,10 @@ int ric_base64_decode(LIBRARY_PARAMS()) {
       stringArg = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -211,8 +212,8 @@ int ric_base64_encode(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -278,9 +279,10 @@ int ric_hex_decode(LIBRARY_PARAMS()) {
       stringArg = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -346,8 +348,8 @@ int ric_hex_encode(LIBRARY_PARAMS()) {
       rawdata = stv.rawdata;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -409,8 +411,8 @@ int ric_blowfish_keys(LIBRARY_PARAMS()) {
       user_key_len = stv.rawdata->size;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, string or data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -449,8 +451,8 @@ int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
       key = (BLOWFISH_KEY *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -469,8 +471,8 @@ int ric_blowfish_encrypt(LIBRARY_PARAMS()) {
       data_in_len = stv.rawdata->size;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, text or raw data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -528,8 +530,8 @@ int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
       key = (BLOWFISH_KEY *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -544,8 +546,8 @@ int ric_blowfish_decrypt(LIBRARY_PARAMS()) {
       data_in_len = stv.rawdata->size;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, raw data expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -596,8 +598,8 @@ int ric_blowfish_keys_destroy(LIBRARY_PARAMS()) {
       key = (BLOWFISH_KEY *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, pointer to blowfish key expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);

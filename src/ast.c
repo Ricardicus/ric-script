@@ -2,9 +2,7 @@
 #include "eval.h"
 #include "hashtable.h"
 #include "prioqueue.h"
-
-extern int yylinenor;
-extern char *ParsedFile;
+#include <stdarg.h>
 
 void *ast_emalloc(size_t size) {
   char *p = (char *)malloc(size);
@@ -37,14 +35,14 @@ void *ast_ecalloc(size_t size) {
 }
 
 expr_t *newExpr_Time(time_t time) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   expr->type = EXPR_TYPE_TIME;
   expr->time = time;
   return expr;
 }
 
 expr_t *newExpr_ClassPtr(class_t *class) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   class_t *cls = ast_emalloc(sizeof(class_t));
 
   cls->id = class->id;
@@ -59,7 +57,7 @@ expr_t *newExpr_ClassPtr(class_t *class) {
 }
 
 expr_t *newExpr_ClassPtrCopy(class_t *class) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   class_t *cls = ast_emalloc(sizeof(class_t));
 
   cls->id = class->id;
@@ -75,7 +73,7 @@ expr_t *newExpr_ClassPtrCopy(class_t *class) {
 }
 
 expr_t *newExpr_Cond(ifCondition_t *cond) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_COND;
   expr->cond = cond;
@@ -84,7 +82,7 @@ expr_t *newExpr_Cond(ifCondition_t *cond) {
 }
 
 expr_t *newExpr_Pointer(uintptr_t val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_POINTER;
   expr->p = val;
@@ -93,7 +91,7 @@ expr_t *newExpr_Pointer(uintptr_t val) {
 }
 
 expr_t *newExpr_FuncPtr(void *func) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FUNCPTR;
   expr->func = func;
@@ -102,7 +100,7 @@ expr_t *newExpr_FuncPtr(void *func) {
 }
 
 expr_t *newExpr_BigIntFromStr(const char *intStr) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   mpz_t *n = ast_emalloc(sizeof(mpz_t));
 
   mpz_init_set_str(*n, intStr, 10);
@@ -114,7 +112,7 @@ expr_t *newExpr_BigIntFromStr(const char *intStr) {
 }
 
 expr_t *newExpr_BigIntFromInt(intptr_t val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   mpz_t *n = ast_emalloc(sizeof(mpz_t));
 
   mpz_init_set_si(*n, (signed long)val);
@@ -126,7 +124,7 @@ expr_t *newExpr_BigIntFromInt(intptr_t val) {
 }
 
 expr_t *newExpr_BigInt(mpz_t *n_) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   mpz_t *n = ast_emalloc(sizeof(mpz_t));
 
   mpz_init_set(*n, *n_);
@@ -138,7 +136,7 @@ expr_t *newExpr_BigInt(mpz_t *n_) {
 }
 
 expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   indexer_t *indexer = ast_emalloc(sizeof(indexer_t));
 
   indexer->left = left;
@@ -151,7 +149,7 @@ expr_t *newExpr_Indexer(expr_t *left, expr_t *right, expr_t *offset) {
 }
 
 expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   logical_t *logical = ast_emalloc(sizeof(logical_t));
   int appendPrev = 0;
 
@@ -207,7 +205,7 @@ expr_t *newExpr_Logical(expr_t *prevLogical, expr_t *newAnd, expr_t *newOr) {
 expr_t *newExpr_Vector(argsList_t *args) {
   int32_t length = 0;
   argsList_t *walk;
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
 
   if (args != NULL) {
@@ -244,7 +242,7 @@ expr_t *newExpr_Vector(argsList_t *args) {
 
 expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
   int32_t length = 0;
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   vector_t *vec = ast_emalloc(sizeof(vector_t));
 
   vec->length = length;
@@ -258,7 +256,7 @@ expr_t *newExpr_VectorFromForEach(statement_t *forEach) {
 }
 
 expr_t *newExpr_Dictionary(keyValList_t *keyVals) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   expr->dict = ast_emalloc(sizeof(dictionary_t));
 
   expr->type = EXPR_TYPE_DICT;
@@ -272,7 +270,7 @@ expr_t *newExpr_Dictionary(keyValList_t *keyVals) {
 }
 
 expr_t *newExpr_Cachepot(void) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   cachepot_t *cachepot = ast_emalloc(sizeof(expr_t));
 
   cachepot->hash = hashtable_new(CACHEPOT_STANDARD_SIZE, CACHEPOT_STANDARD_LOAD);
@@ -283,7 +281,7 @@ expr_t *newExpr_Cachepot(void) {
 }
 
 expr_t *newExpr_PriorityQueue(int capacity, int is_minimum) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   priority_queue_t *prioqueue = new_priority_queue(capacity, is_minimum);
 
   expr->type = EXPR_TYPE_PRIOQUEUE;
@@ -294,7 +292,7 @@ expr_t *newExpr_PriorityQueue(int capacity, int is_minimum) {
 
 expr_t *newExpr_Text(char *text) {
   size_t textLen = strlen(text);
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_TEXT;
   expr->text = (char *)ast_emalloc(textLen + 1);
@@ -306,7 +304,7 @@ expr_t *newExpr_Text(char *text) {
 }
 
 expr_t *newExpr_Ival(int val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_IVAL;
   expr->ival = (int32_t)val;
@@ -315,7 +313,7 @@ expr_t *newExpr_Ival(int val) {
 }
 
 expr_t *newExpr_Uval(unsigned val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_UVAL;
   expr->ival = (uint32_t)val;
@@ -324,7 +322,7 @@ expr_t *newExpr_Uval(unsigned val) {
 }
 
 expr_t *newExpr_Float(double val) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FVAL;
   expr->fval = val;
@@ -333,7 +331,7 @@ expr_t *newExpr_Float(double val) {
 }
 
 expr_t *newExpr_RawData(size_t size) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   rawdata_t *rawdata = ast_emalloc(sizeof(rawdata_t));
 
   rawdata->data = ast_ecalloc(size + 1);
@@ -347,7 +345,7 @@ expr_t *newExpr_RawData(size_t size) {
 
 expr_t *newExpr_ID(char *id) {
   size_t textLen = strlen(id);
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_ID;
   expr->id.id = (char *)ast_emalloc(textLen + 1);
@@ -359,7 +357,7 @@ expr_t *newExpr_ID(char *id) {
 }
 
 expr_t *newExpr_FuncCall(functionCall_t *func) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_FUNCCALL;
   expr->func = func;
@@ -368,7 +366,7 @@ expr_t *newExpr_FuncCall(functionCall_t *func) {
 }
 
 expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_LIBFUNCPTR;
   expr->func = func;
@@ -377,7 +375,7 @@ expr_t *newExpr_LibFuncPtr(libFunction_t *func) {
 }
 
 expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPADD;
   expr->add.left = left;
@@ -387,7 +385,7 @@ expr_t *newExpr_OPAdd(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPSub(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPSUB;
   expr->add.left = left;
@@ -397,7 +395,7 @@ expr_t *newExpr_OPSub(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPMul(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPMUL;
   expr->add.left = left;
@@ -407,7 +405,7 @@ expr_t *newExpr_OPMul(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPMod(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPMOD;
   expr->add.left = left;
@@ -417,7 +415,7 @@ expr_t *newExpr_OPMod(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
 
   expr->type = EXPR_TYPE_OPDIV;
   expr->add.left = left;
@@ -427,7 +425,7 @@ expr_t *newExpr_OPDiv(expr_t *left, expr_t *right) {
 }
 
 expr_t *newExpr_VectorIndex(expr_t *id_expr, expr_t *index) {
-  expr_t *expr = ast_emalloc(sizeof(expr_t));
+  expr_t *expr = ast_ecalloc(sizeof(expr_t));
   expr->vecIdx = ast_emalloc(sizeof(vectorIndex_t));
 
   expr->type = EXPR_TYPE_VECTOR_IDX;
@@ -439,7 +437,7 @@ expr_t *newExpr_VectorIndex(expr_t *id_expr, expr_t *index) {
 }
 
 expr_t *newConditional(int type, expr_t *left, expr_t *right) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   ifCondition_t *cond = ast_emalloc(sizeof(ifCondition_t));
 
   cond->type = type;
@@ -465,14 +463,9 @@ statement_t *newStatement(int type, void *content) {
   statement_t *stmt = ast_emalloc(sizeof(statement_t));
   stmt->entity = type;
   stmt->next = NULL;
-  stmt->line = yylinenor - 1;
-
-  stmt->file[0] = 0;
-  if (ParsedFile != NULL) {
-    snprintf(stmt->file, sizeof(stmt->file), "%s", ParsedFile);
-  } else {
-    snprintf(stmt->file, sizeof(stmt->file), "%s", "stdin");
-  }
+  stmt->line = 0;
+  stmt->file = "<runtime>";
+  stmt->location = (source_location_t){0};
 
   switch (type) {
     case LANG_ENTITY_DECL:
@@ -589,7 +582,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case EXPR_TYPE_DICT: {
-      newExp = ast_emalloc(sizeof(expr_t));
+      newExp = ast_ecalloc(sizeof(expr_t));
       newExp->type = EXPR_TYPE_DICT;
       if (alloc == EXPR_ALLOC) {
         newExp->dict = allocNewDictionary(expr->dict, EXPRESSION_ARGS());
@@ -612,6 +605,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
   }
 
+  if (newExp != NULL) newExp->location = expr->location;
   return newExp;
 }
 
@@ -672,7 +666,7 @@ functionDef_t *newFunc(const char *id, void *params, void *body) {
 }
 
 expr_t *newClassFunCall(expr_t *classID, char *funcID, void *args) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   classFunctionCall_t *func = ast_emalloc(sizeof(classFunctionCall_t));
   char *newTxt = ast_emalloc(strlen(funcID) + 2);
   snprintf(newTxt, strlen(funcID) + 2, "%s", funcID);
@@ -688,7 +682,7 @@ expr_t *newClassFunCall(expr_t *classID, char *funcID, void *args) {
 }
 
 expr_t *newClassAccesser(expr_t *classID, char *memberID) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   classAccesser_t *func = ast_emalloc(sizeof(classAccesser_t));
   char *newTxt = ast_emalloc(strlen(memberID) + 2);
   snprintf(newTxt, strlen(memberID) + 2, "%s", memberID);
@@ -703,7 +697,7 @@ expr_t *newClassAccesser(expr_t *classID, char *memberID) {
 }
 
 expr_t *newFunCall(expr_t *id, void *args) {
-  expr_t *e = ast_emalloc(sizeof(expr_t));
+  expr_t *e = ast_ecalloc(sizeof(expr_t));
   functionCall_t *func = ast_emalloc(sizeof(functionCall_t));
 
   func->entity = LANG_ENTITY_FUNCCALL;
@@ -1129,4 +1123,59 @@ void free_keyvals(dictionary_t *dict) {
     keyVals = keyVals->next;
     free(kv);
   }
+}
+
+/* Source names outlive loaded strings and interactive command buffers. */
+typedef struct source_file_t {
+  char *name;
+  struct source_file_t *next;
+} source_file_t;
+static source_file_t *source_files;
+
+static void free_source_files(void) {
+  while (source_files != NULL) {
+    source_file_t *next = source_files->next;
+    free(source_files->name);
+    free(source_files);
+    source_files = next;
+  }
+}
+
+const char *sourceFile(const char *file) {
+  source_file_t *entry;
+  if (file == NULL) file = "<stdin>";
+  for (entry = source_files; entry != NULL; entry = entry->next) {
+    if (strcmp(entry->name, file) == 0) return entry->name;
+  }
+  if (source_files == NULL) atexit(free_source_files);
+  entry = ast_emalloc(sizeof(*entry));
+  entry->name = ast_emalloc(strlen(file) + 1);
+  strcpy(entry->name, file);
+  entry->next = source_files;
+  source_files = entry;
+  return entry->name;
+}
+
+static void report_source_error(const source_location_t *location,
+                                const char *format, va_list args) {
+  if (location != NULL && location->file != NULL && location->first_line > 0) {
+    fprintf(stderr, "%s:%d:%d: ", location->file,
+            location->first_line, location->first_column);
+  }
+  vfprintf(stderr, format, args);
+}
+
+void reportSourceError(const source_location_t *location, const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  report_source_error(location, format, args);
+  va_end(args);
+}
+
+void reportRuntimeError(context_full_t *context, const char *format, ...) {
+  va_list args;
+  if (context != NULL) ++context->diagnostic_count;
+  va_start(args, format);
+  report_source_error(context != NULL ? &context->location : NULL, format, args);
+  va_end(args);
 }

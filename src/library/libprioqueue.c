@@ -45,8 +45,8 @@ int ric_heap_insert(LIBRARY_PARAMS()) {
       arg = stv.prioqueue;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, expected a priority queue.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -64,8 +64,8 @@ int ric_heap_insert(LIBRARY_PARAMS()) {
       priority = stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, expected an integer.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -95,8 +95,8 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
       arg = stv.prioqueue;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, expected a priority queue.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -105,7 +105,8 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
 
   // check if size is larger than zero
   if (arg->size == 0) {
-    fprintf(stderr, "error: function call '%s' got empty priority queue.\n", LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(), "error: function call '%s' got empty priority queue.\n",
+                       LIBRARY_FUNC_NAME());
     exit(1);
   }
 

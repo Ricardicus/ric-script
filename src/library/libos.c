@@ -19,8 +19,8 @@ int ric_sleep(LIBRARY_PARAMS()) {
       sleepTime = stv.i;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function call '%s' got unexpected data type as argument, integer expected.\n",
           LIBRARY_FUNC_NAME());
       exit(1);
@@ -47,9 +47,10 @@ int ric_is_directory(LIBRARY_PARAMS()) {
       string = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -124,9 +125,10 @@ int ric_rm(LIBRARY_PARAMS()) {
       file = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -164,9 +166,10 @@ int ric_ls(LIBRARY_PARAMS()) {
       argText = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -210,9 +213,10 @@ int ric_cd(LIBRARY_PARAMS()) {
       argText = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -239,9 +243,10 @@ int ric_is_file(LIBRARY_PARAMS()) {
       filename = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function call '%s' got unexpected data type as argument, string expected.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
+          "error: function call '%s' got unexpected data type as argument, string expected.\n",
+          LIBRARY_FUNC_NAME());
       exit(1);
     } break;
   }
@@ -273,9 +278,9 @@ int ric_mkdir(LIBRARY_PARAMS()) {
       dir = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected string.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected string.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
@@ -382,17 +387,18 @@ int ric_find_files(LIBRARY_PARAMS()) {
       pattern = stv.t;
       break;
     default: {
-      fprintf(stderr,
-              "error: function '%s' got unexpected data type as argument, expected string.\n",
-              LIBRARY_FUNC_NAME());
+      reportRuntimeError(PROVIDE_CONTEXT(),
+                         "error: function '%s' got unexpected data type as argument, expected string.\n",
+                         LIBRARY_FUNC_NAME());
       return 1;
     } break;
   }
 
   rc = regcomp(&re, pattern, REG_EXTENDED | REG_NOSUB);
   if (rc != 0) {
-    fprintf(stderr, "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
-            LIBRARY_FUNC_NAME(), pattern);
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' got an invalid regular expression pattern: '%s'\r\n",
+                       LIBRARY_FUNC_NAME(), pattern);
 
     vec = newExpr_Vector(NULL);
 
@@ -527,8 +533,9 @@ int ric_set_env(LIBRARY_PARAMS()) {
   POP_VAL(&stv_val, sp, sc);
 
   if (stv_key.type != TEXT || stv_val.type != TEXT) {
-    fprintf(stderr, "error: function '%s' expected (string, string) as arguments.\n",
-            LIBRARY_FUNC_NAME());
+    reportRuntimeError(PROVIDE_CONTEXT(),
+                       "error: function '%s' expected (string, string) as arguments.\n",
+                       LIBRARY_FUNC_NAME());
     exit(1);
   }
 

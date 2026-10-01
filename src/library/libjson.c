@@ -140,7 +140,7 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
     expr_t *outE = newExpr_Dictionary(keyVals);
     dictionary_t *outEHead = allocNewDictionary(outE->dict, EXPRESSION_ARGS());
     free(outE->dict);
-    expr_t *newExp = ast_emalloc(sizeof(expr_t));
+    expr_t *newExp = ast_ecalloc(sizeof(expr_t));
     newExp->type = EXPR_TYPE_DICT;
     newExp->dict = outEHead;
     free(outE);
@@ -172,8 +172,8 @@ int ric_json_convert(LIBRARY_PARAMS()) {
       argClass = stv.classObj;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function '%s' got unexpected data type as argument, expected string or file.\n",
           LIBRARY_FUNC_NAME());
       return 1;
@@ -225,8 +225,8 @@ int ric_json_load(LIBRARY_PARAMS()) {
       fp = (FILE *)stv.p;
       break;
     default: {
-      fprintf(
-          stderr,
+      reportRuntimeError(
+          PROVIDE_CONTEXT(),
           "error: function '%s' got unexpected data type as argument, expected string or file.\n",
           LIBRARY_FUNC_NAME());
       return 1;

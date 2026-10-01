@@ -2,8 +2,17 @@
 
 static jmp_buf endingJmpBuf;
 
+static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS());
+
 interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), argsList_t *args,
                                         hashtable_t *argVals) {
+  source_location_t previous = PROVIDE_CONTEXT()->location;
+  interpret_state_t result = interpret_statements_inner(stmt, NULL, PROVIDE_CONTEXT(), args, argVals);
+  PROVIDE_CONTEXT()->location = previous;
+  return result;
+}
+
+static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
   locals_stack_t *varLocals = PROVIDE_CONTEXT()->varLocals;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -12,7 +21,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
   int *interactive = PROVIDE_CONTEXT()->interactive;
   int32_t *ax = PROVIDE_CONTEXT()->ax;
   entity_eval_t *eval;
-  void *next = NULL;
+  next = NULL;
   ctx_table_t *ctx = ast_emalloc(sizeof(ctx_table_t));
 
   /* Initialize the context */
@@ -61,6 +70,11 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
       } break;
       default:
         break;
+    }
+
+    if (eval->entity != LANG_ENTITY_BODY && eval->entity != LANG_ENTITY_BODY_END) {
+      statement_t *current = stmt;
+      if (current->location.file != NULL) PROVIDE_CONTEXT()->location = current->location;
     }
 
     switch (eval->entity) {
@@ -135,7 +149,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 hashtable_put(PROVIDE_CONTEXT()->varDecs, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
               } else {
                 /* Placing variable declaration in local variable namespace */
-                locals_push(varLocals, idStr, hvp);
+                locals_push(varLocals, idStr, hvp, PROVIDE_CONTEXT());
               }
             }
           } break;
@@ -164,7 +178,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != TEXT) {
-                  fprintf(stderr, "index error: Must provide a string as key\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide a string as key\n");
                   exit(1);
                 }
 
@@ -209,7 +223,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != INT32TYPE) {
-                  fprintf(stderr, "index error: Must provide an integer as index\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide an integer as index\n");
                   exit(1);
                 }
 
@@ -217,10 +231,9 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
                 /* check the limits */
                 if (arrayIndex >= vec->length) {
-                  fprintf(stderr,
-                          "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32
-                          "'\n",
-                          arrayIndex, vec->length);
+                  reportRuntimeError(PROVIDE_CONTEXT(),
+                                     "index error: index: '%" PRIi32 "' is too large, length: '%" PRIi32 "'\n",
+                                     arrayIndex, vec->length);
                   exit(1);
                 } else if (arrayIndex < 0) {
                   arrayIndex = vec->length - ((vec->length - arrayIndex) % vec->length);
@@ -234,7 +247,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 }
 
                 if (*expToSet == NULL) {
-                  fprintf(stderr, "Unexpected index error!\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "Unexpected index error!\n");
                   GENERAL_REPORT_ISSUE_MSG();
                   exit(1);
                 }
@@ -261,7 +274,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != INT32TYPE) {
-                  fprintf(stderr, "index error: Must provide an integer as index\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide an integer as index\n");
                   exit(1);
                 }
 
@@ -270,7 +283,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 if (arrayIndex < 0) {
                   arrayIndex = origLen - ((origLen - arrayIndex) % origLen);
                 } else if (arrayIndex >= strlen(text)) {
-                  fprintf(stderr, "index error: index out of bounds\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: index out of bounds\n");
                   exit(1);
                 }
                 /* Evaluating the expression among global variables */
@@ -278,7 +291,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 POP_VAL(&sv, sp, sc);
 
                 if (sv.type != TEXT) {
-                  fprintf(stderr, "string index error: Can only assign text to text.\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "string index error: Can only assign text to text.\n");
                   exit(1);
                 }
 
@@ -303,7 +316,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 evaluate_expression(index, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);
                 if (sv.type != TEXT) {
-                  fprintf(stderr, "index error: Must provide a string as index\n");
+                  reportRuntimeError(PROVIDE_CONTEXT(), "index error: Must provide a string as index\n");
                   exit(1);
                 }
                 key = ast_emalloc(strlen(sv.t) + 1);
@@ -327,7 +340,8 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 hashtable_put(cachepot->hash, PROVIDE_CONTEXT()->syncCtx, key, newExp);
               } break;
               default: {
-                fprintf(stderr, "index error: '%s' is not an indexable object.\n", id->id.id);
+                reportRuntimeError(PROVIDE_CONTEXT(), "index error: '%s' is not an indexable object.\n",
+                                   id->id.id);
                 GENERAL_REPORT_ISSUE_MSG();
                 exit(1);
                 break;
@@ -495,8 +509,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             rootBigInt = rootExp->bigInt;
             break;
           default:
-            printf("%s.%d error: expression isn't an indexable\n", ((statement_t *)stmt)->file,
-                   ((statement_t *)stmt)->line);
+            reportRuntimeError(PROVIDE_CONTEXT(), "error: expression isn't an indexable\n");
             break;
         }
 
@@ -510,7 +523,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           svtmp.type = VECTORTYPE;
           svtmp.vec = rootVec;
           ALLOC_HEAP(&svtmp, hp, &hvp, &dummy);
-          locals_push(varLocals, festmt->uniqueUnfoldRootID, hvp);
+          locals_push(varLocals, festmt->uniqueUnfoldRootID, hvp, PROVIDE_CONTEXT());
 
           endIteration = rootVec->length;
         } else if (rootDict != NULL) {
@@ -545,16 +558,16 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           }
         } else {
           /* This is really not supposed to happen */
-          printf(
-              "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-              ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+          reportRuntimeError(
+              PROVIDE_CONTEXT(),
+              "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+              GENERAL_ERROR_ISSUE_URL);
           exit(1);
         }
 
         while (continueLoop) {
           if (entry->type != EXPR_TYPE_ID) {
-            printf("%s.%d error: '%s' isn't a correct variable\n", ((statement_t *)stmt)->file,
-                   ((statement_t *)stmt)->line, entry->id.id);
+            reportRuntimeError(PROVIDE_CONTEXT(), "error: '%s' isn't a correct variable\n", entry->id.id);
           } else {
             entryId = entry->id.id;
           }
@@ -575,21 +588,22 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
 
               ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+              locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
             } else {
               sv.type = INT32TYPE;
               sv.i = 0;
               ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+              locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
             }
           }
           /* Get the index value */
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
           if (hvp == NULL || (hvp->sv.type != INT32TYPE && hvp->sv.type != BIGINT)) {
             /* This is really not supposed to happen */
-            printf(
-                "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            reportRuntimeError(
+                PROVIDE_CONTEXT(),
+                "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                GENERAL_ERROR_ISSUE_URL);
             exit(1);
           }
 
@@ -613,15 +627,15 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
             if (hvp == NULL || hvp->sv.type != INT32TYPE) {
               /* This is really not supposed to happen */
-              printf(
-                  "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line,
+              reportRuntimeError(
+                  PROVIDE_CONTEXT(),
+                  "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                   GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
             hvp->sv.i = festmtIndex;
-            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
 
             walk = rootVec->content;
             while (walk != NULL && arrayIndexWalk >= 0) {
@@ -631,8 +645,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             }
 
             if (expToSet == NULL) {
-              fprintf(stderr, "%s.%d error: Unexpected index error!\n",
-                      ((statement_t *)stmt)->file, ((statement_t *)stmt)->line);
+              reportRuntimeError(PROVIDE_CONTEXT(), "error: Unexpected index error!\n");
               GENERAL_REPORT_ISSUE_MSG();
               exit(1);
             }
@@ -657,7 +670,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               sv.dict = dict;
             }
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
+            locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
 
           } else if (rootDict != NULL) {
             /* traverse the dictionary keys */
@@ -679,22 +692,22 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                   sv.type = TEXT;
                   sv.t = newText;
                   ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-                  locals_push(varLocals, entryId, hvp);
+                  locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
                   /* Increase the value of the unfolded variable */
                   festmtIndex++;
                   hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
 
                   if (hvp == NULL || hvp->sv.type != INT32TYPE) {
                     /* This is really not supposed to happen */
-                    printf(
-                        "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                        ((statement_t *)stmt)->file, ((statement_t *)stmt)->line,
+                    reportRuntimeError(
+                        PROVIDE_CONTEXT(),
+                        "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                         GENERAL_ERROR_ISSUE_URL);
                     exit(1);
                   }
 
                   hvp->sv.i = festmtIndex;
-                  locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+                  locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
                 }
 
                 ptr = ptr->next;
@@ -716,7 +729,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             sv.t = newText;
 
             ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-            locals_push(varLocals, entryId, hvp);
+            locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
 
             /* Increase the value of the unfolded variable */
             festmtIndex++;
@@ -724,15 +737,15 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
             if (hvp == NULL || hvp->sv.type != INT32TYPE) {
               /* This is really not supposed to happen */
-              printf(
-                  "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line,
+              reportRuntimeError(
+                  PROVIDE_CONTEXT(),
+                  "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                   GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
             hvp->sv.i = festmtIndex;
-            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
           } else if (rootInt >= 0) {
             /* traverse the integer, start from zero */
             hvp = locals_lookup(varLocals, entryId);
@@ -742,7 +755,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               sv.type = INT32TYPE;
               sv.i = festmtIndex;
               ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, entryId, hvp);
+              locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
             } else {
               /* Update value on the heap */
               hvp->sv.i = festmtIndex;
@@ -753,15 +766,15 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
             if (hvp == NULL || hvp->sv.type != INT32TYPE) {
               /* This is really not supposed to happen */
-              printf(
-                  "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line,
+              reportRuntimeError(
+                  PROVIDE_CONTEXT(),
+                  "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                   GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
             hvp->sv.i = festmtIndex;
-            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
           } else if (rootBigInt != NULL) {
             /* traverse the big integer, start from zero */
             stackval_t sv;
@@ -779,7 +792,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
               mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
 
               ALLOC_HEAP(&sv, hp, &hvp, &dummy);
-              locals_push(varLocals, entryId, hvp);
+              locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
             } else {
               mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
             }
@@ -790,20 +803,21 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
 
             if (hvp == NULL || hvp->sv.type != BIGINT) {
               /* This is really not supposed to happen */
-              printf(
-                  "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                  ((statement_t *)stmt)->file, ((statement_t *)stmt)->line,
+              reportRuntimeError(
+                  PROVIDE_CONTEXT(),
+                  "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
                   GENERAL_ERROR_ISSUE_URL);
               exit(1);
             }
 
             mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
-            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp);
+            locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
           } else {
             /* This is really not supposed to happen */
-            printf(
-                "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            reportRuntimeError(
+                PROVIDE_CONTEXT(),
+                "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                GENERAL_ERROR_ISSUE_URL);
             exit(1);
           }
 
@@ -832,10 +846,10 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
           hvp = locals_lookup(varLocals, festmt->uniqueUnfoldIncID);
           if (hvp == NULL || (hvp->sv.type != INT32TYPE && hvp->sv.type != BIGINT)) {
             /* This is really not supposed to happen */
-            fprintf(
-                stderr,
-                "%s.%d error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
-                ((statement_t *)stmt)->file, ((statement_t *)stmt)->line, GENERAL_ERROR_ISSUE_URL);
+            reportRuntimeError(
+                PROVIDE_CONTEXT(),
+                "error: The unfolding of this statement failed!\nPlease file an issue here: %s\n",
+                GENERAL_ERROR_ISSUE_URL);
             exit(1);
           }
           if (hvp->sv.type == INT32TYPE) {
@@ -880,9 +894,9 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
         /* We are out of here */
         stmt = next;
         /* Remove unique unfold from locals */
-        locals_remove(varLocals, festmt->uniqueUnfoldIncID);
+        locals_remove(varLocals, festmt->uniqueUnfoldIncID, PROVIDE_CONTEXT());
         /* remove entry from locals */
-        locals_remove(varLocals, entryId);
+        locals_remove(varLocals, entryId, PROVIDE_CONTEXT());
 
         if (rootBigInt != NULL) {
           mpz_clear(endIterationBigInt);
@@ -1154,7 +1168,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
             break;
           }
           default:
-            fprintf(stderr, "Invalid conditional expression (%d)\n", sv.type);
+            reportRuntimeError(PROVIDE_CONTEXT(), "Invalid conditional expression (%d)\n", sv.type);
             exit(1);
             break;
         }
@@ -1177,7 +1191,7 @@ interpret_state_t interpret_statements_(void *stmt, PROVIDE_CONTEXT_ARGS(), args
                 *ax = (sv.i != 0);
                 break;
               default:
-                fprintf(stderr, "Invalid conditional expression.\n");
+                reportRuntimeError(PROVIDE_CONTEXT(), "Invalid conditional expression.\n");
                 exit(1);
                 break;
             }
@@ -1591,7 +1605,8 @@ void arguments_to_variables(PROVIDE_CONTEXT_ARGS(), int argc, char *argv[], void
         break;
       }
       default:
-        fprintf(stderr, "There was something strange with the provided argument..\r\n");
+        reportRuntimeError(PROVIDE_CONTEXT(),
+                           "There was something strange with the provided argument..\r\n");
         GENERAL_REPORT_ISSUE_MSG();
         break;
     }

@@ -56,7 +56,7 @@
 #define YYPURE 0
 
 /* Using locations.  */
-#define YYLSP_NEEDED 0
+#define YYLSP_NEEDED 1
 
 
 
@@ -127,13 +127,17 @@ void *e_malloc(size_t size)
     return (void*)mem;
 }
 
-void yyerror(const char *s)
-{
-    fprintf(stderr,
-        "%s:%d: %s\n",
-        ParsedFile,
-        yylinenor,
-        s);
+void yyerror(const char *s);
+
+#define SOURCE_LOCATION(loc) ((source_location_t){sourceFile(ParsedFile), \
+  (loc).first_line, (loc).first_column, (loc).last_line, (loc).last_column})
+
+static statement_t *sourceStatement(int type, void *content, source_location_t location) {
+    statement_t *stmt = newStatement(type, content);
+    stmt->location = location;
+    stmt->file = location.file;
+    stmt->line = location.first_line;
+    return stmt;
 }
 
 int yylex(void);
@@ -163,23 +167,35 @@ statement_t *root = NULL;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 42 "gram.y"
+#line 47 "gram.y"
 { int val_int; double val_double; char id[256]; void *data; }
 /* Line 193 of yacc.c.  */
-#line 170 "y.tab.c"
+#line 174 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
 #endif
 
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+} YYLTYPE;
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
 
 
 /* Copy the second part of user declarations.  */
 
 
 /* Line 216 of yacc.c.  */
-#line 183 "y.tab.c"
+#line 199 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -337,14 +353,16 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
-	 || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+	 || (defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL \
+	     && defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
   yytype_int16 yyss;
   YYSTYPE yyvs;
-  };
+    YYLTYPE yyls;
+};
 
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
@@ -352,8 +370,8 @@ union yyalloc
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
-      + YYSTACK_GAP_MAXIMUM)
+     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE) + sizeof (YYLTYPE)) \
+      + 2 * YYSTACK_GAP_MAXIMUM)
 
 /* Copy COUNT objects from FROM to TO.  The source and destination do
    not overlap.  */
@@ -533,23 +551,23 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   107,   107,   124,   129,   133,   136,   139,   142,   145,
-     148,   151,   154,   157,   160,   163,   167,   167,   169,   171,
-     176,   181,   185,   189,   193,   198,   201,   207,   213,   219,
-     225,   233,   234,   238,   241,   248,   256,   265,   268,   275,
-     283,   292,   299,   304,   311,   317,   320,   325,   328,   333,
-     336,   341,   346,   349,   352,   355,   358,   361,   364,   368,
-     402,   405,   410,   413,   416,   422,   426,   430,   433,   437,
-     443,   449,   463,   468,   475,   482,   489,   496,   502,   508,
-     514,   520,   525,   528,   533,   538,   545,   548,   553,   564,
-     569,   574,   578,   583,   587,   592,   597,   603,   606,   610,
-     613,   619,   625,   636,   639,   642,   645,   648,   651,   654,
-     657,   662,   667,   670,   673,   676,   679,   682,   685,   688,
-     691,   696,   709,   714,   717,   720,   724,   730,   758,   763,
-     766,   773,   790,   795,   800,   805,   810,   815,   819,   823,
-     827,   831,   835,   839,   843,   847,   851,   855,   859,   863,
-     866,   870,   874,   878,   882,   886,   890,   894,   898,   902,
-     906,   910
+       0,   112,   112,   129,   134,   138,   141,   144,   147,   150,
+     153,   156,   159,   162,   165,   168,   172,   172,   174,   176,
+     181,   186,   190,   194,   198,   203,   206,   213,   220,   227,
+     234,   243,   244,   248,   251,   258,   266,   275,   278,   285,
+     293,   302,   309,   314,   321,   327,   331,   336,   340,   345,
+     348,   354,   359,   363,   367,   371,   375,   379,   383,   387,
+     421,   424,   429,   433,   437,   444,   449,   454,   457,   462,
+     469,   476,   491,   496,   503,   510,   517,   524,   530,   536,
+     542,   548,   553,   556,   561,   567,   574,   577,   582,   593,
+     598,   604,   609,   615,   619,   624,   629,   635,   638,   643,
+     646,   653,   660,   672,   675,   678,   681,   684,   687,   690,
+     694,   700,   705,   709,   713,   717,   721,   725,   729,   733,
+     737,   743,   757,   763,   766,   769,   774,   781,   810,   815,
+     819,   827,   845,   851,   857,   863,   868,   873,   877,   881,
+     885,   889,   893,   897,   901,   905,   909,   913,   917,   921,
+     924,   928,   932,   936,   940,   944,   948,   952,   956,   960,
+     964,   968
 };
 #endif
 
@@ -1027,7 +1045,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value); \
+		  Type, Value, Location); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -1041,17 +1059,19 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
+    YYLTYPE const * const yylocationp;
 #endif
 {
   if (!yyvaluep)
     return;
+  YYUSE (yylocationp);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -1073,13 +1093,14 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep)
+yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
+    YYLTYPE const * const yylocationp;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -1087,7 +1108,9 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
   else
     YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep);
+  YY_LOCATION_PRINT (yyoutput, *yylocationp);
+  YYFPRINTF (yyoutput, ": ");
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -1127,11 +1150,12 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule)
+yy_reduce_print (yyvsp, yylsp, yyrule)
     YYSTYPE *yyvsp;
+    YYLTYPE *yylsp;
     int yyrule;
 #endif
 {
@@ -1146,7 +1170,7 @@ yy_reduce_print (yyvsp, yyrule)
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       );
+		       , &(yylsp[(yyi + 1) - (yynrhs)])		       );
       fprintf (stderr, "\n");
     }
 }
@@ -1154,7 +1178,7 @@ yy_reduce_print (yyvsp, yyrule)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, Rule); \
+    yy_reduce_print (yyvsp, yylsp, Rule); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1405,16 +1429,18 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep)
+yydestruct (yymsg, yytype, yyvaluep, yylocationp)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
+    YYLTYPE *yylocationp;
 #endif
 {
   YYUSE (yyvaluep);
+  YYUSE (yylocationp);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1455,6 +1481,8 @@ YYSTYPE yylval;
 
 /* Number of syntax errors so far.  */
 int yynerrs;
+/* Location data for the look-ahead symbol.  */
+YYLTYPE yylloc;
 
 
 
@@ -1517,16 +1545,21 @@ yyparse ()
   YYSTYPE *yyvs = yyvsa;
   YYSTYPE *yyvsp;
 
+  /* The location stack.  */
+  YYLTYPE yylsa[YYINITDEPTH];
+  YYLTYPE *yyls = yylsa;
+  YYLTYPE *yylsp;
+  /* The locations where the error started and ended.  */
+  YYLTYPE yyerror_range[2];
 
-
-#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
 
   YYSIZE_T yystacksize = YYINITDEPTH;
 
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
-
+  YYLTYPE yyloc;
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
@@ -1546,6 +1579,12 @@ yyparse ()
 
   yyssp = yyss;
   yyvsp = yyvs;
+  yylsp = yyls;
+#if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+  /* Initialize the default location before parsing starts.  */
+  yylloc.first_line   = yylloc.last_line   = 1;
+  yylloc.first_column = yylloc.last_column = 0;
+#endif
 
   goto yysetstate;
 
@@ -1572,7 +1611,7 @@ yyparse ()
 	   memory.  */
 	YYSTYPE *yyvs1 = yyvs;
 	yytype_int16 *yyss1 = yyss;
-
+	YYLTYPE *yyls1 = yyls;
 
 	/* Each stack pointer address is followed by the size of the
 	   data in use in that stack, in bytes.  This used to be a
@@ -1581,9 +1620,9 @@ yyparse ()
 	yyoverflow (YY_("memory exhausted"),
 		    &yyss1, yysize * sizeof (*yyssp),
 		    &yyvs1, yysize * sizeof (*yyvsp),
-
+		    &yyls1, yysize * sizeof (*yylsp),
 		    &yystacksize);
-
+	yyls = yyls1;
 	yyss = yyss1;
 	yyvs = yyvs1;
       }
@@ -1606,7 +1645,7 @@ yyparse ()
 	  goto yyexhaustedlab;
 	YYSTACK_RELOCATE (yyss);
 	YYSTACK_RELOCATE (yyvs);
-
+	YYSTACK_RELOCATE (yyls);
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -1616,7 +1655,7 @@ yyparse ()
 
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
-
+      yylsp = yyls + yysize - 1;
 
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
 		  (unsigned long int) yystacksize));
@@ -1693,7 +1732,7 @@ yybackup:
 
   yystate = yyn;
   *++yyvsp = yylval;
-
+  *++yylsp = yylloc;
   goto yynewstate;
 
 
@@ -1724,12 +1763,13 @@ yyreduce:
      GCC warning that YYVAL may be used uninitialized.  */
   yyval = yyvsp[1-yylen];
 
-
+  /* Default location.  */
+  YYLLOC_DEFAULT (yyloc, (yylsp - yylen), yylen);
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
         case 2:
-#line 107 "gram.y"
+#line 112 "gram.y"
     {
     root = (statement_t*)(yyval.data);
 
@@ -1748,7 +1788,7 @@ yyreduce:
     break;
 
   case 3:
-#line 124 "gram.y"
+#line 129 "gram.y"
     {
         statement_t *stmt = (statement_t*)(yyvsp[(2) - (3)].data);
         stmt->next = (statement_t*)(yyvsp[(3) - (3)].data);
@@ -1757,222 +1797,227 @@ yyreduce:
     break;
 
   case 4:
-#line 129 "gram.y"
+#line 134 "gram.y"
     { (yyval.data) = NULL; }
     break;
 
   case 5:
-#line 133 "gram.y"
+#line 138 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_DECL, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_DECL, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 6:
-#line 136 "gram.y"
+#line 141 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_FUNCDECL, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_FUNCDECL, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 7:
-#line 139 "gram.y"
+#line 144 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_FOREACH, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_FOREACH, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 8:
-#line 142 "gram.y"
+#line 147 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_EXPR, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_EXPR, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 9:
-#line 145 "gram.y"
+#line 150 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_CONDITIONAL, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_CONDITIONAL, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 10:
-#line 148 "gram.y"
+#line 153 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_CONDITIONAL, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_CONDITIONAL, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 11:
-#line 151 "gram.y"
+#line 156 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_CONTINUE, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_CONTINUE, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 12:
-#line 154 "gram.y"
+#line 159 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_BREAK, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_BREAK, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 13:
-#line 157 "gram.y"
+#line 162 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_RETURN, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_RETURN, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 14:
-#line 160 "gram.y"
+#line 165 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_SYSTEM, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_SYSTEM, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 15:
-#line 163 "gram.y"
+#line 168 "gram.y"
     {
-        (yyval.data) = newStatement(LANG_ENTITY_CLASSDECL, (yyvsp[(1) - (1)].data));
+        (yyval.data) = sourceStatement(LANG_ENTITY_CLASSDECL, (yyvsp[(1) - (1)].data), SOURCE_LOCATION((yyloc)));
     }
     break;
 
   case 16:
-#line 167 "gram.y"
+#line 172 "gram.y"
     {}
     break;
 
   case 17:
-#line 167 "gram.y"
+#line 172 "gram.y"
     {}
     break;
 
   case 18:
-#line 169 "gram.y"
+#line 174 "gram.y"
     {
     (yyval.data) = newExpr_ID((yyvsp[(2) - (2)].id));
 }
     break;
 
   case 19:
-#line 171 "gram.y"
-    {
-    (yyval.data) = (yyvsp[(2) - (2)].data);
-}
-    break;
-
-  case 20:
 #line 176 "gram.y"
     {
     (yyval.data) = (yyvsp[(2) - (2)].data);
 }
     break;
 
-  case 21:
+  case 20:
 #line 181 "gram.y"
+    {
+    (yyval.data) = (yyvsp[(2) - (2)].data);
+}
+    break;
+
+  case 21:
+#line 186 "gram.y"
     {
     (yyval.data) = newForEach((yyvsp[(3) - (8)].data), (yyvsp[(5) - (8)].id), (yyvsp[(8) - (8)].data));
 }
     break;
 
   case 22:
-#line 185 "gram.y"
+#line 190 "gram.y"
     {
     (yyval.data) = (yyvsp[(2) - (2)].data);
 }
     break;
 
   case 23:
-#line 189 "gram.y"
+#line 194 "gram.y"
     {
     (yyval.data) = NULL;
 }
     break;
 
   case 24:
-#line 193 "gram.y"
+#line 198 "gram.y"
     {
     (yyval.data) = NULL;
 }
     break;
 
   case 25:
-#line 198 "gram.y"
+#line 203 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 26:
-#line 201 "gram.y"
+#line 206 "gram.y"
     {
       expr_t *e1 = (expr_t*)(yyvsp[(1) - (4)].data);
       expr_t *e2 = (expr_t*)(yyvsp[(4) - (4)].data);
 
       (yyval.data) = newExpr_OPAdd(e1,e2);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 27:
-#line 207 "gram.y"
-    {
-      expr_t *e1 = (expr_t*)(yyvsp[(1) - (4)].data);
-      expr_t *e2 = (expr_t*)(yyvsp[(4) - (4)].data);
-
-      (yyval.data) = newExpr_OPMul(e1,e2);
-    }
-    break;
-
-  case 28:
 #line 213 "gram.y"
     {
       expr_t *e1 = (expr_t*)(yyvsp[(1) - (4)].data);
       expr_t *e2 = (expr_t*)(yyvsp[(4) - (4)].data);
 
+      (yyval.data) = newExpr_OPMul(e1,e2);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
+    }
+    break;
+
+  case 28:
+#line 220 "gram.y"
+    {
+      expr_t *e1 = (expr_t*)(yyvsp[(1) - (4)].data);
+      expr_t *e2 = (expr_t*)(yyvsp[(4) - (4)].data);
+
       (yyval.data) = newExpr_OPSub(e1,e2);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 29:
-#line 219 "gram.y"
+#line 227 "gram.y"
     {
       expr_t *e1 = (expr_t*)(yyvsp[(1) - (4)].data);
       expr_t *e2 = (expr_t*)(yyvsp[(4) - (4)].data);
 
       (yyval.data) = newExpr_OPMod(e1,e2);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 30:
-#line 225 "gram.y"
+#line 234 "gram.y"
     {
       expr_t *e1 = (expr_t*)(yyvsp[(1) - (4)].data);
       expr_t *e2 = (expr_t*)(yyvsp[(4) - (4)].data);
 
       (yyval.data) = newExpr_OPDiv(e1,e2);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 31:
-#line 233 "gram.y"
+#line 243 "gram.y"
     { (yyval.data) = (yyvsp[(1) - (1)].data); }
     break;
 
   case 32:
-#line 234 "gram.y"
+#line 244 "gram.y"
     { (yyval.data) = (yyvsp[(1) - (1)].data); }
     break;
 
   case 33:
-#line 238 "gram.y"
+#line 248 "gram.y"
     {
         (yyval.data) = newIfStatement(LANG_CONDITIONAL_IF, (yyvsp[(3) - (5)].data), (yyvsp[(5) - (5)].data));
     }
     break;
 
   case 34:
-#line 241 "gram.y"
+#line 251 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, (yyvsp[(3) - (6)].data), (yyvsp[(5) - (6)].data));
 
@@ -1983,7 +2028,7 @@ yyreduce:
     break;
 
   case 35:
-#line 248 "gram.y"
+#line 258 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, (yyvsp[(3) - (7)].data), (yyvsp[(5) - (7)].data));
 
@@ -1995,7 +2040,7 @@ yyreduce:
     break;
 
   case 36:
-#line 256 "gram.y"
+#line 266 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF, (yyvsp[(3) - (6)].data), (yyvsp[(5) - (6)].data));
 
@@ -2006,14 +2051,14 @@ yyreduce:
     break;
 
   case 37:
-#line 265 "gram.y"
+#line 275 "gram.y"
     {
         (yyval.data) = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[(3) - (5)].data), (yyvsp[(5) - (5)].data));
     }
     break;
 
   case 38:
-#line 268 "gram.y"
+#line 278 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[(3) - (6)].data), (yyvsp[(5) - (6)].data));
 
@@ -2024,7 +2069,7 @@ yyreduce:
     break;
 
   case 39:
-#line 275 "gram.y"
+#line 285 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[(3) - (7)].data), (yyvsp[(5) - (7)].data));
 
@@ -2036,7 +2081,7 @@ yyreduce:
     break;
 
   case 40:
-#line 283 "gram.y"
+#line 293 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_IF | LANG_CONDITIONAL_CTX, (yyvsp[(3) - (6)].data), (yyvsp[(5) - (6)].data));
 
@@ -2047,7 +2092,7 @@ yyreduce:
     break;
 
   case 41:
-#line 292 "gram.y"
+#line 302 "gram.y"
     {
         ifStmt_t *ifs1 = (ifStmt_t *) (yyvsp[(1) - (2)].data);
         ifStmt_t *ifs2 = (ifStmt_t *) (yyvsp[(2) - (2)].data);
@@ -2058,14 +2103,14 @@ yyreduce:
     break;
 
   case 42:
-#line 299 "gram.y"
+#line 309 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 43:
-#line 304 "gram.y"
+#line 314 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELIF, (yyvsp[(3) - (5)].data), (yyvsp[(5) - (5)].data));
        
@@ -2074,7 +2119,7 @@ yyreduce:
     break;
 
   case 44:
-#line 311 "gram.y"
+#line 321 "gram.y"
     {
         ifStmt_t *ifs = newIfStatement(LANG_CONDITIONAL_ELSE, NULL, (yyvsp[(2) - (2)].data));
         (yyval.data) = ifs;
@@ -2082,107 +2127,116 @@ yyreduce:
     break;
 
   case 45:
-#line 317 "gram.y"
+#line 327 "gram.y"
     {
       (yyval.data) = newExpr_Logical((yyvsp[(1) - (5)].data), NULL, (yyvsp[(5) - (5)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 46:
-#line 320 "gram.y"
+#line 331 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 47:
-#line 325 "gram.y"
+#line 336 "gram.y"
     {
       (yyval.data) = newExpr_Logical((yyvsp[(5) - (5)].data), (yyvsp[(1) - (5)].data), NULL);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 48:
-#line 328 "gram.y"
+#line 340 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 49:
-#line 333 "gram.y"
+#line 345 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 50:
-#line 336 "gram.y"
+#line 348 "gram.y"
     {
         expr_t *zero = newExpr_Ival(0);
         expr_t *cond = newConditional(CONDITION_EQ, zero, (yyvsp[(2) - (2)].data));
         (yyval.data) = cond;
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 51:
-#line 341 "gram.y"
+#line 354 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 52:
-#line 346 "gram.y"
+#line 359 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_EQ, (yyvsp[(1) - (4)].data), (yyvsp[(4) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 53:
-#line 349 "gram.y"
+#line 363 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_NEQ, (yyvsp[(1) - (4)].data), (yyvsp[(4) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 54:
-#line 352 "gram.y"
+#line 367 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_LEQ, (yyvsp[(1) - (4)].data), (yyvsp[(4) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 55:
-#line 355 "gram.y"
+#line 371 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_GEQ, (yyvsp[(1) - (4)].data), (yyvsp[(4) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 56:
-#line 358 "gram.y"
+#line 375 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_LE, (yyvsp[(1) - (3)].data), (yyvsp[(3) - (3)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 57:
-#line 361 "gram.y"
+#line 379 "gram.y"
     {
         (yyval.data) = newConditional(CONDITION_GE, (yyvsp[(1) - (3)].data), (yyvsp[(3) - (3)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 58:
-#line 364 "gram.y"
+#line 383 "gram.y"
     {
         (yyval.data) = (yyvsp[(3) - (4)].data);
     }
     break;
 
   case 59:
-#line 368 "gram.y"
+#line 387 "gram.y"
     {
     /* Only declarations allowed */
     body_t *bod = (yyvsp[(6) - (6)].data);
@@ -2194,8 +2248,8 @@ yyreduce:
             walk->entity != LANG_ENTITY_BODY &&
             walk->entity != LANG_ENTITY_BODY_END
         ) {
-            fprintf(stderr, "Syntax error, class '%s':\r\n", (yyvsp[(3) - (6)].id));
-            fprintf(stderr, "  You may only have variable and or function declaration statements here.\r\n");
+            reportSourceError(&walk->location,
+                "SyntaxError: class '%s' may contain only variable and function declarations\n", (yyvsp[(3) - (6)].id));
             exit(1);
         }
 
@@ -2205,8 +2259,8 @@ yyreduce:
             /* Sanity check, constructor may not use arguments */
             if ( strcmp(funcDef->id.id, (yyvsp[(3) - (6)].id)) == 0 ) {
                 if ( funcDef->params != NULL ) {
-                    fprintf(stderr, "Syntax error, class '%s':\r\n", (yyvsp[(3) - (6)].id));
-                    fprintf(stderr, "  You may not define a constructor with function parameters.\r\n");
+                    reportSourceError(&walk->location,
+                        "SyntaxError: constructor '%s' must not have parameters\n", (yyvsp[(3) - (6)].id));
                     exit(1);
                 }
             }
@@ -2218,91 +2272,99 @@ yyreduce:
     break;
 
   case 60:
-#line 402 "gram.y"
+#line 421 "gram.y"
     {
         (yyval.data) = newFunc((yyvsp[(2) - (6)].id),(yyvsp[(4) - (6)].data),(yyvsp[(6) - (6)].data));
     }
     break;
 
   case 61:
-#line 405 "gram.y"
+#line 424 "gram.y"
     {
         (yyval.data) = newFunc((yyvsp[(2) - (5)].id),NULL,(yyvsp[(5) - (5)].data));
     }
     break;
 
   case 62:
-#line 410 "gram.y"
+#line 429 "gram.y"
     {
         (yyval.data) = newClassFunCall((yyvsp[(1) - (6)].data), (yyvsp[(3) - (6)].id), (yyvsp[(5) - (6)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 63:
-#line 413 "gram.y"
+#line 433 "gram.y"
     {
         (yyval.data) = newClassFunCall((yyvsp[(1) - (5)].data), (yyvsp[(3) - (5)].id), NULL);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 64:
-#line 416 "gram.y"
+#line 437 "gram.y"
     {
         (yyval.data) = newClassAccesser((yyvsp[(1) - (3)].data), (yyvsp[(3) - (3)].id));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 65:
-#line 422 "gram.y"
+#line 444 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[(1) - (4)].id));
         (yyval.data) = newFunCall(id,(yyvsp[(3) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 66:
-#line 426 "gram.y"
+#line 449 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[(1) - (3)].id));
         (yyval.data) = newFunCall(id,NULL);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 67:
-#line 430 "gram.y"
+#line 454 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 68:
-#line 433 "gram.y"
+#line 457 "gram.y"
     {
         expr_t *id = (expr_t*)(yyvsp[(1) - (4)].data);
         (yyval.data) = newFunCall(id,(yyvsp[(3) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 69:
-#line 437 "gram.y"
+#line 462 "gram.y"
     {
         expr_t *id = (expr_t*)(yyvsp[(1) - (3)].data);
         (yyval.data) = newFunCall(id,NULL);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 70:
-#line 443 "gram.y"
+#line 469 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[(3) - (5)].id));
         expr_t *expr = newExpr_ID((yyvsp[(1) - (5)].id));
         argsList_t *args = newArgument(expr, NULL);
         (yyval.data) = newFunCall(id, args);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 71:
-#line 449 "gram.y"
+#line 476 "gram.y"
     {
         expr_t *id = newExpr_ID((yyvsp[(3) - (6)].id));
         expr_t *expr = newExpr_ID((yyvsp[(1) - (6)].id));
@@ -2314,11 +2376,12 @@ yyreduce:
         }
         walk->next = args;
         (yyval.data) = newFunCall(id, (yyvsp[(5) - (6)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 72:
-#line 463 "gram.y"
+#line 491 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[(1) - (3)].id));
 
@@ -2327,7 +2390,7 @@ yyreduce:
     break;
 
   case 73:
-#line 468 "gram.y"
+#line 496 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[(1) - (3)].id));
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
@@ -2338,7 +2401,7 @@ yyreduce:
     break;
 
   case 74:
-#line 475 "gram.y"
+#line 503 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[(1) - (3)].id));
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
@@ -2349,7 +2412,7 @@ yyreduce:
     break;
 
   case 75:
-#line 482 "gram.y"
+#line 510 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[(1) - (3)].id));
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
@@ -2360,7 +2423,7 @@ yyreduce:
     break;
 
   case 76:
-#line 489 "gram.y"
+#line 517 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[(1) - (3)].id));
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
@@ -2371,7 +2434,7 @@ yyreduce:
     break;
 
   case 77:
-#line 496 "gram.y"
+#line 524 "gram.y"
     {
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
         expr_t *opadd = newExpr_OPAdd((yyvsp[(1) - (3)].data), valexpr);
@@ -2381,7 +2444,7 @@ yyreduce:
     break;
 
   case 78:
-#line 502 "gram.y"
+#line 530 "gram.y"
     {
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
         expr_t *opadd = newExpr_OPSub((yyvsp[(1) - (3)].data), valexpr);
@@ -2391,7 +2454,7 @@ yyreduce:
     break;
 
   case 79:
-#line 508 "gram.y"
+#line 536 "gram.y"
     {
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
         expr_t *opadd = newExpr_OPMul((yyvsp[(1) - (3)].data), valexpr);
@@ -2401,7 +2464,7 @@ yyreduce:
     break;
 
   case 80:
-#line 514 "gram.y"
+#line 542 "gram.y"
     {
         expr_t *valexpr = (yyvsp[(3) - (3)].data);
         expr_t *opadd = newExpr_OPDiv((yyvsp[(1) - (3)].data), valexpr);
@@ -2411,7 +2474,7 @@ yyreduce:
     break;
 
   case 81:
-#line 520 "gram.y"
+#line 548 "gram.y"
     {
         expr_t *idexpr = newExpr_ID((yyvsp[(1) - (3)].id));
 
@@ -2420,28 +2483,29 @@ yyreduce:
     break;
 
   case 82:
-#line 525 "gram.y"
+#line 553 "gram.y"
     {
         (yyval.data) = newDeclaration((yyvsp[(1) - (3)].data),(yyvsp[(3) - (3)].data));
     }
     break;
 
   case 83:
-#line 528 "gram.y"
+#line 556 "gram.y"
     {
         (yyval.data) = newDeclaration((yyvsp[(1) - (3)].data),(yyvsp[(3) - (3)].data));
     }
     break;
 
   case 84:
-#line 533 "gram.y"
+#line 561 "gram.y"
     {
       (yyval.data) = newExpr_Dictionary((yyvsp[(3) - (4)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 85:
-#line 538 "gram.y"
+#line 567 "gram.y"
     {
       keyValList_t *left = (keyValList_t*)(yyvsp[(1) - (5)].data);
       keyValList_t *right = (keyValList_t*)(yyvsp[(4) - (5)].data);
@@ -2452,21 +2516,21 @@ yyreduce:
     break;
 
   case 86:
-#line 545 "gram.y"
+#line 574 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (2)].data);
     }
     break;
 
   case 87:
-#line 548 "gram.y"
+#line 577 "gram.y"
     {
         (yyval.data) = NULL;
     }
     break;
 
   case 88:
-#line 553 "gram.y"
+#line 582 "gram.y"
     {
       keyValList_t *keyVal = ast_emalloc(sizeof(keyValList_t));
 
@@ -2479,37 +2543,40 @@ yyreduce:
     break;
 
   case 89:
-#line 564 "gram.y"
+#line 593 "gram.y"
     {
         (yyval.data) = newBody((yyvsp[(2) - (3)].data));
     }
     break;
 
   case 90:
-#line 569 "gram.y"
+#line 598 "gram.y"
     {
       argsList_t *args = (argsList_t*) (yyvsp[(3) - (5)].data);
       (yyval.data) = newExpr_Vector(args);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 91:
-#line 574 "gram.y"
+#line 604 "gram.y"
     {
-      statement_t* stmt = newStatement(LANG_ENTITY_FOREACH, (yyvsp[(3) - (5)].data));
+      statement_t* stmt = sourceStatement(LANG_ENTITY_FOREACH, (yyvsp[(3) - (5)].data), SOURCE_LOCATION((yylsp[(3) - (5)])));
       (yyval.data) = newExpr_VectorFromForEach(stmt);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 92:
-#line 578 "gram.y"
+#line 609 "gram.y"
     {
       (yyval.data) = newExpr_Vector(NULL);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 93:
-#line 583 "gram.y"
+#line 615 "gram.y"
     {
         expr_t *expr = (yyvsp[(5) - (5)].data);
         (yyval.data) = newArgument(expr, (yyvsp[(1) - (5)].data));
@@ -2517,14 +2584,14 @@ yyreduce:
     break;
 
   case 94:
-#line 587 "gram.y"
+#line 619 "gram.y"
     {
         (yyval.data) = newArgument((yyvsp[(1) - (1)].data), NULL);
     }
     break;
 
   case 95:
-#line 592 "gram.y"
+#line 624 "gram.y"
     {
         /* A parameter list is an argument struct list with only ID expressions */
         expr_t *expr = newExpr_ID((yyvsp[(3) - (3)].id));
@@ -2533,7 +2600,7 @@ yyreduce:
     break;
 
   case 96:
-#line 597 "gram.y"
+#line 629 "gram.y"
     {
         expr_t *expr = newExpr_ID((yyvsp[(1) - (1)].id));
         (yyval.data) = newArgument(expr, NULL);
@@ -2541,185 +2608,200 @@ yyreduce:
     break;
 
   case 97:
-#line 603 "gram.y"
+#line 635 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 98:
-#line 606 "gram.y"
+#line 638 "gram.y"
     {
         expr_t *neg = newExpr_Ival(-1);
         (yyval.data) = newExpr_OPMul(neg, (yyvsp[(2) - (2)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 99:
-#line 610 "gram.y"
+#line 643 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 100:
-#line 613 "gram.y"
+#line 646 "gram.y"
     {
         expr_t *neg = newExpr_Ival(-1);
         (yyval.data) = newExpr_OPMul(neg, (yyvsp[(2) - (2)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 101:
-#line 619 "gram.y"
+#line 653 "gram.y"
     {
         expr_t *id = (yyvsp[(1) - (4)].data);
         expr_t *index = (yyvsp[(3) - (4)].data);
 
         (yyval.data) = newExpr_VectorIndex(id, index);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 102:
-#line 625 "gram.y"
+#line 660 "gram.y"
     {
         expr_t *id = (yyvsp[(1) - (4)].data);
         expr_t *index = (yyvsp[(3) - (4)].data);
 
         (yyval.data) = newExpr_VectorIndex(id, index);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 103:
-#line 636 "gram.y"
+#line 672 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 104:
-#line 639 "gram.y"
+#line 675 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 105:
-#line 642 "gram.y"
+#line 678 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 106:
-#line 645 "gram.y"
+#line 681 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 107:
-#line 648 "gram.y"
+#line 684 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 108:
-#line 651 "gram.y"
+#line 687 "gram.y"
     {
       (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 109:
-#line 654 "gram.y"
+#line 690 "gram.y"
     {
       (yyval.data) = newExpr_ID((yyvsp[(1) - (1)].id));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 110:
-#line 657 "gram.y"
+#line 694 "gram.y"
     {
       expr_t *id = newExpr_ID((yyvsp[(2) - (2)].id));
       expr_t *neg = newExpr_Ival(-1);
       (yyval.data) = newExpr_OPMul(neg, id);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 111:
-#line 662 "gram.y"
+#line 700 "gram.y"
     {
       (yyval.data) = (yyvsp[(3) - (4)].data);
     }
     break;
 
   case 112:
-#line 667 "gram.y"
+#line 705 "gram.y"
     {
     (yyval.data) = newExpr_Indexer((yyvsp[(1) - (3)].data), (yyvsp[(3) - (3)].data), NULL);
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 113:
-#line 670 "gram.y"
+#line 709 "gram.y"
     {
     (yyval.data) = newExpr_Indexer(NULL, (yyvsp[(2) - (2)].data), NULL);
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 114:
-#line 673 "gram.y"
+#line 713 "gram.y"
     {
     (yyval.data) = newExpr_Indexer((yyvsp[(1) - (2)].data), NULL, NULL);
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 115:
-#line 676 "gram.y"
+#line 717 "gram.y"
     {
     (yyval.data) = newExpr_Indexer(NULL, NULL, NULL);
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 116:
-#line 679 "gram.y"
+#line 721 "gram.y"
     {
     (yyval.data) = newExpr_Indexer((yyvsp[(1) - (5)].data), (yyvsp[(3) - (5)].data), (yyvsp[(5) - (5)].data));
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 117:
-#line 682 "gram.y"
+#line 725 "gram.y"
     {
     (yyval.data) = newExpr_Indexer(NULL, (yyvsp[(2) - (4)].data), (yyvsp[(4) - (4)].data));
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 118:
-#line 685 "gram.y"
+#line 729 "gram.y"
     {
     (yyval.data) = newExpr_Indexer((yyvsp[(1) - (3)].data), NULL, (yyvsp[(3) - (3)].data));
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 119:
-#line 688 "gram.y"
+#line 733 "gram.y"
     {
     (yyval.data) = newExpr_Indexer(NULL, NULL, (yyvsp[(2) - (2)].data));
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 120:
-#line 691 "gram.y"
+#line 737 "gram.y"
     {
     (yyval.data) = newExpr_Indexer(NULL, NULL, NULL);
+    ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
   }
     break;
 
   case 121:
-#line 696 "gram.y"
+#line 743 "gram.y"
     {
       if ( strlen(yyval.id) >= 10 ) {
         (yyval.data) = newExpr_BigIntFromStr(yyval.id);
@@ -2730,48 +2812,52 @@ yyreduce:
           (yyval.data) = newExpr_Ival(atoi(yyval.id));
         }
       }
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 122:
-#line 709 "gram.y"
+#line 757 "gram.y"
     {
         (yyval.data) = newExpr_Float(yyval.val_double);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 123:
-#line 714 "gram.y"
+#line 763 "gram.y"
     {
         (yyval.data) = (yyvsp[(2) - (3)].data);
     }
     break;
 
   case 124:
-#line 717 "gram.y"
+#line 766 "gram.y"
     {
         (yyval.data) = (yyvsp[(2) - (3)].data);
     }
     break;
 
   case 125:
-#line 720 "gram.y"
+#line 769 "gram.y"
     {
         /* Empty text */
         (yyval.data) = newExpr_Text("");
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 126:
-#line 724 "gram.y"
+#line 774 "gram.y"
     {
         /* Empty text */
         (yyval.data) = newExpr_Text("");
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 127:
-#line 730 "gram.y"
+#line 781 "gram.y"
     {
         char *textBuffer;
 
@@ -2799,36 +2885,39 @@ yyreduce:
         (yyval.data) = newExpr_Text(textBuffer);
 
         free(textBuffer);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 128:
-#line 758 "gram.y"
+#line 810 "gram.y"
     {
         (yyval.data) = (yyvsp[(1) - (1)].data);
     }
     break;
 
   case 129:
-#line 763 "gram.y"
+#line 815 "gram.y"
     {
         (yyval.data) = newExpr_Text(yyval.id);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 130:
-#line 766 "gram.y"
+#line 819 "gram.y"
     {
         char buffer[256];
         expr_t *e = (expr_t*)(yyvsp[(1) - (1)].data);
         snprintf(buffer, sizeof(buffer), "%lf", e->fval);
         (yyval.data) = newExpr_Text(buffer);
         free((yyvsp[(1) - (1)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 131:
-#line 773 "gram.y"
+#line 827 "gram.y"
     {
         char buffer[256];
         expr_t *d = (expr_t*)(yyvsp[(1) - (1)].data);
@@ -2845,36 +2934,40 @@ yyreduce:
         }
         (yyval.data) = newExpr_Text(buffer);
         free((yyvsp[(1) - (1)].data));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 132:
-#line 790 "gram.y"
+#line 845 "gram.y"
     {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "->");
         (yyval.data) = newExpr_Text(buffer);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 133:
-#line 795 "gram.y"
+#line 851 "gram.y"
     {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%s", "...");
         (yyval.data) = newExpr_Text(buffer);
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 134:
-#line 800 "gram.y"
+#line 857 "gram.y"
     {
         (yyval.data) = newExpr_Text((yyvsp[(1) - (1)].id));
+      ((expr_t*)(yyval.data))->location = SOURCE_LOCATION((yyloc));
     }
     break;
 
   case 135:
-#line 805 "gram.y"
+#line 863 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2882,7 +2975,7 @@ yyreduce:
     break;
 
   case 136:
-#line 810 "gram.y"
+#line 868 "gram.y"
     {
         (yyval.id)[0] = ' ';
         (yyval.id)[1] = 0;
@@ -2890,7 +2983,7 @@ yyreduce:
     break;
 
   case 137:
-#line 815 "gram.y"
+#line 873 "gram.y"
     {
         (yyval.id)[0] = '?';
         (yyval.id)[1] = 0;
@@ -2898,7 +2991,7 @@ yyreduce:
     break;
 
   case 138:
-#line 819 "gram.y"
+#line 877 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2906,7 +2999,7 @@ yyreduce:
     break;
 
   case 139:
-#line 823 "gram.y"
+#line 881 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2914,7 +3007,7 @@ yyreduce:
     break;
 
   case 140:
-#line 827 "gram.y"
+#line 885 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2922,7 +3015,7 @@ yyreduce:
     break;
 
   case 141:
-#line 831 "gram.y"
+#line 889 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2930,7 +3023,7 @@ yyreduce:
     break;
 
   case 142:
-#line 835 "gram.y"
+#line 893 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2938,7 +3031,7 @@ yyreduce:
     break;
 
   case 143:
-#line 839 "gram.y"
+#line 897 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2946,7 +3039,7 @@ yyreduce:
     break;
 
   case 144:
-#line 843 "gram.y"
+#line 901 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2954,7 +3047,7 @@ yyreduce:
     break;
 
   case 145:
-#line 847 "gram.y"
+#line 905 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2962,7 +3055,7 @@ yyreduce:
     break;
 
   case 146:
-#line 851 "gram.y"
+#line 909 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2970,7 +3063,7 @@ yyreduce:
     break;
 
   case 147:
-#line 855 "gram.y"
+#line 913 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2978,7 +3071,7 @@ yyreduce:
     break;
 
   case 148:
-#line 859 "gram.y"
+#line 917 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -2986,14 +3079,14 @@ yyreduce:
     break;
 
   case 149:
-#line 863 "gram.y"
+#line 921 "gram.y"
     {
         strcpy((yyval.id), (yyvsp[(1) - (1)].id));
     }
     break;
 
   case 150:
-#line 866 "gram.y"
+#line 924 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3001,7 +3094,7 @@ yyreduce:
     break;
 
   case 151:
-#line 870 "gram.y"
+#line 928 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3009,7 +3102,7 @@ yyreduce:
     break;
 
   case 152:
-#line 874 "gram.y"
+#line 932 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3017,7 +3110,7 @@ yyreduce:
     break;
 
   case 153:
-#line 878 "gram.y"
+#line 936 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3025,7 +3118,7 @@ yyreduce:
     break;
 
   case 154:
-#line 882 "gram.y"
+#line 940 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3033,7 +3126,7 @@ yyreduce:
     break;
 
   case 155:
-#line 886 "gram.y"
+#line 944 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3041,7 +3134,7 @@ yyreduce:
     break;
 
   case 156:
-#line 890 "gram.y"
+#line 948 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3049,7 +3142,7 @@ yyreduce:
     break;
 
   case 157:
-#line 894 "gram.y"
+#line 952 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3057,7 +3150,7 @@ yyreduce:
     break;
 
   case 158:
-#line 898 "gram.y"
+#line 956 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3065,7 +3158,7 @@ yyreduce:
     break;
 
   case 159:
-#line 902 "gram.y"
+#line 960 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3073,7 +3166,7 @@ yyreduce:
     break;
 
   case 160:
-#line 906 "gram.y"
+#line 964 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3081,7 +3174,7 @@ yyreduce:
     break;
 
   case 161:
-#line 910 "gram.y"
+#line 968 "gram.y"
     {
         (yyval.id)[0] = yyval.id[0];
         (yyval.id)[1] = 0;
@@ -3090,7 +3183,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3094 "y.tab.c"
+#line 3187 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3100,7 +3193,7 @@ yyreduce:
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
-
+  *++yylsp = yyloc;
 
   /* Now `shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
@@ -3162,7 +3255,7 @@ yyerrlab:
 #endif
     }
 
-
+  yyerror_range[0] = yylloc;
 
   if (yyerrstatus == 3)
     {
@@ -3178,7 +3271,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval);
+		      yytoken, &yylval, &yylloc);
 	  yychar = YYEMPTY;
 	}
     }
@@ -3199,6 +3292,7 @@ yyerrorlab:
   if (/*CONSTCOND*/ 0)
      goto yyerrorlab;
 
+  yyerror_range[0] = yylsp[1-yylen];
   /* Do not reclaim the symbols of the rule which action triggered
      this YYERROR.  */
   YYPOPSTACK (yylen);
@@ -3232,9 +3326,9 @@ yyerrlab1:
       if (yyssp == yyss)
 	YYABORT;
 
-
+      yyerror_range[0] = *yylsp;
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp);
+		  yystos[yystate], yyvsp, yylsp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -3245,6 +3339,11 @@ yyerrlab1:
 
   *++yyvsp = yylval;
 
+  yyerror_range[1] = yylloc;
+  /* Using YYLLOC is tempting, but would change the location of
+     the look-ahead.  YYLOC is available though.  */
+  YYLLOC_DEFAULT (yyloc, (yyerror_range - 1), 2);
+  *++yylsp = yyloc;
 
   /* Shift the error token.  */
   YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
@@ -3280,7 +3379,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval);
+		 yytoken, &yylval, &yylloc);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -3288,7 +3387,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp);
+		  yystos[*yyssp], yyvsp, yylsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -3304,8 +3403,13 @@ yyreturn:
 }
 
 
-#line 915 "gram.y"
+#line 973 "gram.y"
 
+
+void yyerror(const char *s) {
+    source_location_t location = SOURCE_LOCATION(yylloc);
+    reportSourceError(&location, "SyntaxError: %s\n", s);
+}
 
 #include <stdlib.h>
 #include <string.h>
@@ -3338,11 +3442,14 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
         }
 
         /* Parse from read line */
+        ParsedFile = "<stdin>";
+        resetLexerLocation();
+        root = NULL;
         buffer = yy_scan_string(lineBuffer);
-        yyparse();
+        int parsed = yyparse();
         yy_delete_buffer(buffer);
 
-        if ( root != NULL ) {
+        if ( parsed == 0 && root != NULL ) {
             func(argc, argv, root, 0, stacksize, heapsize);
         }
 
@@ -3351,16 +3458,20 @@ void runInteractive(int argc, char *argv[], interactiveInterpreterFunc func, int
 }
 
 
-void runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command, int stacksize, int heapsize) {
+int runCommand(int argc, char *argv[], interactiveInterpreterFunc func, char *command, int stacksize, int heapsize) {
     YY_BUFFER_STATE buffer;
 
     /* Parse from provided command line */
+    ParsedFile = "<command>";
+    resetLexerLocation();
+    root = NULL;
     buffer = yy_scan_string(command);
-    yyparse();
+    int parsed = yyparse();
     yy_delete_buffer(buffer);
 
-    if ( root != NULL ) {
+    if ( parsed == 0 && root != NULL ) {
         func(argc, argv, root, 0, stacksize, heapsize);
     }
+    return parsed != 0;
 }
 

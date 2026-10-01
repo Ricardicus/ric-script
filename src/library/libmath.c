@@ -54,7 +54,6 @@ int ric_power(LIBRARY_PARAMS()) {
     stackval_t stv;
     void *hp = PROVIDE_CONTEXT()->hp;
     heapval_t *hpv = NULL;
-    int dummy;
 
     if (expontent < 0) {
       reportRuntimeError(PROVIDE_CONTEXT(),
@@ -69,7 +68,7 @@ int ric_power(LIBRARY_PARAMS()) {
 
     stv.type = BIGINT;
     stv.bigInt = n;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_BIGINT(n, sp, sc);
     return 0;
@@ -315,7 +314,6 @@ int ric_abs(LIBRARY_PARAMS()) {
     stackval_t stv;
     void *hp = PROVIDE_CONTEXT()->hp;
     heapval_t *hpv = NULL;
-    int dummy;
 
     mpz_t *n = ast_emalloc(sizeof(mpz_t));
     mpz_init(*n);
@@ -323,7 +321,7 @@ int ric_abs(LIBRARY_PARAMS()) {
 
     stv.type = BIGINT;
     stv.bigInt = n;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
 
     PUSH_BIGINT(n, sp, sc);
     return 0;
@@ -548,7 +546,6 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  int dummy;
 
   // Pop arg1
   POP_VAL(&stv, sp, sc);
@@ -633,7 +630,7 @@ int ric_get_nbr_base_string(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = newText->text;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(newText);
 

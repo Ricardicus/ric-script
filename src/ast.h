@@ -897,15 +897,12 @@ This is not supposed to happen, I hope I can fix the intepreter!\n", \
 extern void getContext(void *);
 extern void releaseContext(void *);
 
-#define ALLOC_HEAP(a, hp, hpv, upd)                                                     \
+#define ALLOC_HEAP(a, hp, hpv)                                                     \
   do {                                                                                  \
     int32_t size = (*(heapval_t *)hp).sv.i;                                             \
     int32_t i = 0;                                                                      \
     heapval_t hv = {0};                                                                 \
     getContext(PROVIDE_CONTEXT()->syncCtx);                                             \
-    if (upd != NULL) {                                                                  \
-      *(int *)upd = 1;                                                                  \
-    }                                                                                   \
     hv.sv = *a;                                                                         \
     if (hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || hv.sv.type == DICTTYPE        \
         || hv.sv.type == CLASSTYPE || hv.sv.type == RAWDATATYPE || hv.sv.type == BIGINT \
@@ -932,14 +929,11 @@ extern void releaseContext(void *);
     releaseContext(PROVIDE_CONTEXT()->syncCtx);                                         \
   } while (0);
 
-#define ALLOC_HEAP_UNSAFE(a, hp, hpv, upd)                                                 \
+#define ALLOC_HEAP_UNSAFE(a, hp, hpv)                                                 \
   do {                                                                                     \
     int32_t size = (*(heapval_t *)hp).sv.i;                                                \
     int32_t i = 0;                                                                         \
     heapval_t hv = {0};                                                                    \
-    if (upd != NULL) {                                                                     \
-      *(int *)upd = 1;                                                                     \
-    }                                                                                      \
     hv.sv = *a;                                                                            \
     if (hv.sv.type == TEXT || hv.sv.type == VECTORTYPE || hv.sv.type == DICTTYPE           \
         || hv.sv.type == CLASSTYPE || hv.sv.type == RAWDATATYPE || hv.sv.type == BIGINT) { \

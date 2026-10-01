@@ -86,7 +86,6 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
         id = decl->id;
         switch (id->type) {
           case EXPR_TYPE_ID: {
-            int heapUpdated;
             heapval_t *globalCheck = NULL;
             heapval_t *classCheck = NULL;
             char *idStr = id->id.id;
@@ -126,7 +125,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
             //  hvp = ast_emalloc(sizeof(heapval_t));
             //  hvp->sv = sv;
             //} else {
-            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            ALLOC_HEAP(&sv, hp, &hvp);
             //}
 
             /* Check if the variable is to be put in the class namespace */
@@ -172,7 +171,6 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
                 /* Assigning a dictionary */
                 char *key = NULL;
                 heapval_t *hvp = NULL;
-                int dummy;
 
                 evaluate_expression(index, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);
@@ -210,7 +208,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
                   free(e);
                 }
 
-                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+                ALLOC_HEAP(&sv, hp, &hvp);
 
                 // Check if collision, if so, free key
                 hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
@@ -407,23 +405,21 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
           case VECTORTYPE: {
             /* Pushing the return value as a vector */
             /* Placing value on the heap */
-            int dummy;
             heapval_t *hvp = NULL;
             expr_t *e = copy_vector(sv.vec, EXPR_ALLOC, EXPRESSION_ARGS());
             sv.vec = e->vec;
             free(e);
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             PUSH_VECTOR(sv.vec, sp, sc);
             break;
           }
           case DICTTYPE: {
             /* Pushing the return value as a vector */
             /* Placing value on the heap */
-            int dummy;
             heapval_t *hvp = NULL;
             dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
             sv.dict = dict;
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             PUSH_DICTIONARY(sv.dict, sp, sc);
             break;
           }
@@ -475,7 +471,6 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
         argsList_t *walk = NULL;
         expr_t *expToSet = NULL;
         heapval_t *hvp = NULL;
-        int dummy;
         int32_t arrayIndex = 0;
         int32_t festmtIndex = 0;
         int festmtBigIntInitialized = 0;
@@ -516,13 +511,12 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
         if (rootVec != NULL) {
           /* place the root vec on the heap */
           stackval_t svtmp;
-          int dummy;
           heapval_t *hvp = NULL;
           heapval_t *hp = PROVIDE_CONTEXT()->hp;
 
           svtmp.type = VECTORTYPE;
           svtmp.vec = rootVec;
-          ALLOC_HEAP(&svtmp, hp, &hvp, &dummy);
+          ALLOC_HEAP(&svtmp, hp, &hvp);
           locals_push(varLocals, festmt->uniqueUnfoldRootID, hvp, PROVIDE_CONTEXT());
 
           endIteration = rootVec->length;
@@ -587,12 +581,12 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
 
               mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
 
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              ALLOC_HEAP(&sv, hp, &hvp);
               locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
             } else {
               sv.type = INT32TYPE;
               sv.i = 0;
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              ALLOC_HEAP(&sv, hp, &hvp);
               locals_push(varLocals, festmt->uniqueUnfoldIncID, hvp, PROVIDE_CONTEXT());
             }
           }
@@ -669,7 +663,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
               dictionary_t *dict = allocNewDictionary(sv.dict, EXPRESSION_ARGS());
               sv.dict = dict;
             }
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
 
           } else if (rootDict != NULL) {
@@ -691,7 +685,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
                   snprintf(newText, len, "%s", c);
                   sv.type = TEXT;
                   sv.t = newText;
-                  ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+                  ALLOC_HEAP(&sv, hp, &hvp);
                   locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
                   /* Increase the value of the unfolded variable */
                   festmtIndex++;
@@ -728,7 +722,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
             sv.type = TEXT;
             sv.t = newText;
 
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
 
             /* Increase the value of the unfolded variable */
@@ -754,7 +748,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
 
               sv.type = INT32TYPE;
               sv.i = festmtIndex;
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              ALLOC_HEAP(&sv, hp, &hvp);
               locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
             } else {
               /* Update value on the heap */
@@ -791,7 +785,7 @@ static interpret_state_t interpret_statements_inner(EXPRESSION_PARAMS()) {
 
               mpz_add_ui(*sv.bigInt, festmtBigIndex, 0);
 
-              ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+              ALLOC_HEAP(&sv, hp, &hvp);
               locals_push(varLocals, entryId, hvp, PROVIDE_CONTEXT());
             } else {
               mpz_add_ui(*hvp->sv.bigInt, festmtBigIndex, 0);
@@ -1543,7 +1537,6 @@ void arguments_to_variables(PROVIDE_CONTEXT_ARGS(), int argc, char *argv[], void
    * args, which is a vector with max 10 arguments.
    */
 
-  int heapUpdated;
   stackval_t sv;
   heapval_t *hvp = NULL;
   int argWalk = 0;
@@ -1626,7 +1619,7 @@ void arguments_to_variables(PROVIDE_CONTEXT_ARGS(), int argc, char *argv[], void
   sv.vec = args->vec;
   free(args);
 
-  ALLOC_HEAP_UNSAFE(&sv, hp, &hvp, &heapUpdated);
+  ALLOC_HEAP_UNSAFE(&sv, hp, &hvp);
 
   /* Placing variable declaration in global variable namespace */
   hashtable_put(PROVIDE_CONTEXT()->varDecs, NULL, argumentListName, hvp);

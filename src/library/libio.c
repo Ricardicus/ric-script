@@ -79,7 +79,6 @@ int ric_read_file(LIBRARY_PARAMS()) {
   size_t datasize = 0;
   expr_t *e;
   size_t readBytes = 0;
-  int dummy;
   heapval_t *hpv;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -125,7 +124,7 @@ int ric_read_file(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the raw data read */
   PUSH_RAWDATA(stv.rawdata, sp, sc);
@@ -141,7 +140,6 @@ int ric_read_file_all(LIBRARY_PARAMS()) {
   size_t datasize = 0;
   expr_t *e;
   size_t readBytes = 0;
-  int dummy;
   heapval_t *hpv;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -176,7 +174,7 @@ int ric_read_file_all(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the raw data read */
   PUSH_RAWDATA(stv.rawdata, sp, sc);
@@ -287,7 +285,6 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
   FILE *fp = NULL;
   char *buffer = NULL;
   heapval_t *hpv;
-  int dummy;
   size_t fz = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -342,7 +339,7 @@ int ric_read_lines_file(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -358,7 +355,6 @@ int ric_read_input(LIBRARY_PARAMS()) {
   char *buffer = NULL;
   char *c = NULL;
   heapval_t *hpv;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -409,7 +405,7 @@ int ric_read_input(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = t;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_STRING(stv.t, sp, sc);

@@ -15,7 +15,6 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
   size_t offset = 0;
   ssize_t ret;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -61,7 +60,7 @@ int ric_list_xattr(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   free(buffer);
@@ -171,7 +170,6 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
   char *arg2;
   stackval_t stv;
   heapval_t *hpv;
-  int dummy;
   char *resultValue = NULL;
   size_t valueMaxLen = 256;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -223,7 +221,7 @@ int ric_get_xattr(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = resultValue;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);
@@ -352,7 +350,6 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
   expr_t *vec;
   argsList_t *vecContent = NULL;
   heapval_t *hpv;
-  int dummy;
   int maxDepth = 20;
   char *rootDir = ".";
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -385,7 +382,7 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
 
     stv.type = VECTORTYPE;
     stv.vec = vec->vec;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
     free(vec);
 
     /* Pushing the parsed value */
@@ -402,7 +399,7 @@ int ric_find_xattr(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */

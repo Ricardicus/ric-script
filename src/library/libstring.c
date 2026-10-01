@@ -49,7 +49,6 @@ int ric_trim(LIBRARY_PARAMS()) {
   char *string = NULL;
   char *c = NULL;
   size_t sz = 0;
-  int dummy;
   heapval_t *hpv = NULL;
   char *result = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -93,7 +92,7 @@ int ric_trim(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = result;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the trimmed string */
   PUSH_STRING(stv.t, sp, sc);
@@ -112,7 +111,6 @@ int ric_split(LIBRARY_PARAMS()) {
   int special_case = 0;
   char *c;
   heapval_t *hpv;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -190,7 +188,7 @@ int ric_split(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   free(buffer);
@@ -235,7 +233,6 @@ int ric_to_upper(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   expr_t *e = NULL;
-  int dummy;
   size_t strLen = 0;
   size_t i = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -269,7 +266,7 @@ int ric_to_upper(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = e->text;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(e);
 
@@ -283,7 +280,6 @@ int ric_to_lower(LIBRARY_PARAMS()) {
   stackval_t stv;
   char *string = NULL;
   expr_t *e = NULL;
-  int dummy;
   size_t strLen = 0;
   size_t i = 0;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -317,7 +313,7 @@ int ric_to_lower(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = e->text;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(e);
 

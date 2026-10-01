@@ -153,7 +153,6 @@ int ric_ls(LIBRARY_PARAMS()) {
   argsList_t *vecContent = NULL;
   stackval_t stv;
   heapval_t *hpv;
-  int dummy;
   char *argText;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
@@ -190,7 +189,7 @@ int ric_ls(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -367,7 +366,6 @@ int ric_find_files(LIBRARY_PARAMS()) {
   stackval_t stv;
   regex_t re;
   heapval_t *hpv;
-  int dummy;
   char *pattern = NULL;
   int rc;
   int maxDepth = 1;
@@ -403,7 +401,7 @@ int ric_find_files(LIBRARY_PARAMS()) {
 
     stv.type = VECTORTYPE;
     stv.vec = vec->vec;
-    ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+    ALLOC_HEAP(&stv, hp, &hpv);
     free(vec);
 
     /* Pushing the parsed value */
@@ -423,7 +421,7 @@ int ric_find_files(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -440,7 +438,6 @@ int ric_os_name(LIBRARY_PARAMS()) {
   void *hp = PROVIDE_CONTEXT()->hp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   char *fixer = NULL;
-  int dummy;
   heapval_t *hpv = NULL;
 
   resultText = ast_ecalloc(resultTextLen);
@@ -475,7 +472,7 @@ int ric_os_name(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = resultText;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);
@@ -488,7 +485,6 @@ int ric_env_keys(LIBRARY_PARAMS()) {
   argsList_t *vecContent = NULL;
   stackval_t stv;
   heapval_t *hpv;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -512,7 +508,7 @@ int ric_env_keys(LIBRARY_PARAMS()) {
   vec = newExpr_Vector(vecContent);
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   PUSH_VECTOR(stv.vec, sp, sc);
@@ -522,7 +518,6 @@ int ric_env_keys(LIBRARY_PARAMS()) {
 int ric_set_env(LIBRARY_PARAMS()) {
   stackval_t stv_key, stv_val;
   heapval_t *hpv;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -550,7 +545,7 @@ int ric_set_env(LIBRARY_PARAMS()) {
   stackval_t stv;
   stv.type = TEXT;
   stv.t = strdup("");
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   PUSH_STRING(stv.t, sp, sc);
 
   return 0;

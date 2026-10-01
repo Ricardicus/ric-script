@@ -138,7 +138,6 @@ int ric_json_convert(LIBRARY_PARAMS()) {
   class_t *argClass = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  int dummy;
   heapval_t *hpv = NULL;
   void *hp = PROVIDE_CONTEXT()->hp;
   char *resultBuf = NULL;
@@ -180,7 +179,7 @@ int ric_json_convert(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = resultBuf;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   PUSH_STRING(stv.t, sp, sc);
   return 0;
@@ -194,7 +193,6 @@ int ric_json_load(LIBRARY_PARAMS()) {
   char *argText = NULL;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
-  int dummy;
   heapval_t *hpv = NULL;
   void *hp = PROVIDE_CONTEXT()->hp;
 
@@ -243,7 +241,7 @@ int ric_json_load(LIBRARY_PARAMS()) {
   stv.type = DICTTYPE;
   stv.dict = allocNewDictionary(result->dict, EXPRESSION_ARGS());
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   PUSH_DICTIONARY(stv.dict, sp, sc);
   free_expression(result);

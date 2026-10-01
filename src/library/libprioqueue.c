@@ -83,7 +83,6 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
   expr_t *popped = NULL;
   heapval_t *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
 
@@ -118,7 +117,7 @@ int ric_heap_pop(LIBRARY_PARAMS()) {
   // allocate the popped argument to the heap so that it
   // can be freed later
   POP_VAL(&stv, sp, sc);
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   push_expression(popped, EXPRESSION_ARGS());
 

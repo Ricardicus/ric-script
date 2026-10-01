@@ -123,7 +123,6 @@ static int perform_request(const char *method, EXPRESSION_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
   int headers_len = 0;
 
   POP_VAL(&stv_url, sp, sc);
@@ -167,7 +166,7 @@ static int perform_request(const char *method, EXPRESSION_PARAMS()) {
   stv.type = TEXT;
   stv.t = response_body;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   PUSH_STRING(response_body, sp, sc);
   return 0;
 }

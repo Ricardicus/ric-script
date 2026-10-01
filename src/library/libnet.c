@@ -150,7 +150,6 @@ int ric_read_socket(LIBRARY_PARAMS()) {
   heapval_t *hpv;
   int socket;
   expr_t *e;
-  int dummy;
   ssize_t readBytes = 0;
   size_t maxReadSize;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -198,7 +197,7 @@ int ric_read_socket(LIBRARY_PARAMS()) {
 
   stv.type = RAWDATATYPE;
   stv.rawdata = e->rawdata;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_RAWDATA(stv.rawdata, sp, sc);

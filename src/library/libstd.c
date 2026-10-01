@@ -40,7 +40,6 @@ int ric_type(LIBRARY_PARAMS()) {
 
 int ric_type_text(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   size_t strSize = 100;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -95,7 +94,7 @@ int ric_type_text(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = resultText;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);
@@ -105,7 +104,6 @@ int ric_type_text(LIBRARY_PARAMS()) {
 
 int ric_create_list(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   char *inText = NULL;
   char *c;
@@ -184,7 +182,7 @@ int ric_create_list(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = vec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(vec);
 
   /* Pushing the parsed value */
@@ -195,7 +193,6 @@ int ric_create_list(LIBRARY_PARAMS()) {
 
 int ric_create_data(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   char *inText = NULL;
   vector_t *vec = NULL;
@@ -266,7 +263,7 @@ int ric_create_data(LIBRARY_PARAMS()) {
   stv.type = RAWDATATYPE;
   stv.rawdata = newRawData->rawdata;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(newRawData);
   /* Pushing the parsed value */
@@ -277,7 +274,6 @@ int ric_create_data(LIBRARY_PARAMS()) {
 
 int ric_create_text(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   char *inText = NULL;
   int32_t inInt;
@@ -375,7 +371,7 @@ int ric_create_text(LIBRARY_PARAMS()) {
   stv.type = TEXT;
   stv.t = newText->text;
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   free(newText);
 
@@ -818,7 +814,6 @@ int ric_pop(LIBRARY_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
 
   /* Get vector reference */
   POP_VAL(&stv, sp, sc);
@@ -856,7 +851,7 @@ int ric_pop(LIBRARY_PARAMS()) {
   evaluate_expression(walk->arg, EXPRESSION_ARGS());
   POP_VAL(&stv, sp, sc);
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   push_stackval(&stv, PROVIDE_CONTEXT());
 
   /* The heap owns the returned value after removal from the vector. */
@@ -878,7 +873,6 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
   heapval_t *hpv = NULL;
-  int dummy;
   int walk_count = 0;
 
   /* Get vector reference */
@@ -942,7 +936,7 @@ int ric_pop_idx(LIBRARY_PARAMS()) {
   evaluate_expression(walk->arg, EXPRESSION_ARGS());
   POP_VAL(&stv, sp, sc);
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   push_stackval(&stv, PROVIDE_CONTEXT());
 
   /* The heap owns the returned value after removal from the vector. */
@@ -961,7 +955,6 @@ int ric_pop_first(LIBRARY_PARAMS()) {
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   heapval_t *hpv;
-  int dummy;
   void *hp = PROVIDE_CONTEXT()->hp;
 
   /* Get vector reference */
@@ -992,7 +985,7 @@ int ric_pop_first(LIBRARY_PARAMS()) {
   evaluate_expression(walk->arg, EXPRESSION_ARGS());
   POP_VAL(&stv, sp, sc);
 
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   push_stackval(&stv, PROVIDE_CONTEXT());
 
   /* The heap owns the returned value after removal from the vector. */
@@ -1229,7 +1222,6 @@ int ric_keys(LIBRARY_PARAMS()) {
   expr_t *resultVec = NULL;
   int32_t result = 0;
   heapval_t *hpv = NULL;
-  int dummy;
   void *sp = PROVIDE_CONTEXT()->sp;
   size_t *sc = PROVIDE_CONTEXT()->sc;
   void *hp = PROVIDE_CONTEXT()->hp;
@@ -1279,7 +1271,7 @@ int ric_keys(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = resultVec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(resultVec);
 
   /* Pushing the list of keys */
@@ -1448,7 +1440,6 @@ static int _cmp_func_chars(const void *a, const void *b) {
 
 int ric_sort(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   int i = 0;
   vector_t *vec = NULL;
@@ -1570,7 +1561,7 @@ int ric_sort(LIBRARY_PARAMS()) {
 
   stv.type = VECTORTYPE;
   stv.vec = newVec->vec;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
   free(newVec);
 
   /* Pushing the parsed value */
@@ -1581,7 +1572,6 @@ int ric_sort(LIBRARY_PARAMS()) {
 
 int ric_join(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   int i = 0;
   int first_iteration = 1;
@@ -1674,7 +1664,7 @@ int ric_join(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = outChars;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_STRING(stv.t, sp, sc);
@@ -1696,7 +1686,6 @@ int ric_cachepot(LIBRARY_PARAMS()) {
 
 int ric_get_env(LIBRARY_PARAMS()) {
   stackval_t stv;
-  int dummy;
   heapval_t *hpv;
   size_t strSize;
   void *sp = PROVIDE_CONTEXT()->sp;
@@ -1731,7 +1720,7 @@ int ric_get_env(LIBRARY_PARAMS()) {
 
   stv.type = TEXT;
   stv.t = resultText;
-  ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the value */
   PUSH_STRING(stv.t, sp, sc);

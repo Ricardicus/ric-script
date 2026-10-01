@@ -1291,7 +1291,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             argsList_t *vecContent = NULL;
             argsList_t *walk = NULL;
             heapval_t *hpv;
-            int dummy;
 
             (void)evaluate_indexer(indexer, vec->length, &idxStart, &idxEnd, &offset,
                                    EXPRESSION_ARGS());
@@ -1340,7 +1339,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.type = VECTORTYPE;
             sv.vec = newVec->vec;
 
-            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+            ALLOC_HEAP(&sv, hp, &hpv);
 
             PUSH_VECTOR(newVec->vec, sp, sc);
             free(newVec);
@@ -1350,7 +1349,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
           size_t len = 1;
           stackval_t sv;
           heapval_t *hvp;
-          int heapUpdated;
           char *newText = NULL;
           size_t origLen = strlen(text);
 
@@ -1383,7 +1381,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.type = TEXT;
             sv.t = newText;
 
-            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            ALLOC_HEAP(&sv, hp, &hvp);
             PUSH_STRING(sv.t, sp, sc);
           } else if (sv.type == INDEXER) {
             indexer_t *indexer = sv.indexer;
@@ -1395,7 +1393,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             char *newText = NULL;
             expr_t *newTextExp = NULL;
             heapval_t *hpv;
-            int dummy;
 
             (void)evaluate_indexer(indexer, textLen, &idxStart, &idxEnd, &offset,
                                    EXPRESSION_ARGS());
@@ -1424,7 +1421,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.t = newTextExp->text;
             free(newTextExp);
 
-            ALLOC_HEAP(&sv, hp, &hpv, &dummy);
+            ALLOC_HEAP(&sv, hp, &hpv);
             PUSH_STRING(sv.t, sp, sc);
           }
         } break;
@@ -1463,7 +1460,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             char *newData = NULL;
             expr_t *newDataExp = NULL;
             heapval_t *hvp;
-            int dummy;
 
             (void)evaluate_indexer(indexer, dataLen, &idxStart, &idxEnd, &offset,
                                    EXPRESSION_ARGS());
@@ -1492,7 +1488,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
             sv.rawdata = newDataExp->rawdata;
             free(newDataExp);
 
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
 
             PUSH_RAWDATA(sv.rawdata, sp, sc);
           }
@@ -1646,9 +1642,8 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         mpz_add(*sv.bigInt, *svLeft.bigInt, *svRight.bigInt);
         heapval_t *hpv;
-        int heapUpdated;
         void *hp = PROVIDE_CONTEXT()->hp;
-        ALLOC_HEAP(&sv, hp, &hpv, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hpv);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
@@ -1661,9 +1656,8 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         mpz_add(*sv.bigInt, *sv.bigInt, *svRight.bigInt);
 
         heapval_t *hpv;
-        int heapUpdated;
         void *hp = PROVIDE_CONTEXT()->hp;
-        ALLOC_HEAP(&sv, hp, &hpv, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hpv);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
@@ -1675,9 +1669,8 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         mpz_add(*sv.bigInt, *sv.bigInt, *svLeft.bigInt);
 
         heapval_t *hpv;
-        int heapUpdated;
         void *hp = PROVIDE_CONTEXT()->hp;
-        ALLOC_HEAP(&sv, hp, &hpv, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hpv);
         PUSH_BIGINT(sv.bigInt, sp, sc);
         free(e);
       } else if (svLeft.type == TIMETYPE && svRight.type == TIMETYPE) {
@@ -1686,121 +1679,90 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         size_t len = strlen(svLeft.t) + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s%s", svLeft.t, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == DOUBLETYPE && svRight.type == TEXT) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%.4f%s", svLeft.d, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == DOUBLETYPE) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s%.4f", svLeft.t, svRight.d);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s%d", svLeft.t, svRight.i);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == INT32TYPE && svRight.type == TEXT) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%d%s", svLeft.i, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == POINTERTYPE && svRight.type == TEXT) {
         size_t len = 50 + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "<%" PRIuPTR ">%s", svLeft.p, svRight.t);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == BIGINT && svRight.type == TEXT) {
         size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svRight.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
         char *bigIntStr = NULL;
@@ -1814,19 +1776,14 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == BIGINT) {
         size_t len = RIC_BIG_INT_MAX_SIZE + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         char *bigIntBuf = ast_emalloc(RIC_BIG_INT_MAX_SIZE);
         char *bigIntStr = NULL;
@@ -1840,31 +1797,22 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == TEXT && svRight.type == POINTERTYPE) {
         size_t len = 50 + strlen(svLeft.t);
         stackval_t sv;
         heapval_t *hvp;
-        int heapUpdated;
         char *newText = ast_emalloc(len + 1);
         snprintf(newText, len + 1, "%s<%" PRIuPTR ">", svLeft.t, svRight.p);
 
         sv.type = TEXT;
         sv.t = newText;
 
-        ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+        ALLOC_HEAP(&sv, hp, &hvp);
 
-        if (!heapUpdated) {
-          free(newText);
-          sv = hvp->sv;
-        }
 
         PUSH_STRING(sv.t, sp, sc);
       } else if (svLeft.type == VECTORTYPE
@@ -1875,7 +1823,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         argsList_t *vecContent = NULL;
         expr_t *newVec;
         argsList_t *walk = NULL;
-        int dummy;
         expr_t *newEntry = NULL;
 
         walk = svLeft.vec->content;
@@ -1927,7 +1874,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.vec = newVec->vec;
         free(newVec);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        ALLOC_HEAP(&sv, hp, &hvp);
         PUSH_VECTOR(sv.vec, sp, sc);
       } else if (svRight.type == VECTORTYPE && svLeft.type == VECTORTYPE) {
         stackval_t sv;
@@ -1935,7 +1882,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         argsList_t *vecContent = NULL;
         expr_t *newVec;
         argsList_t *walk = NULL;
-        int dummy;
 
         walk = svLeft.vec->content;
         while (walk != NULL) {
@@ -1968,7 +1914,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         sv.vec = newVec->vec;
         free(newVec);
 
-        ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+        ALLOC_HEAP(&sv, hp, &hvp);
         PUSH_VECTOR(sv.vec, sp, sc);
       }
 
@@ -2044,7 +1990,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_sub(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2052,12 +1997,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
@@ -2072,12 +2016,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
@@ -2091,7 +2034,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       }
 
       break;
@@ -2169,7 +2112,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2178,12 +2120,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svLeft.bigInt, (long)svRight.i);
@@ -2191,12 +2132,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mul_si(*n, *svRight.bigInt, (long)svLeft.i);
@@ -2204,14 +2144,13 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == TEXT && svRight.type == INT32TYPE) {
         heapval_t *hpv;
         stackval_t stv;
         size_t strLen = strlen(leftStr);
         int32_t mult = *r1;
         int32_t i = 0;
-        int dummy;
         char *newStr = ast_emalloc(strLen * mult + 2);
 
         while (i < mult) {
@@ -2225,7 +2164,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = TEXT;
         stv.t = newStr;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
 
         PUSH_STRING(stv.t, sp, sc);
       } else if (svRight.type == TEXT && svLeft.type == INT32TYPE) {
@@ -2234,7 +2173,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         size_t strLen = strlen(rightStr);
         int32_t mult = *r0;
         int32_t i = 0;
-        int dummy;
         char *newStr = ast_emalloc(strLen * mult + 2);
 
         while (i < mult) {
@@ -2248,7 +2186,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = TEXT;
         stv.t = newStr;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
 
         PUSH_STRING(stv.t, sp, sc);
       } else if ((svRight.type == VECTORTYPE && svLeft.type == INT32TYPE)
@@ -2261,7 +2199,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         vector_t *vec = NULL;
         heapval_t *hvp = NULL;
         stackval_t stv;
-        int dummy;
 
         if (svRight.type == INT32TYPE) {
           mult = svRight.i;
@@ -2328,7 +2265,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         /* Allocate this value on the heap, for garbage collection */
         stv.type = VECTORTYPE;
         stv.vec = newVec->vec;
-        ALLOC_HEAP(&stv, hp, &hvp, &dummy);
+        ALLOC_HEAP(&stv, hp, &hvp);
 
         PUSH_VECTOR(newVec->vec, sp, sc);
         free(newVec);
@@ -2409,7 +2346,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_mod(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2417,12 +2353,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
@@ -2437,12 +2372,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
 
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
@@ -2456,7 +2390,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       }
 
       break;
@@ -2527,7 +2461,6 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         mpz_fdiv_q(*n, *svLeft.bigInt, *svRight.bigInt);
@@ -2535,12 +2468,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == BIGINT && svRight.type == INT32TYPE) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svRight.i);
@@ -2554,12 +2486,11 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       } else if (svLeft.type == INT32TYPE && svRight.type == BIGINT) {
         stackval_t stv;
         void *hp = PROVIDE_CONTEXT()->hp;
         heapval_t *hpv = NULL;
-        int dummy;
         mpz_t *n = ast_emalloc(sizeof(mpz_t));
         mpz_init(*n);
         expr_t *bigIntEtmp = newExpr_BigIntFromInt(svLeft.i);
@@ -2573,7 +2504,7 @@ static void evaluate_expression_inner(expr_t *expr, EXPRESSION_PARAMS()) {
         PUSH_BIGINT(n, sp, sc);
         stv.type = BIGINT;
         stv.bigInt = n;
-        ALLOC_HEAP(&stv, hp, &hpv, &dummy);
+        ALLOC_HEAP(&stv, hp, &hpv);
       }
 
       break;
@@ -3393,7 +3324,6 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
 
         switch (id->type) {
           case EXPR_TYPE_ID: {
-            int heapUpdated;
             char *idStr = id->id.id;
 
             /* Evaluating the expression among global variables */
@@ -3421,7 +3351,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
               free(e);
             }
 
-            ALLOC_HEAP(&sv, hp, &hvp, &heapUpdated);
+            ALLOC_HEAP(&sv, hp, &hvp);
 
             /* Placing variable declaration in class variable member namespace */
             hashtable_put(cls->varMembers, PROVIDE_CONTEXT()->syncCtx, idStr, hvp);
@@ -3446,7 +3376,6 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                 /* Assigning a dictionary */
                 char *key = NULL;
                 heapval_t *hvp = NULL;
-                int dummy;
 
                 evaluate_expression(index, EXPRESSION_ARGS());
                 POP_VAL(&sv, sp, sc);
@@ -3484,7 +3413,7 @@ void initClass(class_t *cls, EXPRESSION_PARAMS()) {
                   free(e);
                 }
 
-                ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+                ALLOC_HEAP(&sv, hp, &hvp);
 
                 // Check if collision, if so, free key
                 hashtable_put(dict->hash, PROVIDE_CONTEXT()->syncCtx, key, hvp);
@@ -3634,7 +3563,6 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
       char *newKeyStr = NULL; // Storing the key
       heapval_t *hvp = NULL;  // Storing the value
       stackval_t sv;
-      int dummy; // todo: remove the need for this..
 
       evaluate_expression(expKey, EXPRESSION_ARGS());
       POP_VAL(&sv, sp, sc);
@@ -3663,13 +3591,13 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         case LIBFUNCPTRTYPE:
         case FUNCPTRTYPE:
         case TIMETYPE:
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          ALLOC_HEAP(&sv, hp, &hvp);
           break;
         case BIGINT: {
           expr_t *e = newExpr_BigInt(sv.bigInt);
           sv.bigInt = e->bigInt;
           free(e);
-          ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+          ALLOC_HEAP(&sv, hp, &hvp);
           break;
         }
         case VECTORTYPE: {
@@ -3688,7 +3616,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
           free(newVecExpr);
 
-          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          ALLOC_HEAP(&newStackVal, hp, &hvp);
           break;
         }
         case TEXT: {
@@ -3701,7 +3629,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           newStackVal = sv;
           newStackVal.t = newText;
 
-          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          ALLOC_HEAP(&newStackVal, hp, &hvp);
           break;
         }
         case DICTTYPE: {
@@ -3710,7 +3638,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
           newStackVal.dict = newDict;
 
-          ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+          ALLOC_HEAP(&newStackVal, hp, &hvp);
           break;
         }
         default:
@@ -3740,7 +3668,6 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
         char *newKeyStr = NULL; // Storing the key
         heapval_t *hvp = NULL;  // Storing the value
         stackval_t sv;
-        int dummy; // todo: remove the need for this..
         size_t len = strlen(key);
         newKeyStr = ast_emalloc(len + 2);
         snprintf(newKeyStr, len + 2, "%s", key);
@@ -3754,13 +3681,13 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
           case LIBFUNCPTRTYPE:
           case FUNCPTRTYPE:
           case TIMETYPE:
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             break;
           case BIGINT: {
             expr_t *e = newExpr_BigInt(sv.bigInt);
             sv.bigInt = e->bigInt;
             free(e);
-            ALLOC_HEAP(&sv, hp, &hvp, &dummy);
+            ALLOC_HEAP(&sv, hp, &hvp);
             break;
           }
           case VECTORTYPE: {
@@ -3779,7 +3706,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
             free(newVecExpr);
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            ALLOC_HEAP(&newStackVal, hp, &hvp);
             break;
           }
           case TEXT: {
@@ -3792,7 +3719,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
             newStackVal = sv;
             newStackVal.t = newText;
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            ALLOC_HEAP(&newStackVal, hp, &hvp);
             break;
           }
           case DICTTYPE: {
@@ -3801,7 +3728,7 @@ dictionary_t *allocNewDictionary(dictionary_t *dict, EXPRESSION_PARAMS()) {
 
             newStackVal.dict = newDict;
 
-            ALLOC_HEAP(&newStackVal, hp, &hvp, &dummy);
+            ALLOC_HEAP(&newStackVal, hp, &hvp);
             break;
           }
           default:

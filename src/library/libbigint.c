@@ -41,9 +41,8 @@ int ric_new_big_int(LIBRARY_PARAMS()) {
   stv.bigInt = n;
 
   heapval_t *hpv;
-  int heapUpdated;
   void *hp = PROVIDE_CONTEXT()->hp;
-  ALLOC_HEAP(&stv, hp, &hpv, &heapUpdated);
+  ALLOC_HEAP(&stv, hp, &hpv);
 
   /* Pushing the parsed value */
   PUSH_BIGINT(n, sp, sc);

@@ -91,4 +91,10 @@ def test_file_checks_and_removal_in_clean_directory(tmp_path):
                           capture_output=True, text=True, timeout=10)
   assert result.returncode == 0, result.stderr
   assert result.stderr == ""
-  assert result.stdout.splitlines() == ["0", "0", "-1", "1", "0", "0", "0", "0", "1", "0"]
+  # Windows exposes Win32 BOOL success (1); POSIX exposes syscall success (0).
+  success = "1" if os.name == "nt" else "0"
+  assert result.stdout.splitlines() == [
+    "0", "0", "-1", "1", "0", success, success, "0", "1", success,
+  ]
+  assert not (tmp_path / "present.txt").exists()
+  assert not (tmp_path / "present-dir").exists()

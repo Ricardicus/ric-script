@@ -11,9 +11,9 @@ BINARY = Path(EXECUTABLE).resolve()
 
 def run_script(tmp_path, source, name="script-with-a-long-filename-for-errors.ric"):
     script = tmp_path / name
-    script.write_text(source)
+    script.write_text(source, encoding="utf-8", newline="")
     result = subprocess.run([str(BINARY), str(script)], capture_output=True,
-                            text=True, timeout=10)
+                            text=True, encoding="utf-8", timeout=10)
     return script, result
 
 

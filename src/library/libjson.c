@@ -1,11 +1,10 @@
 #include "libjson.h"
 
-static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS()) {
+static void loadCJSON(cJSON *json, int depth, int isArray, expr_t **out, EXPRESSION_PARAMS()) {
   cJSON *walk = json;
   int i = 0;
   keyValList_t *keyVals = NULL;
   keyValList_t *keyValsHead = NULL;
-  int isArray = 0;
 
   walk = json;
   i = 0;
@@ -36,10 +35,10 @@ static void loadCJSON(cJSON *json, int depth, expr_t **out, EXPRESSION_PARAMS())
         val = newExpr_Text(walk->valuestring);
         break;
       case cJSON_Array:
-        loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+        loadCJSON(walk->child, depth + 1, 1, &val, EXPRESSION_ARGS());
         break;
       case cJSON_Object: {
-        loadCJSON(walk->child, depth + 1, &val, EXPRESSION_ARGS());
+        loadCJSON(walk->child, depth + 1, 0, &val, EXPRESSION_ARGS());
         if (depth == 0) {
           *out = val;
           free(keyVal);
@@ -239,7 +238,7 @@ int ric_json_load(LIBRARY_PARAMS()) {
 
   /* Convert the cJSON object */
   result = NULL;
-  loadCJSON(json, 0, &result, EXPRESSION_ARGS());
+  loadCJSON(json, 0, 0, &result, EXPRESSION_ARGS());
 
   stv.type = DICTTYPE;
   stv.dict = allocNewDictionary(result->dict, EXPRESSION_ARGS());

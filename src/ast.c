@@ -523,7 +523,7 @@ expr_t *newExpr_Copy(expr_t *expr, int alloc, EXPRESSION_PARAMS()) {
       break;
     }
     case EXPR_TYPE_FVAL:
-      newExp = newExpr_Ival(expr->fval);
+      newExp = newExpr_Float(expr->fval);
       break;
     case EXPR_TYPE_IVAL:
       newExp = newExpr_Ival(expr->ival);

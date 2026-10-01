@@ -3610,7 +3610,7 @@ void check_buf_size(char **buf, size_t *bufSize, size_t *pos, size_t require) {
   size_t expandFactor = 2; // Arbitrary
   while (*bufSize <= *pos + require) {
     size_t newSize = *bufSize * expandFactor;
-    char *newBuf = (char *)ast_remalloc(buf, newSize);
+    char *newBuf = (char *)ast_remalloc(*buf, newSize);
     *buf = newBuf;
     *bufSize = newSize;
   }

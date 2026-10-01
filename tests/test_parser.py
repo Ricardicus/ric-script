@@ -128,3 +128,17 @@ def test_file_execution_cleans_up_owned_and_shared_ast_nodes(tmp_path, source, o
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
     assert result.stdout.strip() == output
+
+
+def test_float_slices_preserve_fractional_values():
+    assert run_program("v = [1.5,2.5] print(v[0:2])") == ["[1.500000,2.500000]"]
+
+
+def test_discarded_priority_queue_can_be_collected():
+    assert run_program('p = minHeap() heapInsert(p,"kept",1) p = 0 '
+                       '. (50 ... i) { x = i } print("done")') == ["done"]
+
+
+def test_resized_dictionary_keeps_all_entries():
+    assert run_program('d = {} . (900 ... i) { d[text(i)] = i } '
+                       'print(len(keys(d))) print(d["0"]) print(d["899"])') == ["900", "0", "899"]

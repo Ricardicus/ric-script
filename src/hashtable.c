@@ -77,6 +77,7 @@ void hashtable_rehash(hashtable_t *hashtable) {
   _free_hashtable_table_rehash(hashtable);
   hashtable->table = newhash->table;
   hashtable->size = newsize;
+  free(newhash);
 }
 
 hashtable_t *hashtable_copy(hashtable_t *hashtable) {

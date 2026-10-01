@@ -135,13 +135,12 @@ static void sweep(uint32_t markVal, EXPRESSION_PARAMS()) {
           free(heap[i].sv.rawdata->data);
           free(heap[i].sv.rawdata);
         } else if (heap[i].sv.type == PRIOQUEUE) {
-          int i = 0;
           priority_queue_t *pq = heap[i].sv.prioqueue;
-          while (i < pq->size) {
-            free_expression(pq->items[i].value);
-            free(pq->items[i].value);
-            i++;
+          for (int item = 0; item < pq->size; ++item) {
+            free_expression(pq->items[item].value);
+            free(pq->items[item].value);
           }
+          free_priority_queue(pq);
         } else if (heap[i].sv.type == CLASSTYPE) {
           if (((heapval_t *)hp)[i].sv.classObj->initialized) {
             hashtable_free(((heapval_t *)hp)[i].sv.classObj->varMembers);
